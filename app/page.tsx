@@ -83,7 +83,7 @@ function formatNum(v: number | null) {
   return v.toLocaleString();
 }
 
-function heatColor(value) {
+function heatColor(v: number | null) {
   if (value == null || Number.isNaN(value)) return "#f3f4f6";
   if (value <= -0.15) return "#3f1d1d";
   if (value <= -0.10) return "#5f2727";
