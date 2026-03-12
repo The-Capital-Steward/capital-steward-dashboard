@@ -84,14 +84,14 @@ function formatNum(v: number | null) {
 }
 
 function heatColor(v: number | null) {
-  if (value == null || Number.isNaN(value)) return "#f3f4f6";
-  if (value <= -0.15) return "#3f1d1d";
-  if (value <= -0.10) return "#5f2727";
-  if (value <= -0.05) return "#7f3333";
-  if (value < 0) return "#a74a4a";
-  if (value < 0.05) return "#4f5b66";
-  if (value < 0.10) return "#335f66";
-  if (value < 0.15) return "#21736f";
+  if (v == null || Number.isNaN(v)) return "#f3f4f6";
+  if (v <= -0.15) return "#3f1d1d";
+  if (v <= -0.10) return "#5f2727";
+  if (v <= -0.05) return "#7f3333";
+  if (v < 0) return "#a74a4a";
+  if (v < 0.05) return "#4f5b66";
+  if (v < 0.10) return "#335f66";
+  if (v < 0.15) return "#21736f";
   return "#19805b";
 }
 
