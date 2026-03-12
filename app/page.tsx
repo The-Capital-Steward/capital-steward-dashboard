@@ -73,7 +73,7 @@ const heatmapPanels = {
 const bucketOrder = ["Very Low", "Low", "Moderate", "High", "Very High"];
 const oalOrder = ["FCF", "Net Income", "EBIT", "Revenue", "Non-viable"];
 
-function formatPct(v) {
+function formatPct(v: number | null) {
   if (v == null || Number.isNaN(v)) return "—";
   return `${(v * 100).toFixed(1)}%`;
 }
