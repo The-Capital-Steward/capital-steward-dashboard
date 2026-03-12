@@ -78,7 +78,7 @@ function formatPct(v: number | null) {
   return `${(v * 100).toFixed(1)}%`;
 }
 
-function formatNum(v) {
+function formatNum(v: number | null) {
   if (v == null || Number.isNaN(v)) return "—";
   return v.toLocaleString();
 }
