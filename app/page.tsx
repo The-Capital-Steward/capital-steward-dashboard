@@ -216,12 +216,12 @@ export default function OSMRDashboardPrototype() {
                         <CartesianGrid stroke="#262626" />
                         <XAxis type="number" dataKey="x" domain={[0, 1]} tick={{ fill: "#a3a3a3", fontSize: 12 }} />
                         <YAxis type="number" dataKey="y" domain={[0, 1]} tick={{ fill: "#a3a3a3", fontSize: 12 }} />
-                        <Tooltip
-                          cursor={{ strokeDasharray: "3 3" }}
-                          contentStyle={{ backgroundColor: "#0f0f10", border: "1px solid #262626", borderRadius: 16 }}
-                          labelStyle={{ color: "#fff" }}
-                          formatter={(value: any, name: string) => [typeof value === "number" ? value.toFixed(3) : value, name]}
-                        />
+<Tooltip
+  cursor={{ strokeDasharray: "3 3" }}
+  contentStyle={{ backgroundColor: "#0f0f10", border: "1px solid #262626", borderRadius: 16 }}
+  labelStyle={{ color: "#fff" }}
+  formatter={(value) => (typeof value === "number" ? value.toFixed(3) : value)}
+/>
                         <Scatter data={scatterData}>
                           {scatterData.map((entry, idx) => {
                             const colorMap: Record<string, string> = {
@@ -470,8 +470,7 @@ export default function OSMRDashboardPrototype() {
                         <CartesianGrid stroke="#262626" vertical={false} />
                         <XAxis dataKey="bucket" tick={{ fill: "#a3a3a3", fontSize: 12 }} />
                         <YAxis tick={{ fill: "#a3a3a3", fontSize: 12 }} />
-                        <Tooltip contentStyle={{ backgroundColor: "#0f0f10", border: "1px solid #262626", borderRadius: 16 }} />
-                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill="#a1a1aa" />
+<Tooltip />                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill="#a1a1aa" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
