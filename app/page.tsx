@@ -44,7 +44,7 @@ export default function HomePage() {
                 Independent Research Infrastructure
               </div>
 
-              <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-[-0.04em] text-[#0A1730] md:text-7xl">
+              <h1 className="tcs-display max-w-4xl text-5xl font-semibold text-[#0A1730] md:text-7xl">
                 Structural intelligence for capital allocation.
               </h1>
 
