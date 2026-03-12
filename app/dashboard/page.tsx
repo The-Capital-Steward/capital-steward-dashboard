@@ -50,13 +50,13 @@ const heatmapPanels = {
   "Low Fragility": [
     [0.11, 0.09, 0.07, 0.04, 0.01],
     [0.13, 0.10, 0.08, 0.05, 0.02],
-    [0.14, 0.12, 0.09, 0.04, 0.00],
+    [0.14, 0.12, 0.09, 0.04, 0.0],
     [0.16, 0.13, 0.10, 0.05, 0.01],
     [0.18, 0.15, 0.12, 0.07, 0.02],
   ],
   "Moderate Fragility": [
-    [0.08, 0.06, 0.03, 0.00, -0.03],
-    [0.09, 0.07, 0.04, 0.00, -0.04],
+    [0.08, 0.06, 0.03, 0.0, -0.03],
+    [0.09, 0.07, 0.04, 0.0, -0.04],
     [0.10, 0.08, 0.05, 0.01, -0.05],
     [0.11, 0.08, 0.04, -0.01, -0.06],
     [0.12, 0.09, 0.05, -0.02, -0.07],
@@ -95,7 +95,7 @@ function heatColor(v: number | null) {
   return "#19805b";
 }
 
-export default function OSMRDashboardPrototype() {
+export default function DashboardPage() {
   const [selectedOAL, setSelectedOAL] = useState("All");
   const [selectedBucket, setSelectedBucket] = useState("All");
   const [search, setSearch] = useState("");
@@ -156,7 +156,7 @@ export default function OSMRDashboardPrototype() {
         </motion.div>
 
         <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">Universe Size</CardDescription>
               <CardTitle className="text-3xl text-white">{formatNum(stats.total)}</CardTitle>
@@ -164,7 +164,7 @@ export default function OSMRDashboardPrototype() {
             <CardContent className="text-sm text-neutral-500">Current snapshot rows in the structural map.</CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">Average Composite Risk</CardDescription>
               <CardTitle className="text-3xl text-white">{formatPct(stats.avgComposite)}</CardTitle>
@@ -172,7 +172,7 @@ export default function OSMRDashboardPrototype() {
             <CardContent className="text-sm text-neutral-500">Cross-sectional average of the composite structural risk score.</CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">Very High Composite</CardDescription>
               <CardTitle className="text-3xl text-white">{formatNum(stats.veryHigh)}</CardTitle>
@@ -180,7 +180,7 @@ export default function OSMRDashboardPrototype() {
             <CardContent className="text-sm text-neutral-500">Names currently sitting in the highest structural risk bucket.</CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-neutral-400">High Financing Fragility</CardDescription>
               <CardTitle className="text-3xl text-white">{formatNum(stats.fragile)}</CardTitle>
@@ -199,14 +199,14 @@ export default function OSMRDashboardPrototype() {
 
           <TabsContent value="market-map" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Layers3 className="h-5 w-5 text-neutral-300" />
                     <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                   </div>
                   <CardDescription className="text-neutral-400">
-                    Valuation pressure on the x-axis, FCF trajectory on the y-axis, financing fragility represented in hover data. This is a prototype view; the production build can add full 3D interaction or facet by fragility tier.
+                    Valuation pressure on the x-axis, FCF trajectory on the y-axis, financing fragility represented in hover data.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -216,12 +216,7 @@ export default function OSMRDashboardPrototype() {
                         <CartesianGrid stroke="#262626" />
                         <XAxis type="number" dataKey="x" domain={[0, 1]} tick={{ fill: "#a3a3a3", fontSize: 12 }} />
                         <YAxis type="number" dataKey="y" domain={[0, 1]} tick={{ fill: "#a3a3a3", fontSize: 12 }} />
-<Tooltip
-  cursor={{ strokeDasharray: "3 3" }}
-  contentStyle={{ backgroundColor: "#0f0f10", border: "1px solid #262626", borderRadius: 16 }}
-  labelStyle={{ color: "#fff" }}
-  formatter={(value) => (typeof value === "number" ? value.toFixed(3) : value)}
-/>
+                        <Tooltip />
                         <Scatter data={scatterData}>
                           {scatterData.map((entry, idx) => {
                             const colorMap: Record<string, string> = {
@@ -240,7 +235,7 @@ export default function OSMRDashboardPrototype() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-neutral-300" />
@@ -269,7 +264,7 @@ export default function OSMRDashboardPrototype() {
 
             <div className="grid gap-6 xl:grid-cols-3">
               {Object.entries(heatmapPanels).map(([panelTitle, grid]) => (
-                <Card key={panelTitle} className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+                <Card key={panelTitle} className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                   <CardHeader>
                     <CardTitle className="text-white">{panelTitle}</CardTitle>
                     <CardDescription className="text-neutral-400">
@@ -305,7 +300,7 @@ export default function OSMRDashboardPrototype() {
           </TabsContent>
 
           <TabsContent value="snapshot" className="space-y-6">
-            <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+            <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
               <CardHeader>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                   <div>
@@ -389,7 +384,7 @@ export default function OSMRDashboardPrototype() {
 
           <TabsContent value="oal" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-neutral-300" />
@@ -406,7 +401,7 @@ export default function OSMRDashboardPrototype() {
                         <CartesianGrid stroke="#262626" vertical={false} />
                         <XAxis dataKey="oal_label" tick={{ fill: "#a3a3a3", fontSize: 12 }} />
                         <YAxis tick={{ fill: "#a3a3a3", fontSize: 12 }} />
-                        <Tooltip contentStyle={{ backgroundColor: "#0f0f10", border: "1px solid #262626", borderRadius: 16 }} />
+                        <Tooltip />
                         <Bar dataKey="n" radius={[12, 12, 0, 0]} fill="#d4d4d8" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -414,7 +409,7 @@ export default function OSMRDashboardPrototype() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <CardTitle className="text-white">OAL Summary Table</CardTitle>
                   <CardDescription className="text-neutral-400">
@@ -453,7 +448,7 @@ export default function OSMRDashboardPrototype() {
 
           <TabsContent value="liquidity" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-neutral-300" />
@@ -470,14 +465,15 @@ export default function OSMRDashboardPrototype() {
                         <CartesianGrid stroke="#262626" vertical={false} />
                         <XAxis dataKey="bucket" tick={{ fill: "#a3a3a3", fontSize: 12 }} />
                         <YAxis tick={{ fill: "#a3a3a3", fontSize: 12 }} />
-<Tooltip />                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill="#a1a1aa" />
+                        <Tooltip />
+                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill="#a1a1aa" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border-neutral-800 bg-neutral-925/80 shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border-neutral-800 bg-neutral-900/80 shadow-xl shadow-black/20">
                 <CardHeader>
                   <CardTitle className="text-white">Implementation Notes</CardTitle>
                   <CardDescription className="text-neutral-400">
