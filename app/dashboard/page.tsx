@@ -20,20 +20,21 @@ import {
   Scatter,
   Cell,
 } from "recharts";
-import { Search, Shield, Layers3, Activity, AlertTriangle, Clock3 } from "lucide-react";
+import { Search, Shield, Layers3, Activity, AlertTriangle, Clock3, Filter } from "lucide-react";
 import { motion } from "framer-motion";
 
 const COLORS = {
   bg: "#0A1730",
   surface: "#10203D",
   panel: "#14284A",
+  panelAlt: "#0F1F3C",
   border: "#243A61",
   text: "#E8EDF5",
   textSecondary: "#B7C3D8",
   textMuted: "#7F90AD",
   accent: "#5E7FBE",
   accentSecondary: "#8EA7D8",
-  anchor: "#35598F",
+  anchor: "#0A1730",
   positive: "#3E8E6A",
   positiveSoft: "#6DAE8B",
   negative: "#C94C4C",
@@ -196,15 +197,15 @@ export default function DashboardPage() {
   }, [filtered]);
 
   const stats = useMemo(() => {
-    const total = snapshotData.length;
+    const total = filtered.length;
     const avgComposite =
       total > 0
-        ? snapshotData.reduce((acc, row) => acc + (row.composite_score ?? 0), 0) / total
+        ? filtered.reduce((acc, row) => acc + (row.composite_score ?? 0), 0) / total
         : null;
-    const veryHigh = snapshotData.filter((r) => r.composite_bucket === "Very High").length;
-    const fragile = snapshotData.filter((r) => (r.axis3_pct ?? 0) >= 0.8).length;
+    const veryHigh = filtered.filter((r) => r.composite_bucket === "Very High").length;
+    const fragile = filtered.filter((r) => (r.axis3_pct ?? 0) >= 0.8).length;
     return { total, avgComposite, veryHigh, fragile };
-  }, [snapshotData]);
+  }, [filtered]);
 
   const scatterData = filtered.map((row) => ({
     x: row.axis1_pct,
@@ -215,16 +216,22 @@ export default function DashboardPage() {
     composite_bucket: row.composite_bucket,
   }));
 
+  const clearFilters = () => {
+    setSelectedOAL("All");
+    setSelectedBucket("All");
+    setSearch("");
+  };
+
   return (
     <div className="min-h-screen bg-[#0A1730] text-[#E8EDF5]">
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mx-auto max-w-7xl px-6 py-10">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="mb-8"
+          className="mb-12 max-w-5xl"
         >
-          <div className="mb-12 max-w-5xl">
+          <div className="mb-5 flex flex-wrap items-center gap-3">
             <Badge className="rounded-full border border-[#243A61] bg-[#10203D] px-3 py-1 text-[#B7C3D8] hover:bg-[#10203D]">
               OSMR Structural Risk Dashboard
             </Badge>
@@ -232,18 +239,85 @@ export default function DashboardPage() {
               Live Data
             </Badge>
           </div>
-          <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">
-  Structural mapping of the corporate economy.
-</h1>
 
-<p className="mt-6 max-w-3xl text-lg leading-8 text-[#B7C3D8]">
-  The Capital Steward’s OSMR framework maps structural risk across the equity
-  universe using operating anchors, free-cash-flow trajectory, and financing
-  fragility.
-</p>
+          <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">
+            Structural mapping of the corporate economy.
+          </h1>
+
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-[#B7C3D8]">
+            The Capital Steward’s OSMR framework maps structural risk across the equity
+            universe using operating anchors, free-cash-flow trajectory, and financing
+            fragility.
+          </p>
         </motion.div>
 
-        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="mb-10 rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-[#B7C3D8]" />
+                  <CardTitle className="text-white">Global Filters</CardTitle>
+                </div>
+                <CardDescription className="text-[#B7C3D8]">
+                  These controls apply across the full dashboard, including the market map, tables, and summary cards.
+                </CardDescription>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="rounded-2xl border-[#243A61] bg-transparent text-[#B7C3D8] hover:bg-[#10203D] hover:text-white"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-[#7F90AD]" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search symbol"
+                  className="rounded-2xl border-[#243A61] bg-[#10203D] pl-9 text-white placeholder:text-[#7F90AD]"
+                />
+              </div>
+
+              <Select value={selectedOAL} onValueChange={setSelectedOAL}>
+                <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
+                  <SelectValue placeholder="OAL" />
+                </SelectTrigger>
+                <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
+                  <SelectItem value="All">All OALs</SelectItem>
+                  {oalOrder.map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedBucket} onValueChange={setSelectedBucket}>
+                <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
+                  <SelectValue placeholder="Composite Bucket" />
+                </SelectTrigger>
+                <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
+                  <SelectItem value="All">All Composite Buckets</SelectItem>
+                  {bucketOrder.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-[#B7C3D8]">Universe Plotted</CardDescription>
@@ -252,19 +326,19 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
-              Names with usable structural snapshot data.
+              Names currently in the filtered universe.
             </CardContent>
           </Card>
 
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">Average Composite Risk</CardDescription>
+              <CardDescription className="text-[#B7C3D8]">Average Composite</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatPct(stats.avgComposite)}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
-              Cross-sectional average of the composite structural risk score.
+              Average composite score of the filtered cohort.
             </CardContent>
           </Card>
 
@@ -276,7 +350,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
-              Names currently sitting in the highest structural risk bucket.
+              Names currently in the highest composite bucket.
             </CardContent>
           </Card>
 
@@ -288,48 +362,29 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
-              Names with financing fragility in the top quintile.
+              Filtered names with top-quintile Axis III fragility.
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="market-map" className="space-y-6">
+        <Tabs defaultValue="market-map" className="space-y-8">
           <TabsList className="flex w-full gap-2 border-b border-[#243A61] bg-transparent p-0">
-  <TabsTrigger
-    value="market-map"
-    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
-  >
-    Market Map
-  </TabsTrigger>
-
-  <TabsTrigger
-    value="snapshot"
-    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
-  >
-    Snapshot
-  </TabsTrigger>
-
-  <TabsTrigger
-    value="oal"
-    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
-  >
-    OAL Structure
-  </TabsTrigger>
-
-  <TabsTrigger
-    value="liquidity"
-    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
-  >
-    Liquidity
-  </TabsTrigger>
-
-  <TabsTrigger
-    value="history"
-    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
-  >
-    History
-  </TabsTrigger>
-</TabsList>
+            {[
+              ["market-map", "Market Map"],
+              ["snapshot", "Snapshot"],
+              ["oal", "OAL Structure"],
+              ["liquidity", "Liquidity"],
+              ["history", "History"],
+            ].map(([value, label]) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:bg-[#F5F2EA] data-[state=active]:text-[#0A1730]"
+              >
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
           <TabsContent value="market-map" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
@@ -402,34 +457,41 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {topRisk.map((row) => (
-<div
-  key={row.symbol}
-  className="flex items-center justify-between rounded-xl border border-[#243A61] bg-[#0F1F3C] px-4 py-3 transition hover:border-[#35598F]"
->
-  <div className="flex flex-col">
-    <span className="font-medium text-white">{row.symbol}</span>
-    <span className="text-xs text-[#7F90AD]">
-      {row.oal_label} • {row.risk_bucket_within_oal}
-    </span>
-  </div>
+                    <div
+                      key={row.symbol}
+                      className="flex items-center justify-between rounded-xl border border-[#243A61] bg-[#0F1F3C] px-4 py-3 transition hover:border-[#35598F]"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium text-white">{row.symbol}</span>
+                        <span className="text-xs text-[#7F90AD]">
+                          {row.oal_label} • {row.risk_bucket_within_oal}
+                        </span>
+                      </div>
 
-  <div className="flex items-center gap-3">
-    <Badge
-      variant="outline"
-      className="border-[#243A61]"
-      style={{ color: compositeColor(row.composite_bucket) }}
-    >
-      {row.composite_bucket}
-    </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="outline"
+                          className="border-[#243A61]"
+                          style={{ color: compositeColor(row.composite_bucket) }}
+                        >
+                          {row.composite_bucket}
+                        </Badge>
 
-    <span className="font-mono text-sm text-white">
-      {row.composite_score?.toFixed(3)}
-    </span>
-  </div>
-</div>
+                        <span className="font-mono text-sm text-white">
+                          {row.composite_score?.toFixed(3)}
+                        </span>
+                      </div>
+                    </div>
                   ))}
                 </CardContent>
               </Card>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold text-white">Illustrative Regime Grids</h2>
+              <Badge variant="outline" className="border-[#243A61] text-[#7F90AD]">
+                Placeholder
+              </Badge>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-3">
@@ -438,7 +500,7 @@ export default function DashboardPage() {
                   <CardHeader>
                     <CardTitle className="text-white">{panelTitle}</CardTitle>
                     <CardDescription className="text-[#B7C3D8]">
-                      Expected forward return regimes across valuation, trajectory, and fragility states.
+                      Illustrative expected return regimes across valuation, trajectory, and fragility states.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -474,51 +536,10 @@ export default function DashboardPage() {
           <TabsContent value="snapshot" className="space-y-6">
             <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
               <CardHeader>
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
-                    <CardTitle className="text-white">Structural Snapshot Table</CardTitle>
-                    <CardDescription className="text-[#B7C3D8]">
-                      Live table from the latest exported structural snapshot.
-                    </CardDescription>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-[#7F90AD]" />
-                      <Input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search symbol"
-                        className="rounded-2xl border-[#243A61] bg-[#10203D] pl-9 text-white placeholder:text-[#7F90AD]"
-                      />
-                    </div>
-                    <Select value={selectedOAL} onValueChange={setSelectedOAL}>
-                      <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
-                        <SelectValue placeholder="OAL" />
-                      </SelectTrigger>
-                      <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
-                        <SelectItem value="All">All OALs</SelectItem>
-                        {oalOrder.map((o) => (
-                          <SelectItem key={o} value={o}>
-                            {o}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select value={selectedBucket} onValueChange={setSelectedBucket}>
-                      <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
-                        <SelectValue placeholder="Composite Bucket" />
-                      </SelectTrigger>
-                      <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
-                        <SelectItem value="All">All Buckets</SelectItem>
-                        {bucketOrder.map((b) => (
-                          <SelectItem key={b} value={b}>
-                            {b}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <CardTitle className="text-white">Structural Snapshot Table</CardTitle>
+                <CardDescription className="text-[#B7C3D8]">
+                  Live table from the latest exported structural snapshot. “Valuation Bucket” refers only to Axis I within-OAL ranking, not total composite risk.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="overflow-hidden rounded-2xl border border-[#243A61]">
@@ -527,11 +548,11 @@ export default function DashboardPage() {
                       <TableRow className="border-[#243A61] bg-[#10203D]">
                         <TableHead className="text-[#B7C3D8]">Symbol</TableHead>
                         <TableHead className="text-[#B7C3D8]">OAL</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Valuation</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Trajectory</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Fragility</TableHead>
+                        <TableHead className="text-[#B7C3D8]">Axis I</TableHead>
+                        <TableHead className="text-[#B7C3D8]">Axis II</TableHead>
+                        <TableHead className="text-[#B7C3D8]">Axis III</TableHead>
                         <TableHead className="text-[#B7C3D8]">Composite</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Risk Bucket</TableHead>
+                        <TableHead className="text-[#B7C3D8]">Valuation Bucket</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -579,7 +600,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-white">OAL Cohort Structure</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Live Operational Anchor Ladder distribution across the current snapshot.
+                    Live Operational Anchor Ladder distribution across the filtered snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -693,19 +714,14 @@ export default function DashboardPage() {
                     <span className="font-medium text-white">1.</span> The market map, OAL summary, and liquidity distribution are now live.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> The next upgrade is to export historical monthly snapshots and real cohort analytics.
+                    <span className="font-medium text-white">2.</span> Global filters now apply consistently across tabs.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> After that, the heatmaps become empirical outputs rather than placeholders.
+                    <span className="font-medium text-white">3.</span> The regime grids remain illustrative until the historical cohort engine is built.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> Then we can build ticker drilldowns and research pages around the same data layer.
+                    <span className="font-medium text-white">4.</span> The next big upgrade is empirical forward-return analytics from monthly history.
                   </p>
-                  <div className="pt-2">
-                    <Button className="rounded-2xl bg-[#5E7FBE] text-white hover:bg-[#4A6FA5]">
-                      Next: build historical cohort engine
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             </div>
