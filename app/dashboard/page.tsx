@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,37 +39,17 @@ const COLORS = {
   negative: "#C94C4C",
 };
 
-const snapshotData = [
-  { symbol: "AAPL", oal_label: "FCF", risk_bucket_within_oal: "High", liq_bucket: "Very High", axis1_pct: 0.79, axis2_pct: 0.28, axis3_pct: 0.06, composite_score: 0.38, composite_bucket: "Low" },
-  { symbol: "NVDA", oal_label: "FCF", risk_bucket_within_oal: "Very High", liq_bucket: "Very High", axis1_pct: 0.96, axis2_pct: 0.41, axis3_pct: 0.02, composite_score: 0.46, composite_bucket: "Moderate" },
-  { symbol: "UBER", oal_label: "FCF", risk_bucket_within_oal: "Moderate", liq_bucket: "Very High", axis1_pct: 0.45, axis2_pct: 0.0, axis3_pct: 0.31, composite_score: 0.25, composite_bucket: "Very Low" },
-  { symbol: "DDOG", oal_label: "FCF", risk_bucket_within_oal: "High", liq_bucket: "Very High", axis1_pct: 0.83, axis2_pct: 0.0, axis3_pct: 0.18, composite_score: 0.34, composite_bucket: "Low" },
-  { symbol: "AAL", oal_label: "Net Income", risk_bucket_within_oal: "Very High", liq_bucket: "Very High", axis1_pct: 0.96, axis2_pct: null, axis3_pct: 0.74, composite_score: 0.85, composite_bucket: "Very High" },
-  { symbol: "ABNB", oal_label: "FCF", risk_bucket_within_oal: "High", liq_bucket: "Very High", axis1_pct: 0.72, axis2_pct: 0.07, axis3_pct: 0.01, composite_score: 0.27, composite_bucket: "Very Low" },
-  { symbol: "ABCL", oal_label: "Revenue", risk_bucket_within_oal: "High", liq_bucket: "High", axis1_pct: 0.71, axis2_pct: null, axis3_pct: 1.0, composite_score: 0.86, composite_bucket: "Very High" },
-  { symbol: "MRX", oal_label: "FCF", risk_bucket_within_oal: "Very Low", liq_bucket: "Low", axis1_pct: 0.04, axis2_pct: 0.0, axis3_pct: 0.12, composite_score: 0.05, composite_bucket: "Very Low" },
-  { symbol: "IOT", oal_label: "FCF", risk_bucket_within_oal: "Very High", liq_bucket: "High", axis1_pct: 0.9, axis2_pct: 0.0, axis3_pct: 0.04, composite_score: 0.31, composite_bucket: "Low" },
-  { symbol: "THRY", oal_label: "FCF", risk_bucket_within_oal: "Low", liq_bucket: "Moderate", axis1_pct: 0.22, axis2_pct: 1.0, axis3_pct: 0.21, composite_score: 0.48, composite_bucket: "Moderate" },
-  { symbol: "AGNC", oal_label: "FCF", risk_bucket_within_oal: "Very High", liq_bucket: "High", axis1_pct: 0.96, axis2_pct: 0.99, axis3_pct: 0.55, composite_score: 0.83, composite_bucket: "Very High" },
-  { symbol: "ABEO", oal_label: "Net Income", risk_bucket_within_oal: "Very Low", liq_bucket: "Low", axis1_pct: 0.06, axis2_pct: null, axis3_pct: 0.91, composite_score: 0.48, composite_bucket: "Moderate" },
-];
-
-const oalSummary = [
-  { oal_label: "FCF", n: 2872, median_multiple: 19.8, median_axis3: 0.44, median_composite: 0.47 },
-  { oal_label: "Net Income", n: 641, median_multiple: 27.7, median_axis3: 0.2, median_composite: 0.39 },
-  { oal_label: "EBIT", n: 109, median_multiple: 52.5, median_axis3: 0.82, median_composite: 0.64 },
-  { oal_label: "Revenue", n: 1168, median_multiple: 3.7, median_axis3: 1.0, median_composite: 0.66 },
-  { oal_label: "Non-viable", n: 372, median_multiple: null, median_axis3: 1.0, median_composite: 1.0 },
-];
-
-const liquiditySummary = [
-  { bucket: "Very Low", count: 1030 },
-  { bucket: "Low", count: 1031 },
-  { bucket: "Moderate", count: 1031 },
-  { bucket: "High", count: 1031 },
-  { bucket: "Very High", count: 1031 },
-  { bucket: "No Data", count: 8 },
-];
+type SnapshotRow = {
+  symbol: string;
+  oal_label: string | null;
+  risk_bucket_within_oal: string | null;
+  axis1_pct: number | null;
+  axis2_pct: number | null;
+  axis2_plot: number | null;
+  axis3_pct: number | null;
+  composite_score: number | null;
+  composite_bucket: string | null;
+};
 
 const heatmapRows = ["Very Weak", "Weak", "Neutral", "Strong", "Very Strong"];
 const heatmapCols = ["Very Low", "Low", "Moderate", "High", "Very High"];
@@ -134,9 +114,27 @@ function compositeColor(bucket: string | null | undefined) {
 }
 
 export default function DashboardPage() {
+  const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOAL, setSelectedOAL] = useState("All");
   const [selectedBucket, setSelectedBucket] = useState("All");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetch("/data/osmr_snapshot.json")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load snapshot: ${res.status}`);
+        return res.json();
+      })
+      .then((json: SnapshotRow[]) => {
+        setSnapshotData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = useMemo(() => {
     return snapshotData.filter((row) => {
@@ -145,28 +143,97 @@ export default function DashboardPage() {
       const matchSearch = !search || row.symbol.toLowerCase().includes(search.toLowerCase());
       return matchOAL && matchBucket && matchSearch;
     });
-  }, [selectedOAL, selectedBucket, search]);
+  }, [snapshotData, selectedOAL, selectedBucket, search]);
 
   const topRisk = useMemo(() => {
-    return [...filtered].sort((a, b) => b.composite_score - a.composite_score).slice(0, 12);
+    return [...filtered]
+      .filter((r) => r.composite_score != null)
+      .sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0))
+      .slice(0, 12);
   }, [filtered]);
 
   const stats = useMemo(() => {
     const total = snapshotData.length;
-    const avgComposite = snapshotData.reduce((acc, row) => acc + row.composite_score, 0) / total;
+    const avgComposite =
+      total > 0
+        ? snapshotData.reduce((acc, row) => acc + (row.composite_score ?? 0), 0) / total
+        : null;
     const veryHigh = snapshotData.filter((r) => r.composite_bucket === "Very High").length;
-    const fragile = snapshotData.filter((r) => r.axis3_pct >= 0.8).length;
+    const fragile = snapshotData.filter((r) => (r.axis3_pct ?? 0) >= 0.8).length;
     return { total, avgComposite, veryHigh, fragile };
-  }, []);
+  }, [snapshotData]);
 
   const scatterData = filtered.map((row) => ({
     x: row.axis1_pct,
-    y: row.axis2_pct ?? 0.5,
+    y: row.axis2_plot ?? 0.5,
     z: row.axis3_pct,
     symbol: row.symbol,
     oal_label: row.oal_label,
     composite_bucket: row.composite_bucket,
   }));
+
+  const oalSummary = useMemo(() => {
+    const groups = new Map<
+      string,
+      { oal_label: string; n: number; axis3Vals: number[]; compVals: number[]; axis1Vals: number[] }
+    >();
+
+    for (const row of snapshotData) {
+      const label = row.oal_label ?? "Unknown";
+      if (!groups.has(label)) {
+        groups.set(label, {
+          oal_label: label,
+          n: 0,
+          axis3Vals: [],
+          compVals: [],
+          axis1Vals: [],
+        });
+      }
+      const g = groups.get(label)!;
+      g.n += 1;
+      if (row.axis3_pct != null) g.axis3Vals.push(row.axis3_pct);
+      if (row.composite_score != null) g.compVals.push(row.composite_score);
+      if (row.axis1_pct != null) g.axis1Vals.push(row.axis1_pct);
+    }
+
+    function median(arr: number[]) {
+      if (!arr.length) return null;
+      const s = [...arr].sort((a, b) => a - b);
+      const mid = Math.floor(s.length / 2);
+      return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+    }
+
+    return oalOrder
+      .map((label) => {
+        const g = groups.get(label);
+        if (!g) return null;
+        return {
+          oal_label: g.oal_label,
+          n: g.n,
+          median_multiple: null,
+          median_axis3: median(g.axis3Vals),
+          median_composite: median(g.compVals),
+        };
+      })
+      .filter(Boolean) as {
+      oal_label: string;
+      n: number;
+      median_multiple: number | null;
+      median_axis3: number | null;
+      median_composite: number | null;
+    }[];
+  }, [snapshotData]);
+
+  const liquiditySummary = useMemo(() => {
+    return [
+      { bucket: "Very Low", count: 0 },
+      { bucket: "Low", count: 0 },
+      { bucket: "Moderate", count: 0 },
+      { bucket: "High", count: 0 },
+      { bucket: "Very High", count: 0 },
+      { bucket: "No Data", count: 0 },
+    ];
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0A1730] text-[#E8EDF5]">
@@ -182,32 +249,36 @@ export default function DashboardPage() {
               OSMR Structural Risk Dashboard
             </Badge>
             <Badge variant="outline" className="rounded-full border-[#243A61] text-[#7F90AD]">
-              Prototype
+              Live Data
             </Badge>
           </div>
           <h1 className="tcs-heading max-w-4xl text-4xl font-semibold text-white md:text-5xl">
             A structural map of the equity market, built from operating anchors, cash trajectory, and financing fragility.
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-[#B7C3D8] md:text-lg">
-            This prototype turns the OSMR framework into an interactive research interface. The final production version should read directly from monthly snapshot files and historical cohort tables.
+            The dashboard now reads from the latest exported OSMR snapshot and reflects the current state of your research pipeline.
           </p>
         </motion.div>
 
         <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">Universe Size</CardDescription>
-              <CardTitle className="text-3xl text-white">{formatNum(stats.total)}</CardTitle>
+              <CardDescription className="text-[#B7C3D8]">Universe Plotted</CardDescription>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatNum(stats.total)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
-              Current snapshot rows in the structural map.
+              Names with usable structural snapshot data.
             </CardContent>
           </Card>
 
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-[#B7C3D8]">Average Composite Risk</CardDescription>
-              <CardTitle className="text-3xl text-white">{formatPct(stats.avgComposite)}</CardTitle>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatPct(stats.avgComposite)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
               Cross-sectional average of the composite structural risk score.
@@ -217,7 +288,9 @@ export default function DashboardPage() {
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-[#B7C3D8]">Very High Composite</CardDescription>
-              <CardTitle className="text-3xl text-white">{formatNum(stats.veryHigh)}</CardTitle>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatNum(stats.veryHigh)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
               Names currently sitting in the highest structural risk bucket.
@@ -227,7 +300,9 @@ export default function DashboardPage() {
           <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-[#B7C3D8]">High Financing Fragility</CardDescription>
-              <CardTitle className="text-3xl text-white">{formatNum(stats.fragile)}</CardTitle>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatNum(stats.fragile)}
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7F90AD]">
               Names with financing fragility in the top quintile.
@@ -260,47 +335,53 @@ export default function DashboardPage() {
                     <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Valuation pressure on the x-axis, FCF trajectory on the y-axis, financing fragility represented in hover data.
+                    Valuation pressure on the x-axis, FCF trajectory on the y-axis, financing fragility encoded by composite bucket color.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[420px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
-                        <CartesianGrid stroke={COLORS.border} />
-                        <XAxis
-                          type="number"
-                          dataKey="x"
-                          domain={[0, 1]}
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <YAxis
-                          type="number"
-                          dataKey="y"
-                          domain={[0, 1]}
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: COLORS.surface,
-                            border: `1px solid ${COLORS.border}`,
-                            borderRadius: 16,
-                            color: COLORS.text,
-                          }}
-                          labelStyle={{ color: COLORS.text }}
-                        />
-                        <Scatter data={scatterData}>
-                          {scatterData.map((entry, idx) => (
-                            <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
-                          ))}
-                        </Scatter>
-                      </ScatterChart>
-                    </ResponsiveContainer>
-                  </div>
+                  {loading ? (
+                    <div className="flex h-[420px] items-center justify-center text-[#7F90AD]">
+                      Loading live snapshot...
+                    </div>
+                  ) : (
+                    <div className="h-[420px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+                          <CartesianGrid stroke={COLORS.border} />
+                          <XAxis
+                            type="number"
+                            dataKey="x"
+                            domain={[0, 1]}
+                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                            axisLine={{ stroke: COLORS.border }}
+                            tickLine={{ stroke: COLORS.border }}
+                          />
+                          <YAxis
+                            type="number"
+                            dataKey="y"
+                            domain={[0, 1]}
+                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                            axisLine={{ stroke: COLORS.border }}
+                            tickLine={{ stroke: COLORS.border }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: COLORS.surface,
+                              border: `1px solid ${COLORS.border}`,
+                              borderRadius: 16,
+                              color: COLORS.text,
+                            }}
+                            labelStyle={{ color: COLORS.text }}
+                          />
+                          <Scatter data={scatterData}>
+                            {scatterData.map((entry, idx) => (
+                              <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
+                            ))}
+                          </Scatter>
+                        </ScatterChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -311,7 +392,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-white">Highest Composite Risk</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Prototype list of names with the greatest structural risk according to the current composite score.
+                    Live list of names with the greatest structural risk according to the latest composite score.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -328,7 +409,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-[#B7C3D8]">Composite</div>
-                        <div className="font-medium text-white">{row.composite_score.toFixed(3)}</div>
+                        <div className="font-medium text-white">
+                          {row.composite_score?.toFixed(3)}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -342,7 +425,7 @@ export default function DashboardPage() {
                   <CardHeader>
                     <CardTitle className="text-white">{panelTitle}</CardTitle>
                     <CardDescription className="text-[#B7C3D8]">
-                      Prototype forward-return heatmap by valuation pressure and trajectory bucket.
+                      Placeholder cohort heatmap. Next step is wiring historical snapshot analytics.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -382,7 +465,7 @@ export default function DashboardPage() {
                   <div>
                     <CardTitle className="text-white">Structural Snapshot Table</CardTitle>
                     <CardDescription className="text-[#B7C3D8]">
-                      This table should eventually be populated directly from the monthly structural snapshot CSV generated by the pipeline.
+                      Live table from the latest exported structural snapshot.
                     </CardDescription>
                   </div>
                   <div className="grid gap-3 md:grid-cols-3">
@@ -435,7 +518,7 @@ export default function DashboardPage() {
                         <TableHead className="text-[#B7C3D8]">Trajectory</TableHead>
                         <TableHead className="text-[#B7C3D8]">Fragility</TableHead>
                         <TableHead className="text-[#B7C3D8]">Composite</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Liquidity</TableHead>
+                        <TableHead className="text-[#B7C3D8]">Risk Bucket</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -443,14 +526,16 @@ export default function DashboardPage() {
                         <TableRow key={row.symbol} className="border-[#243A61]">
                           <TableCell className="font-medium text-white">{row.symbol}</TableCell>
                           <TableCell className="text-[#E8EDF5]">{row.oal_label}</TableCell>
-                          <TableCell className="text-[#E8EDF5]">{row.axis1_pct.toFixed(3)}</TableCell>
+                          <TableCell className="text-[#E8EDF5]">{row.axis1_pct?.toFixed(3) ?? "—"}</TableCell>
                           <TableCell className="text-[#E8EDF5]">
                             {row.axis2_pct == null ? "—" : row.axis2_pct.toFixed(3)}
                           </TableCell>
-                          <TableCell className="text-[#E8EDF5]">{row.axis3_pct.toFixed(3)}</TableCell>
+                          <TableCell className="text-[#E8EDF5]">{row.axis3_pct?.toFixed(3) ?? "—"}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-white">{row.composite_score.toFixed(3)}</span>
+                              <span className="font-medium text-white">
+                                {row.composite_score?.toFixed(3) ?? "—"}
+                              </span>
                               <Badge
                                 variant="outline"
                                 className="border-[#243A61] text-[#B7C3D8]"
@@ -460,7 +545,9 @@ export default function DashboardPage() {
                               </Badge>
                             </div>
                           </TableCell>
-                          <TableCell className="text-[#E8EDF5]">{row.liq_bucket}</TableCell>
+                          <TableCell className="text-[#E8EDF5]">
+                            {row.risk_bucket_within_oal ?? "—"}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -479,7 +566,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-white">OAL Cohort Structure</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Operational Anchor Ladder distribution across the current snapshot.
+                    Live Operational Anchor Ladder distribution across the current snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -508,7 +595,7 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white">OAL Summary Table</CardTitle>
                   <CardDescription className="text-[#B7C3D8]">
-                    Prototype summary card. Production version should render from the latest oal_summary output automatically.
+                    Summary derived from the live exported snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -518,7 +605,6 @@ export default function DashboardPage() {
                         <TableRow className="border-[#243A61] bg-[#10203D]">
                           <TableHead className="text-[#B7C3D8]">OAL</TableHead>
                           <TableHead className="text-[#B7C3D8]">Count</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Median Multiple</TableHead>
                           <TableHead className="text-[#B7C3D8]">Median Fragility</TableHead>
                           <TableHead className="text-[#B7C3D8]">Median Composite</TableHead>
                         </TableRow>
@@ -529,10 +615,11 @@ export default function DashboardPage() {
                             <TableCell className="font-medium text-white">{row.oal_label}</TableCell>
                             <TableCell className="text-[#E8EDF5]">{formatNum(row.n)}</TableCell>
                             <TableCell className="text-[#E8EDF5]">
-                              {row.median_multiple == null ? "—" : `${row.median_multiple.toFixed(1)}x`}
+                              {row.median_axis3 == null ? "—" : row.median_axis3.toFixed(3)}
                             </TableCell>
-                            <TableCell className="text-[#E8EDF5]">{row.median_axis3.toFixed(3)}</TableCell>
-                            <TableCell className="text-[#E8EDF5]">{row.median_composite.toFixed(3)}</TableCell>
+                            <TableCell className="text-[#E8EDF5]">
+                              {row.median_composite == null ? "—" : row.median_composite.toFixed(3)}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -549,10 +636,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-[#B7C3D8]" />
-                    <CardTitle className="text-white">Liquidity Distribution</CardTitle>
+                    <CardTitle className="text-white">Liquidity Placeholder</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Full-universe ADV bucket counts. Liquidity is measured, not used as an early filter.
+                    Next step: add exported liquidity buckets to the live JSON and replace this placeholder.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -581,25 +668,25 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white">Implementation Notes</CardTitle>
                   <CardDescription className="text-[#B7C3D8]">
-                    Suggested production wiring for the website version of this dashboard.
+                    The dashboard is now reading from the exported OSMR snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
                   <p>
-                    <span className="font-medium text-white">1.</span> Read the latest monthly snapshot from the structural pipeline rather than hardcoding data.
+                    <span className="font-medium text-white">1.</span> The market map and snapshot table now use live exported data.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> Cache pre-aggregated cohort tables for heatmaps so the site stays fast.
+                    <span className="font-medium text-white">2.</span> The next upgrade is to export liquidity buckets and OAL summary directly from Python.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> Export both HTML-ready JSON and SVG assets so the same research layer can power the dashboard, the PDF report, and the email summary.
+                    <span className="font-medium text-white">3.</span> After that, we build the 7-year historical monthly backfill and cohort engine.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> Keep the interface restrained: one primary market map, one cohort heatmap, one searchable table.
+                    <span className="font-medium text-white">4.</span> Then the heatmaps become real empirical outputs rather than placeholders.
                   </p>
                   <div className="pt-2">
                     <Button className="rounded-2xl bg-[#5E7FBE] text-white hover:bg-[#4A6FA5]">
-                      Next: wire live pipeline outputs
+                      Next: export richer dashboard datasets
                     </Button>
                   </div>
                 </CardContent>
