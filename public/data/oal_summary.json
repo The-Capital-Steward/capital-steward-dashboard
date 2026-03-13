@@ -1,0 +1,37 @@
+[
+  {
+    "oal_label": "FCF",
+    "n": 2872,
+    "median_axis1": 0.5001740947075208,
+    "median_axis3": 0.4373286329808068,
+    "median_composite": 0.4669556201612834
+  },
+  {
+    "oal_label": "Net Income",
+    "n": 641,
+    "median_axis1": 0.500780031201248,
+    "median_axis3": 0.1959183673469388,
+    "median_composite": 0.3869368652297112
+  },
+  {
+    "oal_label": "EBIT",
+    "n": 109,
+    "median_axis1": 0.5045871559633027,
+    "median_axis3": 0.8204081632653062,
+    "median_composite": 0.6401048492791612
+  },
+  {
+    "oal_label": "Revenue",
+    "n": 1168,
+    "median_axis1": 0.5004280821917808,
+    "median_axis3": 1.0,
+    "median_composite": 0.6603167808219178
+  },
+  {
+    "oal_label": "Non-viable",
+    "n": 372,
+    "median_axis1": null,
+    "median_axis3": 0.0,
+    "median_composite": 0.0
+  }
+]

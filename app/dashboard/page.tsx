@@ -51,6 +51,19 @@ type SnapshotRow = {
   composite_bucket: string | null;
 };
 
+type OALSummaryRow = {
+  oal_label: string;
+  n: number;
+  median_axis1: number | null;
+  median_axis3: number | null;
+  median_composite: number | null;
+};
+
+type LiquiditySummaryRow = {
+  bucket: string;
+  count: number;
+};
+
 const heatmapRows = ["Very Weak", "Weak", "Neutral", "Strong", "Very Strong"];
 const heatmapCols = ["Very Low", "Low", "Moderate", "High", "Very High"];
 const heatmapPanels = {
@@ -115,19 +128,33 @@ function compositeColor(bucket: string | null | undefined) {
 
 export default function DashboardPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
+  const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
+  const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [selectedOAL, setSelectedOAL] = useState("All");
   const [selectedBucket, setSelectedBucket] = useState("All");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/data/osmr_snapshot.json")
-      .then((res) => {
+    Promise.all([
+      fetch("/data/osmr_snapshot.json").then((res) => {
         if (!res.ok) throw new Error(`Failed to load snapshot: ${res.status}`);
         return res.json();
-      })
-      .then((json: SnapshotRow[]) => {
-        setSnapshotData(json);
+      }),
+      fetch("/data/oal_summary.json").then((res) => {
+        if (!res.ok) throw new Error(`Failed to load oal summary: ${res.status}`);
+        return res.json();
+      }),
+      fetch("/data/liquidity_summary.json").then((res) => {
+        if (!res.ok) throw new Error(`Failed to load liquidity summary: ${res.status}`);
+        return res.json();
+      }),
+    ])
+      .then(([snapshot, oal, liquidity]) => {
+        setSnapshotData(snapshot);
+        setOALSummary(oal);
+        setLiquiditySummary(liquidity);
         setLoading(false);
       })
       .catch((err) => {
@@ -172,69 +199,6 @@ export default function DashboardPage() {
     composite_bucket: row.composite_bucket,
   }));
 
-  const oalSummary = useMemo(() => {
-    const groups = new Map<
-      string,
-      { oal_label: string; n: number; axis3Vals: number[]; compVals: number[]; axis1Vals: number[] }
-    >();
-
-    for (const row of snapshotData) {
-      const label = row.oal_label ?? "Unknown";
-      if (!groups.has(label)) {
-        groups.set(label, {
-          oal_label: label,
-          n: 0,
-          axis3Vals: [],
-          compVals: [],
-          axis1Vals: [],
-        });
-      }
-      const g = groups.get(label)!;
-      g.n += 1;
-      if (row.axis3_pct != null) g.axis3Vals.push(row.axis3_pct);
-      if (row.composite_score != null) g.compVals.push(row.composite_score);
-      if (row.axis1_pct != null) g.axis1Vals.push(row.axis1_pct);
-    }
-
-    function median(arr: number[]) {
-      if (!arr.length) return null;
-      const s = [...arr].sort((a, b) => a - b);
-      const mid = Math.floor(s.length / 2);
-      return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-    }
-
-    return oalOrder
-      .map((label) => {
-        const g = groups.get(label);
-        if (!g) return null;
-        return {
-          oal_label: g.oal_label,
-          n: g.n,
-          median_multiple: null,
-          median_axis3: median(g.axis3Vals),
-          median_composite: median(g.compVals),
-        };
-      })
-      .filter(Boolean) as {
-      oal_label: string;
-      n: number;
-      median_multiple: number | null;
-      median_axis3: number | null;
-      median_composite: number | null;
-    }[];
-  }, [snapshotData]);
-
-  const liquiditySummary = useMemo(() => {
-    return [
-      { bucket: "Very Low", count: 0 },
-      { bucket: "Low", count: 0 },
-      { bucket: "Moderate", count: 0 },
-      { bucket: "High", count: 0 },
-      { bucket: "Very High", count: 0 },
-      { bucket: "No Data", count: 0 },
-    ];
-  }, []);
-
   return (
     <div className="min-h-screen bg-[#0A1730] text-[#E8EDF5]">
       <div className="mx-auto max-w-7xl px-6 py-8">
@@ -256,7 +220,7 @@ export default function DashboardPage() {
             A structural map of the equity market, built from operating anchors, cash trajectory, and financing fragility.
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-[#B7C3D8] md:text-lg">
-            The dashboard now reads from the latest exported OSMR snapshot and reflects the current state of your research pipeline.
+            The dashboard now reads from exported OSMR datasets generated directly by your research pipeline.
           </p>
         </motion.div>
 
@@ -605,7 +569,8 @@ export default function DashboardPage() {
                         <TableRow className="border-[#243A61] bg-[#10203D]">
                           <TableHead className="text-[#B7C3D8]">OAL</TableHead>
                           <TableHead className="text-[#B7C3D8]">Count</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Median Fragility</TableHead>
+                          <TableHead className="text-[#B7C3D8]">Median Axis I</TableHead>
+                          <TableHead className="text-[#B7C3D8]">Median Axis III</TableHead>
                           <TableHead className="text-[#B7C3D8]">Median Composite</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -614,6 +579,9 @@ export default function DashboardPage() {
                           <TableRow key={row.oal_label} className="border-[#243A61]">
                             <TableCell className="font-medium text-white">{row.oal_label}</TableCell>
                             <TableCell className="text-[#E8EDF5]">{formatNum(row.n)}</TableCell>
+                            <TableCell className="text-[#E8EDF5]">
+                              {row.median_axis1 == null ? "—" : row.median_axis1.toFixed(3)}
+                            </TableCell>
                             <TableCell className="text-[#E8EDF5]">
                               {row.median_axis3 == null ? "—" : row.median_axis3.toFixed(3)}
                             </TableCell>
@@ -636,10 +604,10 @@ export default function DashboardPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-[#B7C3D8]" />
-                    <CardTitle className="text-white">Liquidity Placeholder</CardTitle>
+                    <CardTitle className="text-white">Liquidity Distribution</CardTitle>
                   </div>
                   <CardDescription className="text-[#B7C3D8]">
-                    Next step: add exported liquidity buckets to the live JSON and replace this placeholder.
+                    Live liquidity summary exported from the structural state snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -668,25 +636,25 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white">Implementation Notes</CardTitle>
                   <CardDescription className="text-[#B7C3D8]">
-                    The dashboard is now reading from the exported OSMR snapshot.
+                    The dashboard is now reading from exported OSMR datasets.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
                   <p>
-                    <span className="font-medium text-white">1.</span> The market map and snapshot table now use live exported data.
+                    <span className="font-medium text-white">1.</span> The market map, OAL summary, and liquidity distribution are now live.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> The next upgrade is to export liquidity buckets and OAL summary directly from Python.
+                    <span className="font-medium text-white">2.</span> The next upgrade is to export historical monthly snapshots and real cohort analytics.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> After that, we build the 7-year historical monthly backfill and cohort engine.
+                    <span className="font-medium text-white">3.</span> After that, the heatmaps become empirical outputs rather than placeholders.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> Then the heatmaps become real empirical outputs rather than placeholders.
+                    <span className="font-medium text-white">4.</span> Then we can build ticker drilldowns and research pages around the same data layer.
                   </p>
                   <div className="pt-2">
                     <Button className="rounded-2xl bg-[#5E7FBE] text-white hover:bg-[#4A6FA5]">
-                      Next: export richer dashboard datasets
+                      Next: build historical cohort engine
                     </Button>
                   </div>
                 </CardContent>

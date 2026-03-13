@@ -1,0 +1,26 @@
+[
+  {
+    "bucket": "Very Low",
+    "count": 1030
+  },
+  {
+    "bucket": "Low",
+    "count": 1031
+  },
+  {
+    "bucket": "Moderate",
+    "count": 1031
+  },
+  {
+    "bucket": "High",
+    "count": 1031
+  },
+  {
+    "bucket": "Very High",
+    "count": 1031
+  },
+  {
+    "bucket": "No Data",
+    "count": 8
+  }
+]
