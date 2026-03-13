@@ -294,23 +294,42 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue="market-map" className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 rounded-2xl border border-[#243A61] bg-[#10203D] p-2 md:grid-cols-5">
-            <TabsTrigger value="market-map" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
-              Market Map
-            </TabsTrigger>
-            <TabsTrigger value="snapshot" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
-              Snapshot Table
-            </TabsTrigger>
-            <TabsTrigger value="oal" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
-              OAL Structure
-            </TabsTrigger>
-            <TabsTrigger value="liquidity" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
-              Liquidity
-            </TabsTrigger>
-            <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
-              History
-            </TabsTrigger>
-          </TabsList>
+          <TabsList className="flex w-full gap-2 border-b border-[#243A61] bg-transparent p-0">
+  <TabsTrigger
+    value="market-map"
+    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
+  >
+    Market Map
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="snapshot"
+    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
+  >
+    Snapshot
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="oal"
+    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
+  >
+    OAL Structure
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="liquidity"
+    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
+  >
+    Liquidity
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="history"
+    className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:text-white"
+  >
+    History
+  </TabsTrigger>
+</TabsList>
 
           <TabsContent value="market-map" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
@@ -419,7 +438,7 @@ export default function DashboardPage() {
                   <CardHeader>
                     <CardTitle className="text-white">{panelTitle}</CardTitle>
                     <CardDescription className="text-[#B7C3D8]">
-                      Placeholder cohort heatmap. Next step is wiring historical snapshot analytics.
+                      Expected forward return regimes across valuation, trajectory, and fragility states.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

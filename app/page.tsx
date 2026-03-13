@@ -44,7 +44,7 @@ export default function HomePage() {
                 Independent Research Infrastructure
               </div>
 
-              <h1 className="tcs-display max-w-4xl text-5xl font-semibold text-[#0A1730] md:text-7xl">
+              <h1 className="tcs-kicker mb-4 font-medium text-[#8A92A0]">
                 Structural intelligence for capital allocation.
               </h1>
 
@@ -181,10 +181,10 @@ export default function HomePage() {
       <section id="framework" className="border-b border-[#E3DED2] bg-white">
         <div className="mx-auto max-w-7xl px-6 py-20 md:px-10 lg:px-12">
           <div className="max-w-3xl">
-            <div className="mb-4 text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+            <div className="tcs-kicker mb-4 font-medium text-[#8A92A0]">
               Core Framework
             </div>
-            <h2 className="text-4xl font-semibold tracking-[-0.03em] text-[#0A1730] md:text-5xl">
+            <h2 className="tcs-heading text-4xl font-semibold text-[#0A1730] md:text-5xl">
               A three-axis model for mapping structural fragility.
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
@@ -243,13 +243,13 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6 py-20 md:px-10 lg:px-12">
           <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
             <div>
-              <div className="mb-4 text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+              <div className="tcs-kicker mb-4 font-medium text-[#8A92A0]">
                 Platform
               </div>
-              <h2 className="text-4xl font-semibold tracking-[-0.03em] text-[#0A1730] md:text-5xl">
+              <h2 className="tcs-heading text-4xl font-semibold text-[#0A1730] md:text-5xl">
                 Institutional-grade research infrastructure.
               </h2>
-              <p className="mt-6 text-lg leading-8 text-[#5C6472]">
+              <p className="tcs-body mt-6 text-lg text-[#5C6472]">
                 The dashboard converts company-level financial statements into a
                 structural risk map of the equity market, enabling cross-sectional
                 diagnostics, cohort analysis, and company-level drilldowns.
@@ -308,13 +308,13 @@ export default function HomePage() {
       <section id="philosophy" className="bg-white">
         <div className="mx-auto max-w-7xl px-6 py-20 md:px-10 lg:px-12">
           <div className="max-w-4xl">
-            <div className="mb-4 text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+            <div className="tcs-kicker mb-4 font-medium text-[#8A92A0]">
               Research Philosophy
             </div>
-            <h2 className="text-4xl font-semibold tracking-[-0.03em] text-[#0A1730] md:text-5xl">
+            <h2 className="tcs-heading text-4xl font-semibold text-[#0A1730] md:text-5xl">
               Markets spend a lot of time debating narratives. We are more interested in mapping structure.
             </h2>
-            <p className="mt-6 text-lg leading-8 text-[#5C6472]">
+            <p className="tcs-body mt-6 text-lg text-[#5C6472]">
               The Capital Steward is built to surface where structural resilience
               exists, where fragility is hiding, and how those conditions evolve
               across the corporate economy.
