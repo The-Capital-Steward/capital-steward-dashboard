@@ -226,7 +226,7 @@ html {
 
 .tcs-heading {
   font-family: var(--font-serif);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   line-height: 1.02;
 }
 
@@ -270,3 +270,4 @@ html {
   border: 1px solid var(--tcs-dashboard-border);
   color: #e8edf5;
 }
+

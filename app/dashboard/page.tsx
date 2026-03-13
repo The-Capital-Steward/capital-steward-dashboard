@@ -224,7 +224,7 @@ export default function DashboardPage() {
           transition={{ duration: 0.35 }}
           className="mb-8"
         >
-          <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="mb-12 max-w-5xl">
             <Badge className="rounded-full border border-[#243A61] bg-[#10203D] px-3 py-1 text-[#B7C3D8] hover:bg-[#10203D]">
               OSMR Structural Risk Dashboard
             </Badge>
@@ -232,12 +232,15 @@ export default function DashboardPage() {
               Live Data
             </Badge>
           </div>
-          <h1 className="tcs-heading max-w-4xl text-4xl font-semibold text-white md:text-5xl">
-            A structural map of the equity market, built from operating anchors, cash trajectory, and financing fragility.
-          </h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-[#B7C3D8] md:text-lg">
-            The dashboard now reads from exported OSMR datasets generated directly by your research pipeline.
-          </p>
+          <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">
+  Structural mapping of the corporate economy.
+</h1>
+
+<p className="mt-6 max-w-3xl text-lg leading-8 text-[#B7C3D8]">
+  The Capital Steward’s OSMR framework maps structural risk across the equity
+  universe using operating anchors, free-cash-flow trajectory, and financing
+  fragility.
+</p>
         </motion.div>
 
         <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -380,23 +383,31 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {topRisk.map((row) => (
-                    <div
-                      key={row.symbol}
-                      className="flex items-center justify-between rounded-2xl border border-[#243A61] bg-[#10203D] px-4 py-3"
-                    >
-                      <div>
-                        <div className="font-medium text-white">{row.symbol}</div>
-                        <div className="text-sm text-[#7F90AD]">
-                          {row.oal_label} · {row.composite_bucket}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-[#B7C3D8]">Composite</div>
-                        <div className="font-medium text-white">
-                          {row.composite_score?.toFixed(3)}
-                        </div>
-                      </div>
-                    </div>
+<div
+  key={row.symbol}
+  className="flex items-center justify-between rounded-xl border border-[#243A61] bg-[#0F1F3C] px-4 py-3 transition hover:border-[#35598F]"
+>
+  <div className="flex flex-col">
+    <span className="font-medium text-white">{row.symbol}</span>
+    <span className="text-xs text-[#7F90AD]">
+      {row.oal_label} • {row.risk_bucket_within_oal}
+    </span>
+  </div>
+
+  <div className="flex items-center gap-3">
+    <Badge
+      variant="outline"
+      className="border-[#243A61]"
+      style={{ color: compositeColor(row.composite_bucket) }}
+    >
+      {row.composite_bucket}
+    </Badge>
+
+    <span className="font-mono text-sm text-white">
+      {row.composite_score?.toFixed(3)}
+    </span>
+  </div>
+</div>
                   ))}
                 </CardContent>
               </Card>
