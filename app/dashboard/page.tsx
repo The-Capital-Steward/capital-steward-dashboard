@@ -20,7 +20,7 @@ import {
   Scatter,
   Cell,
 } from "recharts";
-import { Search, Shield, Layers3, Activity, AlertTriangle } from "lucide-react";
+import { Search, Shield, Layers3, Activity, AlertTriangle, Clock3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const COLORS = {
@@ -62,6 +62,16 @@ type OALSummaryRow = {
 type LiquiditySummaryRow = {
   bucket: string;
   count: number;
+};
+
+type HistoryManifestRow = {
+  month: string;
+  oal_scores_rows: number | null;
+  oal_summary_rows: number | null;
+  structural_rows: number | null;
+  has_oal_scores: boolean;
+  has_oal_summary: boolean;
+  has_structural_snapshot: boolean;
 };
 
 const heatmapRows = ["Very Weak", "Weak", "Neutral", "Strong", "Very Strong"];
@@ -130,6 +140,7 @@ export default function DashboardPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
   const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
   const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
+  const [historyManifest, setHistoryManifest] = useState<HistoryManifestRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedOAL, setSelectedOAL] = useState("All");
@@ -150,11 +161,16 @@ export default function DashboardPage() {
         if (!res.ok) throw new Error(`Failed to load liquidity summary: ${res.status}`);
         return res.json();
       }),
+      fetch("/data/history_manifest.json").then((res) => {
+        if (!res.ok) throw new Error(`Failed to load history manifest: ${res.status}`);
+        return res.json();
+      }),
     ])
-      .then(([snapshot, oal, liquidity]) => {
+      .then(([snapshot, oal, liquidity, history]) => {
         setSnapshotData(snapshot);
         setOALSummary(oal);
         setLiquiditySummary(liquidity);
+        setHistoryManifest(history);
         setLoading(false);
       })
       .catch((err) => {
@@ -275,7 +291,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue="market-map" className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 rounded-2xl border border-[#243A61] bg-[#10203D] p-2 md:grid-cols-4">
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-2 rounded-2xl border border-[#243A61] bg-[#10203D] p-2 md:grid-cols-5">
             <TabsTrigger value="market-map" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
               Market Map
             </TabsTrigger>
@@ -287,6 +303,9 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="liquidity" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
               Liquidity
+            </TabsTrigger>
+            <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-[#35598F] data-[state=active]:text-white">
+              History
             </TabsTrigger>
           </TabsList>
 
@@ -657,6 +676,75 @@ export default function DashboardPage() {
                       Next: build historical cohort engine
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Clock3 className="h-5 w-5 text-[#B7C3D8]" />
+                    <CardTitle className="text-white">History Manifest</CardTitle>
+                  </div>
+                  <CardDescription className="text-[#B7C3D8]">
+                    Stored monthly structural snapshots available to the platform.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-hidden rounded-2xl border border-[#243A61]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-[#243A61] bg-[#10203D]">
+                          <TableHead className="text-[#B7C3D8]">Month</TableHead>
+                          <TableHead className="text-[#B7C3D8]">OAL Scores</TableHead>
+                          <TableHead className="text-[#B7C3D8]">OAL Summary</TableHead>
+                          <TableHead className="text-[#B7C3D8]">Structural Snapshot</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {historyManifest.map((row) => (
+                          <TableRow key={row.month} className="border-[#243A61]">
+                            <TableCell className="font-medium text-white">{row.month}</TableCell>
+                            <TableCell className="text-[#E8EDF5]">
+                              {row.has_oal_scores ? formatNum(row.oal_scores_rows) : "—"}
+                            </TableCell>
+                            <TableCell className="text-[#E8EDF5]">
+                              {row.has_oal_summary ? formatNum(row.oal_summary_rows) : "—"}
+                            </TableCell>
+                            <TableCell className="text-[#E8EDF5]">
+                              {row.has_structural_snapshot ? formatNum(row.structural_rows) : "—"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+                <CardHeader>
+                  <CardTitle className="text-white">History Status</CardTitle>
+                  <CardDescription className="text-[#B7C3D8]">
+                    Honest infrastructure status before the 7-year backfill.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
+                  <p>
+                    <span className="font-medium text-white">1.</span> The platform now knows which monthly snapshots have been archived.
+                  </p>
+                  <p>
+                    <span className="font-medium text-white">2.</span> This is the correct foundation for a true longitudinal research engine.
+                  </p>
+                  <p>
+                    <span className="font-medium text-white">3.</span> A real 7-year history still requires point-in-time monthly fundamentals and EV data.
+                  </p>
+                  <p>
+                    <span className="font-medium text-white">4.</span> Until that backfill exists, the site should present history accurately rather than pretending to have it.
+                  </p>
                 </CardContent>
               </Card>
             </div>
