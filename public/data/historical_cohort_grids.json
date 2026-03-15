@@ -1,0 +1,958 @@
+{
+  "metadata": {
+    "horizon_months": 12,
+    "formation_frequency": "monthly",
+    "backend_price_frequency": "daily_or_weekly",
+    "cell_statistic": "mean_forward_return",
+    "min_count_for_display": 15,
+    "panel_dimension": "Axis III / Financing Fragility",
+    "column_dimension": "Axis I / Valuation Pressure within OAL",
+    "row_dimension": "Axis II / Cash-Engine Trajectory",
+    "x_axis_labels": [
+      "Very Low",
+      "Low",
+      "Moderate",
+      "High",
+      "Very High"
+    ],
+    "y_axis_labels": [
+      "Very Weak",
+      "Weak",
+      "Neutral",
+      "Strong",
+      "Very Strong"
+    ],
+    "panels": [
+      "Low Fragility",
+      "Moderate Fragility",
+      "High Fragility"
+    ],
+    "formation_month_min": "2019-01",
+    "formation_month_max": "2025-02",
+    "observation_count": 270618,
+    "notes": [
+      "Panels are Axis III financing fragility terciles.",
+      "Columns are Axis I valuation buckets within OAL.",
+      "Rows are Axis II trajectory buckets derived from axis2_pct quintile bands.",
+      "Cell values are mean forward returns over the selected horizon.",
+      "Low-N cells are suppressed from display_value but still include count and summary stats."
+    ]
+  },
+  "panels": [
+    {
+      "panel": "Low Fragility",
+      "rows": [
+        {
+          "axis2_bucket": "Very Weak",
+          "cells": [
+            {
+              "count": 7688,
+              "mean_return": 0.1296974555198808,
+              "median_return": 0.030201857608052163,
+              "hit_rate": 0.5382414151925078,
+              "display_value": 0.1296974555198808,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 5407,
+              "mean_return": 0.1297739650725885,
+              "median_return": 0.029529711994166874,
+              "hit_rate": 0.5361568337340484,
+              "display_value": 0.1297739650725885,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 5065,
+              "mean_return": 0.14595449062962176,
+              "median_return": 0.05029281277728481,
+              "hit_rate": 0.5555774925962488,
+              "display_value": 0.14595449062962176,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 5275,
+              "mean_return": 0.16186339033888553,
+              "median_return": 0.0763027295285359,
+              "hit_rate": 0.5918483412322275,
+              "display_value": 0.16186339033888553,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 4578,
+              "mean_return": 0.1959707151189239,
+              "median_return": 0.010959573500063047,
+              "hit_rate": 0.508955875928353,
+              "display_value": 0.1959707151189239,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Low Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Weak",
+          "cells": [
+            {
+              "count": 6213,
+              "mean_return": 0.14494243822350994,
+              "median_return": 0.006187161639597871,
+              "hit_rate": 0.5050700144857557,
+              "display_value": 0.14494243822350994,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 5187,
+              "mean_return": 0.11136868931467286,
+              "median_return": 0.02044109736417421,
+              "hit_rate": 0.5228455754771544,
+              "display_value": 0.11136868931467286,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 4604,
+              "mean_return": 0.10448143862112555,
+              "median_return": 0.044648687831376654,
+              "hit_rate": 0.5558210251954822,
+              "display_value": 0.10448143862112555,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 4312,
+              "mean_return": 0.10610188266127303,
+              "median_return": 0.034726715744280434,
+              "hit_rate": 0.5454545454545454,
+              "display_value": 0.10610188266127303,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 2893,
+              "mean_return": 0.10424773550569386,
+              "median_return": -0.02632515119174661,
+              "hit_rate": 0.47839612858624264,
+              "display_value": 0.10424773550569386,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Low Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Neutral",
+          "cells": [
+            {
+              "count": 5724,
+              "mean_return": 0.11841949432985076,
+              "median_return": -0.008667781493868432,
+              "hit_rate": 0.4888190076869322,
+              "display_value": 0.11841949432985076,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 5040,
+              "mean_return": 0.0946149569201691,
+              "median_return": -0.0015388371899245912,
+              "hit_rate": 0.49563492063492065,
+              "display_value": 0.0946149569201691,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 3987,
+              "mean_return": 0.1092602834148724,
+              "median_return": 0.020998240985048433,
+              "hit_rate": 0.5344870830198144,
+              "display_value": 0.1092602834148724,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 3558,
+              "mean_return": 0.10504206920345072,
+              "median_return": 0.035695885773165514,
+              "hit_rate": 0.544406970207982,
+              "display_value": 0.10504206920345072,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 2674,
+              "mean_return": 0.07603959582082806,
+              "median_return": -0.028953753400485283,
+              "hit_rate": 0.46522064323111445,
+              "display_value": 0.07603959582082806,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Low Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Strong",
+          "cells": [
+            {
+              "count": 3791,
+              "mean_return": 0.18141831459721747,
+              "median_return": -0.022292993630573354,
+              "hit_rate": 0.4674228435768926,
+              "display_value": 0.18141831459721747,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 3803,
+              "mean_return": 0.16024511256871382,
+              "median_return": -0.01980198019801971,
+              "hit_rate": 0.47199579279516174,
+              "display_value": 0.16024511256871382,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 3200,
+              "mean_return": 0.11413261044160058,
+              "median_return": -0.017831241033711198,
+              "hit_rate": 0.478125,
+              "display_value": 0.11413261044160058,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 2510,
+              "mean_return": 0.1146707653985109,
+              "median_return": -0.007521832601294021,
+              "hit_rate": 0.4940239043824701,
+              "display_value": 0.1146707653985109,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 2566,
+              "mean_return": -0.010248592631939212,
+              "median_return": -0.09530297132476973,
+              "hit_rate": 0.4099766173031956,
+              "display_value": -0.010248592631939212,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Low Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Very Strong",
+          "cells": [
+            {
+              "count": 2359,
+              "mean_return": 0.10272775685133216,
+              "median_return": -0.06779661016949157,
+              "hit_rate": 0.42390843577787196,
+              "display_value": 0.10272775685133216,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 1922,
+              "mean_return": 0.11440682244514395,
+              "median_return": -0.02981106091484448,
+              "hit_rate": 0.4505723204994797,
+              "display_value": 0.11440682244514395,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 1977,
+              "mean_return": 0.19703219867278296,
+              "median_return": -0.05067064083457529,
+              "hit_rate": 0.45220030349013657,
+              "display_value": 0.19703219867278296,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 2373,
+              "mean_return": 0.0755247964208641,
+              "median_return": -0.17816954238559635,
+              "hit_rate": 0.36578171091445427,
+              "display_value": 0.0755247964208641,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Low Fragility"
+            },
+            {
+              "count": 3303,
+              "mean_return": -0.06579064750484807,
+              "median_return": -0.2919254658385094,
+              "hit_rate": 0.3439297608234938,
+              "display_value": -0.06579064750484807,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Low Fragility"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "Moderate Fragility",
+      "rows": [
+        {
+          "axis2_bucket": "Very Weak",
+          "cells": [
+            {
+              "count": 3543,
+              "mean_return": 0.13500946409989792,
+              "median_return": 0.006749156355455588,
+              "hit_rate": 0.5094552639006492,
+              "display_value": 0.13500946409989792,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3739,
+              "mean_return": 0.07214275122573596,
+              "median_return": -0.007920792079208039,
+              "hit_rate": 0.4872960684675047,
+              "display_value": 0.07214275122573596,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3420,
+              "mean_return": 0.10255774159440688,
+              "median_return": 0.02235380319658009,
+              "hit_rate": 0.533625730994152,
+              "display_value": 0.10255774159440688,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3111,
+              "mean_return": 0.05325173601994036,
+              "median_return": 0.017209302325581488,
+              "hit_rate": 0.5216972034715526,
+              "display_value": 0.05325173601994036,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1661,
+              "mean_return": 0.1101826325743366,
+              "median_return": 0.028020211299954134,
+              "hit_rate": 0.5273931366646598,
+              "display_value": 0.1101826325743366,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "Moderate Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Weak",
+          "cells": [
+            {
+              "count": 3110,
+              "mean_return": 0.19079805571994404,
+              "median_return": 0.019986440025259844,
+              "hit_rate": 0.5279742765273312,
+              "display_value": 0.19079805571994404,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 4026,
+              "mean_return": 0.09582739597138784,
+              "median_return": -0.0026518960135852865,
+              "hit_rate": 0.496274217585693,
+              "display_value": 0.09582739597138784,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3783,
+              "mean_return": 0.06685338478761493,
+              "median_return": 0.02368472141331779,
+              "hit_rate": 0.5342320909331219,
+              "display_value": 0.06685338478761493,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3504,
+              "mean_return": 0.09759593906597414,
+              "median_return": 0.06852638841125047,
+              "hit_rate": 0.598458904109589,
+              "display_value": 0.09759593906597414,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1440,
+              "mean_return": 0.1321628374495692,
+              "median_return": 0.06180141579731746,
+              "hit_rate": 0.5645833333333333,
+              "display_value": 0.1321628374495692,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "Moderate Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Neutral",
+          "cells": [
+            {
+              "count": 2134,
+              "mean_return": 0.1681996717922013,
+              "median_return": -0.006483064596120802,
+              "hit_rate": 0.48828491096532334,
+              "display_value": 0.1681996717922013,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3251,
+              "mean_return": 0.11123675620806825,
+              "median_return": 0.019911504424778848,
+              "hit_rate": 0.5269147954475546,
+              "display_value": 0.11123675620806825,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 4018,
+              "mean_return": 0.07261450721418639,
+              "median_return": 0.012246998141806076,
+              "hit_rate": 0.5164260826281732,
+              "display_value": 0.07261450721418639,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3276,
+              "mean_return": 0.08034502278661358,
+              "median_return": 0.0352029476367256,
+              "hit_rate": 0.5506715506715507,
+              "display_value": 0.08034502278661358,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1602,
+              "mean_return": 0.14634779407561108,
+              "median_return": 0.043697098682143,
+              "hit_rate": 0.5480649188514357,
+              "display_value": 0.14634779407561108,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "Moderate Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Strong",
+          "cells": [
+            {
+              "count": 1342,
+              "mean_return": 0.5397326493780092,
+              "median_return": 0.03730370999338306,
+              "hit_rate": 0.5432190760059612,
+              "display_value": 0.5397326493780092,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 2271,
+              "mean_return": 0.12468472320336182,
+              "median_return": 0.013798111837327598,
+              "hit_rate": 0.5195948921180097,
+              "display_value": 0.12468472320336182,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 3014,
+              "mean_return": 0.12178636393294262,
+              "median_return": 0.023649664051471286,
+              "hit_rate": 0.5311877903118779,
+              "display_value": 0.12178636393294262,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 2782,
+              "mean_return": 0.05836410468653572,
+              "median_return": 0.0024695553625116995,
+              "hit_rate": 0.505391804457225,
+              "display_value": 0.05836410468653572,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1551,
+              "mean_return": 0.11081332104175802,
+              "median_return": 0.026058399371742702,
+              "hit_rate": 0.5306254029658285,
+              "display_value": 0.11081332104175802,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "Moderate Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Very Strong",
+          "cells": [
+            {
+              "count": 506,
+              "mean_return": -0.045678151071647244,
+              "median_return": -0.11975784852762,
+              "hit_rate": 0.37351778656126483,
+              "display_value": -0.045678151071647244,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 783,
+              "mean_return": 0.08289893417020419,
+              "median_return": -0.012328767123287676,
+              "hit_rate": 0.4789272030651341,
+              "display_value": 0.08289893417020419,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1044,
+              "mean_return": 0.06161864301952981,
+              "median_return": 0.011555232551440198,
+              "hit_rate": 0.5172413793103449,
+              "display_value": 0.06161864301952981,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 1365,
+              "mean_return": 0.06920815279554199,
+              "median_return": 0.00499919367843904,
+              "hit_rate": 0.5076923076923077,
+              "display_value": 0.06920815279554199,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Moderate Fragility"
+            },
+            {
+              "count": 676,
+              "mean_return": 0.014816666548881207,
+              "median_return": -0.03541274226430341,
+              "hit_rate": 0.46005917159763315,
+              "display_value": 0.014816666548881207,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "Moderate Fragility"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "High Fragility",
+      "rows": [
+        {
+          "axis2_bucket": "Very Weak",
+          "cells": [
+            {
+              "count": 2059,
+              "mean_return": 0.926899272793172,
+              "median_return": 0.12094207511139388,
+              "hit_rate": 0.6143759106362312,
+              "display_value": 0.926899272793172,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 2483,
+              "mean_return": 0.19064144307656763,
+              "median_return": 0.03400000000000003,
+              "hit_rate": 0.5400724929520742,
+              "display_value": 0.19064144307656763,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 2456,
+              "mean_return": 0.2692642991716585,
+              "median_return": 0.0025183586572056216,
+              "hit_rate": 0.5028501628664495,
+              "display_value": 0.2692642991716585,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 2627,
+              "mean_return": 0.14047238046739227,
+              "median_return": -0.0714285714285714,
+              "hit_rate": 0.4248191853825657,
+              "display_value": 0.14047238046739227,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 3169,
+              "mean_return": 0.08924653443521335,
+              "median_return": -0.07750000000000001,
+              "hit_rate": 0.42063742505522245,
+              "display_value": 0.08924653443521335,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Weak",
+              "axis3_panel": "High Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Weak",
+          "cells": [
+            {
+              "count": 2880,
+              "mean_return": 0.2760806948756163,
+              "median_return": 0.10428356890876556,
+              "hit_rate": 0.6034722222222222,
+              "display_value": 0.2760806948756163,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 3466,
+              "mean_return": 0.27811314772420914,
+              "median_return": 0.029722285272592353,
+              "hit_rate": 0.5279861511829198,
+              "display_value": 0.27811314772420914,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 3489,
+              "mean_return": 0.12352323288827959,
+              "median_return": -0.01463907117617358,
+              "hit_rate": 0.47922040699340784,
+              "display_value": 0.12352323288827959,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 3374,
+              "mean_return": 0.12763826450550364,
+              "median_return": -0.01792857142857146,
+              "hit_rate": 0.47925311203319504,
+              "display_value": 0.12763826450550364,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 4164,
+              "mean_return": 0.1782835203962314,
+              "median_return": -0.015150711087492885,
+              "hit_rate": 0.484149855907781,
+              "display_value": 0.1782835203962314,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Weak",
+              "axis3_panel": "High Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Neutral",
+          "cells": [
+            {
+              "count": 2952,
+              "mean_return": 0.3690409312352241,
+              "median_return": 0.06182233607976184,
+              "hit_rate": 0.5623306233062331,
+              "display_value": 0.3690409312352241,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 3311,
+              "mean_return": 0.2123270052000222,
+              "median_return": 0.014150943396226356,
+              "hit_rate": 0.5116279069767442,
+              "display_value": 0.2123270052000222,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 4024,
+              "mean_return": 0.20006519956804406,
+              "median_return": -0.004043152275341189,
+              "hit_rate": 0.4952783300198807,
+              "display_value": 0.20006519956804406,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 4454,
+              "mean_return": 0.15435824363683828,
+              "median_return": -0.01272322316350466,
+              "hit_rate": 0.4818140996856758,
+              "display_value": 0.15435824363683828,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 6287,
+              "mean_return": 0.0864724376771715,
+              "median_return": -0.023691746940900704,
+              "hit_rate": 0.47176713853984414,
+              "display_value": 0.0864724376771715,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Neutral",
+              "axis3_panel": "High Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Strong",
+          "cells": [
+            {
+              "count": 4958,
+              "mean_return": 0.6322188787678422,
+              "median_return": 0.0044020849189326805,
+              "hit_rate": 0.5014118596208148,
+              "display_value": 0.6322188787678422,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 4563,
+              "mean_return": 0.1916905100168271,
+              "median_return": -0.07432865915131515,
+              "hit_rate": 0.4420337497260574,
+              "display_value": 0.1916905100168271,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 4571,
+              "mean_return": 0.21734195544850465,
+              "median_return": -0.04074464348436957,
+              "hit_rate": 0.4651061036972216,
+              "display_value": 0.21734195544850465,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 5650,
+              "mean_return": 0.13505095043899068,
+              "median_return": -0.03921360607492608,
+              "hit_rate": 0.4561061946902655,
+              "display_value": 0.13505095043899068,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 8484,
+              "mean_return": 0.13695284758203732,
+              "median_return": -0.04834999010488816,
+              "hit_rate": 0.4539132484677039,
+              "display_value": 0.13695284758203732,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Strong",
+              "axis3_panel": "High Fragility"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Very Strong",
+          "cells": [
+            {
+              "count": 4148,
+              "mean_return": 0.4166558271728186,
+              "median_return": -0.1883216189816153,
+              "hit_rate": 0.39922854387656703,
+              "display_value": 0.4166558271728186,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 5411,
+              "mean_return": 0.15745739313436666,
+              "median_return": -0.1745134965473948,
+              "hit_rate": 0.3906856403622251,
+              "display_value": 0.15745739313436666,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 6059,
+              "mean_return": 0.08827815260672855,
+              "median_return": -0.15887300747014887,
+              "hit_rate": 0.38900808714309293,
+              "display_value": 0.08827815260672855,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 6404,
+              "mean_return": 0.1097070541408135,
+              "median_return": -0.18548876745598064,
+              "hit_rate": 0.38226108682073706,
+              "display_value": 0.1097070541408135,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "High Fragility"
+            },
+            {
+              "count": 8214,
+              "mean_return": -0.02081066885761272,
+              "median_return": -0.24786074745849485,
+              "hit_rate": 0.3326028731434137,
+              "display_value": -0.02081066885761272,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Strong",
+              "axis3_panel": "High Fragility"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
