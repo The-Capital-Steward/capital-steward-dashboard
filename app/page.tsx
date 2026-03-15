@@ -38,7 +38,7 @@ export default function HomePage() {
             <Link href="/coming-soon" className="transition hover:text-[#0A2342]">
               Our Platform
             </Link>
-            <Link href="/story" className="transition hover:text-[#0A2342]">
+            <Link href="/our-story" className="transition hover:text-[#0A2342]">
               Our Story
             </Link>
           </nav>
@@ -434,7 +434,7 @@ export default function HomePage() {
 
               <div className="flex flex-wrap gap-4 md:justify-end">
                 <Link
-                  href="/story"
+                  href="/our-story"
                   className="inline-flex items-center gap-2 rounded-2xl bg-[#0A2342] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
                 >
                   Read Our Story
