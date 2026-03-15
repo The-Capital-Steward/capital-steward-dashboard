@@ -20,7 +20,7 @@ import {
   Scatter,
   Cell,
 } from "recharts";
-import { Search, Shield, Layers3, Activity, AlertTriangle, Clock3, Filter } from "lucide-react";
+import { Search, Shield, Layers3, Activity, AlertTriangle, Clock3, Filter, Grid3X3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const COLORS = {
@@ -75,30 +75,49 @@ type HistoryManifestRow = {
   has_structural_snapshot: boolean;
 };
 
-const heatmapRows = ["Very Weak", "Weak", "Neutral", "Strong", "Very Strong"];
-const heatmapCols = ["Very Low", "Low", "Moderate", "High", "Very High"];
-const heatmapPanels = {
-  "Low Fragility": [
-    [0.11, 0.09, 0.07, 0.04, 0.01],
-    [0.13, 0.1, 0.08, 0.05, 0.02],
-    [0.14, 0.12, 0.09, 0.04, 0.0],
-    [0.16, 0.13, 0.1, 0.05, 0.01],
-    [0.18, 0.15, 0.12, 0.07, 0.02],
-  ],
-  "Moderate Fragility": [
-    [0.08, 0.06, 0.03, 0.0, -0.03],
-    [0.09, 0.07, 0.04, 0.0, -0.04],
-    [0.1, 0.08, 0.05, 0.01, -0.05],
-    [0.11, 0.08, 0.04, -0.01, -0.06],
-    [0.12, 0.09, 0.05, -0.02, -0.07],
-  ],
-  "High Fragility": [
-    [0.03, 0.01, -0.02, -0.06, -0.11],
-    [0.04, 0.01, -0.03, -0.07, -0.12],
-    [0.05, 0.02, -0.04, -0.08, -0.14],
-    [0.06, 0.02, -0.05, -0.09, -0.16],
-    [0.07, 0.03, -0.05, -0.1, -0.18],
-  ],
+type CohortGridCell = {
+  count: number;
+  mean_return: number | null;
+  median_return: number | null;
+  hit_rate: number | null;
+  display_value: number | null;
+  suppressed: boolean;
+  axis1_bucket: string;
+  axis2_bucket: string;
+  axis3_panel: string;
+};
+
+type CohortGridRow = {
+  axis2_bucket: string;
+  cells: CohortGridCell[];
+};
+
+type CohortGridPanel = {
+  panel: string;
+  rows: CohortGridRow[];
+};
+
+type CohortGridMetadata = {
+  horizon_months: number;
+  formation_frequency: string;
+  backend_price_frequency: string;
+  cell_statistic: string;
+  min_count_for_display: number;
+  panel_dimension: string;
+  column_dimension: string;
+  row_dimension: string;
+  x_axis_labels: string[];
+  y_axis_labels: string[];
+  panels: string[];
+  formation_month_min: string | null;
+  formation_month_max: string | null;
+  observation_count: number;
+  notes: string[];
+};
+
+type HistoricalCohortGridPayload = {
+  metadata: CohortGridMetadata;
+  panels: CohortGridPanel[];
 };
 
 const bucketOrder = ["Very Low", "Low", "Moderate", "High", "Very High"];
@@ -109,21 +128,15 @@ function formatPct(v: number | null) {
   return `${(v * 100).toFixed(1)}%`;
 }
 
+function formatPctSigned(v: number | null) {
+  if (v == null || Number.isNaN(v)) return "—";
+  const pct = v * 100;
+  return `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`;
+}
+
 function formatNum(v: number | null) {
   if (v == null || Number.isNaN(v)) return "—";
   return v.toLocaleString();
-}
-
-function heatColor(v: number | null) {
-  if (v == null || Number.isNaN(v)) return "#20314F";
-  if (v <= -0.15) return "#6E2D2D";
-  if (v <= -0.1) return "#8B3838";
-  if (v <= -0.05) return "#A84848";
-  if (v < 0) return "#BC6464";
-  if (v < 0.05) return "#475B7B";
-  if (v < 0.1) return "#5E7FBE";
-  if (v < 0.15) return "#6DAE8B";
-  return "#3E8E6A";
 }
 
 function compositeColor(bucket: string | null | undefined) {
@@ -137,11 +150,24 @@ function compositeColor(bucket: string | null | undefined) {
   return colorMap[bucket ?? ""] ?? COLORS.textMuted;
 }
 
+function returnHeatColor(v: number | null, suppressed: boolean) {
+  if (suppressed || v == null || Number.isNaN(v)) return "#20314F";
+  if (v <= -0.25) return "#6E2D2D";
+  if (v <= -0.15) return "#8B3838";
+  if (v <= -0.08) return "#A84848";
+  if (v < 0) return "#BC6464";
+  if (v < 0.04) return "#475B7B";
+  if (v < 0.08) return "#5E7FBE";
+  if (v < 0.15) return "#6DAE8B";
+  return "#3E8E6A";
+}
+
 export default function DashboardPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
   const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
   const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
   const [historyManifest, setHistoryManifest] = useState<HistoryManifestRow[]>([]);
+  const [cohortGrid, setCohortGrid] = useState<HistoricalCohortGridPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedOAL, setSelectedOAL] = useState("All");
@@ -166,12 +192,17 @@ export default function DashboardPage() {
         if (!res.ok) throw new Error(`Failed to load history manifest: ${res.status}`);
         return res.json();
       }),
+      fetch("/data/historical_cohort_grids.json").then((res) => {
+        if (!res.ok) throw new Error(`Failed to load historical cohort grids: ${res.status}`);
+        return res.json();
+      }),
     ])
-      .then(([snapshot, oal, liquidity, history]) => {
+      .then(([snapshot, oal, liquidity, history, grids]) => {
         setSnapshotData(snapshot);
         setOALSummary(oal);
         setLiquiditySummary(liquidity);
         setHistoryManifest(history);
+        setCohortGrid(grids);
         setLoading(false);
       })
       .catch((err) => {
@@ -488,40 +519,83 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-white">Illustrative Regime Grids</h2>
-              <Badge variant="outline" className="border-[#243A61] text-[#7F90AD]">
-                Placeholder
-              </Badge>
+              <Grid3X3 className="h-5 w-5 text-[#B7C3D8]" />
+              <h2 className="text-xl font-semibold text-white">Historical Cohort Return Grid</h2>
+              {cohortGrid?.metadata && (
+                <Badge variant="outline" className="border-[#243A61] text-[#7F90AD]">
+                  {cohortGrid.metadata.horizon_months}M Forward
+                </Badge>
+              )}
             </div>
 
+            <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <CardHeader>
+                <CardTitle className="text-white">How to read the grids</CardTitle>
+                <CardDescription className="text-[#B7C3D8]">
+                  Each cell shows the historical average forward return for stocks that sat in that structural state at formation month-end.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-3 text-sm leading-7">
+                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+                  <div className="mb-2 font-medium text-white">Columns = Axis I</div>
+                  <div className="text-[#B7C3D8]">Valuation Pressure within OAL, from Very Low to Very High.</div>
+                </div>
+                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+                  <div className="mb-2 font-medium text-white">Rows = Axis II</div>
+                  <div className="text-[#B7C3D8]">Cash-Engine Trajectory, from Very Weak to Very Strong.</div>
+                </div>
+                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+                  <div className="mb-2 font-medium text-white">Panels = Axis III</div>
+                  <div className="text-[#B7C3D8]">Financing Fragility regime: Low, Moderate, or High.</div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid gap-6 xl:grid-cols-3">
-              {Object.entries(heatmapPanels).map(([panelTitle, grid]) => (
-                <Card key={panelTitle} className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              {cohortGrid?.panels.map((panel) => (
+                <Card key={panel.panel} className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
                   <CardHeader>
-                    <CardTitle className="text-white">{panelTitle}</CardTitle>
+                    <CardTitle className="text-white">{panel.panel}</CardTitle>
                     <CardDescription className="text-[#B7C3D8]">
-                      Illustrative expected return regimes across valuation, trajectory, and fragility states.
+                      Mean forward {cohortGrid.metadata.horizon_months}M return by Axis I × Axis II state.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2 text-xs">
                       <div />
-                      {heatmapCols.map((c) => (
+                      {cohortGrid.metadata.x_axis_labels.map((c) => (
                         <div key={c} className="text-center text-[#7F90AD]">
                           {c}
                         </div>
                       ))}
-                      {heatmapRows.map((r, rowIdx) => (
-                        <React.Fragment key={r}>
-                          <div className="flex items-center pr-2 text-[#7F90AD]">{r}</div>
-                          {grid[rowIdx].map((v, colIdx) => (
+
+                      {panel.rows.map((row) => (
+                        <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
+                          <div className="flex items-center pr-2 text-[#7F90AD]">{row.axis2_bucket}</div>
+                          {row.cells.map((cell) => (
                             <div
-                              key={`${r}-${colIdx}`}
-                              className="flex h-14 items-center justify-center rounded-2xl border border-[#243A61] font-medium text-white"
-                              style={{ backgroundColor: heatColor(v) }}
-                              title={`${panelTitle} | ${r} | ${heatmapCols[colIdx]} = ${formatPct(v)}`}
+                              key={`${panel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
+                              className="flex h-16 flex-col items-center justify-center rounded-2xl border border-[#243A61] px-1 text-white"
+                              style={{ backgroundColor: returnHeatColor(cell.display_value, cell.suppressed) }}
+                              title={[
+                                `Panel: ${cell.axis3_panel}`,
+                                `Axis II: ${cell.axis2_bucket}`,
+                                `Axis I: ${cell.axis1_bucket}`,
+                                `Mean Return: ${formatPctSigned(cell.mean_return)}`,
+                                `Median Return: ${formatPctSigned(cell.median_return)}`,
+                                `Hit Rate: ${formatPct(cell.hit_rate)}`,
+                                `Count: ${formatNum(cell.count)}`,
+                                cell.suppressed ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" | ")}
                             >
-                              {formatPct(v)}
+                              <div className="text-[11px] font-medium">
+                                {cell.suppressed ? "—" : formatPctSigned(cell.display_value)}
+                              </div>
+                              <div className="mt-1 text-[10px] text-[#E8EDF5]/80">
+                                N={formatNum(cell.count)}
+                              </div>
                             </div>
                           ))}
                         </React.Fragment>
@@ -717,10 +791,10 @@ export default function DashboardPage() {
                     <span className="font-medium text-white">2.</span> Global filters now apply consistently across tabs.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> The regime grids remain illustrative until the historical cohort engine is built.
+                    <span className="font-medium text-white">3.</span> The cohort return grids are now real historical outputs based on archived monthly states.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> The next big upgrade is empirical forward-return analytics from monthly history.
+                    <span className="font-medium text-white">4.</span> The next big upgrade is ticker drilldowns and regime history views built on the same data layer.
                   </p>
                 </CardContent>
               </Card>
@@ -775,21 +849,21 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white">History Status</CardTitle>
                   <CardDescription className="text-[#B7C3D8]">
-                    Honest infrastructure status before the 7-year backfill.
+                    Longitudinal research infrastructure is now active.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
                   <p>
-                    <span className="font-medium text-white">1.</span> The platform now knows which monthly snapshots have been archived.
+                    <span className="font-medium text-white">1.</span> The platform now tracks archived monthly structural states across the full backfill window.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> This is the correct foundation for a true longitudinal research engine.
+                    <span className="font-medium text-white">2.</span> Historical cohort returns are now computed from real monthly formation states and forward returns.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> A real 7-year history still requires point-in-time monthly fundamentals and EV data.
+                    <span className="font-medium text-white">3.</span> This gives you a true empirical regime surface across valuation, trajectory, and financing fragility.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> Until that backfill exists, the site should present history accurately rather than pretending to have it.
+                    <span className="font-medium text-white">4.</span> The next layer is company drilldowns, regime history pages, and monthly publication workflows.
                   </p>
                 </CardContent>
               </Card>
