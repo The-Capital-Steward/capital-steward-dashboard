@@ -1,6 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ChevronRight, Shield, Radar, Workflow } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronRight,
+  Shield,
+  Radar,
+  Workflow,
+  Map,
+  Database,
+  Waypoints,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -40,17 +49,17 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 md:grid-cols-[1.15fr_0.85fr] md:py-28">
           <div className="max-w-3xl">
             <p className="mb-5 text-sm font-medium uppercase tracking-[0.18em] text-[#4A6FA5]">
-              Independent Market Intelligence
+              Independent Market Research
             </p>
 
             <h1 className="tcs-heading text-5xl font-semibold leading-[1.02] tracking-tight text-[#0A2342] md:text-7xl">
-              Structural Market Intelligence for Serious Investors
+              Structural Intelligence for Serious Investors
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
-              The Capital Steward is an independent research platform built to identify where
-              structural fragility, resilience, and valuation risk are concentrated across the
-              equity market.
+              The Capital Steward is an independent research platform built to identify
+              where structural fragility, resilience, and valuation risk are concentrated
+              across the equity market.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
@@ -70,6 +79,35 @@ export default function HomePage() {
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[#E3DED2] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
+                <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">
+                  Focus
+                </div>
+                <div className="mt-2 text-sm font-medium text-[#0A2342]">
+                  Structural fragility
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#E3DED2] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
+                <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">
+                  Scope
+                </div>
+                <div className="mt-2 text-sm font-medium text-[#0A2342]">
+                  Equity universe diagnostics
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#E3DED2] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
+                <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">
+                  Method
+                </div>
+                <div className="mt-2 text-sm font-medium text-[#0A2342]">
+                  Three-axis structural model
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center">
@@ -80,7 +118,7 @@ export default function HomePage() {
                     OSMR
                   </p>
                   <h2 className="mt-2 text-2xl font-semibold text-[#0A2342]">
-                    Structural Risk Surface
+                    Structural Market Map
                   </h2>
                 </div>
                 <div className="rounded-full bg-[#F5F2EA] px-3 py-1 text-xs font-medium text-[#4A6FA5]">
@@ -116,8 +154,8 @@ export default function HomePage() {
                   Core Output
                 </div>
                 <div className="mt-2 text-lg font-medium">
-                  A structural map of where resilience and fragility are concentrated across the
-                  equity market.
+                  A structural map of where resilience and fragility are concentrated
+                  across the equity market.
                 </div>
               </div>
             </div>
@@ -143,9 +181,9 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-[#0A2342]">Focus</h3>
               <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                We study the underlying conditions that shape valuation, cash-flow durability, and
-                financing resilience. The goal is to identify structural risk before it becomes
-                obvious in market narratives.
+                We study the underlying conditions that shape valuation, cash-flow
+                durability, and financing resilience. The goal is to identify structural
+                risk before it becomes obvious in market narratives.
               </p>
             </div>
 
@@ -155,9 +193,9 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-[#0A2342]">Scope</h3>
               <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                Our work is cross-sectional by design, built to compare firms across the public
-                equity market on a common structural basis. That makes fragility easier to rank,
-                segment, and monitor over time.
+                Our work is cross-sectional by design, built to compare firms across the
+                public equity market on a common structural basis. That makes fragility
+                easier to rank, segment, and monitor over time.
               </p>
             </div>
 
@@ -167,9 +205,9 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-semibold text-[#0A2342]">Method</h3>
               <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                OSMR evaluates firms across valuation pressure, cash-engine trajectory, and
-                financing fragility. Together, those three dimensions form a map of where
-                resilience and risk are structurally concentrated.
+                OSMR evaluates firms across valuation pressure, cash-engine trajectory,
+                and financing fragility. Together, those three dimensions form a map of
+                where resilience and risk are structurally concentrated.
               </p>
             </div>
           </div>
@@ -183,17 +221,66 @@ export default function HomePage() {
               Core Framework
             </p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A2342] md:text-5xl">
-              A three-axis model for mapping the structural fragility that underlies market
+              A three-axis model for mapping the structural fragility underlying market
               valuations.
             </h2>
           </div>
 
           <div className="space-y-6">
             <p className="text-lg leading-8 text-[#5C6472]">
-              The model ranks companies independently across valuation pressure, cash-engine
-              trajectory, and financing fragility to identify where structural resilience and
-              structural risk are concentrated.
+              The model ranks companies independently across valuation pressure,
+              cash-engine trajectory, and financing fragility to identify where
+              structural resilience and structural risk are concentrated.
             </p>
+
+            <div className="rounded-[1.75rem] border border-[#E3DED2] bg-[#FBFAF7] p-6 shadow-[0_10px_30px_rgba(10,35,66,0.04)]">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="inline-flex rounded-2xl bg-white p-3 text-[#4A6FA5] shadow-sm">
+                  <Waypoints className="h-5 w-5" />
+                </div>
+                <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+                  OSMR Axis Diagram
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
+                <div className="rounded-2xl border border-[#EAE5D8] bg-white p-5">
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Axis I
+                  </div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Valuation Pressure
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center gap-3 text-[#4A6FA5]">
+                  <div className="rounded-full border border-[#D8E2F1] bg-[#EEF3FB] px-4 py-2 text-sm font-medium">
+                    OSMR
+                  </div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">
+                    Three-axis structure
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#EAE5D8] bg-white p-5">
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Axis III
+                  </div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Financing Fragility
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-[#EAE5D8] bg-white p-5">
+                <div className="text-sm font-medium text-[#0A2342]">
+                  Axis II
+                </div>
+                <div className="mt-1 text-sm text-[#5C6472]">
+                  Cash-Engine Trajectory
+                </div>
+              </div>
+            </div>
 
             <div className="grid gap-4">
               <div className="rounded-2xl border border-[#EAE5D8] bg-[#FBFAF7] p-5">
@@ -201,7 +288,8 @@ export default function HomePage() {
                   Narrative Fragility
                 </div>
                 <div className="mt-2 text-sm leading-6 text-[#5C6472]">
-                  How far up the income statement the market must climb to justify valuation.
+                  How far up the income statement the market must climb to justify
+                  valuation.
                 </div>
               </div>
 
@@ -210,7 +298,8 @@ export default function HomePage() {
                   Cash-Flow Fragility
                 </div>
                 <div className="mt-2 text-sm leading-6 text-[#5C6472]">
-                  Whether cash generation is durable, deteriorating, or only superficially stable.
+                  Whether cash generation is durable, deteriorating, or only
+                  superficially stable.
                 </div>
               </div>
 
@@ -219,7 +308,8 @@ export default function HomePage() {
                   Financing Fragility
                 </div>
                 <div className="mt-2 text-sm leading-6 text-[#5C6472]">
-                  How resilient a firm is to tighter financial conditions and debt-service strain.
+                  How resilient a firm is to tighter financial conditions and
+                  debt-service strain.
                 </div>
               </div>
             </div>
@@ -237,9 +327,9 @@ export default function HomePage() {
               Institutional-Grade Research Infrastructure
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-              Our platform converts company-level financial data into a structural map of the
-              equity market, enabling cross-sectional diagnostics, regime analysis, and
-              company-level drilldowns.
+              Our platform converts company-level financial data into a structural map of
+              the equity market, enabling cross-sectional diagnostics, regime analysis,
+              and company-level drilldowns.
             </p>
 
             <div className="mt-8">
@@ -254,10 +344,21 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-[2rem] border border-[#E3DED2] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)]">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl bg-[#F5F2EA] p-3 text-[#4A6FA5]">
+                <Database className="h-5 w-5" />
+              </div>
+              <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+                Platform Roadmap
+              </div>
+            </div>
+
             <div className="grid gap-4">
               <div className="flex items-start justify-between rounded-2xl border border-[#EAE5D8] bg-[#FBFAF7] p-5">
                 <div>
-                  <div className="text-sm font-medium text-[#0A2342]">Cross-sectional diagnostics</div>
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Cross-sectional diagnostics
+                  </div>
                   <div className="mt-1 text-sm text-[#5C6472]">
                     Rank structural fragility across the equity universe.
                   </div>
@@ -269,7 +370,9 @@ export default function HomePage() {
 
               <div className="flex items-start justify-between rounded-2xl border border-[#EAE5D8] bg-[#FBFAF7] p-5">
                 <div>
-                  <div className="text-sm font-medium text-[#0A2342]">Historical cohort analysis</div>
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Historical cohort analysis
+                  </div>
                   <div className="mt-1 text-sm text-[#5C6472]">
                     Compare forward outcomes across structural regimes.
                   </div>
@@ -281,13 +384,29 @@ export default function HomePage() {
 
               <div className="flex items-start justify-between rounded-2xl border border-[#EAE5D8] bg-[#FBFAF7] p-5">
                 <div>
-                  <div className="text-sm font-medium text-[#0A2342]">Company-level drilldowns</div>
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Company-level drilldowns
+                  </div>
                   <div className="mt-1 text-sm text-[#5C6472]">
                     Detailed entity pages, regime context, and research layers.
                   </div>
                 </div>
                 <div className="rounded-full bg-[#F3EFE6] px-3 py-1 text-xs font-medium text-[#8A92A0]">
                   Coming Next
+                </div>
+              </div>
+
+              <div className="flex items-start justify-between rounded-2xl border border-[#EAE5D8] bg-[#FBFAF7] p-5">
+                <div>
+                  <div className="text-sm font-medium text-[#0A2342]">
+                    Structural market map
+                  </div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Convert firm-level data into a coherent market-wide diagnostic layer.
+                  </div>
+                </div>
+                <div className="rounded-full bg-[#EAF6F0] px-3 py-1 text-xs font-medium text-[#3E8E6A]">
+                  Core
                 </div>
               </div>
             </div>
@@ -307,9 +426,9 @@ export default function HomePage() {
                   Learn more about the origin of The Capital Steward.
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-                  The platform grew out of a simple conviction: markets spend too much time
-                  debating narratives and not enough time mapping structure. Read more about the
-                  philosophy and perspective behind the work.
+                  The platform grew out of a simple conviction: markets spend too much
+                  time debating narratives and not enough time mapping structure. Read
+                  more about the philosophy and perspective behind the work.
                 </p>
               </div>
 
