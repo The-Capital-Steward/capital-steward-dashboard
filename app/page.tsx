@@ -10,7 +10,7 @@ export default function HomePage() {
           <Link href="/" className="flex items-center gap-4">
             <div className="relative h-12 w-12 overflow-hidden rounded-xl">
               <Image
-                src="/tcs_logo.png"
+                src="/tcs-logo.png"
                 alt="The Capital Steward"
                 fill
                 className="object-contain"
