@@ -85,7 +85,7 @@ export default function HomePage() {
                 href="/philosophy"
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#4A6FA5] hover:text-[#0A2342]"
               >
-                Explore OSMR Framework
+                Read About Our Research Philosophy
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
