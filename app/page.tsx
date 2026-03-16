@@ -31,17 +31,29 @@ export default function HomePage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium text-[#5C6472] md:flex">
-            <Link href="/philosophy" className="transition hover:text-[#0A2342]">
-              Our Philosophy
-            </Link>
-            <Link href="/coming-soon" className="transition hover:text-[#0A2342]">
-              Our Platform
-            </Link>
-            <Link href="/our-story" className="transition hover:text-[#0A2342]">
-              Our Story
-            </Link>
-          </nav>
+          <nav className="hidden items-center gap-5 text-sm font-medium text-[#5C6472] md:flex">
+  <Link
+    href="/our-story"
+    className="transition hover:text-[#0A2342]"
+  >
+    Our Story
+  </Link>
+
+  <Link
+    href="/philosophy"
+    className="transition hover:text-[#0A2342]"
+  >
+    Our Philosophy
+  </Link>
+
+  <Link
+    href="/coming-soon"
+    className="inline-flex items-center gap-2 rounded-[1.75rem] bg-[#0A2342] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#153761]"
+  >
+    Our Platform
+    <ArrowRight className="h-4 w-4" />
+  </Link>
+</nav>
         </div>
       </header>
 
