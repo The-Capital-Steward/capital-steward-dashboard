@@ -60,9 +60,7 @@ export default function HomePage() {
       <section className="border-b border-[#E3DED2]">
         <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 md:grid-cols-[1.15fr_0.85fr] md:py-28">
           <div className="max-w-3xl">
-            <p className="mb-5 text-sm font-medium uppercase tracking-[0.18em] text-[#4A6FA5]">
-              Independent Market Research
-            </p>
+            
 
             <h1 className="tcs-heading text-5xl font-semibold leading-[1.02] tracking-tight text-[#0A2342] md:text-7xl">
               Structural Intelligence for Serious Investors
