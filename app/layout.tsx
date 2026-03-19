@@ -50,7 +50,7 @@ export default function RootLayout({
               <Link href="/our-story" className="transition hover:text-[#0A1F3D]">
                 Our Story
               </Link>
-              <Link href="/philosophy" className="transition hover:text-[#0A1F3D]">
+              <Link href="/our-philosophy" className="transition hover:text-[#0A1F3D]">
                 Our Philosophy
               </Link>
               <Link
