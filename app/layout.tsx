@@ -54,7 +54,7 @@ export default function RootLayout({
                 Our Philosophy
               </Link>
               <Link
-                href="/coming-soon"
+                href="/platform"
                 className="inline-flex items-center gap-2 rounded-[1.75rem] bg-[#0A1F3D] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#153761]"
               >
                 Open Platform

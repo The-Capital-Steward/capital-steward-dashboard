@@ -29,7 +29,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
-                href="/coming-soon"
+                href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
               >
                 Open Platform
@@ -254,7 +254,7 @@ export default function HomePage() {
             </p>
             <div className="mt-8">
               <Link
-                href="/coming-soon"
+                href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
               >
                 View Platform Status

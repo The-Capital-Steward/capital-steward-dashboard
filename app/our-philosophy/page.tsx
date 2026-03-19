@@ -338,7 +338,7 @@ export default function OurPhilosophyPage() {
 
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/coming-soon"
+                href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
               >
                 Open Platform
