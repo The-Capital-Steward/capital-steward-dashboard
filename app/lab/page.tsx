@@ -34,19 +34,27 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const COLORS = {
-  bg: "#0A1730",
-  surface: "#10203D",
-  panel: "#14284A",
-  panelAlt: "#0F1F3C",
-  border: "#243A61",
-  text: "#E8EDF5",
-  textSecondary: "#B7C3D8",
-  textMuted: "#7F90AD",
-  accent: "#5E7FBE",
-  accentSecondary: "#8EA7D8",
+  bg: "#0A1F3D",
+  panel: "#102642",
+  card: "#112A47",
+  inset: "#0D2138",
+  border: "#203754",
+
+  text: "#EAF0F2",
+  textSecondary: "#B8C3CC",
+  textMuted: "#7E8A96",
+
+  accent: "#41506A",
+  green: "#244636",
+  greenSoft: "#E8EFE9",
+
   positive: "#3E8E6A",
   positiveSoft: "#6DAE8B",
-  negative: "#C94C4C",
+  negative: "#8B3838",
+  negativeSoft: "#BC6464",
+  neutral: "#47566B",
+
+  suppressed: "#20314F",
 };
 
 type SnapshotRow = {
@@ -154,8 +162,8 @@ function compositeColor(bucket: string | null | undefined) {
   const colorMap: Record<string, string> = {
     "Very Low": COLORS.positive,
     Low: COLORS.positiveSoft,
-    Moderate: COLORS.accentSecondary,
-    High: COLORS.accent,
+    Moderate: COLORS.accent,
+    High: COLORS.negativeSoft,
     "Very High": COLORS.negative,
   };
   return colorMap[bucket ?? ""] ?? COLORS.textMuted;
@@ -180,15 +188,12 @@ function cohortMetricLabel(metric: CohortMetric) {
 }
 
 function returnHeatColor(v: number | null, suppressed: boolean) {
-  if (suppressed || v == null || Number.isNaN(v)) return "#20314F";
-  if (v <= -0.25) return "#6E2D2D";
-  if (v <= -0.15) return "#8B3838";
-  if (v <= -0.08) return "#A84848";
-  if (v < 0) return "#BC6464";
-  if (v < 0.04) return "#475B7B";
-  if (v < 0.08) return "#5E7FBE";
-  if (v < 0.15) return "#6DAE8B";
-  return "#3E8E6A";
+  if (suppressed || v == null || Number.isNaN(v)) return COLORS.suppressed;
+  if (v <= -0.12) return COLORS.negative;
+  if (v <= -0.03) return COLORS.negativeSoft;
+  if (v < 0.03) return COLORS.neutral;
+  if (v < 0.12) return COLORS.positiveSoft;
+  return COLORS.positive;
 }
 
 export default function LabPage() {
@@ -290,7 +295,7 @@ export default function LabPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A1730] text-[#E8EDF5]">
+    <div className="min-h-screen bg-[#0A1F3D] text-[#EAF0F2]">
       <div className="mx-auto max-w-7xl px-6 py-10">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -299,43 +304,42 @@ export default function LabPage() {
           className="mb-12 max-w-5xl"
         >
           <div className="mb-5 flex flex-wrap items-center gap-3">
-            <Badge className="rounded-full border border-[#243A61] bg-[#10203D] px-3 py-1 text-[#B7C3D8] hover:bg-[#10203D]">
-              OSMR Research Lab
+            <Badge className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[#B8C3CC] hover:bg-[#0D2138]">
+              OSMR System
             </Badge>
-            <Badge variant="outline" className="rounded-full border-[#243A61] text-[#7F90AD]">
-              Internal Build
+            <Badge variant="outline" className="rounded-full border-[#203754] text-[#7E8A96]">
+              Platform Preview
             </Badge>
           </div>
 
           <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">
-            Structural mapping of the corporate economy.
+            A structural map of the equity market.
           </h1>
 
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-[#B7C3D8]">
-            The Capital Steward’s OSMR framework maps structural risk across the equity
-            universe using operating anchors, free-cash-flow trajectory, financing fragility,
-            and now real historical cohort outcomes.
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-[#B8C3CC]">
+            The OSMR system maps structural fragility, resilience, and valuation pressure
+            across the equity universe—and now links those states to real historical cohort outcomes.
           </p>
         </motion.div>
 
-        <Card className="mb-10 rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+        <Card className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
           <CardHeader className="pb-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="mb-2 flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-[#B7C3D8]" />
+                  <Filter className="h-4 w-4 text-[#B8C3CC]" />
                   <CardTitle className="text-white">Global Filters</CardTitle>
                 </div>
-                <CardDescription className="text-[#B7C3D8]">
-                  These controls apply across the full lab, including the market map,
-                  snapshot table, and summary cards.
+                <CardDescription className="text-[#B8C3CC]">
+                  Apply filters across the market map, cohort outcomes, snapshot table,
+                  and supporting diagnostics.
                 </CardDescription>
               </div>
 
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="rounded-2xl border-[#243A61] bg-transparent text-[#B7C3D8] hover:bg-[#10203D] hover:text-white"
+                className="rounded-2xl border-[#203754] bg-transparent text-[#B8C3CC] hover:bg-[#0D2138] hover:text-white"
               >
                 Clear Filters
               </Button>
@@ -345,20 +349,20 @@ export default function LabPage() {
           <CardContent>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-[#7F90AD]" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-[#7E8A96]" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search symbol"
-                  className="rounded-2xl border-[#243A61] bg-[#10203D] pl-9 text-white placeholder:text-[#7F90AD]"
+                  className="rounded-2xl border-[#203754] bg-[#0D2138] pl-9 text-white placeholder:text-[#7E8A96]"
                 />
               </div>
 
               <Select value={selectedOAL} onValueChange={setSelectedOAL}>
-                <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
+                <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
                   <SelectValue placeholder="OAL" />
                 </SelectTrigger>
-                <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
+                <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
                   <SelectItem value="All">All OALs</SelectItem>
                   {oalOrder.map((o) => (
                     <SelectItem key={o} value={o}>
@@ -369,10 +373,10 @@ export default function LabPage() {
               </Select>
 
               <Select value={selectedBucket} onValueChange={setSelectedBucket}>
-                <SelectTrigger className="rounded-2xl border-[#243A61] bg-[#10203D] text-white">
+                <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
                   <SelectValue placeholder="Composite Bucket" />
                 </SelectTrigger>
-                <SelectContent className="border-[#243A61] bg-[#10203D] text-white">
+                <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
                   <SelectItem value="All">All Composite Buckets</SelectItem>
                   {bucketOrder.map((b) => (
                     <SelectItem key={b} value={b}>
@@ -386,57 +390,57 @@ export default function LabPage() {
         </Card>
 
         <div className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">Universe Plotted</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">Universe Plotted</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatNum(stats.total)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-[#7F90AD]">
-              Names currently in the filtered universe.
+            <CardContent className="text-sm text-[#7E8A96]">
+              Names currently represented in the filtered structural universe.
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">Average Composite</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">Average Composite</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatPct(stats.avgComposite)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-[#7F90AD]">
-              Average composite score of the filtered cohort.
+            <CardContent className="text-sm text-[#7E8A96]">
+              Average structural risk score across the filtered cohort.
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border border-[#3E8E6A]/35 bg-[#112A47] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">Very High Composite</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">High Structural Risk</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatNum(stats.veryHigh)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-[#7F90AD]">
-              Names currently in the highest composite bucket.
+            <CardContent className="text-sm text-[#7E8A96]">
+              Names currently in the highest composite risk bucket.
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B7C3D8]">High Financing Fragility</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">High Fragility Regime</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatNum(stats.fragile)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-[#7F90AD]">
-              Filtered names with top-quintile Axis III fragility.
+            <CardContent className="text-sm text-[#7E8A96]">
+              Filtered names with elevated Axis III financing fragility.
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="market-map" className="space-y-8">
-          <TabsList className="flex w-full gap-2 border-b border-[#243A61] bg-transparent p-0">
+          <TabsList className="flex w-full gap-2 border-b border-[#203754] bg-transparent p-0">
             {[
               ["market-map", "Market Map"],
               ["snapshot", "Snapshot"],
@@ -447,7 +451,7 @@ export default function LabPage() {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B7C3D8] data-[state=active]:border-[#5E7FBE] data-[state=active]:bg-[#F5F2EA] data-[state=active]:text-[#0A1730]"
+                className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B8C3CC] data-[state=active]:border-[#41506A] data-[state=active]:bg-[#0D2138] data-[state=active]:text-white"
               >
                 {label}
               </TabsTrigger>
@@ -456,84 +460,111 @@ export default function LabPage() {
 
           <TabsContent value="market-map" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Layers3 className="h-5 w-5 text-[#B7C3D8]" />
+                    <Layers3 className="h-5 w-5 text-[#B8C3CC]" />
                     <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                   </div>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Valuation pressure on the x-axis, FCF trajectory on the y-axis, financing
-                    fragility encoded by composite bucket color.
+                  <CardDescription className="text-[#B8C3CC]">
+                    X-axis = valuation pressure, Y-axis = cash-generation trajectory,
+                    color = composite structural risk.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <div className="flex h-[420px] items-center justify-center text-[#7F90AD]">
-                      Loading live snapshot...
+                    <div className="flex h-[480px] items-center justify-center text-[#7E8A96]">
+                      Loading current snapshot...
                     </div>
                   ) : (
-                    <div className="h-[420px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
-                          <CartesianGrid stroke={COLORS.border} />
-                          <XAxis
-                            type="number"
-                            dataKey="x"
-                            domain={[0, 1]}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                            axisLine={{ stroke: COLORS.border }}
-                            tickLine={{ stroke: COLORS.border }}
-                          />
-                          <YAxis
-                            type="number"
-                            dataKey="y"
-                            domain={[0, 1]}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                            axisLine={{ stroke: COLORS.border }}
-                            tickLine={{ stroke: COLORS.border }}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: COLORS.surface,
-                              border: `1px solid ${COLORS.border}`,
-                              borderRadius: 16,
-                              color: COLORS.text,
-                            }}
-                            labelStyle={{ color: COLORS.text }}
-                          />
-                          <Scatter data={scatterData}>
-                            {scatterData.map((entry, idx) => (
-                              <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
-                            ))}
-                          </Scatter>
-                        </ScatterChart>
-                      </ResponsiveContainer>
+                    <div className="h-[480px] w-full">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#B8C3CC]">
+                        <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
+                          Valuation Pressure →
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#7E8A96]">Risk:</span>
+                          {["Very Low", "Low", "Moderate", "High", "Very High"].map((bucket) => (
+                            <span
+                              key={bucket}
+                              className="inline-flex items-center gap-1 text-[11px]"
+                            >
+                              <span
+                                className="h-2.5 w-2.5 rounded-full"
+                                style={{ backgroundColor: compositeColor(bucket) }}
+                              />
+                              {bucket}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex h-[440px] items-stretch gap-3">
+                        <div className="flex items-center text-xs text-[#B8C3CC] [writing-mode:vertical-rl] rotate-180">
+                          Cash-Generation Trajectory
+                        </div>
+                        <div className="flex-1">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+                              <CartesianGrid stroke={COLORS.border} />
+                              <XAxis
+                                type="number"
+                                dataKey="x"
+                                domain={[0, 1]}
+                                tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                                axisLine={{ stroke: COLORS.border }}
+                                tickLine={{ stroke: COLORS.border }}
+                              />
+                              <YAxis
+                                type="number"
+                                dataKey="y"
+                                domain={[0, 1]}
+                                tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                                axisLine={{ stroke: COLORS.border }}
+                                tickLine={{ stroke: COLORS.border }}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: COLORS.inset,
+                                  border: `1px solid ${COLORS.border}`,
+                                  borderRadius: 16,
+                                  color: COLORS.text,
+                                }}
+                                labelStyle={{ color: COLORS.text }}
+                              />
+                              <Scatter data={scatterData}>
+                                {scatterData.map((entry, idx) => (
+                                  <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
+                                ))}
+                              </Scatter>
+                            </ScatterChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-[#B7C3D8]" />
-                    <CardTitle className="text-white">Highest Composite Risk</CardTitle>
+                    <AlertTriangle className="h-5 w-5 text-[#B8C3CC]" />
+                    <CardTitle className="text-white">Current Risk Concentrations</CardTitle>
                   </div>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Live list of names with the greatest structural risk according to the latest
-                    composite score.
+                  <CardDescription className="text-[#B8C3CC]">
+                    Names currently showing the highest composite structural risk in the filtered universe.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {topRisk.map((row) => (
                     <div
                       key={row.symbol}
-                      className="flex items-center justify-between rounded-xl border border-[#243A61] bg-[#0F1F3C] px-4 py-3 transition hover:border-[#35598F]"
+                      className="flex items-center justify-between rounded-xl border border-[#203754] bg-[#0D2138] px-4 py-3 transition hover:border-[#41506A]"
                     >
                       <div className="flex flex-col">
                         <span className="font-medium text-white">{row.symbol}</span>
-                        <span className="text-xs text-[#7F90AD]">
+                        <span className="text-xs text-[#7E8A96]">
                           {row.oal_label} • {row.risk_bucket_within_oal}
                         </span>
                       </div>
@@ -541,7 +572,7 @@ export default function LabPage() {
                       <div className="flex items-center gap-3">
                         <Badge
                           variant="outline"
-                          className="border-[#243A61]"
+                          className="border-[#203754]"
                           style={{ color: compositeColor(row.composite_bucket) }}
                         >
                           {row.composite_bucket}
@@ -558,41 +589,35 @@ export default function LabPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Grid3X3 className="h-5 w-5 text-[#B7C3D8]" />
-              <h2 className="text-xl font-semibold text-white">Historical Cohort Return Grid</h2>
+              <Grid3X3 className="h-5 w-5 text-[#B8C3CC]" />
+              <h2 className="text-xl font-semibold text-white">Historical Cohort Grid</h2>
               {cohortGrid?.metadata && (
-                <Badge variant="outline" className="border-[#243A61] text-[#7F90AD]">
+                <Badge variant="outline" className="border-[#203754] text-[#7E8A96]">
                   {cohortGrid.metadata.horizon_months}M Forward
                 </Badge>
               )}
             </div>
 
-            <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader>
-                <CardTitle className="text-white">How to read the grids</CardTitle>
-                <CardDescription className="text-[#B7C3D8]">
-                  Each cell shows the historical cohort outcome for stocks that sat in that
-                  structural state at formation month-end.
+                <CardTitle className="text-white">How the cohort grid works</CardTitle>
+                <CardDescription className="text-[#B8C3CC]">
+                  Each cell shows the historical outcome for stocks that occupied that structural
+                  state at formation month-end.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-3 text-sm leading-7">
-                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+              <CardContent className="grid gap-4 text-sm leading-7 md:grid-cols-3">
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
                   <div className="mb-2 font-medium text-white">Columns = Axis I</div>
-                  <div className="text-[#B7C3D8]">
-                    Valuation Pressure within OAL, from Very Low to Very High.
-                  </div>
+                  <div className="text-[#B8C3CC]">Valuation Pressure within OAL.</div>
                 </div>
-                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
                   <div className="mb-2 font-medium text-white">Rows = Axis II</div>
-                  <div className="text-[#B7C3D8]">
-                    Cash-Engine Trajectory, from Very Weak to Very Strong.
-                  </div>
+                  <div className="text-[#B8C3CC]">Cash-Generation Trajectory.</div>
                 </div>
-                <div className="rounded-2xl border border-[#243A61] bg-[#10203D] p-4">
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
                   <div className="mb-2 font-medium text-white">Panels = Axis III</div>
-                  <div className="text-[#B7C3D8]">
-                    Financing Fragility regime: Low, Moderate, or High.
-                  </div>
+                  <div className="text-[#B8C3CC]">Financing Fragility regime.</div>
                 </div>
               </CardContent>
             </Card>
@@ -610,8 +635,8 @@ export default function LabPage() {
                     onClick={() => setCohortMetric(value as CohortMetric)}
                     className={`rounded-2xl border px-4 py-2 text-sm transition ${
                       active
-                        ? "border-[#5E7FBE] bg-[#F5F2EA] text-[#0A1730]"
-                        : "border-[#243A61] bg-[#10203D] text-[#B7C3D8] hover:bg-[#14284A]"
+                        ? "border-[#41506A] bg-[#0D2138] text-white"
+                        : "border-[#203754] bg-[#0D2138] text-[#B8C3CC] hover:bg-[#112A47]"
                     }`}
                   >
                     {label}
@@ -624,27 +649,27 @@ export default function LabPage() {
               {cohortGrid?.panels.map((panel) => (
                 <Card
                   key={panel.panel}
-                  className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20"
+                  className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"
                 >
                   <CardHeader>
                     <CardTitle className="text-white">{panel.panel}</CardTitle>
-                    <CardDescription className="text-[#B7C3D8]">
-                      {cohortMetricLabel(cohortMetric)} over forward{" "}
-                      {cohortGrid.metadata.horizon_months}M by Axis I × Axis II state.
+                    <CardDescription className="text-[#B8C3CC]">
+                      {cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M
+                      by Axis I × Axis II state.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2 text-xs">
                       <div />
                       {cohortGrid.metadata.x_axis_labels.map((c) => (
-                        <div key={c} className="text-center text-[#7F90AD]">
+                        <div key={c} className="text-center text-[#7E8A96]">
                           {c}
                         </div>
                       ))}
 
                       {panel.rows.map((row) => (
                         <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
-                          <div className="flex items-center pr-2 text-[#7F90AD]">
+                          <div className="flex items-center pr-2 text-[#7E8A96]">
                             {row.axis2_bucket}
                           </div>
 
@@ -658,7 +683,7 @@ export default function LabPage() {
                             return (
                               <div
                                 key={`${panel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
-                                className="flex h-16 flex-col items-center justify-center rounded-2xl border border-[#243A61] px-1 text-white"
+                                className="flex h-16 flex-col items-center justify-center rounded-2xl border border-[#203754] px-1 text-white"
                                 style={{
                                   backgroundColor: returnHeatColor(colorValue, cell.suppressed),
                                 }}
@@ -680,7 +705,7 @@ export default function LabPage() {
                                 <div className="text-[11px] font-medium">
                                   {formatCohortMetric(visibleValue, cohortMetric)}
                                 </div>
-                                <div className="mt-1 text-[10px] text-[#E8EDF5]/80">
+                                <div className="mt-1 text-[10px] text-[#EAF0F2]/80">
                                   N={formatNum(cell.count)}
                                 </div>
                               </div>
@@ -696,50 +721,50 @@ export default function LabPage() {
           </TabsContent>
 
           <TabsContent value="snapshot" className="space-y-6">
-            <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader>
-                <CardTitle className="text-white">Structural Snapshot Table</CardTitle>
-                <CardDescription className="text-[#B7C3D8]">
-                  Live table from the latest exported structural snapshot. “Valuation Bucket”
-                  refers only to Axis I within-OAL ranking, not total composite risk.
+                <CardTitle className="text-white">Current Snapshot</CardTitle>
+                <CardDescription className="text-[#B8C3CC]">
+                  Latest structural state table. “Valuation Bucket” refers to Axis I within-OAL
+                  ranking, not total composite risk.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-hidden rounded-2xl border border-[#243A61]">
+                <div className="overflow-hidden rounded-2xl border border-[#203754]">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-[#243A61] bg-[#10203D]">
-                        <TableHead className="text-[#B7C3D8]">Symbol</TableHead>
-                        <TableHead className="text-[#B7C3D8]">OAL</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Axis I</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Axis II</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Axis III</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Composite</TableHead>
-                        <TableHead className="text-[#B7C3D8]">Valuation Bucket</TableHead>
+                      <TableRow className="border-[#203754] bg-[#0D2138]">
+                        <TableHead className="text-[#B8C3CC]">Symbol</TableHead>
+                        <TableHead className="text-[#B8C3CC]">OAL</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Axis I</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Axis II</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Axis III</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Composite</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Valuation Bucket</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filtered.map((row) => (
-                        <TableRow key={row.symbol} className="border-[#243A61]">
+                        <TableRow key={row.symbol} className="border-[#203754] hover:bg-[#0D2138]/70">
                           <TableCell className="font-medium text-white">{row.symbol}</TableCell>
-                          <TableCell className="text-[#E8EDF5]">{row.oal_label}</TableCell>
-                          <TableCell className="text-[#E8EDF5]">
+                          <TableCell className="text-[#EAF0F2]">{row.oal_label}</TableCell>
+                          <TableCell className="text-[#EAF0F2]">
                             {row.axis1_pct?.toFixed(3) ?? "—"}
                           </TableCell>
-                          <TableCell className="text-[#E8EDF5]">
+                          <TableCell className="text-[#EAF0F2]">
                             {row.axis2_pct == null ? "—" : row.axis2_pct.toFixed(3)}
                           </TableCell>
-                          <TableCell className="text-[#E8EDF5]">
+                          <TableCell className="text-[#EAF0F2]">
                             {row.axis3_pct?.toFixed(3) ?? "—"}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-white">
+                              <span className="font-semibold text-white">
                                 {row.composite_score?.toFixed(3) ?? "—"}
                               </span>
                               <Badge
                                 variant="outline"
-                                className="border-[#243A61] text-[#B7C3D8]"
+                                className="border-[#203754] text-[#B8C3CC]"
                                 style={{
                                   backgroundColor: `${compositeColor(row.composite_bucket)}22`,
                                 }}
@@ -748,7 +773,7 @@ export default function LabPage() {
                               </Badge>
                             </div>
                           </TableCell>
-                          <TableCell className="text-[#E8EDF5]">
+                          <TableCell className="text-[#EAF0F2]">
                             {row.risk_bucket_within_oal ?? "—"}
                           </TableCell>
                         </TableRow>
@@ -762,14 +787,14 @@ export default function LabPage() {
 
           <TabsContent value="oal" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-[#B7C3D8]" />
+                    <Shield className="h-5 w-5 text-[#B8C3CC]" />
                     <CardTitle className="text-white">OAL Cohort Structure</CardTitle>
                   </div>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Live Operational Anchor Ladder distribution across the filtered snapshot.
+                  <CardDescription className="text-[#B8C3CC]">
+                    Operational Anchor Ladder distribution across the filtered snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -790,7 +815,7 @@ export default function LabPage() {
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: COLORS.surface,
+                            backgroundColor: COLORS.inset,
                             border: `1px solid ${COLORS.border}`,
                             borderRadius: 16,
                             color: COLORS.text,
@@ -803,40 +828,38 @@ export default function LabPage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <CardTitle className="text-white">OAL Summary Table</CardTitle>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Summary derived from the live exported snapshot.
+                  <CardDescription className="text-[#B8C3CC]">
+                    Summary derived from the current structural snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-hidden rounded-2xl border border-[#243A61]">
+                  <div className="overflow-hidden rounded-2xl border border-[#203754]">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-[#243A61] bg-[#10203D]">
-                          <TableHead className="text-[#B7C3D8]">OAL</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Count</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Median Axis I</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Median Axis III</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Median Composite</TableHead>
+                        <TableRow className="border-[#203754] bg-[#0D2138]">
+                          <TableHead className="text-[#B8C3CC]">OAL</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Count</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Median Axis I</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Median Axis III</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Median Composite</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {oalSummary.map((row) => (
-                          <TableRow key={row.oal_label} className="border-[#243A61]">
+                          <TableRow key={row.oal_label} className="border-[#203754]">
                             <TableCell className="font-medium text-white">{row.oal_label}</TableCell>
-                            <TableCell className="text-[#E8EDF5]">{formatNum(row.n)}</TableCell>
-                            <TableCell className="text-[#E8EDF5]">
+                            <TableCell className="text-[#EAF0F2]">{formatNum(row.n)}</TableCell>
+                            <TableCell className="text-[#EAF0F2]">
                               {row.median_axis1 == null ? "—" : row.median_axis1.toFixed(3)}
                             </TableCell>
-                            <TableCell className="text-[#E8EDF5]">
+                            <TableCell className="text-[#EAF0F2]">
                               {row.median_axis3 == null ? "—" : row.median_axis3.toFixed(3)}
                             </TableCell>
-                            <TableCell className="text-[#E8EDF5]">
-                              {row.median_composite == null
-                                ? "—"
-                                : row.median_composite.toFixed(3)}
+                            <TableCell className="text-[#EAF0F2]">
+                              {row.median_composite == null ? "—" : row.median_composite.toFixed(3)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -850,14 +873,14 @@ export default function LabPage() {
 
           <TabsContent value="liquidity" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-[#B7C3D8]" />
+                    <Activity className="h-5 w-5 text-[#B8C3CC]" />
                     <CardTitle className="text-white">Liquidity Distribution</CardTitle>
                   </div>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Live liquidity summary exported from the structural state snapshot.
+                  <CardDescription className="text-[#B8C3CC]">
+                    Liquidity summary from the current structural state snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -881,46 +904,42 @@ export default function LabPage() {
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: COLORS.surface,
+                            backgroundColor: COLORS.inset,
                             border: `1px solid ${COLORS.border}`,
                             borderRadius: 16,
                             color: COLORS.text,
                           }}
                         />
-                        <Bar
-                          dataKey="count"
-                          radius={[12, 12, 0, 0]}
-                          fill={COLORS.accentSecondary}
-                        />
+                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.accent} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
-                  <CardTitle className="text-white">Implementation Notes</CardTitle>
-                  <CardDescription className="text-[#B7C3D8]">
-                    The lab is now reading from exported OSMR datasets.
+                  <CardTitle className="text-white">System Notes</CardTitle>
+                  <CardDescription className="text-[#B8C3CC]">
+                    Current release state of the structural diagnostics layer.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
+                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
                   <p>
                     <span className="font-medium text-white">1.</span> The market map, OAL summary,
-                    liquidity distribution, and cohort return grids are now live.
+                    liquidity distribution, and cohort return grids are active.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> Global filters now apply
-                    consistently across tabs.
+                    <span className="font-medium text-white">2.</span> Global filters apply
+                    consistently across all tabs.
                   </p>
                   <p>
                     <span className="font-medium text-white">3.</span> The cohort grid toggle lets
-                    you compare mean, median, and hit-rate surfaces for sanity checking.
+                    you compare mean, median, and hit-rate surfaces for cross-validation.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> The next upgrade is ticker
-                    drilldowns, regime history views, and monthly publication workflows.
+                    <span className="font-medium text-white">4.</span> Upcoming expansion includes
+                    ticker drilldowns, regime history views, and monthly publication workflows.
                   </p>
                 </CardContent>
               </Card>
@@ -929,45 +948,39 @@ export default function LabPage() {
 
           <TabsContent value="history" className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <Clock3 className="h-5 w-5 text-[#B7C3D8]" />
+                    <Clock3 className="h-5 w-5 text-[#B8C3CC]" />
                     <CardTitle className="text-white">History Manifest</CardTitle>
                   </div>
-                  <CardDescription className="text-[#B7C3D8]">
+                  <CardDescription className="text-[#B8C3CC]">
                     Stored monthly structural snapshots available to the platform.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-hidden rounded-2xl border border-[#243A61]">
+                  <div className="overflow-hidden rounded-2xl border border-[#203754]">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-[#243A61] bg-[#10203D]">
-                          <TableHead className="text-[#B7C3D8]">Month</TableHead>
-                          <TableHead className="text-[#B7C3D8]">OAL Scores</TableHead>
-                          <TableHead className="text-[#B7C3D8]">OAL Summary</TableHead>
-                          <TableHead className="text-[#B7C3D8]">Structural Snapshot</TableHead>
+                        <TableRow className="border-[#203754] bg-[#0D2138]">
+                          <TableHead className="text-[#B8C3CC]">Month</TableHead>
+                          <TableHead className="text-[#B8C3CC]">OAL Scores</TableHead>
+                          <TableHead className="text-[#B8C3CC]">OAL Summary</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Structural Snapshot</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {historyManifest.map((row) => (
-                          <TableRow key={row.month} className="border-[#243A61]">
+                          <TableRow key={row.month} className="border-[#203754]">
                             <TableCell className="font-medium text-white">{row.month}</TableCell>
-                            <TableCell className="text-[#E8EDF5]">
-                              {row.has_oal_scores === false
-                                ? "—"
-                                : formatNum(row.oal_scores_rows)}
+                            <TableCell className="text-[#EAF0F2]">
+                              {row.has_oal_scores === false ? "—" : formatNum(row.oal_scores_rows)}
                             </TableCell>
-                            <TableCell className="text-[#E8EDF5]">
-                              {row.has_oal_summary === false
-                                ? "—"
-                                : formatNum(row.oal_summary_rows)}
+                            <TableCell className="text-[#EAF0F2]">
+                              {row.has_oal_summary === false ? "—" : formatNum(row.oal_summary_rows)}
                             </TableCell>
-                            <TableCell className="text-[#E8EDF5]">
-                              {row.has_structural_snapshot === false
-                                ? "—"
-                                : formatNum(row.structural_rows)}
+                            <TableCell className="text-[#EAF0F2]">
+                              {row.has_structural_snapshot === false ? "—" : formatNum(row.structural_rows)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -977,29 +990,29 @@ export default function LabPage() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl border border-[#243A61] bg-[#14284A] shadow-xl shadow-black/20">
+              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
-                  <CardTitle className="text-white">History Status</CardTitle>
-                  <CardDescription className="text-[#B7C3D8]">
-                    Longitudinal research infrastructure is now active.
+                  <CardTitle className="text-white">Release Notes</CardTitle>
+                  <CardDescription className="text-[#B8C3CC]">
+                    Longitudinal structural infrastructure is now active.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#E8EDF5]">
+                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
                   <p>
                     <span className="font-medium text-white">1.</span> The platform now tracks
-                    archived monthly structural states across the full backfill window.
+                    archived monthly structural states across the current backfill window.
                   </p>
                   <p>
                     <span className="font-medium text-white">2.</span> Historical cohort returns
-                    are now computed from real monthly formation states and forward returns.
+                    are computed from real monthly formation states and forward returns.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> This gives you a true
-                    empirical regime surface across valuation, trajectory, and financing fragility.
+                    <span className="font-medium text-white">3.</span> This creates an empirical
+                    regime surface across valuation, trajectory, and financing fragility.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> The next layer is company
-                    drilldowns, regime history pages, and monthly publication workflows.
+                    <span className="font-medium text-white">4.</span> Upcoming expansion includes
+                    company drilldowns, regime history pages, and monthly publication workflows.
                   </p>
                 </CardContent>
               </Card>
