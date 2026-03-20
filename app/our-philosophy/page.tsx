@@ -13,9 +13,9 @@ export default function OurPhilosophyPage() {
           </p>
 
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
-            Markets debate narratives.
+            Markets price through narrative.
             <br />
-            We map structure.
+            We measure the structure beneath it.
           </h1>
 
           <div className="mt-8 max-w-3xl border-l border-[#C9D8CD] pl-5">
@@ -31,13 +31,21 @@ export default function OurPhilosophyPage() {
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
           <article className="mx-auto max-w-3xl border-l border-[#C9D8CD] pl-5 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
             <p>
-              Valuations depend on underlying operating reality. Cash flows determine
-              sustainability. Balance sheets define resilience under pressure.
+              Markets are psychosocial systems. The financials participants choose to
+              focus on are selected because they more easily support a narrative —
+              not because they most honestly represent the firm's economic reality.
             </p>
             <p>
-              The Capital Steward exists to study those conditions directly—not as a
-              complement to narrative analysis, but as an alternative foundation for
-              understanding the market.
+              A company will point to the deepest operational anchor it can credibly
+              claim. If it can justify its valuation with free cash flow, it will. If
+              it cannot, it ascends the financial statement — to earnings, to operating
+              income, to revenue — until it finds a metric the market will accept.
+              Each step up the ladder lengthens the narrative bridge between price
+              and economic reality.
+            </p>
+            <p>
+              The Capital Steward exists to measure that bridge — and to identify
+              where it has grown too long to hold.
             </p>
           </article>
         </div>
@@ -67,7 +75,9 @@ export default function OurPhilosophyPage() {
               <p>
                 Markets rarely break because of a single data point. They break when
                 fragility accumulates beneath the surface — often unnoticed, often
-                misinterpreted, and often justified through narrative.
+                misinterpreted, and often justified through narrative until the narrative
+                no longer holds. The same mechanisms that inflate a valuation can
+                deflate it, and the deflation is rarely slower than the inflation.
               </p>
             </div>
 
@@ -76,7 +86,7 @@ export default function OurPhilosophyPage() {
               {[
                 {
                   label: "Pattern one",
-                  text: "Valuations persist despite weakening fundamentals.",
+                  text: "Valuations persist despite weakening operational anchors.",
                 },
                 {
                   label: "Pattern two",
@@ -102,7 +112,7 @@ export default function OurPhilosophyPage() {
         </div>
       </section>
 
-      {/* ── Structural approach — bridge ── */}
+      {/* ── Structural approach ── */}
       <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
           <article className="mx-auto max-w-3xl">
@@ -116,16 +126,18 @@ export default function OurPhilosophyPage() {
             <div className="mt-6 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               <p>
                 The Capital Steward is built around a different premise: companies should
-                be evaluated based on the structural conditions that support—or fail to
-                support—their valuation.
+                be evaluated based on how deeply their valuation is anchored to real
+                operational output — and how much narrative is required to bridge the gap.
               </p>
               <p>
                 This requires moving away from isolated metrics and toward a system that
-                captures how valuation is justified, how cash is actually generated over
-                time, and how financial obligations are sustained.
+                captures the quality of the anchor, whether that anchor is improving or
+                deteriorating over time, and whether the firm can service its obligations
+                from that anchor.
               </p>
               <p>
                 To do this, we evaluate companies across three structural dimensions.
+                Every dimension speaks to the same operational anchor throughout.
               </p>
             </div>
           </article>
@@ -140,7 +152,7 @@ export default function OurPhilosophyPage() {
               Framework
             </p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-[2.35rem]">
-              The three structural pillars
+              The three structural dimensions
             </h2>
 
             <div className="mt-10 space-y-6">
@@ -153,25 +165,32 @@ export default function OurPhilosophyPage() {
                   </div>
                   <div>
                     <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
-                      Valuation Pressure
+                      Operational Anchor Risk
                     </div>
                     <h3 className="tcs-heading mt-2 text-xl font-semibold text-white">
-                      Valuation anchor depth
+                      Narrative Bridge Risk
                     </h3>
                     <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#A9BEDF]">
                       <p>
-                        Valuation is not a single number. It is a relationship between
-                        price and an underlying operating anchor.
+                        A firm will use the deepest operational anchor it can credibly
+                        claim to justify its valuation. If free cash flow supports that
+                        valuation, the bridge between price and economic reality is short.
+                        If the market must reach to revenue — or beyond — the bridge grows
+                        long, fragile, and dependent on conditions outside the firm's control.
                       </p>
                       <p>
-                        The key question is: how far up the income statement must the
-                        market climb to justify valuation? Companies supported by free
-                        cash flow or earnings possess stronger anchors. Companies
-                        requiring revenue-based justification — or lacking positive
-                        operating anchors entirely — depend increasingly on narrative.
+                        We measure the length of that bridge by comparing enterprise value
+                        to the firm's deepest credible anchor, adjusted for the reliability
+                        of that anchor. FCF is the most credible anchor because it is the
+                        hardest to sustain. Revenue is the least credible because it is the
+                        easiest. The penalty for anchor shallowness reflects the length and
+                        fragility of the narrative required.
                       </p>
                       <p>
-                        This creates a measurable gradient of valuation fragility.
+                        This creates a measurable gradient of valuation fragility —
+                        not a judgment on whether the stock is mispriced today, but a
+                        structural assessment of how vulnerable its price is to narrative
+                        deflation.
                       </p>
                     </div>
                   </div>
@@ -186,26 +205,30 @@ export default function OurPhilosophyPage() {
                   </div>
                   <div>
                     <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
-                      Cash-Flow Fragility
+                      Operational Trajectory Risk
                     </div>
                     <h3 className="tcs-heading mt-2 text-xl font-semibold text-white">
-                      Free cash flow durability
+                      Narrative Durability Risk
                     </h3>
                     <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#A9BEDF]">
                       <p>
-                        Profitability is not the same as cash generation. A company may
-                        report earnings while producing inconsistent, deteriorating, or
-                        structurally weak free cash flow.
+                        A firm whose anchor is consistently improving is shortening its
+                        narrative bridge over time — it is becoming more grounded. A firm
+                        whose anchor is deteriorating is lengthening it — becoming more
+                        dependent on narrative to sustain its valuation.
                       </p>
                       <p>
-                        The critical dimension is not a single period. It is behavior
-                        across time — the consistency of cash production, the directional
-                        trajectory of free cash flow, and the difference between stability
-                        and deterioration.
+                        We measure this by evaluating the YoY consistency of the firm's
+                        anchor metric across the trailing 28 quarters, weighted toward
+                        recency. The same penalty structure applies as in Axis I: a
+                        Revenue company demonstrating consistent revenue growth receives
+                        less credit than an FCF company demonstrating consistent FCF
+                        growth, because the signal is weaker and easier to sustain
+                        without genuine operational progress.
                       </p>
                       <p>
-                        Durable cash generation signals structural resilience. Unstable or
-                        declining cash generation introduces fragility.
+                        Durable anchor improvement signals a shortening narrative bridge.
+                        Deterioration signals a lengthening one.
                       </p>
                     </div>
                   </div>
@@ -220,25 +243,30 @@ export default function OurPhilosophyPage() {
                   </div>
                   <div>
                     <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
-                      Financing Fragility
+                      Operational Financing Risk
                     </div>
                     <h3 className="tcs-heading mt-2 text-xl font-semibold text-white">
-                      Debt-service resilience
+                      Obligation Risk
                     </h3>
                     <div className="mt-4 space-y-4 text-[15px] leading-7 text-[#A9BEDF]">
                       <p>
-                        A company's survival is not determined solely by operations. It is
-                        also determined by its ability to meet financial obligations.
+                        Debt is not inherently fragile. A mature firm running significant
+                        debt with strong FCF coverage is structurally sound — the
+                        obligations are justified by the cash generation capacity. What
+                        creates fragility is the gap between what a firm owes and what it
+                        can credibly produce to service it.
                       </p>
                       <p>
-                        As financial conditions tighten, this dimension becomes
-                        increasingly important. We evaluate the relationship between
-                        operating earnings and interest expense, the margin of safety in
-                        debt-service capacity, and vulnerability to changing credit
-                        conditions.
+                        We evaluate interest coverage using the same operational anchor
+                        the firm is assigned to throughout the framework. A firm anchored
+                        to FCF is evaluated on FCF coverage. A firm anchored to EBIT is
+                        evaluated on EBIT coverage. The same anchor speaks to the same
+                        obligation — consistently, without substitution.
                       </p>
                       <p>
-                        Companies with weak coverage ratios are structurally exposed.
+                        Companies unable to service obligations from their actual
+                        operational output are structurally exposed — regardless of what
+                        narrative surrounds their balance sheet.
                       </p>
                     </div>
                   </div>
@@ -267,9 +295,12 @@ export default function OurPhilosophyPage() {
                 becomes more meaningful when viewed across the entire market.
               </p>
               <p>
-                By evaluating companies along consistent structural dimensions, we can
-                rank firms by fragility and resilience, identify concentrations of
-                structural risk, and observe how these distributions evolve over time.
+                By scoring every company on the same three-axis framework, we can rank
+                firms by structural fragility and resilience, identify where narrative
+                dependence is most concentrated, and observe how these distributions
+                shift over time. Historical cohort analysis links current structural
+                states to real forward return outcomes — grounding the framework in
+                empirical evidence, not theory.
               </p>
               <p>
                 This transforms analysis from isolated observations into a coherent
@@ -288,11 +319,11 @@ export default function OurPhilosophyPage() {
                   },
                   {
                     label: "Identify",
-                    text: "Concentrations of structural risk before they become visible in price.",
+                    text: "Where narrative dependence has outpaced financial reality — before that gap closes in price.",
                   },
                   {
                     label: "Monitor",
-                    text: "How these structural distributions shift over time and across regimes.",
+                    text: "How these structural distributions shift over time and across market regimes.",
                   },
                 ].map(({ label, text }) => (
                   <div key={label}>
@@ -308,7 +339,7 @@ export default function OurPhilosophyPage() {
         </div>
       </section>
 
-      {/* ── Closing philosophy ── */}
+      {/* ── Closing conviction ── */}
       <section>
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
           <article className="mx-auto max-w-3xl">
@@ -325,6 +356,12 @@ export default function OurPhilosophyPage() {
                 narratives are constrained by structure. Valuations must ultimately
                 reconcile with operating reality. Cash generation cannot be substituted
                 indefinitely. Financial obligations must be met.
+              </p>
+              <p>
+                A company with robust, deep operational anchoring does not need narrative
+                to justify its price. The CEO does not need cult charisma. The firm
+                simply needs to generate real economic output consistently, profitably,
+                and in a growing way. Structure eventually speaks for itself.
               </p>
             </div>
 

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   ChevronRight,
@@ -23,8 +22,9 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
-              The Capital Steward maps structural fragility, financial resilience, and
-              valuation risk across the equity market—before they become obvious in price.
+              The Capital Steward measures how deeply a company's valuation is
+              anchored to real operational output — and how much narrative it
+              requires to sustain it.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
@@ -49,15 +49,15 @@ export default function HomePage() {
             <div className="mt-12 grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-[#DDE0DC] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">Focus</div>
-                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Structural fragility</div>
+                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Operational anchor depth</div>
               </div>
               <div className="rounded-2xl border border-[#DDE0DC] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">Scope</div>
-                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Equity-market diagnostics</div>
+                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Full equity universe</div>
               </div>
               <div className="rounded-2xl border border-[#DDE0DC] bg-white px-4 py-4 shadow-[0_10px_25px_rgba(10,35,66,0.04)]">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#8A92A0]">Method</div>
-                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Three-axis decision model</div>
+                <div className="mt-2 text-sm font-medium text-[#0A1F3D]">Three-axis structural model</div>
               </div>
             </div>
           </div>
@@ -77,21 +77,21 @@ export default function HomePage() {
 
               <div className="grid gap-4">
                 <div className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
-                  <div className="text-sm font-medium text-[#0A1F3D]">Axis I</div>
+                  <div className="text-sm font-medium text-[#0A1F3D]">Operational Anchor Risk</div>
                   <div className="mt-1 text-sm text-[#5C6472]">
-                    Valuation pressure relative to operating reality
+                    How much narrative bridges this valuation to real operational output
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
-                  <div className="text-sm font-medium text-[#0A1F3D]">Axis II</div>
+                  <div className="text-sm font-medium text-[#0A1F3D]">Operational Trajectory Risk</div>
                   <div className="mt-1 text-sm text-[#5C6472]">
-                    Cash-generation trajectory across time
+                    Whether the firm's operational anchor is improving or deteriorating
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
-                  <div className="text-sm font-medium text-[#0A1F3D]">Axis III</div>
+                  <div className="text-sm font-medium text-[#0A1F3D]">Operational Financing Risk</div>
                   <div className="mt-1 text-sm text-[#5C6472]">
-                    Financing resilience under debt-service strain
+                    Whether the firm can service its obligations from its operational output
                   </div>
                 </div>
               </div>
@@ -99,8 +99,7 @@ export default function HomePage() {
               <div className="mt-6 rounded-2xl bg-[#0A1F3D] p-5 text-white">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#A9BEDF]">Core Output</div>
                 <div className="mt-2 text-lg font-medium">
-                  A structural map of where fragility and resilience are concentrated
-                  across the equity market.
+                  A structural map of where valuation is credibly anchored — and where it isn't.
                 </div>
               </div>
             </div>
@@ -125,17 +124,17 @@ export default function HomePage() {
               {
                 icon: <Shield className="h-5 w-5" />,
                 title: "Focus",
-                body: "We study the underlying conditions that shape valuation, cash-flow durability, and financing resilience. The goal is to identify structural risk before it becomes obvious in market narratives.",
+                body: "We study the depth and credibility of the operational anchors underlying market valuations. The goal is to identify where narrative dependence has outpaced financial reality — before that gap closes in price.",
               },
               {
                 icon: <Radar className="h-5 w-5" />,
                 title: "Scope",
-                body: "Our work is cross-sectional by design, built to compare firms across the public equity market on a common structural basis. That makes fragility easier to rank, segment, and monitor over time.",
+                body: "Our work is cross-sectional by design, built to compare firms across the public equity universe on a common structural basis. That makes narrative fragility easier to rank, segment, and monitor over time.",
               },
               {
                 icon: <Workflow className="h-5 w-5" />,
                 title: "Method",
-                body: "OSMR evaluates firms across valuation pressure, cash-generation trajectory, and financing fragility. Together, those three dimensions form a map of where resilience and risk are structurally concentrated.",
+                body: "OSMR evaluates firms across three axes — Operational Anchor Risk, Operational Trajectory Risk, and Operational Financing Risk — to map where structural resilience and structural fragility are concentrated.",
               },
             ].map(({ icon, title, body }) => (
               <div
@@ -161,15 +160,17 @@ export default function HomePage() {
               Core Framework
             </p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-5xl">
-              A three-axis model for mapping structural fragility across the market.
+              Markets price assets through narrative. OSMR measures the structure beneath it.
             </h2>
           </div>
 
           <div className="space-y-6">
             <p className="text-lg leading-8 text-[#A9BEDF]">
-              The model ranks companies independently across valuation pressure,
-              cash-generation trajectory, and financing fragility to identify where
-              structural resilience and structural risk are concentrated.
+              Most valuations rest on a narrative bridge between what a company
+              actually produces and what the market believes it will. The deeper
+              the operational anchor, the shorter that bridge. The shallower the
+              anchor, the more narrative is required — and the more vulnerable
+              the valuation is to deflation when that narrative weakens.
             </p>
 
             {/* OSMR Axis Diagram */}
@@ -179,14 +180,16 @@ export default function HomePage() {
                   <Waypoints className="h-5 w-5" />
                 </div>
                 <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
-                  OSMR Axis Diagram
+                  OSMR Framework
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
+              <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
                 <div className="rounded-2xl border border-[#1E3A5F] bg-[#0A1F3D] p-5">
-                  <div className="text-sm font-medium text-white">Axis I</div>
-                  <div className="mt-1 text-sm text-[#A9BEDF]">Valuation Pressure</div>
+                  <div className="text-sm font-medium text-white">Operational Anchor Risk</div>
+                  <div className="mt-1 text-sm text-[#A9BEDF]">
+                    Valuation vs. credible operational output
+                  </div>
                 </div>
 
                 <div className="flex flex-col items-center justify-center gap-3">
@@ -199,31 +202,35 @@ export default function HomePage() {
                 </div>
 
                 <div className="rounded-2xl border border-[#1E3A5F] bg-[#0A1F3D] p-5">
-                  <div className="text-sm font-medium text-white">Axis III</div>
-                  <div className="mt-1 text-sm text-[#A9BEDF]">Financing Fragility</div>
+                  <div className="text-sm font-medium text-white">Operational Financing Risk</div>
+                  <div className="mt-1 text-sm text-[#A9BEDF]">
+                    Obligation coverage from operational output
+                  </div>
                 </div>
               </div>
 
               <div className="mt-4 rounded-2xl border border-[#1E3A5F] bg-[#0A1F3D] p-5">
-                <div className="text-sm font-medium text-white">Axis II</div>
-                <div className="mt-1 text-sm text-[#A9BEDF]">Cash-Engine Trajectory</div>
+                <div className="text-sm font-medium text-white">Operational Trajectory Risk</div>
+                <div className="mt-1 text-sm text-[#A9BEDF]">
+                  Whether the anchor is improving or deteriorating over time
+                </div>
               </div>
             </div>
 
-            {/* Fragility type cards */}
+            {/* Philosophical risk type cards */}
             <div className="grid gap-4">
               {[
                 {
-                  title: "Narrative Fragility",
-                  body: "How far up the income statement the market must climb to justify valuation.",
+                  title: "Narrative Bridge Risk",
+                  body: "The further a valuation reaches beyond credible operational output, the more narrative is required to sustain it — and the more vulnerable it is to deflation.",
                 },
                 {
-                  title: "Cash-Flow Fragility",
-                  body: "Whether cash generation is durable, deteriorating, or only superficially stable.",
+                  title: "Narrative Durability Risk",
+                  body: "A firm whose anchor is consistently improving is shortening its narrative bridge. One whose anchor is deteriorating is lengthening it — becoming more dependent on narrative to justify its price.",
                 },
                 {
-                  title: "Financing Fragility",
-                  body: "How resilient a firm is to tighter financial conditions and debt-service strain.",
+                  title: "Obligation Risk",
+                  body: "Whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.",
                 },
               ].map(({ title, body }) => (
                 <div
@@ -248,9 +255,9 @@ export default function HomePage() {
               Institutional-Grade Decision Infrastructure
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-              Our platform converts company-level financial data into a structural map of
-              the equity market, enabling cross-sectional diagnostics, regime analysis,
-              and company-level drilldowns.
+              The platform converts company-level financial data into a structural map
+              of the equity market — enabling cross-sectional diagnostics, historical
+              cohort analysis, and company-level structural drilldowns.
             </p>
             <div className="mt-8">
               <Link
@@ -276,8 +283,10 @@ export default function HomePage() {
             <div className="grid gap-4">
               <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
                 <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Cross-sectional diagnostics</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">Rank structural fragility across the equity universe.</div>
+                  <div className="text-sm font-medium text-[#0A1F3D]">Structural market map</div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Full-universe OSMR scoring across all three axes.
+                  </div>
                 </div>
                 <div className="ml-4 shrink-0 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
                   Live
@@ -287,17 +296,21 @@ export default function HomePage() {
               <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
                 <div>
                   <div className="text-sm font-medium text-[#0A1F3D]">Historical cohort analysis</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">Compare forward outcomes across structural regimes.</div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Forward return outcomes across structural regimes, 12M horizon.
+                  </div>
                 </div>
                 <div className="ml-4 shrink-0 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
-                  In Build
+                  Live
                 </div>
               </div>
 
               <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
                 <div>
                   <div className="text-sm font-medium text-[#0A1F3D]">Company-level drilldowns</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">Detailed entity pages, regime context, and research layers.</div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Individual ticker structural profiles, regime context, trajectory history.
+                  </div>
                 </div>
                 <div className="ml-4 shrink-0 rounded-full bg-[#ECEDE7] px-3 py-1 text-xs font-medium text-[#5B665E]">
                   Coming Next
@@ -306,11 +319,13 @@ export default function HomePage() {
 
               <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
                 <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Structural market map</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">Convert firm-level data into a coherent market-wide diagnostic layer.</div>
+                  <div className="text-sm font-medium text-[#0A1F3D]">Market structure analytics</div>
+                  <div className="mt-1 text-sm text-[#5C6472]">
+                    Options and spread microstructure signals layered on structural scores.
+                  </div>
                 </div>
-                <div className="ml-4 shrink-0 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
-                  Core
+                <div className="ml-4 shrink-0 rounded-full bg-[#ECEDE7] px-3 py-1 text-xs font-medium text-[#5B665E]">
+                  Planned
                 </div>
               </div>
             </div>
@@ -331,9 +346,11 @@ export default function HomePage() {
                   Why The Capital Steward exists.
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-                  The platform grew out of a simple conviction: markets spend too much
-                  time debating narratives and not enough time mapping structure. Read
-                  more about the philosophy and perspective behind the work.
+                  This platform was built on a simple conviction: most financial
+                  analysis is downstream of narrative, not upstream of it. The
+                  Capital Steward is a space to think structurally — honestly,
+                  without the incentive distortions that shape how most financial
+                  information gets packaged and sold.
                 </p>
               </div>
 
