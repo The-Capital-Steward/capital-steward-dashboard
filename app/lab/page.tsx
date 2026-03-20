@@ -39,21 +39,17 @@ const COLORS = {
   card: "#112A47",
   inset: "#0D2138",
   border: "#203754",
-
   text: "#EAF0F2",
   textSecondary: "#B8C3CC",
   textMuted: "#7E8A96",
-
   accent: "#41506A",
   green: "#244636",
   greenSoft: "#E8EFE9",
-
   positive: "#3E8E6A",
   positiveSoft: "#6DAE8B",
   negative: "#8B3838",
   negativeSoft: "#BC6464",
   neutral: "#47566B",
-
   suppressed: "#20314F",
 };
 
@@ -196,7 +192,7 @@ function returnHeatColor(v: number | null, suppressed: boolean) {
   return COLORS.positive;
 }
 
-export default function LabPage() {
+export default function PlatformPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
   const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
   const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
@@ -301,7 +297,7 @@ export default function LabPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="mb-12 max-w-5xl"
+          className="mb-8 max-w-5xl"
         >
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <Badge className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[#B8C3CC] hover:bg-[#0D2138]">
@@ -318,10 +314,45 @@ export default function LabPage() {
 
           <p className="mt-6 max-w-3xl text-lg leading-8 text-[#B8C3CC]">
             The OSMR system maps structural fragility, resilience, and valuation pressure
-            across the equity universe—and now links those states to real historical cohort outcomes.
+            across the equity universe—and links those states to real historical cohort outcomes.
           </p>
         </motion.div>
 
+        {/* Start Here — green left border via inline style to avoid Tailwind conflict */}
+        <Card
+          className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"
+          style={{ borderLeft: "2px solid #244636" }}
+        >
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white">Start Here</CardTitle>
+            <CardDescription className="text-[#B8C3CC]">
+              OSMR (Operational Structure Mispricing Risk) is a framework for identifying
+              structural imbalances across the corporate economy.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+              <div className="mb-2 font-medium text-white">Market Map</div>
+              <div className="text-sm leading-6 text-[#B8C3CC]">
+                See where structural risk is concentrated right now.
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+              <div className="mb-2 font-medium text-white">Risk List</div>
+              <div className="text-sm leading-6 text-[#B8C3CC]">
+                Identify the names currently carrying the greatest structural stress.
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+              <div className="mb-2 font-medium text-white">Cohort Outcomes</div>
+              <div className="text-sm leading-6 text-[#B8C3CC]">
+                See how similar structural states have behaved historically.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Filters */}
         <Card className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
           <CardHeader className="pb-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -334,8 +365,10 @@ export default function LabPage() {
                   Apply filters across the market map, cohort outcomes, snapshot table,
                   and supporting diagnostics.
                 </CardDescription>
+                <div className="mt-3 text-sm text-[#7E8A96]">
+                  OAL = Operational Anchor Ladder, the system used to group companies by operating support.
+                </div>
               </div>
-
               <Button
                 variant="outline"
                 onClick={clearFilters}
@@ -345,7 +378,6 @@ export default function LabPage() {
               </Button>
             </div>
           </CardHeader>
-
           <CardContent>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="relative">
@@ -353,11 +385,10 @@ export default function LabPage() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search symbol"
+                  placeholder="Search ticker"
                   className="rounded-2xl border-[#203754] bg-[#0D2138] pl-9 text-white placeholder:text-[#7E8A96]"
                 />
               </div>
-
               <Select value={selectedOAL} onValueChange={setSelectedOAL}>
                 <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
                   <SelectValue placeholder="OAL" />
@@ -365,13 +396,10 @@ export default function LabPage() {
                 <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
                   <SelectItem value="All">All OALs</SelectItem>
                   {oalOrder.map((o) => (
-                    <SelectItem key={o} value={o}>
-                      {o}
-                    </SelectItem>
+                    <SelectItem key={o} value={o}>{o}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-
               <Select value={selectedBucket} onValueChange={setSelectedBucket}>
                 <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
                   <SelectValue placeholder="Composite Bucket" />
@@ -379,9 +407,7 @@ export default function LabPage() {
                 <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
                   <SelectItem value="All">All Composite Buckets</SelectItem>
                   {bucketOrder.map((b) => (
-                    <SelectItem key={b} value={b}>
-                      {b}
-                    </SelectItem>
+                    <SelectItem key={b} value={b}>{b}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -389,31 +415,8 @@ export default function LabPage() {
           </CardContent>
         </Card>
 
-        <div className="mb-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Universe Plotted</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {loading ? "…" : formatNum(stats.total)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Names currently represented in the filtered structural universe.
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Average Composite</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {loading ? "…" : formatPct(stats.avgComposite)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Average structural risk score across the filtered cohort.
-            </CardContent>
-          </Card>
-
+        {/* KPI strip */}
+        <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl border border-[#3E8E6A]/35 bg-[#112A47] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
               <CardDescription className="text-[#B8C3CC]">High Structural Risk</CardDescription>
@@ -422,24 +425,45 @@ export default function LabPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Names currently in the highest composite risk bucket.
+              Primary concentration of structural risk under the active filters.
             </CardContent>
           </Card>
-
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">High Fragility Regime</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">Elevated Financing Fragility</CardDescription>
               <CardTitle className="text-3xl text-white">
                 {loading ? "…" : formatNum(stats.fragile)}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Filtered names with elevated Axis III financing fragility.
+              Names currently exposed to the highest financing strain.
+            </CardContent>
+          </Card>
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-[#B8C3CC]">Universe Covered</CardDescription>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatNum(stats.total)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-[#7E8A96]">
+              Companies currently represented under the active filters.
+            </CardContent>
+          </Card>
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+            <CardHeader className="pb-2">
+              <CardDescription className="text-[#B8C3CC]">Average Composite Risk</CardDescription>
+              <CardTitle className="text-3xl text-white">
+                {loading ? "…" : formatPct(stats.avgComposite)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-[#7E8A96]">
+              Average structural risk across the filtered universe.
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="market-map" className="space-y-8">
+        <Tabs defaultValue="market-map" className="space-y-10">
           <TabsList className="flex w-full gap-2 border-b border-[#203754] bg-transparent p-0">
             {[
               ["market-map", "Market Map"],
@@ -458,37 +482,81 @@ export default function LabPage() {
             ))}
           </TabsList>
 
-          <TabsContent value="market-map" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+          <TabsContent value="market-map" className="space-y-8">
+
+            {/* Interpretive layer placeholder */}
+            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+              <CardHeader>
+                <CardTitle className="text-white">Interpretive Layer</CardTitle>
+                <CardDescription className="text-[#B8C3CC]">
+                  This layer will surface current structural signals, directional positioning,
+                  and regime-level context once the data-driven insight engine is active.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Structural Signal</div>
+                  <div className="text-sm leading-6 text-[#B8C3CC]">
+                    Will summarize what the current market state implies under the active filters.
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Structural Positioning</div>
+                  <div className="text-sm leading-6 text-[#B8C3CC]">
+                    Will distinguish favorable, unfavorable, and mixed structural zones.
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Decision Layer</div>
+                  <div className="text-sm leading-6 text-[#B8C3CC]">
+                    Will guide focus areas and regime interpretation once the signal engine is live.
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Market map section header */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Layers3 className="h-5 w-5 text-[#B8C3CC]" />
+                <h2 className="text-xl font-semibold text-white">Current Structural State of the Market</h2>
+              </div>
+              <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
+                The market map shows where structural risk is concentrated now, how companies are
+                positioned by valuation pressure and cash-generation trajectory, and where current
+                structural stress is clustering under the active filters.
+              </div>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Layers3 className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
-                  </div>
+                  <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
-                    X-axis = valuation pressure, Y-axis = cash-generation trajectory,
-                    color = composite structural risk.
+                    Each point is a company positioned by valuation pressure and cash-generation
+                    trajectory, with color showing composite structural risk.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <div className="flex h-[480px] items-center justify-center text-[#7E8A96]">
+                    <div className="flex h-[460px] items-center justify-center text-[#7E8A96]">
                       Loading current snapshot...
                     </div>
                   ) : (
-                    <div className="h-[480px] w-full">
+                    <div className="h-[460px] w-full">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#B8C3CC]">
-                        <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
-                          Valuation Pressure →
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
+                            Valuation Pressure →
+                          </div>
+                          <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
+                            Cash-Generation Trajectory ↑
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#7E8A96]">Risk:</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[#7E8A96]">Composite Risk:</span>
                           {["Very Low", "Low", "Moderate", "High", "Very High"].map((bucket) => (
-                            <span
-                              key={bucket}
-                              className="inline-flex items-center gap-1 text-[11px]"
-                            >
+                            <span key={bucket} className="inline-flex items-center gap-1 text-[11px]">
                               <span
                                 className="h-2.5 w-2.5 rounded-full"
                                 style={{ backgroundColor: compositeColor(bucket) }}
@@ -498,49 +566,41 @@ export default function LabPage() {
                           ))}
                         </div>
                       </div>
-
-                      <div className="flex h-[440px] items-stretch gap-3">
-                        <div className="flex items-center text-xs text-[#B8C3CC] [writing-mode:vertical-rl] rotate-180">
-                          Cash-Generation Trajectory
-                        </div>
-                        <div className="flex-1">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
-                              <CartesianGrid stroke={COLORS.border} />
-                              <XAxis
-                                type="number"
-                                dataKey="x"
-                                domain={[0, 1]}
-                                tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                                axisLine={{ stroke: COLORS.border }}
-                                tickLine={{ stroke: COLORS.border }}
-                              />
-                              <YAxis
-                                type="number"
-                                dataKey="y"
-                                domain={[0, 1]}
-                                tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                                axisLine={{ stroke: COLORS.border }}
-                                tickLine={{ stroke: COLORS.border }}
-                              />
-                              <Tooltip
-                                contentStyle={{
-                                  backgroundColor: COLORS.inset,
-                                  border: `1px solid ${COLORS.border}`,
-                                  borderRadius: 16,
-                                  color: COLORS.text,
-                                }}
-                                labelStyle={{ color: COLORS.text }}
-                              />
-                              <Scatter data={scatterData}>
-                                {scatterData.map((entry, idx) => (
-                                  <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
-                                ))}
-                              </Scatter>
-                            </ScatterChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+                          <CartesianGrid stroke={COLORS.border} />
+                          <XAxis
+                            type="number"
+                            dataKey="x"
+                            domain={[0, 1]}
+                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                            axisLine={{ stroke: COLORS.border }}
+                            tickLine={{ stroke: COLORS.border }}
+                          />
+                          <YAxis
+                            type="number"
+                            dataKey="y"
+                            domain={[0, 1]}
+                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                            axisLine={{ stroke: COLORS.border }}
+                            tickLine={{ stroke: COLORS.border }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: COLORS.inset,
+                              border: `1px solid ${COLORS.border}`,
+                              borderRadius: 16,
+                              color: COLORS.text,
+                            }}
+                            labelStyle={{ color: COLORS.text }}
+                          />
+                          <Scatter data={scatterData}>
+                            {scatterData.map((entry, idx) => (
+                              <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
+                            ))}
+                          </Scatter>
+                        </ScatterChart>
+                      </ResponsiveContainer>
                     </div>
                   )}
                 </CardContent>
@@ -550,10 +610,10 @@ export default function LabPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Current Risk Concentrations</CardTitle>
+                    <CardTitle className="text-white">Active Risk Cluster</CardTitle>
                   </div>
                   <CardDescription className="text-[#B8C3CC]">
-                    Names currently showing the highest composite structural risk in the filtered universe.
+                    These names are currently registering the greatest structural stress under the active filters.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -568,7 +628,6 @@ export default function LabPage() {
                           {row.oal_label} • {row.risk_bucket_within_oal}
                         </span>
                       </div>
-
                       <div className="flex items-center gap-3">
                         <Badge
                           variant="outline"
@@ -577,7 +636,6 @@ export default function LabPage() {
                         >
                           {row.composite_bucket}
                         </Badge>
-
                         <span className="font-mono text-sm text-white">
                           {row.composite_score?.toFixed(3)}
                         </span>
@@ -588,61 +646,98 @@ export default function LabPage() {
               </Card>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Grid3X3 className="h-5 w-5 text-[#B8C3CC]" />
-              <h2 className="text-xl font-semibold text-white">Historical Cohort Grid</h2>
-              {cohortGrid?.metadata && (
-                <Badge variant="outline" className="border-[#203754] text-[#7E8A96]">
-                  {cohortGrid.metadata.horizon_months}M Forward
-                </Badge>
-              )}
+            {/* Cohort Outcomes */}
+            <div className="mt-6 space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Grid3X3 className="h-5 w-5 text-[#B8C3CC]" />
+                <h2 className="text-xl font-semibold text-white">Historical Cohort Outcomes</h2>
+                {cohortGrid?.metadata && (
+                  <Badge variant="outline" className="border-[#203754] text-[#7E8A96]">
+                    {cohortGrid.metadata.horizon_months}M Forward
+                  </Badge>
+                )}
+              </div>
+              <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
+                This section shows how similar structural states have performed over time—linking current
+                positioning to real historical outcomes.
+              </div>
             </div>
 
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader>
-                <CardTitle className="text-white">How the cohort grid works</CardTitle>
+                <CardTitle className="text-white">How to Read This</CardTitle>
                 <CardDescription className="text-[#B8C3CC]">
-                  Each cell shows the historical outcome for stocks that occupied that structural
-                  state at formation month-end.
+                  Each cell shows how stocks in that structural state performed after formation month-end.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 text-sm leading-7 md:grid-cols-3">
+              <CardContent className="grid gap-4 text-sm leading-7 md:grid-cols-5">
                 <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Columns = Axis I</div>
-                  <div className="text-[#B8C3CC]">Valuation Pressure within OAL.</div>
+                  <div className="mb-2 font-medium text-white">What it shows</div>
+                  <div className="text-[#B8C3CC]">Historical outcomes for similar structural states.</div>
                 </div>
                 <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Rows = Axis II</div>
-                  <div className="text-[#B8C3CC]">Cash-Generation Trajectory.</div>
+                  <div className="mb-2 font-medium text-white">Columns</div>
+                  <div className="text-[#B8C3CC]">Valuation pressure (Axis I).</div>
                 </div>
                 <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Panels = Axis III</div>
-                  <div className="text-[#B8C3CC]">Financing Fragility regime.</div>
+                  <div className="mb-2 font-medium text-white">Rows</div>
+                  <div className="text-[#B8C3CC]">Cash-generation trajectory (Axis II).</div>
+                </div>
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+                  <div className="mb-2 font-medium text-white">Panels</div>
+                  <div className="text-[#B8C3CC]">Financing fragility regime (Axis III).</div>
+                </div>
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+                  <div className="mb-2 font-medium text-white">Color + N</div>
+                  <div className="text-[#B8C3CC]">Outcome strength and cohort sample size.</div>
                 </div>
               </CardContent>
             </Card>
 
-            <div className="flex flex-wrap items-center gap-3">
-              {[
-                ["mean_return", "Mean"],
-                ["median_return", "Median"],
-                ["hit_rate", "Hit Rate"],
-              ].map(([value, label]) => {
-                const active = cohortMetric === value;
-                return (
-                  <button
-                    key={value}
-                    onClick={() => setCohortMetric(value as CohortMetric)}
-                    className={`rounded-2xl border px-4 py-2 text-sm transition ${
-                      active
-                        ? "border-[#41506A] bg-[#0D2138] text-white"
-                        : "border-[#203754] bg-[#0D2138] text-[#B8C3CC] hover:bg-[#112A47]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
+            <div className="space-y-4">
+              <div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  {[
+                    ["mean_return", "Mean"],
+                    ["median_return", "Median"],
+                    ["hit_rate", "Hit Rate"],
+                  ].map(([value, label]) => {
+                    const active = cohortMetric === value;
+                    return (
+                      <button
+                        key={value}
+                        onClick={() => setCohortMetric(value as CohortMetric)}
+                        className={`rounded-2xl border px-4 py-2 text-sm transition ${
+                          active
+                            ? "border-[#41506A] bg-[#0D2138] text-white"
+                            : "border-[#203754] bg-[#0D2138] text-[#B8C3CC] hover:bg-[#112A47]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                  {[
+                    { label: "Strong Negative", color: COLORS.negative },
+                    { label: "Mild Negative", color: COLORS.negativeSoft },
+                    { label: "Neutral", color: COLORS.neutral },
+                    { label: "Mild Positive", color: COLORS.positiveSoft },
+                    { label: "Strong Positive", color: COLORS.positive },
+                    { label: "Suppressed", color: COLORS.suppressed },
+                  ].map((item) => (
+                    <div key={item.label} className="inline-flex items-center gap-2 text-[#B8C3CC]">
+                      <span
+                        className="h-3 w-3 rounded-sm border border-[#203754]"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      {item.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-3">
@@ -662,31 +757,24 @@ export default function LabPage() {
                     <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2 text-xs">
                       <div />
                       {cohortGrid.metadata.x_axis_labels.map((c) => (
-                        <div key={c} className="text-center text-[#7E8A96]">
-                          {c}
-                        </div>
+                        <div key={c} className="text-center text-[#7E8A96]">{c}</div>
                       ))}
-
                       {panel.rows.map((row) => (
                         <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
                           <div className="flex items-center pr-2 text-[#7E8A96]">
                             {row.axis2_bucket}
                           </div>
-
                           {row.cells.map((cell) => {
                             const visibleValue = getCohortMetricValue(cell, cohortMetric);
                             const colorValue =
                               cohortMetric === "hit_rate"
                                 ? ((visibleValue ?? 0) - 0.5) * 2
                                 : visibleValue;
-
                             return (
                               <div
                                 key={`${panel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
                                 className="flex h-16 flex-col items-center justify-center rounded-2xl border border-[#203754] px-1 text-white"
-                                style={{
-                                  backgroundColor: returnHeatColor(colorValue, cell.suppressed),
-                                }}
+                                style={{ backgroundColor: returnHeatColor(colorValue, cell.suppressed) }}
                                 title={[
                                   `Panel: ${cell.axis3_panel}`,
                                   `Axis II: ${cell.axis2_bucket}`,
@@ -698,9 +786,7 @@ export default function LabPage() {
                                   cell.suppressed
                                     ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}`
                                     : null,
-                                ]
-                                  .filter(Boolean)
-                                  .join(" | ")}
+                                ].filter(Boolean).join(" | ")}
                               >
                                 <div className="text-[11px] font-medium">
                                   {formatCohortMetric(visibleValue, cohortMetric)}
@@ -718,6 +804,22 @@ export default function LabPage() {
                 </Card>
               ))}
             </div>
+
+            {/* Cohort Insight Layer placeholder — CardContent included to prevent padding gap */}
+            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+              <CardHeader>
+                <CardTitle className="text-white">Cohort Insight Layer</CardTitle>
+                <CardDescription className="text-[#B8C3CC]">
+                  This panel will surface data-driven historical pattern summaries once cohort
+                  interpretation is generated directly from the live outcome surfaces.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4 text-sm text-[#7E8A96]">
+                  Insight generation is not yet active. Patterns will appear here once the signal engine is live.
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="snapshot" className="space-y-6">
@@ -725,11 +827,14 @@ export default function LabPage() {
               <CardHeader>
                 <CardTitle className="text-white">Current Snapshot</CardTitle>
                 <CardDescription className="text-[#B8C3CC]">
-                  Latest structural state table. “Valuation Bucket” refers to Axis I within-OAL
-                  ranking, not total composite risk.
+                  Detailed structural state for each company in the current snapshot. "Valuation Bucket"
+                  refers to Axis I within-OAL ranking, not total composite risk.
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
+                  Use this table to inspect the full structural profile of each company in the current snapshot.
+                </div>
                 <div className="overflow-hidden rounded-2xl border border-[#203754]">
                   <Table>
                     <TableHeader>
@@ -765,9 +870,7 @@ export default function LabPage() {
                               <Badge
                                 variant="outline"
                                 className="border-[#203754] text-[#B8C3CC]"
-                                style={{
-                                  backgroundColor: `${compositeColor(row.composite_bucket)}22`,
-                                }}
+                                style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}
                               >
                                 {row.composite_bucket}
                               </Badge>
@@ -791,13 +894,16 @@ export default function LabPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">OAL Cohort Structure</CardTitle>
+                    <CardTitle className="text-white">Operational Anchor Structure</CardTitle>
                   </div>
                   <CardDescription className="text-[#B8C3CC]">
                     Operational Anchor Ladder distribution across the filtered snapshot.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
+                    Shows how companies are distributed across operating support levels within the current regime.
+                  </div>
                   <div className="h-[320px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={oalSummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
@@ -821,7 +927,7 @@ export default function LabPage() {
                             color: COLORS.text,
                           }}
                         />
-                        <Bar dataKey="n" radius={[12, 12, 0, 0]} fill={COLORS.accent} />
+                        <Bar dataKey="n" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -830,7 +936,7 @@ export default function LabPage() {
 
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
-                  <CardTitle className="text-white">OAL Summary Table</CardTitle>
+                  <CardTitle className="text-white">Operational Anchor Summary</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
                     Summary derived from the current structural snapshot.
                   </CardDescription>
@@ -884,12 +990,12 @@ export default function LabPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
+                    Provides context on capital access and balance sheet flexibility across the current structural state.
+                  </div>
                   <div className="h-[320px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={liquiditySummary}
-                        margin={{ top: 10, right: 10, bottom: 10, left: 0 }}
-                      >
+                      <BarChart data={liquiditySummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
                         <CartesianGrid stroke={COLORS.border} vertical={false} />
                         <XAxis
                           dataKey="bucket"
@@ -910,7 +1016,7 @@ export default function LabPage() {
                             color: COLORS.text,
                           }}
                         />
-                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.accent} />
+                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -921,13 +1027,13 @@ export default function LabPage() {
                 <CardHeader>
                   <CardTitle className="text-white">System Notes</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
-                    Current release state of the structural diagnostics layer.
+                    Current state of the platform's structural diagnostics layer.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
                   <p>
                     <span className="font-medium text-white">1.</span> The market map, OAL summary,
-                    liquidity distribution, and cohort return grids are active.
+                    liquidity distribution, and cohort return grids are live.
                   </p>
                   <p>
                     <span className="font-medium text-white">2.</span> Global filters apply
@@ -952,13 +1058,16 @@ export default function LabPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Clock3 className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">History Manifest</CardTitle>
+                    <CardTitle className="text-white">Historical Coverage</CardTitle>
                   </div>
                   <CardDescription className="text-[#B8C3CC]">
-                    Stored monthly structural snapshots available to the platform.
+                    Archived monthly structural snapshots currently available in the system.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
+                    Defines the time coverage used to generate cohort outcomes and structural comparisons.
+                  </div>
                   <div className="overflow-hidden rounded-2xl border border-[#203754]">
                     <Table>
                       <TableHeader>
@@ -992,27 +1101,27 @@ export default function LabPage() {
 
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
-                  <CardTitle className="text-white">Release Notes</CardTitle>
+                  <CardTitle className="text-white">About Historical Coverage</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
-                    Longitudinal structural infrastructure is now active.
+                    How the platform's historical layer supports structural comparison over time.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
                   <p>
-                    <span className="font-medium text-white">1.</span> The platform now tracks
-                    archived monthly structural states across the current backfill window.
+                    <span className="font-medium text-white">1.</span> Archived monthly structural states
+                    define the platform's historical coverage window.
                   </p>
                   <p>
-                    <span className="font-medium text-white">2.</span> Historical cohort returns
-                    are computed from real monthly formation states and forward returns.
+                    <span className="font-medium text-white">2.</span> Cohort outcomes are calculated
+                    from real formation-month states and forward returns.
                   </p>
                   <p>
-                    <span className="font-medium text-white">3.</span> This creates an empirical
-                    regime surface across valuation, trajectory, and financing fragility.
+                    <span className="font-medium text-white">3.</span> This historical layer supports
+                    regime comparison across valuation, trajectory, and financing fragility.
                   </p>
                   <p>
-                    <span className="font-medium text-white">4.</span> Upcoming expansion includes
-                    company drilldowns, regime history pages, and monthly publication workflows.
+                    <span className="font-medium text-white">4.</span> Historical coverage provides the
+                    foundation for future drilldowns and regime history views.
                   </p>
                 </CardContent>
               </Card>
