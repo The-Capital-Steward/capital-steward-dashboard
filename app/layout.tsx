@@ -18,7 +18,7 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "The Capital Steward",
-  description: "Structural market research for serious investors.",
+  description: "Structural Intelligence for Serious Investors.",
 };
 
 export default function RootLayout({

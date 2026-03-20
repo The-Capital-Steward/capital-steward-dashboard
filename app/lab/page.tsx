@@ -192,6 +192,18 @@ function returnHeatColor(v: number | null, suppressed: boolean) {
   return COLORS.positive;
 }
 
+function skewSignal(cell: CohortGridCell): "right" | "left" | "none" {
+  if (
+    cell.mean_return == null ||
+    cell.median_return == null ||
+    cell.suppressed
+  ) return "none";
+  const diff = cell.mean_return - cell.median_return;
+  if (diff > 0.10) return "right";
+  if (diff < -0.10) return "left";
+  return "none";
+}
+
 export default function PlatformPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
   const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
@@ -203,7 +215,7 @@ export default function PlatformPage() {
   const [selectedOAL, setSelectedOAL] = useState("All");
   const [selectedBucket, setSelectedBucket] = useState("All");
   const [search, setSearch] = useState("");
-  const [cohortMetric, setCohortMetric] = useState<CohortMetric>("mean_return");
+  const [cohortMetric, setCohortMetric] = useState<CohortMetric>("median_return");
 
   useEffect(() => {
     Promise.all([
@@ -696,6 +708,12 @@ export default function PlatformPage() {
 
             <div className="space-y-4">
               <div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div>
+              {cohortMetric === "mean_return" && (
+                <div className="text-xs text-[#7E8A96]">
+                  Mean returns are sensitive to outliers. Cells marked ▲ or ▼ have median returns
+                  that differ materially — hover for context.
+                </div>
+              )}
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
                   {[
@@ -786,12 +804,34 @@ export default function PlatformPage() {
                                   cell.suppressed
                                     ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}`
                                     : null,
+                                  cohortMetric === "mean_return" && skewSignal(cell) === "right"
+                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean inflated by high-return outliers`
+                                    : null,
+                                  cohortMetric === "mean_return" && skewSignal(cell) === "left"
+                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean dragged down by large losses`
+                                    : null,
                                 ].filter(Boolean).join(" | ")}
                               >
                                 <div className="text-[11px] font-medium">
                                   {formatCohortMetric(visibleValue, cohortMetric)}
                                 </div>
-                                <div className="mt-1 text-[10px] text-[#EAF0F2]/80">
+                                {cohortMetric === "mean_return" && (() => {
+                                  const skew = skewSignal(cell);
+                                  if (skew === "none") return null;
+                                  return (
+                                    <div
+                                      className="mt-0.5 text-[9px] font-medium"
+                                      style={{
+                                        color: skew === "right"
+                                          ? COLORS.positiveSoft
+                                          : COLORS.negativeSoft,
+                                      }}
+                                    >
+                                      {skew === "right" ? "▲ skewed" : "▼ skewed"}
+                                    </div>
+                                  );
+                                })()}
+                                <div className="mt-0.5 text-[10px] text-[#EAF0F2]/80">
                                   N={formatNum(cell.count)}
                                 </div>
                               </div>
