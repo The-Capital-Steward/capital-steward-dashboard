@@ -578,41 +578,65 @@ export default function PlatformPage() {
                           ))}
                         </div>
                       </div>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
-                          <CartesianGrid stroke={COLORS.border} />
-                          <XAxis
-                            type="number"
-                            dataKey="x"
-                            domain={[0, 1]}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                            axisLine={{ stroke: COLORS.border }}
-                            tickLine={{ stroke: COLORS.border }}
-                          />
-                          <YAxis
-                            type="number"
-                            dataKey="y"
-                            domain={[0, 1]}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                            axisLine={{ stroke: COLORS.border }}
-                            tickLine={{ stroke: COLORS.border }}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: COLORS.inset,
-                              border: `1px solid ${COLORS.border}`,
-                              borderRadius: 16,
-                              color: COLORS.text,
-                            }}
-                            labelStyle={{ color: COLORS.text }}
-                          />
-                          <Scatter data={scatterData}>
-                            {scatterData.map((entry, idx) => (
-                              <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
-                            ))}
-                          </Scatter>
-                        </ScatterChart>
-                      </ResponsiveContainer>
+
+                      {/* Chart with quadrant label overlay */}
+                      <div className="relative h-[400px]">
+                        {/* Quadrant corner labels — positioned inside chart area */}
+                        <div className="pointer-events-none absolute inset-0 z-10">
+                          {/* Top-left: high trajectory, low pressure */}
+                          <div className="absolute left-[14px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#7E8A96]">
+                            Low pressure<br />Strong trajectory
+                          </div>
+                          {/* Top-right: high trajectory, high pressure */}
+                          <div className="absolute right-[24px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#7E8A96]">
+                            High pressure<br />Strong trajectory
+                          </div>
+                          {/* Bottom-left: low trajectory, low pressure */}
+                          <div className="absolute bottom-[28px] left-[14px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#7E8A96]">
+                            Low pressure<br />Weak trajectory
+                          </div>
+                          {/* Bottom-right: low trajectory, high pressure — highest risk zone */}
+                          <div className="absolute bottom-[28px] right-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#BC6464]">
+                            High pressure<br />Weak trajectory
+                          </div>
+                        </div>
+
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 10 }}>
+                            <CartesianGrid stroke={COLORS.border} />
+                            <XAxis
+                              type="number"
+                              dataKey="x"
+                              domain={[0, 1]}
+                              tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                              axisLine={{ stroke: COLORS.border }}
+                              tickLine={{ stroke: COLORS.border }}
+                            />
+                            <YAxis
+                              type="number"
+                              dataKey="y"
+                              domain={[0, 1]}
+                              tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
+                              axisLine={{ stroke: COLORS.border }}
+                              tickLine={{ stroke: COLORS.border }}
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: COLORS.inset,
+                                border: `1px solid ${COLORS.border}`,
+                                borderRadius: 16,
+                                color: COLORS.text,
+                              }}
+                              labelStyle={{ color: COLORS.text }}
+                            />
+                            <Scatter data={scatterData}>
+                              {scatterData.map((entry, idx) => (
+                                <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
+                              ))}
+                            </Scatter>
+                          </ScatterChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -675,36 +699,15 @@ export default function PlatformPage() {
               </div>
             </div>
 
-            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-              <CardHeader>
-                <CardTitle className="text-white">How to Read This</CardTitle>
-                <CardDescription className="text-[#B8C3CC]">
-                  Each cell shows how stocks in that structural state performed after formation month-end.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 text-sm leading-7 md:grid-cols-5">
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">What it shows</div>
-                  <div className="text-[#B8C3CC]">Historical outcomes for similar structural states.</div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Columns</div>
-                  <div className="text-[#B8C3CC]">Valuation pressure (Axis I).</div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Rows</div>
-                  <div className="text-[#B8C3CC]">Cash-generation trajectory (Axis II).</div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Panels</div>
-                  <div className="text-[#B8C3CC]">Financing fragility regime (Axis III).</div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 font-medium text-white">Color + N</div>
-                  <div className="text-[#B8C3CC]">Outcome strength and cohort sample size.</div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#7E8A96]">
+                <span className="font-medium text-[#B8C3CC]">How to read this:</span>
+                <span><span className="text-[#EAF0F2]">Columns</span> = Valuation pressure (Axis I) ← less / more →</span>
+                <span><span className="text-[#EAF0F2]">Rows</span> = Cash-generation trajectory (Axis II) ↑ stronger</span>
+                <span><span className="text-[#EAF0F2]">Panels</span> = Financing fragility (Axis III)</span>
+                <span><span className="text-[#EAF0F2]">Color + N</span> = Outcome strength and sample size</span>
+              </div>
+            </div>
 
             <div className="space-y-4">
               <div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div>
@@ -772,14 +775,21 @@ export default function PlatformPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-2 text-xs">
-                      <div />
-                      {cohortGrid.metadata.x_axis_labels.map((c) => (
-                        <div key={c} className="text-center text-[#7E8A96]">{c}</div>
+                    <div className="grid grid-cols-[80px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
+                      <div>
+                        <div className="text-[9px] text-[#7E8A96]">← weaker</div>
+                        <div className="text-[9px] text-[#7E8A96]">stronger ↑</div>
+                      </div>
+                      {cohortGrid.metadata.x_axis_labels.map((c, i) => (
+                        <div key={c} className="text-center">
+                          <div className="text-[#7E8A96]">{c}</div>
+                          {i === 0 && <div className="text-[9px] text-[#7E8A96]">←</div>}
+                          {i === 4 && <div className="text-[9px] text-[#7E8A96]">→</div>}
+                        </div>
                       ))}
                       {panel.rows.map((row) => (
                         <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
-                          <div className="flex items-center pr-2 text-[#7E8A96]">
+                          <div className="flex items-center text-[#7E8A96]" style={{ minWidth: 80 }}>
                             {row.axis2_bucket}
                           </div>
                           {row.cells.map((cell) => {
