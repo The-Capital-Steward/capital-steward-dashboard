@@ -4,28 +4,28 @@
     "n": 2900,
     "median_axis1": 0.4065440547476475,
     "median_axis3": 0.436917701863354,
-    "median_composite": 0.4527162519127398
+    "median_composite": 0.3800966457728069
   },
   {
     "oal_label": "Net Income",
     "n": 622,
     "median_axis1": 0.7548118049615056,
     "median_axis3": 0.2014767932489451,
-    "median_composite": 0.4709657309852868
+    "median_composite": 0.5042467124398153
   },
   {
     "oal_label": "EBIT",
     "n": 111,
     "median_axis1": 0.8718990590248075,
     "median_axis3": 0.810126582278481,
-    "median_composite": 0.6770492016367236
+    "median_composite": 0.7831468364935295
   },
   {
     "oal_label": "Revenue",
     "n": 1163,
     "median_axis1": 0.6920444824636441,
     "median_axis3": 1.0,
-    "median_composite": 0.6390035899968459
+    "median_composite": 0.7641562705158141
   },
   {
     "oal_label": "Non-viable",

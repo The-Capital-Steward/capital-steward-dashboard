@@ -287,7 +287,9 @@ export default function PlatformPage() {
         .filter((row) => row.axis1_pct != null && row.axis2_pct != null)
         .map((row) => ({
           x: row.axis1_pct as number,
-          y: row.axis2_plot ?? row.axis2_pct ?? 0.5,
+          // Invert axis2_pct so higher Y = higher trajectory risk
+          // matches the risk-forward convention of all other axes
+          y: 1 - (row.axis2_plot ?? row.axis2_pct ?? 0.5),
           z: row.axis3_pct,
           symbol: row.symbol,
           oal_label: row.oal_label,
@@ -535,8 +537,8 @@ export default function PlatformPage() {
               </div>
               <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
                 The market map shows where structural risk is concentrated now, how companies are
-                positioned by valuation pressure and cash-generation trajectory, and where current
-                structural stress is clustering under the active filters.
+                positioned by Operational Anchor Risk and Operational Trajectory Risk, and where
+                current structural stress is clustering under the active filters.
               </div>
             </div>
 
@@ -545,8 +547,8 @@ export default function PlatformPage() {
                 <CardHeader>
                   <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
-                    Each point is a company positioned by valuation pressure and cash-generation
-                    trajectory, with color showing composite structural risk.
+                    Each point is a company positioned by Operational Anchor Risk and Operational
+                    Trajectory Risk, with color showing Composite Structural Risk.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -559,10 +561,10 @@ export default function PlatformPage() {
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#B8C3CC]">
                         <div className="flex flex-wrap items-center gap-2">
                           <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
-                            Valuation Pressure →
+                            Operational Anchor Risk →
                           </div>
                           <div className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1">
-                            Cash-Generation Trajectory ↑
+                            Operational Trajectory Risk ↑
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -581,23 +583,22 @@ export default function PlatformPage() {
 
                       {/* Chart with quadrant label overlay */}
                       <div className="relative h-[400px]">
-                        {/* Quadrant corner labels — positioned inside chart area */}
                         <div className="pointer-events-none absolute inset-0 z-10">
-                          {/* Top-left: high trajectory, low pressure */}
+                          {/* Top-left: high trajectory risk, low anchor risk */}
                           <div className="absolute left-[14px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#7E8A96]">
-                            Low pressure<br />Strong trajectory
+                            Low anchor risk<br />High trajectory risk
                           </div>
-                          {/* Top-right: high trajectory, high pressure */}
-                          <div className="absolute right-[24px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#7E8A96]">
-                            High pressure<br />Strong trajectory
+                          {/* Top-right: high trajectory risk, high anchor risk — high risk zone */}
+                          <div className="absolute right-[24px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#BC6464]">
+                            High anchor risk<br />High trajectory risk
                           </div>
-                          {/* Bottom-left: low trajectory, low pressure */}
-                          <div className="absolute bottom-[28px] left-[14px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#7E8A96]">
-                            Low pressure<br />Weak trajectory
+                          {/* Bottom-left: low trajectory risk, low anchor risk — favorable zone */}
+                          <div className="absolute bottom-[28px] left-[14px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#6DAE8B]">
+                            Low anchor risk<br />Low trajectory risk
                           </div>
-                          {/* Bottom-right: low trajectory, high pressure — highest risk zone */}
-                          <div className="absolute bottom-[28px] right-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#BC6464]">
-                            High pressure<br />Weak trajectory
+                          {/* Bottom-right: low trajectory risk, high anchor risk */}
+                          <div className="absolute bottom-[28px] right-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#7E8A96]">
+                            High anchor risk<br />Low trajectory risk
                           </div>
                         </div>
 
@@ -621,15 +622,29 @@ export default function PlatformPage() {
                               tickLine={{ stroke: COLORS.border }}
                             />
                             <Tooltip
-                              contentStyle={{
-                                backgroundColor: COLORS.inset,
-                                border: `1px solid ${COLORS.border}`,
-                                borderRadius: 16,
-                                color: COLORS.text,
+                              cursor={{ strokeDasharray: "3 3" }}
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0].payload;
+                                return (
+                                  <div
+                                    className="rounded-2xl px-3 py-2 text-xs"
+                                    style={{
+                                      backgroundColor: COLORS.inset,
+                                      border: `1px solid ${COLORS.border}`,
+                                      color: COLORS.text,
+                                    }}
+                                  >
+                                    <div className="font-semibold text-white">{d.symbol}</div>
+                                    <div style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
+                                    <div style={{ color: compositeColor(d.composite_bucket) }}>
+                                      {d.composite_bucket}
+                                    </div>
+                                  </div>
+                                );
                               }}
-                              labelStyle={{ color: COLORS.text }}
                             />
-                            <Scatter data={scatterData}>
+                            <Scatter data={scatterData} r={3}>
                               {scatterData.map((entry, idx) => (
                                 <Cell key={idx} fill={compositeColor(entry.composite_bucket)} />
                               ))}
@@ -702,9 +717,9 @@ export default function PlatformPage() {
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#7E8A96]">
                 <span className="font-medium text-[#B8C3CC]">How to read this:</span>
-                <span><span className="text-[#EAF0F2]">Columns</span> = Valuation pressure (Axis I) ← less / more →</span>
-                <span><span className="text-[#EAF0F2]">Rows</span> = Cash-generation trajectory (Axis II) ↑ stronger</span>
-                <span><span className="text-[#EAF0F2]">Panels</span> = Financing fragility (Axis III)</span>
+                <span><span className="text-[#EAF0F2]">Columns</span> = Operational Anchor Risk ← lower / higher →</span>
+                <span><span className="text-[#EAF0F2]">Rows</span> = Operational Trajectory Risk ↑ higher risk</span>
+                <span><span className="text-[#EAF0F2]">Panels</span> = Operational Financing Risk</span>
                 <span><span className="text-[#EAF0F2]">Color + N</span> = Outcome strength and sample size</span>
               </div>
             </div>
@@ -771,7 +786,7 @@ export default function PlatformPage() {
                     <CardTitle className="text-white">{panel.panel}</CardTitle>
                     <CardDescription className="text-[#B8C3CC]">
                       {cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M
-                      by Axis I × Axis II state.
+                      by Operational Anchor Risk × Operational Trajectory Risk.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -891,9 +906,9 @@ export default function PlatformPage() {
                       <TableRow className="border-[#203754] bg-[#0D2138]">
                         <TableHead className="text-[#B8C3CC]">Symbol</TableHead>
                         <TableHead className="text-[#B8C3CC]">OAL</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Axis I</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Axis II</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Axis III</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Anchor Risk</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Trajectory Risk</TableHead>
+                        <TableHead className="text-[#B8C3CC]">Financing Risk</TableHead>
                         <TableHead className="text-[#B8C3CC]">Composite</TableHead>
                         <TableHead className="text-[#B8C3CC]">Valuation Bucket</TableHead>
                       </TableRow>
@@ -998,8 +1013,8 @@ export default function PlatformPage() {
                         <TableRow className="border-[#203754] bg-[#0D2138]">
                           <TableHead className="text-[#B8C3CC]">OAL</TableHead>
                           <TableHead className="text-[#B8C3CC]">Count</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Median Axis I</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Median Axis III</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Median Anchor Risk</TableHead>
+                          <TableHead className="text-[#B8C3CC]">Median Financing Risk</TableHead>
                           <TableHead className="text-[#B8C3CC]">Median Composite</TableHead>
                         </TableRow>
                       </TableHeader>
