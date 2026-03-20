@@ -1,31 +1,31 @@
 [
   {
     "oal_label": "FCF",
-    "n": 2872,
-    "median_axis1": 0.5001740947075208,
-    "median_axis3": 0.4373286329808068,
-    "median_composite": 0.4669556201612834
+    "n": 2900,
+    "median_axis1": 0.4065440547476475,
+    "median_axis3": 0.436917701863354,
+    "median_composite": 0.4527162519127398
   },
   {
     "oal_label": "Net Income",
-    "n": 641,
-    "median_axis1": 0.500780031201248,
-    "median_axis3": 0.1959183673469388,
-    "median_composite": 0.3869368652297112
+    "n": 622,
+    "median_axis1": 0.7548118049615056,
+    "median_axis3": 0.2014767932489451,
+    "median_composite": 0.4709657309852868
   },
   {
     "oal_label": "EBIT",
-    "n": 109,
-    "median_axis1": 0.5045871559633027,
-    "median_axis3": 0.8204081632653062,
-    "median_composite": 0.6401048492791612
+    "n": 111,
+    "median_axis1": 0.8718990590248075,
+    "median_axis3": 0.810126582278481,
+    "median_composite": 0.6770492016367236
   },
   {
     "oal_label": "Revenue",
-    "n": 1168,
-    "median_axis1": 0.5004280821917808,
+    "n": 1163,
+    "median_axis1": 0.6920444824636441,
     "median_axis3": 1.0,
-    "median_composite": 0.6603167808219178
+    "median_composite": 0.6390035899968459
   },
   {
     "oal_label": "Non-viable",
