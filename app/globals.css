@@ -61,25 +61,26 @@
 
 :root {
   /* Core brand palette */
-  --tcs-parchment: #f5f2ea;
+  --tcs-parchment: #f1f3f0;
   --tcs-card: #ffffff;
-  --tcs-divider: #e3ded2;
+  --tcs-divider: #dde0dc;
 
   --tcs-ink: #1e2228;
   --tcs-ink-secondary: #5c6472;
   --tcs-ink-muted: #8a92a0;
 
-  --tcs-accent: #4a6fa5;
-  --tcs-accent-secondary: #6f8fc4;
-  --tcs-anchor: #0a2342;
+  --tcs-accent: #244636;
+  --tcs-accent-secondary: #41506a;
+  --tcs-anchor: #0a1f3d;
 
   --tcs-positive: #3e8e6a;
-  --tcs-negative: #c94c4c;
+  --tcs-negative: #8b3838;
 
-  --tcs-dashboard-bg: #0a1730;
-  --tcs-dashboard-surface: #10203d;
-  --tcs-dashboard-panel: #14284a;
-  --tcs-dashboard-border: #243a61;
+  --tcs-dashboard-bg: #0a1f3d;
+  --tcs-dashboard-surface: #102642;
+  --tcs-dashboard-panel: #112a47;
+  --tcs-dashboard-inset: #0d2138;
+  --tcs-dashboard-border: #203754;
 
   /* shadcn semantic tokens - light mode */
   --background: var(--tcs-parchment);
@@ -94,14 +95,14 @@
   --primary: var(--tcs-anchor);
   --primary-foreground: #ffffff;
 
-  --secondary: #ece7dc;
+  --secondary: #e9ece7;
   --secondary-foreground: var(--tcs-ink);
 
-  --muted: #efebe3;
+  --muted: #ecefec;
   --muted-foreground: var(--tcs-ink-secondary);
 
-  --accent: #eef3fa;
-  --accent-foreground: var(--tcs-anchor);
+  --accent: #e8efe9;
+  --accent-foreground: var(--tcs-accent);
 
   --destructive: var(--tcs-negative);
 
@@ -109,10 +110,10 @@
   --input: var(--tcs-divider);
   --ring: var(--tcs-accent);
 
-  --chart-1: var(--tcs-accent);
+  --chart-1: var(--tcs-anchor);
   --chart-2: var(--tcs-accent-secondary);
   --chart-3: var(--tcs-positive);
-  --chart-4: #8da0bc;
+  --chart-4: #47566b;
   --chart-5: var(--tcs-negative);
 
   --radius: 0.75rem;
@@ -121,34 +122,34 @@
   --sidebar-foreground: var(--tcs-ink);
   --sidebar-primary: var(--tcs-anchor);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef3fa;
-  --sidebar-accent-foreground: var(--tcs-anchor);
+  --sidebar-accent: #e8efe9;
+  --sidebar-accent-foreground: var(--tcs-accent);
   --sidebar-border: var(--tcs-divider);
   --sidebar-ring: var(--tcs-accent);
 }
 
 .dark {
-  /* shadcn semantic tokens - dashboard dark mode */
+  /* shadcn semantic tokens - platform dark mode */
   --background: var(--tcs-dashboard-bg);
-  --foreground: #e8edf5;
+  --foreground: #eaf0f2;
 
   --card: var(--tcs-dashboard-panel);
-  --card-foreground: #e8edf5;
+  --card-foreground: #eaf0f2;
 
   --popover: var(--tcs-dashboard-surface);
-  --popover-foreground: #e8edf5;
+  --popover-foreground: #eaf0f2;
 
-  --primary: var(--tcs-accent);
+  --primary: var(--tcs-accent-secondary);
   --primary-foreground: #ffffff;
 
-  --secondary: #10203d;
-  --secondary-foreground: #e8edf5;
+  --secondary: var(--tcs-dashboard-surface);
+  --secondary-foreground: #eaf0f2;
 
-  --muted: #10203d;
-  --muted-foreground: #b7c3d8;
+  --muted: var(--tcs-dashboard-inset);
+  --muted-foreground: #b8c3cc;
 
-  --accent: #18345d;
-  --accent-foreground: #e8edf5;
+  --accent: var(--tcs-dashboard-inset);
+  --accent-foreground: #eaf0f2;
 
   --destructive: var(--tcs-negative);
 
@@ -156,18 +157,18 @@
   --input: var(--tcs-dashboard-border);
   --ring: var(--tcs-accent-secondary);
 
-  --chart-1: var(--tcs-accent);
-  --chart-2: var(--tcs-accent-secondary);
+  --chart-1: var(--tcs-accent-secondary);
+  --chart-2: #6dae8b;
   --chart-3: var(--tcs-positive);
-  --chart-4: #7f90ad;
+  --chart-4: #47566b;
   --chart-5: var(--tcs-negative);
 
   --sidebar: var(--tcs-dashboard-surface);
-  --sidebar-foreground: #e8edf5;
-  --sidebar-primary: var(--tcs-accent);
+  --sidebar-foreground: #eaf0f2;
+  --sidebar-primary: var(--tcs-accent-secondary);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #18345d;
-  --sidebar-accent-foreground: #e8edf5;
+  --sidebar-accent: var(--tcs-dashboard-inset);
+  --sidebar-accent-foreground: #eaf0f2;
   --sidebar-border: var(--tcs-dashboard-border);
   --sidebar-ring: var(--tcs-accent-secondary);
 }
@@ -194,7 +195,7 @@ html {
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--tcs-accent) 22%, white);
+    background: color-mix(in srgb, var(--tcs-accent) 20%, white);
     color: var(--tcs-anchor);
   }
 }
@@ -262,12 +263,17 @@ html {
 
 .tcs-surface-dark {
   background: var(--tcs-dashboard-bg);
-  color: #e8edf5;
+  color: #eaf0f2;
 }
 
 .tcs-card-dark {
   background: var(--tcs-dashboard-panel);
   border: 1px solid var(--tcs-dashboard-border);
-  color: #e8edf5;
+  color: #eaf0f2;
 }
 
+.tcs-inset-dark {
+  background: var(--tcs-dashboard-inset);
+  border: 1px solid var(--tcs-dashboard-border);
+  color: #eaf0f2;
+}
