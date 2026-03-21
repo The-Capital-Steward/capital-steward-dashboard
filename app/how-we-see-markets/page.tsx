@@ -1,15 +1,16 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export default function OurPhilosophyPage() {
+export default function HowWeSeeMarketsPage() {
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
       {/* ── Hero ── */}
       <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-18 md:py-24">
+          {/* Eyebrow — renamed */}
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#244636]">
-            Our Philosophy
+            How We See Markets
           </p>
 
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
@@ -33,7 +34,7 @@ export default function OurPhilosophyPage() {
             <p>
               Markets are psychosocial systems. The financials participants choose to
               focus on are selected because they more easily support a narrative —
-              not because they most honestly represent the firm's economic reality.
+              not because they most accurately represent the firm's economic reality.
             </p>
             <p>
               A company will point to the deepest operational anchor it can credibly
@@ -145,6 +146,8 @@ export default function OurPhilosophyPage() {
       </section>
 
       {/* ── Three pillars — DARK BAND ── */}
+      {/* Philosophical names kept as h3 — this page is the correct context */}
+      {/* Operational names preserved as eyebrow labels for system continuity */}
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
           <div className="mx-auto max-w-3xl">
@@ -376,7 +379,7 @@ export default function OurPhilosophyPage() {
         </div>
       </section>
 
-      {/* ── Bridge to framework — NEW SECTION ── */}
+      {/* ── Bridge to framework ── */}
       <section className="border-b border-[#DDE0DC] bg-white">
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
           <article className="mx-auto max-w-3xl">
@@ -402,9 +405,10 @@ export default function OurPhilosophyPage() {
                 between structural risk and forward return distributions — is documented
                 in full.
               </p>
+              {/* "honestly" → "rigorously" — moral framing removed */}
               <p>
                 It is written to be read by someone who wants to evaluate the framework
-                honestly, not just use it. If that is you, it is worth the time.
+                rigorously, not just use it. If that is you, it is worth the time.
               </p>
             </div>
 
@@ -433,11 +437,12 @@ export default function OurPhilosophyPage() {
                 Open Platform
                 <ArrowRight className="h-4 w-4" />
               </Link>
+              {/* "Read Our Story" → "Why This Exists" */}
               <Link
                 href="/why-this-exists"
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#DDE0DC] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
               >
-                Read Our Story
+                Why This Exists
               </Link>
             </div>
           </article>
