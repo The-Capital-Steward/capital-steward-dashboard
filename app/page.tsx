@@ -254,101 +254,95 @@ export default function HomePage() {
 
       {/* ── Core Framework — DARK BAND ── */}
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-18 md:grid-cols-[0.95fr_1.05fr] md:py-22">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
-              Core Framework
-            </p>
-            {/* Dark band headline — aligned to canonical phrasing */}
-            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-5xl">
-              Markets price narratives. OSMR measures the structure beneath them.
-            </h2>
-            <p className="mt-8 text-[15px] leading-7 text-[#A9BEDF]">
-              The full methodology — how each axis is computed, why the shallowness
-              penalties are structured as they are, and what 270,618 historical
-              observations tell us about structural risk and forward return
-              distributions — is documented in full.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/the-osmr-framework"
-                className="inline-flex items-center gap-2 rounded-2xl border border-[#A9BEDF] px-5 py-3 text-sm font-medium text-white transition hover:border-white"
-              >
-                How We Measure Structural Risk
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+        <div className="mx-auto max-w-5xl px-6 py-18 md:py-24">
+
+          {/* 1. Headline */}
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
+            Core Framework
+          </p>
+          <h2 className="tcs-heading mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white md:text-5xl">
+            Markets price narratives. OSMR measures the structure beneath them.
+          </h2>
+
+          {/* 2. Intuition */}
+          <p className="mt-8 max-w-3xl text-lg leading-8 text-[#A9BEDF]">
+            Most valuations rest on a narrative bridge between what a company
+            actually produces and what the market believes it will. The deeper
+            the operational anchor, the shorter that bridge. The shallower the
+            anchor, the more narrative is required — and the more vulnerable
+            the valuation is to deflation when that narrative weakens.
+          </p>
+
+          {/* 3. Framework diagram — centered anchor object */}
+          <div className="mt-12 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-8">
+            <div className="mb-6 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
+              OSMR Framework
+            </div>
+
+            {/* Three equal axis cards */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                {
+                  title: "Operational Anchor Risk",
+                  desc: "Valuation vs. credible operational output",
+                },
+                {
+                  title: "Operational Trajectory Risk",
+                  desc: "Whether the anchor is improving or deteriorating",
+                },
+                {
+                  title: "Operational Financing Risk",
+                  desc: "Obligation coverage from operational output",
+                },
+              ].map(({ title, desc }) => (
+                <div
+                  key={title}
+                  className="rounded-xl border border-[#1E3A5F] bg-[#0A1F3D] p-5"
+                >
+                  <div className="text-sm font-medium leading-snug text-white">{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-[#7A9FCA]">{desc}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Connector */}
+            <div className="my-4 flex justify-around px-[16.5%]">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-5 w-px"
+                  style={{ background: 'linear-gradient(to bottom, #2E5A8F, transparent)' }}
+                />
+              ))}
+            </div>
+
+            {/* Composite output band — higher contrast */}
+            <div className="rounded-xl border border-[#3E6A9F] bg-[#0D2847] px-6 py-4">
+              <div className="flex items-center justify-center gap-4">
+                <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-4 py-1.5 text-sm font-medium text-[#244636]">
+                  OSMR
+                </span>
+                <span className="text-sm text-[#A9BEDF]">Composite — three-axis structural output</span>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
-              Here's the intuition behind it:
-            </p>
-            <p className="text-lg leading-8 text-[#A9BEDF]">
-              Most valuations rest on a narrative bridge between what a company
-              actually produces and what the market believes it will. The deeper
-              the operational anchor, the shorter that bridge. The shallower the
-              anchor, the more narrative is required — and the more vulnerable
-              the valuation is to deflation when that narrative weakens.
-            </p>
-
-            {/* OSMR Framework — Option B pillar layout */}
-            <div className="rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-6">
-              <div className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
-                OSMR Framework
-              </div>
-
-              {/* Three equal axis cards — inputs */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  {
-                    title: "Operational Anchor Risk",
-                    desc: "Valuation vs. credible operational output",
-                  },
-                  {
-                    title: "Operational Trajectory Risk",
-                    desc: "Whether the anchor is improving or deteriorating",
-                  },
-                  {
-                    title: "Operational Financing Risk",
-                    desc: "Obligation coverage from operational output",
-                  },
-                ].map(({ title, desc }) => (
-                  <div
-                    key={title}
-                    className="rounded-xl border border-[#1E3A5F] bg-[#0A1F3D] p-3.5"
-                  >
-                    <div className="text-[11px] font-medium leading-snug text-white">{title}</div>
-                    <div className="mt-1.5 text-[11px] leading-5 text-[#7A9FCA]">{desc}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Connector — faint vertical guides */}
-              <div className="my-2 flex justify-center gap-[calc(33.33%-1px)]">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="h-3 w-px"
-                    style={{ background: 'linear-gradient(to bottom, #1E3A5F, transparent)' }}
-                  />
-                ))}
-              </div>
-
-              {/* Composite output band */}
-              <div className="rounded-xl border border-[#2E5A8F] bg-[#0A1F3D] px-4 py-3">
-                <div className="flex items-center justify-center gap-3">
-                  <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
-                    OSMR
-                  </span>
-                  <span className="text-xs text-[#A9BEDF]">Composite — three-axis structural output</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Accordion — operational naming, philosophical names retired */}
+          {/* 4. Accordion — full width */}
+          <div className="mt-6">
             <RiskCards />
           </div>
+
+          {/* 5. CTA — primary, centered */}
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/the-osmr-framework"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
+            >
+              Explore the Full Framework
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
         </div>
       </section>
 
@@ -457,7 +451,7 @@ export default function HomePage() {
                   Why This Exists
                 </p>
                 <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-                  Built where honest research couldn't be published.
+                  Built where rigorous analysis couldn't be published.
                 </h2>
                 {/* Single sentence, incentive framing, second sentence removed */}
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
