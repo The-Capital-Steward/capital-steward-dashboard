@@ -330,7 +330,7 @@ export default function HowWeSeeMarketsPage() {
 
             <div className="mt-5">
               <Link
-                href="/the-osmr-framework"
+                href="/osmr-methodology"
                 className="inline-flex items-center gap-2.5 rounded-lg border border-[#0A1F3D] bg-[#0A1F3D] px-6 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
               >
                 How We Measure Structural Risk
