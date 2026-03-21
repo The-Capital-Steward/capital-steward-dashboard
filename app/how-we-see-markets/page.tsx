@@ -11,14 +11,12 @@ function AnchorLadder() {
   ];
 
   return (
-    <div className="my-8 rounded-[1.25rem] border border-[#C9D8CD] bg-white p-10">
-      <div className="mb-1 flex items-baseline justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6A7280]">
-          Operational Anchor Ladder
-        </p>
-      </div>
-      {/* Directional label — sits just above the rungs */}
-      <p className="mb-3 text-[11px] font-medium text-[#6B7280]">
+    /* Ladder: rounded-[1rem], darker border, no shadow, p-10 */
+    <div className="my-8 rounded-[1rem] border border-[#D1D5DB] bg-white p-10">
+      <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#5B6472]">
+        Operational Anchor Ladder
+      </p>
+      <p className="mt-1 mb-4 text-[11px] font-medium text-[#6B7280]">
         Strongest support → most narrative-dependent
       </p>
 
@@ -36,7 +34,7 @@ function AnchorLadder() {
               <div className={`text-[15px] font-semibold tracking-tight ${
                 rung.isDashed ? "text-[#B0B8C4]" : rung.isFirst ? "text-[#1E3D2B]" : "text-[#0A1F3D]"
               }`}>{rung.label}</div>
-              <div className="mt-0.5 text-[10px] leading-4 text-[#9AA3AF]">{rung.desc}</div>
+              <div className="mt-0.5 text-[11px] leading-4 text-[#9CA3AF]">{rung.desc}</div>
             </div>
             {i < rungs.length - 1 && (
               <div className="mx-1.5 shrink-0">
@@ -70,13 +68,13 @@ function AnchorLadder() {
               <div className={`text-[15px] font-semibold tracking-tight ${
                 rung.isDashed ? "text-[#B0B8C4]" : rung.isFirst ? "text-[#1E3D2B]" : "text-[#0A1F3D]"
               }`}>{rung.label}</div>
-              <div className="mt-0.5 text-[10px] leading-4 text-[#9AA3AF]">{rung.desc}</div>
+              <div className="mt-0.5 text-[11px] leading-4 text-[#9CA3AF]">{rung.desc}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Emphasis block 1 — darker tone, tighter padding, slightly larger + tighter text */}
+      {/* Emphasis block 1 */}
       <div className="mt-8 rounded-md bg-[#E6E9E5] px-6 py-4">
         <p className="tcs-heading text-[1.1rem] font-semibold leading-snug tracking-tight text-[#0A1F3D] md:text-[1.2rem]">
           Each step up increases narrative dependence — and structural risk.
@@ -107,10 +105,12 @@ export default function HowWeSeeMarketsPage() {
         </div>
       </section>
 
-      {/* ── The condition + mechanism + implication ── */}
+      {/* ── Condition + Mechanism + Implication — CONTAINED ── */}
       <section className="border-b border-[#D0D4CF]">
         <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
-          <article className="mx-auto max-w-2xl">
+
+          {/* Section container — card presence matching homepage weight */}
+          <div className="rounded-[1.25rem] border border-[#D0D4CF] bg-white px-10 py-12">
 
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
               The condition
@@ -145,7 +145,7 @@ export default function HowWeSeeMarketsPage() {
             </p>
 
             {/* Emphasis block 2 — heaviest visual moment on the page */}
-            <div className="mx-auto my-14 max-w-lg rounded-lg border border-[#0A1F3D] bg-[#0A1F3D] px-10 py-12 text-center">
+            <div className="my-16 rounded-lg bg-[#0A1F3D] px-12 py-14 text-center">
               <p className="tcs-heading text-2xl font-semibold leading-snug text-white md:text-3xl">
                 The market does not move from truth to price.
                 <br />
@@ -153,15 +153,19 @@ export default function HowWeSeeMarketsPage() {
               </p>
             </div>
 
-          </article>
+          </div>
         </div>
       </section>
 
-      {/* ── The problem ── */}
-      {/* bg-white = background shift, section friction */}
-      <section className="border-b border-[#D0D4CF] bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
-          <article className="mx-auto max-w-3xl">
+      {/* Section spacer */}
+      <div className="h-16 md:h-20" />
+
+      {/* ── The problem — CONTAINED ── */}
+      <section className="border-b border-[#D0D4CF]">
+        <div className="mx-auto max-w-4xl px-6 pb-14 md:pb-20">
+
+          {/* Section container */}
+          <div className="rounded-[1.25rem] border border-[#D0D4CF] bg-white px-10 py-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
               The problem
             </p>
@@ -194,16 +198,16 @@ export default function HowWeSeeMarketsPage() {
                 </div>
               ))}
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
-      {/* ── Framework preview ── */}
-      {/* Transition band — signals entry into system layer before dark section */}
+      {/* Transition band before dark section */}
       <div className="h-12 border-t border-[#C9D8CD] bg-gradient-to-b from-[#F1F3F0] to-[#E9ECE7]" />
-      {/* Deeper background + more entry padding = user feels they entered the system layer */}
+
+      {/* ── Framework — DARK BAND ── */}
       <section className="border-b border-[#0A1830] bg-[#071629]">
-        <div className="mx-auto max-w-4xl px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-4xl px-6 py-24 md:py-32">
           <div className="mx-auto max-w-3xl">
             <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#5B6472]">
               Framework
@@ -218,8 +222,7 @@ export default function HowWeSeeMarketsPage() {
               Every dimension speaks to the same anchor throughout.
             </p>
 
-            {/* More spacing between cards */}
-            <div className="mt-12 space-y-5">
+            <div className="mt-14 space-y-6">
               {[
                 {
                   num: "I",
@@ -265,7 +268,6 @@ export default function HowWeSeeMarketsPage() {
       </section>
 
       {/* ── Closing conviction ── */}
-      {/* More top padding = pause after system layer, before conclusion */}
       <section className="border-b border-[#D0D4CF]">
         <div className="mx-auto max-w-4xl px-6 py-20 md:py-24">
           <article className="mx-auto max-w-3xl">
@@ -298,7 +300,7 @@ export default function HowWeSeeMarketsPage() {
             </div>
 
             <div className="mt-10 border-l-2 border-[#244636] pl-6">
-              <p className="tcs-heading text-xl font-semibold leading-tight text-[#0A1F3D] md:text-2xl">
+              <p className="tcs-heading text-2xl font-semibold leading-tight text-[#0A1F3D]">
                 Structure determines what narratives can survive.
               </p>
             </div>
@@ -326,43 +328,17 @@ export default function HowWeSeeMarketsPage() {
               the time.
             </p>
 
-            <p className="mt-7 text-[15px] leading-7 text-[#8A92A0]">
+            <p className="mt-7 text-[15px] leading-7 text-[#4F5968]">
               If you want to see how this is measured in full —
             </p>
 
             <div className="mt-5">
               <Link
                 href="/the-osmr-framework"
-                className="inline-flex items-center gap-2.5 rounded-lg border border-[#0A1F3D] bg-[#0A1F3D] px-6 py-4 text-sm font-medium text-white transition hover:bg-[#153761]"
+                className="inline-flex items-center gap-2.5 rounded-lg border border-[#0A1F3D] bg-[#0A1F3D] px-6 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
               >
                 How We Measure Structural Risk
                 <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      {/* ── Final CTAs — terminal point ── */}
-      {/* Spacer + divider = deliberate pause before decision */}
-      <div className="h-16 md:h-24" />
-      <div className="border-t border-[#D0D4CF]" />
-      <section>
-        <div className="mx-auto max-w-4xl px-6 py-16 md:py-20">
-          <article className="mx-auto max-w-3xl">
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/platform"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#0A1F3D] px-10 py-6 text-base font-semibold text-white transition hover:bg-[#153761]"
-              >
-                Open Platform
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/why-this-exists"
-                className="inline-flex items-center gap-2.5 rounded-xl border border-[#C8CCC9] bg-white px-10 py-6 text-base font-medium text-[#1E2228] transition hover:border-[#0A1F3D] hover:text-[#0A1F3D]"
-              >
-                Why This Exists
               </Link>
             </div>
           </article>

@@ -6,18 +6,18 @@ export default function WhyThisExistsPage() {
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
       {/* ── Hero ── */}
-      <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-4xl px-6 py-18 md:py-24">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#244636]">
+      <section className="border-b border-[#D0D4CF]">
+        <div className="mx-auto max-w-4xl px-6 py-20 md:py-28">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#244636]">
             Why This Exists
           </p>
 
-          <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
+          <h1 className="tcs-heading mt-5 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
             Built where rigorous analysis couldn't be published.
           </h1>
 
           <div className="mt-8 max-w-3xl border-l border-[#C9D8CD] pl-5">
-            <p className="text-lg leading-8 text-[#5C6472] md:text-[19px]">
+            <p className="text-lg leading-[1.8] text-[#4F5968] md:text-[19px]">
               If you have spent years consuming financial research and still feel like
               you are missing something structural — something that actually conforms
               to evidence — this page explains where that feeling comes from,
@@ -28,17 +28,17 @@ export default function WhyThisExistsPage() {
       </section>
 
       {/* ── The environment ── */}
-      <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+      <section className="border-b border-[#D0D4CF]">
+        <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
           <article className="mx-auto max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
               The context
             </p>
-            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-[2.35rem]">
+            <h2 className="tcs-heading mt-4 text-3xl font-semibold leading-tight tracking-tight text-[#0A1F3D] md:text-[2.35rem]">
               Most financial research is built to be convincing.
             </h2>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               <p>
                 Anthony Summers spent a decade inside one of the largest financial
                 publishing organizations in the world. His job, formally, was research
@@ -80,17 +80,17 @@ export default function WhyThisExistsPage() {
       </section>
 
       {/* ── The turning point — DARK BAND ── */}
-      <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
-        <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
+      <section className="border-b border-[#0A1830] bg-[#071629]">
+        <div className="mx-auto max-w-4xl px-6 py-20 md:py-28">
           <article className="mx-auto max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6A8FB0]">
               The turning point
             </p>
-            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-[2.35rem]">
+            <h2 className="tcs-heading mt-4 text-3xl font-semibold leading-tight tracking-tight text-white md:text-[2.35rem]">
               The framework became too real to keep inside.
             </h2>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#A9BEDF] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#8DAFC8] md:text-[18px]">
               <p>
                 The Operational Structure Mispricing Risk framework did not begin as a
                 platform idea. It began as a private attempt to answer a question
@@ -103,7 +103,7 @@ export default function WhyThisExistsPage() {
                 three axes, the cohort validation against 270,618 historical
                 observations — the clearer it became that the answer was yes. The
                 framework was real. It was grounded in empirical evidence. It measured
-                It measured something most analysis is not designed to surface.
+                something most analysis is not designed to surface.
               </p>
               <p>
                 And it could not be expressed honestly inside a system built on the
@@ -111,8 +111,9 @@ export default function WhyThisExistsPage() {
               </p>
             </div>
 
-            <div className="mt-10 rounded-[1.75rem] border border-[#203754] bg-[#0D2847] px-8 py-8">
-              <p className="text-[17px] leading-8 text-white md:text-[18px]">
+            {/* Dark inset block */}
+            <div className="mt-10 rounded-lg border border-[#1A3354] bg-[#0C2240] px-8 py-8">
+              <p className="text-[17px] leading-[1.8] text-white md:text-[18px]">
                 A framework that measures how much narrative a company requires to
                 justify its valuation cannot be published by an organization whose
                 business model depends on narrative. The conflict is not incidental.
@@ -120,7 +121,7 @@ export default function WhyThisExistsPage() {
               </p>
             </div>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#A9BEDF] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#8DAFC8] md:text-[18px]">
               <p>
                 That realization is what produced The Capital Steward. Not a desire to
                 build a business, though that matters too. Not a critique of where
@@ -135,17 +136,17 @@ export default function WhyThisExistsPage() {
       </section>
 
       {/* ── Who this is for ── */}
-      <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+      <section className="border-b border-[#D0D4CF]">
+        <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
           <article className="mx-auto max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
               The reader
             </p>
-            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-[2.35rem]">
+            <h2 className="tcs-heading mt-4 text-3xl font-semibold leading-tight tracking-tight text-[#0A1F3D] md:text-[2.35rem]">
               This is for investors who already suspect something is wrong.
             </h2>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               <p>
                 Not investors who are new to markets and looking for an introduction.
                 Not investors who are satisfied with the analysis they currently
@@ -164,8 +165,7 @@ export default function WhyThisExistsPage() {
               </p>
             </div>
 
-            {/* Reader recognition cards */}
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-10 grid gap-3 md:grid-cols-3">
               {[
                 {
                   label: "They recognize",
@@ -182,17 +182,17 @@ export default function WhyThisExistsPage() {
               ].map(({ label, text }) => (
                 <div
                   key={label}
-                  className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5"
+                  className="rounded-md border border-[#D0D4CF] bg-[#F4F5F3] p-5"
                 >
-                  <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
                     {label}
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-[#4F5968]">{text}</p>
+                  <p className="mt-3 text-[13.5px] leading-[1.65] text-[#4F5968]">{text}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               <p>
                 The Capital Steward was built for that investor. The framework exists
                 because the question it answers — how structurally grounded is this
@@ -207,17 +207,17 @@ export default function WhyThisExistsPage() {
       </section>
 
       {/* ── The governing principle ── */}
-      <section className="border-b border-[#DDE0DC] bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+      <section className="border-b border-[#D0D4CF] bg-white">
+        <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
           <article className="mx-auto max-w-3xl">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
               The standard
             </p>
-            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-[2.35rem]">
+            <h2 className="tcs-heading mt-4 text-3xl font-semibold leading-tight tracking-tight text-[#0A1F3D] md:text-[2.35rem]">
               Stewardship is the operating principle.
             </h2>
 
-            <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
+            <div className="mt-8 space-y-6 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               <p>
                 The name is not incidental. Stewardship — of capital, of analysis, of
                 the trust that a reader places in a framework they did not build
@@ -228,8 +228,8 @@ export default function WhyThisExistsPage() {
                 means documenting limitations alongside findings. It means
                 acknowledging when the framework cannot tell you something, rather
                 than implying it can. It means building something honest about
-                uncertainty, because uncertainty handled honestly is more useful to a serious
-                investor than confident noise.
+                uncertainty, because uncertainty handled honestly is more useful to a
+                serious investor than confident noise.
               </p>
               <p>
                 This is not a platform built to predict. It is built to see clearly —
@@ -239,7 +239,7 @@ export default function WhyThisExistsPage() {
             </div>
 
             <div className="my-10 border-l-2 border-[#244636] pl-6">
-              <p className="tcs-heading text-2xl font-semibold leading-tight text-[#0A1F3D] md:text-[2rem]">
+              <p className="tcs-heading text-[1.45rem] font-semibold leading-snug tracking-tight text-[#0A1F3D] md:text-[1.65rem]">
                 The work must conform to truth as much as possible.
                 <br />
                 Everything else follows from that.
@@ -249,30 +249,43 @@ export default function WhyThisExistsPage() {
         </div>
       </section>
 
-      {/* ── CTAs ── */}
+      {/* ── Terminal CTA — canonical homepage card pattern ── */}
+      {/* Shared component: same container as homepage "Why This Exists" card */}
       <section>
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
-          <article className="mx-auto max-w-3xl">
-            <p className="text-[17px] leading-8 text-[#4F5968] mb-8 md:text-[18px]">
-              If you have felt the gap but haven't had a framework to measure it,
-              that is exactly what this platform is built to give you.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/the-osmr-framework"
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
-              >
-                How We Measure Structural Risk
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/platform"
-                className="inline-flex items-center gap-2 rounded-2xl border border-[#DDE0DC] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
-              >
-                Open Platform
-              </Link>
+        <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
+          <div className="rounded-[2rem] border border-[#D0D4CF] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] md:p-10">
+            <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
+                  Where to go next
+                </p>
+                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight tracking-tight text-[#0A1F3D] md:text-4xl">
+                  If you have felt the gap, this is built to measure it.
+                </h2>
+                <p className="mt-5 max-w-xl text-[17px] leading-[1.8] text-[#4F5968]">
+                  The framework. The methodology. The platform. All of it built on
+                  the same principle: structure over narrative, evidence over
+                  persuasion.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4 md:justify-end">
+                <Link
+                  href="/the-osmr-framework"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0A1F3D] px-6 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
+                >
+                  How We Measure Structural Risk
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/platform"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#C8CCC9] bg-[#F4F5F3] px-6 py-4 text-sm font-medium text-[#1E2228] transition hover:border-[#0A1F3D] hover:text-[#0A1F3D]"
+                >
+                  Open Platform
+                </Link>
+              </div>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
