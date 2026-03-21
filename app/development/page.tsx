@@ -447,7 +447,7 @@ function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
             <CardTitle className="text-white">Current Market Interpretation</CardTitle>
             {/* Single non-predictive framing — no duplicate */}
             <CardDescription className="mt-1 text-[#B8C3CC]">
-              The system's current read of market structure under the active filters. These characterize conditions — they do not predict outcomes.
+              The system's current read of market structure under the active filters. These describe current structural conditions. They do not forecast outcomes.
             </CardDescription>
             {/* Primacy instruction — first thing to consult on every session */}
             <p className="mt-2 text-[12px] font-medium text-[#6DAE8B]">
@@ -646,7 +646,7 @@ export default function PlatformPage() {
 
           {/* Action-oriented opening — tells user what to do, not just what the system is */}
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[#B8C3CC]">
-            Use this system to identify where structural risk is concentrated, isolate the companies driving it, and understand how those conditions have historically resolved.
+            Use this system to identify where structural risk is concentrated, isolate the companies driving it, and see how those conditions have historically resolved.
           </p>
 
           {/* Product authority line — establishes this as the operating surface */}
@@ -895,7 +895,7 @@ export default function PlatformPage() {
                   Each point is a company. Start with the top-right — where valuation stretch and deteriorating trajectory are highest.
                 </p>
                 <p className="mb-1 text-[11px] text-[#7E8A96]">
-                  Each point represents a company. Hover for detail.
+                  Hover for detail.
                 </p>
                 <p className="mb-4 text-[12px] font-medium" style={{ color: "#BC6464" }}>
                   Top-right = most fragile: highest anchor risk + worst trajectory. Large dots in that zone also carry high financing strain — compound risk across all three axes.
@@ -1425,11 +1425,11 @@ export default function PlatformPage() {
                 <CardHeader>
                   <CardTitle className="text-white">What This View Adds</CardTitle>
                   <CardDescription className="text-[#B8C3CC]">
-                    How the liquidity view extends structural analysis beyond risk scores alone.
+                    How the financing context extends structural analysis beyond risk scores alone.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
-                  <p><span className="font-medium text-white">1.</span> The market map, OAL summary, liquidity distribution, and cohort return grids are live.</p>
+                  <p><span className="font-medium text-white">1.</span> The core structural layers — market map, anchor structure, financing context, and cohort outcomes — are fully active.</p>
                   <p><span className="font-medium text-white">2.</span> Global filters apply consistently across all tabs.</p>
                   <p><span className="font-medium text-white">3.</span> The cohort grid metric toggle lets you compare mean, median, and hit-rate surfaces for cross-validation.</p>
                   <p><span className="font-medium text-white">4.</span> Company drilldowns, regime history views, and advanced filtering extend this system further.</p>
