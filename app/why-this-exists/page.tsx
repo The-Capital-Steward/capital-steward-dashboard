@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export default function OurStoryPage() {
+export default function WhyThisExistsPage() {
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
@@ -9,18 +9,19 @@ export default function OurStoryPage() {
       <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-18 md:py-24">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#244636]">
-            Our Story
+            Why This Exists
           </p>
 
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
-            Why this exists.
+            Built where rigorous analysis couldn't be published.
           </h1>
 
           <div className="mt-8 max-w-3xl border-l border-[#C9D8CD] pl-5">
             <p className="text-lg leading-8 text-[#5C6472] md:text-[19px]">
               If you have spent years consuming financial research and still feel like
-              you are missing something structural — something honest — this page
-              explains where that feeling comes from, and what we built to address it.
+              you are missing something structural — something that actually conforms
+              to evidence — this page explains where that feeling comes from,
+              and what this is built to address.
             </p>
           </div>
         </div>
@@ -46,13 +47,16 @@ export default function OurStoryPage() {
                 determined how capital got deployed and how strategies got approved or
                 rejected before they ever reached a subscriber.
               </p>
+
               <p>
-                The work was real. The environment it lived in was not designed for it.
-                Financial publishing positions itself as an alternative to mainstream
-                financial media. If that claim is to be taken seriously, the industry
-                should operate with intellectual standards at least equal to the
-                institutions it critiques. In most cases, it does not — because the
-                people generating investment ideas are not analysts, portfolio managers,
+                The work described here was built inside a live institutional
+                environment and tested against real capital decisions.
+              </p>
+
+              <p>
+                The work was real. The environment it lived in — and still lives in —
+                was not designed to reward it. The people generating investment ideas
+                in most of these organizations are not analysts, portfolio managers,
                 or researchers. They are marketing copywriters. Their job is not to
                 test ideas against data or evidence. It is to produce persuasive
                 narratives designed to capture attention and drive subscriptions.
@@ -65,7 +69,7 @@ export default function OurStoryPage() {
                 it does has proven to be a very durable business model.
               </p>
               <p>
-                Anthony understood this from the inside. He worked within it. And for
+                Anthony understood this from the inside. He works within it. And for
                 years, the tension between the quality of the analytical work he was
                 doing and the environment it was produced for was something he managed
                 rather than resolved.
@@ -90,26 +94,27 @@ export default function OurStoryPage() {
               <p>
                 The Operational Structure Mispricing Risk framework did not begin as a
                 platform idea. It began as a private attempt to answer a question
-                Anthony had been circling for years: is there a systematic, honest way
-                to measure how structurally grounded a company's valuation actually is?
+                Anthony had been circling for years: is there a systematic, rigorous
+                way to measure how structurally grounded a company's valuation
+                actually is?
               </p>
               <p>
-                The further the work developed — the OAL governance construct, the three
-                axes, the cohort validation against 270,618 historical observations —
-                the clearer it became that the answer was yes. The framework was real.
-                It was grounded in empirical evidence. It measured something that
-                mattered and that most analysis was not designed to surface.
+                The further the work developed — the OAL governance construct, the
+                three axes, the cohort validation against 270,618 historical
+                observations — the clearer it became that the answer was yes. The
+                framework was real. It was grounded in empirical evidence. It measured
+                It measured something most analysis is not designed to surface.
               </p>
               <p>
-                And it could not live inside a system built on the exact dynamics it
-                was designed to measure.
+                And it could not be expressed honestly inside a system built on the
+                exact dynamics it was designed to measure.
               </p>
             </div>
 
             <div className="mt-10 rounded-[1.75rem] border border-[#203754] bg-[#0D2847] px-8 py-8">
               <p className="text-[17px] leading-8 text-white md:text-[18px]">
-                A framework that honestly measures how much narrative a company requires
-                to justify its valuation cannot be published by an organization whose
+                A framework that measures how much narrative a company requires to
+                justify its valuation cannot be published by an organization whose
                 business model depends on narrative. The conflict is not incidental.
                 It is structural.
               </p>
@@ -119,10 +124,10 @@ export default function OurStoryPage() {
               <p>
                 That realization is what produced The Capital Steward. Not a desire to
                 build a business, though that matters too. Not a critique of where
-                Anthony had worked, which produced real skills and real clarity about
-                what honest research requires. But a recognition that the work had
-                outgrown its container — and that the only way to do it honestly was
-                to build the right one.
+                Anthony has worked, which produced real skills and real clarity about
+                what rigorous analysis requires. But a recognition that the work had
+                outgrown its container — and that the only way to express it honestly
+                was to build the right one alongside it.
               </p>
             </div>
           </article>
@@ -143,17 +148,19 @@ export default function OurStoryPage() {
             <div className="mt-8 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               <p>
                 Not investors who are new to markets and looking for an introduction.
-                Not investors who are satisfied with the analysis they currently consume.
-                This platform is built for the investor who has been paying attention
-                long enough to notice that most financial research — however confident
-                it sounds — is downstream of someone's incentive structure.
+                Not investors who are satisfied with the analysis they currently
+                consume. This platform is built for the investor who has been paying
+                attention long enough to notice that most financial research —
+                however confident it sounds — is downstream of someone's incentive
+                structure.
               </p>
               <p>
                 That investor is not cynical. They still believe rigorous analysis is
                 possible. They are looking for it. They have not found it in most of
-                what gets published because most of what gets published was not designed
-                to be honest first. It was designed to be read first, shared first,
-                acted on first. Honesty, where it exists, is incidental.
+                what gets published because most of what gets published was not
+                designed to conform to evidence first. It was designed to be read
+                first, shared first, acted on first. Analytical rigor, where it
+                exists, is incidental.
               </p>
             </div>
 
@@ -162,7 +169,7 @@ export default function OurStoryPage() {
               {[
                 {
                   label: "They recognize",
-                  text: "That the financial media they consume is shaped by what publishers can sell, not what is actually true.",
+                  text: "That the research they consume is shaped by what publishers can sell, not what the evidence actually supports.",
                 },
                 {
                   label: "They want",
@@ -217,17 +224,17 @@ export default function OurStoryPage() {
                 themselves — is the governing standard for every decision made here.
               </p>
               <p>
-                That means median over mean when mean would flatter the results. It means
-                documenting limitations alongside findings. It means acknowledging when
-                the framework cannot tell you something, rather than implying it can.
-                It means building something that is honest about uncertainty, because
-                honest uncertainty is more useful to a serious investor than confident
-                noise.
+                That means median over mean when mean would flatter the results. It
+                means documenting limitations alongside findings. It means
+                acknowledging when the framework cannot tell you something, rather
+                than implying it can. It means building something honest about
+                uncertainty, because uncertainty handled honestly is more useful to a serious
+                investor than confident noise.
               </p>
               <p>
                 This is not a platform built to predict. It is built to see clearly —
                 and to make structural risk legible to anyone willing to look at it
-                honestly.
+                without an agenda attached to the outcome.
               </p>
             </div>
 

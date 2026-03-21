@@ -434,7 +434,7 @@ export default function OurPhilosophyPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/our-story"
+                href="/why-this-exists"
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#DDE0DC] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
               >
                 Read Our Story

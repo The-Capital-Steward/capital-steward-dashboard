@@ -47,11 +47,11 @@ export default function RootLayout({
             </Link>
 
             <nav className="hidden items-center gap-5 text-sm font-medium text-[#5C6472] md:flex">
-              <Link href="/our-story" className="transition hover:text-[#0A1F3D]">
-                Our Story
+              <Link href="/why-this-exists" className="transition hover:text-[#0A1F3D]">
+                Why This Exists
               </Link>
-              <Link href="/our-philosophy" className="transition hover:text-[#0A1F3D]">
-                Our Philosophy
+              <Link href="/how-we-see-markets" className="transition hover:text-[#0A1F3D]">
+                How We See Markets
               </Link>
               <Link
                 href="/platform"
