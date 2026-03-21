@@ -1,6 +1,88 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+// OAL Ladder — inline visual component
+function AnchorLadder() {
+  const rungs = [
+    { label: "FCF", desc: "Free cash flow", depth: "deepest" },
+    { label: "NI", desc: "Net income", depth: "" },
+    { label: "EBIT", desc: "Operating income", depth: "" },
+    { label: "Revenue", desc: "Sales only", depth: "" },
+    { label: "Narrative", desc: "No operational anchor", depth: "shallowest" },
+  ];
+
+  return (
+    <div className="my-10 rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_10px_30px_rgba(10,35,66,0.04)]">
+      <p className="mb-5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+        Operational Anchor Ladder
+      </p>
+
+      {/* Ladder — left to right on desktop, stacked on mobile */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-stretch md:gap-0">
+        {rungs.map((rung, i) => {
+          const isNarrative = rung.label === "Narrative";
+          const isFirst = i === 0;
+          return (
+            <div key={rung.label} className="flex md:flex-1 md:flex-col">
+              {/* Connector arrow — desktop only */}
+              {i > 0 && (
+                <div className="hidden md:flex md:items-center md:justify-center md:w-5 md:shrink-0 md:self-center">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 7h8M8 4l3 3-3 3" stroke="#C9D8CD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+              {/* Mobile connector */}
+              {i > 0 && (
+                <div className="flex items-center justify-center py-1 md:hidden">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M7 3v8M4 8l3 3 3-3" stroke="#C9D8CD" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+              <div
+                className={`flex-1 rounded-xl px-4 py-3 ${
+                  isNarrative
+                    ? "border border-dashed border-[#DDE0DC] bg-[#FAFAF8]"
+                    : isFirst
+                    ? "border border-[#C9D8CD] bg-[#E8EFE9]"
+                    : "border border-[#DDE0DC] bg-[#F7F8F6]"
+                }`}
+              >
+                <div
+                  className={`text-sm font-semibold ${
+                    isNarrative ? "text-[#9CA3AF]" : isFirst ? "text-[#244636]" : "text-[#0A1F3D]"
+                  }`}
+                >
+                  {rung.label}
+                </div>
+                <div className="mt-0.5 text-[11px] leading-4 text-[#8A92A0]">{rung.desc}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-4 text-[12px] text-[#8A92A0]">
+        Each step up increases narrative dependence — and structural risk.
+      </p>
+    </div>
+  );
+}
+
+// High-impact pull quote
+function ImpactLine() {
+  return (
+    <div className="my-10 border-l-2 border-[#0A1F3D] pl-6">
+      <p className="tcs-heading text-xl font-semibold leading-tight text-[#0A1F3D] md:text-2xl">
+        The market does not move from truth to price.
+        <br />
+        It moves from narrative to price.
+      </p>
+    </div>
+  );
+}
+
 export default function HowWeSeeMarketsPage() {
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
@@ -8,35 +90,46 @@ export default function HowWeSeeMarketsPage() {
       {/* ── Hero ── */}
       <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-18 md:py-24">
-          {/* Eyebrow — renamed */}
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#244636]">
             How We See Markets
           </p>
 
+          {/* Canonical headline */}
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
-            Markets price through narrative.
+            Markets price narratives.
             <br />
-            We measure the structure beneath it.
+            We measure the structure beneath them.
           </h1>
 
-          <div className="mt-8 max-w-3xl border-l border-[#C9D8CD] pl-5">
+          <div className="mt-8 max-w-2xl border-l border-[#C9D8CD] pl-5">
+            {/* "market" dropped — sharper contrast */}
             <p className="text-lg leading-8 text-[#5C6472] md:text-[19px]">
-              Most market analysis begins with stories. We begin with structure.
+              Most analysis begins with stories. We begin with structure.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── Opening argument ── */}
+      {/* ── Opening argument — staged in three blocks ── */}
       <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
-          <article className="mx-auto max-w-3xl border-l border-[#C9D8CD] pl-5 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
-            <p>
+          <article className="mx-auto max-w-2xl">
+
+            {/* Block 1: The condition */}
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+              The condition
+            </p>
+            <p className="mt-4 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               Markets are psychosocial systems. The financials participants choose to
-              focus on are selected because they more easily support a narrative —
+              focus on are selected because they better support a narrative —
               not because they most accurately represent the firm's economic reality.
             </p>
-            <p>
+
+            {/* Block 2: The mechanism */}
+            <p className="mt-10 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+              The mechanism
+            </p>
+            <p className="mt-4 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               A company will point to the deepest operational anchor it can credibly
               claim. If it can justify its valuation with free cash flow, it will. If
               it cannot, it ascends the financial statement — to earnings, to operating
@@ -44,10 +137,22 @@ export default function HowWeSeeMarketsPage() {
               Each step up the ladder lengthens the narrative bridge between price
               and economic reality.
             </p>
-            <p>
+
+            {/* OAL Ladder — visual anchor */}
+            <AnchorLadder />
+
+            {/* Block 3: The implication */}
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+              The implication
+            </p>
+            <p className="mt-4 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               The Capital Steward exists to measure that bridge — and to identify
               where it has grown too long to hold.
             </p>
+
+            {/* High-impact line */}
+            <ImpactLine />
+
           </article>
         </div>
       </section>
@@ -146,8 +251,8 @@ export default function HowWeSeeMarketsPage() {
       </section>
 
       {/* ── Three pillars — DARK BAND ── */}
-      {/* Philosophical names kept as h3 — this page is the correct context */}
-      {/* Operational names preserved as eyebrow labels for system continuity */}
+      {/* Philosophical names kept as h3 — correct context for this vocabulary */}
+      {/* Operational names as eyebrow — preserves system continuity */}
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto max-w-4xl px-6 py-14 md:py-20">
           <div className="mx-auto max-w-3xl">
@@ -405,7 +510,6 @@ export default function HowWeSeeMarketsPage() {
                 between structural risk and forward return distributions — is documented
                 in full.
               </p>
-              {/* "honestly" → "rigorously" — moral framing removed */}
               <p>
                 It is written to be read by someone who wants to evaluate the framework
                 rigorously, not just use it. If that is you, it is worth the time.
@@ -437,7 +541,6 @@ export default function HowWeSeeMarketsPage() {
                 Open Platform
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              {/* "Read Our Story" → "Why This Exists" */}
               <Link
                 href="/why-this-exists"
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#DDE0DC] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
