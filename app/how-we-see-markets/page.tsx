@@ -11,16 +11,16 @@ function AnchorLadder() {
   ];
 
   return (
-    /* Ladder: heavier padding, darker border, reduced rounding, no shadow — feels like a system, not a card */
-    <div className="my-10 rounded-lg border border-[#C8CCC9] bg-white p-10">
-      <div className="mb-6 flex items-baseline justify-between">
+    <div className="my-8 rounded-[1.25rem] border border-[#C9D8CD] bg-white p-10">
+      <div className="mb-1 flex items-baseline justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6A7280]">
           Operational Anchor Ladder
         </p>
-        <p className="text-[11px] text-[#8A92A0]">
-          Strongest support → most narrative-dependent
-        </p>
       </div>
+      {/* Directional label — sits just above the rungs */}
+      <p className="mb-3 text-[11px] font-medium text-[#6B7280]">
+        Strongest support → most narrative-dependent
+      </p>
 
       {/* Desktop: horizontal */}
       <div className="hidden md:flex md:items-stretch md:gap-1.5">
@@ -33,10 +33,10 @@ function AnchorLadder() {
                 ? "border border-[#B8CFC0] bg-[#E8EFE9]"
                 : "border border-[#D0D4D0] bg-[#F4F5F3]"
             }`}>
-              <div className={`text-sm font-semibold tracking-tight ${
+              <div className={`text-[15px] font-semibold tracking-tight ${
                 rung.isDashed ? "text-[#B0B8C4]" : rung.isFirst ? "text-[#1E3D2B]" : "text-[#0A1F3D]"
               }`}>{rung.label}</div>
-              <div className="mt-0.5 text-[11px] leading-4 text-[#8A92A0]">{rung.desc}</div>
+              <div className="mt-0.5 text-[10px] leading-4 text-[#9AA3AF]">{rung.desc}</div>
             </div>
             {i < rungs.length - 1 && (
               <div className="mx-1.5 shrink-0">
@@ -67,10 +67,10 @@ function AnchorLadder() {
                 ? "border border-[#B8CFC0] bg-[#E8EFE9]"
                 : "border border-[#D0D4D0] bg-[#F4F5F3]"
             }`}>
-              <div className={`text-sm font-semibold tracking-tight ${
+              <div className={`text-[15px] font-semibold tracking-tight ${
                 rung.isDashed ? "text-[#B0B8C4]" : rung.isFirst ? "text-[#1E3D2B]" : "text-[#0A1F3D]"
               }`}>{rung.label}</div>
-              <div className="mt-0.5 text-[11px] leading-4 text-[#8A92A0]">{rung.desc}</div>
+              <div className="mt-0.5 text-[10px] leading-4 text-[#9AA3AF]">{rung.desc}</div>
             </div>
           </div>
         ))}
@@ -116,13 +116,13 @@ export default function HowWeSeeMarketsPage() {
               The condition
             </p>
             <p className="mt-4 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
-              Markets are driven as much by perception as by fundamentals. The
+              Markets are driven as much by perception as by operating reality. The
               financials participants choose to focus on are selected because they
               better support a narrative — not because they represent the firm's
               economic reality.
             </p>
 
-            <p className="mt-12 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8A92A0]">
+            <p className="mt-12 text-[12px] font-semibold uppercase tracking-[0.16em] text-[#5B6472]">
               The mechanism
             </p>
             <p className="mt-4 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
@@ -145,9 +145,8 @@ export default function HowWeSeeMarketsPage() {
             </p>
 
             {/* Emphasis block 2 — heaviest visual moment on the page */}
-            {/* More vertical padding, constrained max-width, tighter tracking for density */}
-            <div className="mx-auto my-14 max-w-lg rounded-lg bg-[#0A1F3D] px-10 py-14 text-center">
-              <p className="tcs-heading text-[1.35rem] font-semibold leading-[1.35] tracking-[-0.01em] text-white md:text-[1.55rem]">
+            <div className="mx-auto my-14 max-w-lg rounded-lg border border-[#0A1F3D] bg-[#0A1F3D] px-10 py-12 text-center">
+              <p className="tcs-heading text-2xl font-semibold leading-snug text-white md:text-3xl">
                 The market does not move from truth to price.
                 <br />
                 It moves from narrative to price.
@@ -200,11 +199,13 @@ export default function HowWeSeeMarketsPage() {
       </section>
 
       {/* ── Framework preview ── */}
+      {/* Transition band — signals entry into system layer before dark section */}
+      <div className="h-12 border-t border-[#C9D8CD] bg-gradient-to-b from-[#F1F3F0] to-[#E9ECE7]" />
       {/* Deeper background + more entry padding = user feels they entered the system layer */}
       <section className="border-b border-[#0A1830] bg-[#071629]">
         <div className="mx-auto max-w-4xl px-6 py-20 md:py-28">
           <div className="mx-auto max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6A8FB0]">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#5B6472]">
               Framework
             </p>
             <h2 className="tcs-heading mt-4 text-3xl font-semibold leading-tight tracking-tight text-white md:text-[2.35rem]">
@@ -296,9 +297,11 @@ export default function HowWeSeeMarketsPage() {
               </p>
             </div>
 
-            <p className="text-[15px] font-medium leading-7 text-[#4F5968]">
-              Structure determines what narratives can survive.
-            </p>
+            <div className="mt-10 border-l-2 border-[#244636] pl-6">
+              <p className="tcs-heading text-xl font-semibold leading-tight text-[#0A1F3D] md:text-2xl">
+                Structure determines what narratives can survive.
+              </p>
+            </div>
           </article>
         </div>
       </section>
@@ -341,21 +344,23 @@ export default function HowWeSeeMarketsPage() {
       </section>
 
       {/* ── Final CTAs — terminal point ── */}
-      {/* Maximum spacing before CTAs = decision weight, not continuation */}
+      {/* Spacer + divider = deliberate pause before decision */}
+      <div className="h-16 md:h-24" />
+      <div className="border-t border-[#D0D4CF]" />
       <section>
-        <div className="mx-auto max-w-4xl px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 py-16 md:py-20">
           <article className="mx-auto max-w-3xl">
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/platform"
-                className="inline-flex items-center gap-2.5 rounded-lg bg-[#0A1F3D] px-9 py-5 text-[15px] font-semibold text-white transition hover:bg-[#153761]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#0A1F3D] px-10 py-6 text-base font-semibold text-white transition hover:bg-[#153761]"
               >
                 Open Platform
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/why-this-exists"
-                className="inline-flex items-center gap-2.5 rounded-lg border border-[#C8CCC9] bg-white px-9 py-5 text-[15px] font-medium text-[#1E2228] transition hover:border-[#0A1F3D] hover:text-[#0A1F3D]"
+                className="inline-flex items-center gap-2.5 rounded-xl border border-[#C8CCC9] bg-white px-10 py-6 text-base font-medium text-[#1E2228] transition hover:border-[#0A1F3D] hover:text-[#0A1F3D]"
               >
                 Why This Exists
               </Link>
