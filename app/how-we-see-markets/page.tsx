@@ -95,9 +95,7 @@ export default function HowWeSeeMarketsPage() {
             How We See Markets
           </p>
           <h1 className="tcs-heading mt-5 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
-            Markets price narratives.
-            <br />
-            We measure the structure beneath them.
+            Markets price narratives. We measure the structure beneath them.
           </h1>
           <p className="mt-7 max-w-xl text-[18px] leading-[1.75] text-[#4F5968]">
             Most analysis begins with stories. We begin with structure.
