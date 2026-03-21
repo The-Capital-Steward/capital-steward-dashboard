@@ -287,8 +287,6 @@ export default function PlatformPage() {
         .filter((row) => row.axis1_pct != null && row.axis2_pct != null)
         .map((row) => ({
           x: row.axis1_pct as number,
-          // Invert axis2_pct so higher Y = higher trajectory risk
-          // matches the risk-forward convention of all other axes
           y: 1 - (row.axis2_plot ?? row.axis2_pct ?? 0.5),
           z: row.axis3_pct,
           symbol: row.symbol,
@@ -328,11 +326,11 @@ export default function PlatformPage() {
 
           <p className="mt-6 max-w-3xl text-lg leading-8 text-[#B8C3CC]">
             The OSMR system maps structural fragility, resilience, and valuation pressure
-            across the equity universe—and links those states to real historical cohort outcomes.
+            across the equity universe — and links those states to real historical cohort outcomes.
           </p>
         </motion.div>
 
-        {/* Start Here — green left border via inline style to avoid Tailwind conflict */}
+        {/* ── FIX 1: Start Here — labels now match actual tab names ── */}
         <Card
           className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"
           style={{ borderLeft: "2px solid #244636" }}
@@ -348,19 +346,19 @@ export default function PlatformPage() {
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
               <div className="mb-2 font-medium text-white">Market Map</div>
               <div className="text-sm leading-6 text-[#B8C3CC]">
-                See where structural risk is concentrated right now.
+                See where structural risk is concentrated right now — scatter map, risk cluster, and cohort grids.
               </div>
             </div>
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-              <div className="mb-2 font-medium text-white">Risk List</div>
+              <div className="mb-2 font-medium text-white">Snapshot</div>
               <div className="text-sm leading-6 text-[#B8C3CC]">
-                Identify the names currently carrying the greatest structural stress.
+                Inspect the full structural profile of every company in the current universe.
               </div>
             </div>
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-              <div className="mb-2 font-medium text-white">Cohort Outcomes</div>
+              <div className="mb-2 font-medium text-white">OAL Structure</div>
               <div className="text-sm leading-6 text-[#B8C3CC]">
-                See how similar structural states have behaved historically.
+                See how the universe distributes across operational anchor levels and what that implies structurally.
               </div>
             </div>
           </CardContent>
@@ -429,7 +427,7 @@ export default function PlatformPage() {
           </CardContent>
         </Card>
 
-        {/* KPI strip */}
+        {/* ── FIX 2: KPI strip — tightened descriptions ── */}
         <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl border border-[#3E8E6A]/35 bg-[#112A47] shadow-xl shadow-black/20">
             <CardHeader className="pb-2">
@@ -439,7 +437,7 @@ export default function PlatformPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Primary concentration of structural risk under the active filters.
+              Companies in the Very High composite bucket under active filters.
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -450,7 +448,7 @@ export default function PlatformPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Names currently exposed to the highest financing strain.
+              Companies with Axis 3 at or above the 80th percentile — high obligation strain.
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -461,7 +459,7 @@ export default function PlatformPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Companies currently represented under the active filters.
+              Companies currently scored under active filters.
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -472,7 +470,7 @@ export default function PlatformPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
-              Average structural risk across the filtered universe.
+              Mean composite structural risk score across the filtered universe.
             </CardContent>
           </Card>
         </div>
@@ -581,22 +579,17 @@ export default function PlatformPage() {
                         </div>
                       </div>
 
-                      {/* Chart with quadrant label overlay */}
                       <div className="relative h-[400px]">
                         <div className="pointer-events-none absolute inset-0 z-10">
-                          {/* Top-left: high trajectory risk, low anchor risk */}
                           <div className="absolute left-[14px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#7E8A96]">
                             Low anchor risk<br />High trajectory risk
                           </div>
-                          {/* Top-right: high trajectory risk, high anchor risk — high risk zone */}
                           <div className="absolute right-[24px] top-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#BC6464]">
                             High anchor risk<br />High trajectory risk
                           </div>
-                          {/* Bottom-left: low trajectory risk, low anchor risk — favorable zone */}
                           <div className="absolute bottom-[28px] left-[14px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-[9px] text-[#6DAE8B]">
                             Low anchor risk<br />Low trajectory risk
                           </div>
-                          {/* Bottom-right: low trajectory risk, high anchor risk */}
                           <div className="absolute bottom-[28px] right-[24px] rounded bg-[#0A1F3D]/80 px-1.5 py-0.5 text-right text-[9px] text-[#7E8A96]">
                             High anchor risk<br />Low trajectory risk
                           </div>
@@ -657,6 +650,7 @@ export default function PlatformPage() {
                 </CardContent>
               </Card>
 
+              {/* ── FIX 3: Active Risk Cluster — improved hover affordance ── */}
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader>
                   <div className="flex items-center gap-2">
@@ -671,12 +665,12 @@ export default function PlatformPage() {
                   {topRisk.map((row) => (
                     <div
                       key={row.symbol}
-                      className="flex items-center justify-between rounded-xl border border-[#203754] bg-[#0D2138] px-4 py-3 transition hover:border-[#41506A]"
+                      className="flex cursor-default items-center justify-between rounded-xl border border-[#203754] bg-[#0D2138] px-4 py-3 transition-all duration-150 hover:border-[#41506A] hover:bg-[#112A47]"
                     >
                       <div className="flex flex-col">
                         <span className="font-medium text-white">{row.symbol}</span>
                         <span className="text-xs text-[#7E8A96]">
-                          {row.oal_label} • {row.risk_bucket_within_oal}
+                          {row.oal_label} · {row.risk_bucket_within_oal}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
@@ -709,16 +703,17 @@ export default function PlatformPage() {
                 )}
               </div>
               <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
-                This section shows how similar structural states have performed over time—linking current
+                This section shows how similar structural states have performed over time — linking current
                 positioning to real historical outcomes.
               </div>
             </div>
 
+            {/* ── FIX 4: Cohort grid legend — risk-consistent language ── */}
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#7E8A96]">
                 <span className="font-medium text-[#B8C3CC]">How to read this:</span>
-                <span><span className="text-[#EAF0F2]">Columns</span> = Operational Anchor Risk ← lower / higher →</span>
-                <span><span className="text-[#EAF0F2]">Rows</span> = Operational Trajectory Risk ↑ higher risk</span>
+                <span><span className="text-[#EAF0F2]">Columns</span> = Operational Anchor Risk — Very Low → Very High</span>
+                <span><span className="text-[#EAF0F2]">Rows</span> = Operational Trajectory Risk — Very Low → Very High</span>
                 <span><span className="text-[#EAF0F2]">Panels</span> = Operational Financing Risk</span>
                 <span><span className="text-[#EAF0F2]">Color + N</span> = Outcome strength and sample size</span>
               </div>
@@ -790,16 +785,15 @@ export default function PlatformPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    {/* ── FIX 4 continued: axis labels now risk-consistent ── */}
                     <div className="grid grid-cols-[80px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
                       <div>
-                        <div className="text-[9px] text-[#7E8A96]">← weaker</div>
-                        <div className="text-[9px] text-[#7E8A96]">stronger ↑</div>
+                        <div className="text-[9px] text-[#7E8A96]">Axis II ↓</div>
+                        <div className="text-[9px] text-[#7E8A96]">Axis I →</div>
                       </div>
-                      {cohortGrid.metadata.x_axis_labels.map((c, i) => (
+                      {cohortGrid.metadata.x_axis_labels.map((c) => (
                         <div key={c} className="text-center">
                           <div className="text-[#7E8A96]">{c}</div>
-                          {i === 0 && <div className="text-[9px] text-[#7E8A96]">←</div>}
-                          {i === 4 && <div className="text-[9px] text-[#7E8A96]">→</div>}
                         </div>
                       ))}
                       {panel.rows.map((row) => (
@@ -870,7 +864,6 @@ export default function PlatformPage() {
               ))}
             </div>
 
-            {/* Cohort Insight Layer placeholder — CardContent included to prevent padding gap */}
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader>
                 <CardTitle className="text-white">Cohort Insight Layer</CardTitle>
