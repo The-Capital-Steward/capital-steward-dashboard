@@ -1,1605 +1,494 @@
-"use client";
+'use client'
 
-import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react"
+import Link from "next/link";
 import {
-  Search,
+  ArrowRight,
+  ChevronRight,
   Shield,
-  Layers3,
-  Activity,
-  AlertTriangle,
-  Clock3,
-  Filter,
-  Grid3X3,
+  Radar,
+  Workflow,
+  Database,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ScatterChart,
-  Scatter,
-  Cell,
-} from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+const RISK_CARDS = [
+  {
+    title: "Operational Anchor Risk",
+    summary: "The further a valuation reaches beyond credible operational output, the more narrative is required to sustain it — and the more vulnerable it is to deflation.",
+    detail: "A firm will use the deepest operational anchor it can credibly claim to justify its valuation. If free cash flow supports that valuation, the bridge between price and economic reality is short. If the market must reach to revenue — or beyond — the bridge grows long, fragile, and dependent on conditions outside the firm's control. The penalty for anchor shallowness reflects the length and fragility of the narrative required.",
+  },
+  {
+    title: "Operational Trajectory Risk",
+    summary: "A firm whose anchor is consistently improving is shortening its narrative bridge. One whose anchor is deteriorating is lengthening it — becoming more dependent on narrative to justify its price.",
+    detail: "This dimension captures trajectory, not just position. A company moving toward demonstrated cash generation is reducing its structural risk over time. A company whose anchor metric is deteriorating — even if its current valuation is not yet stretched — is accumulating structural risk regardless of where its price sits. Consistency of improvement matters as much as the improvement itself.",
+  },
+  {
+    title: "Operational Financing Risk",
+    summary: "Whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.",
+    detail: "Debt is not inherently fragile. A mature firm running significant debt with strong coverage from operational output is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it. Firms unable to cover their obligations from their actual operational anchor are exposed — regardless of what narrative surrounds their balance sheet.",
+  },
+]
 
-const COLORS = {
-  bg: "#0A1F3D",
-  panel: "#102642",
-  card: "#112A47",
-  inset: "#0D2138",
-  border: "#203754",
-  text: "#EAF0F2",
-  textSecondary: "#B8C3CC",
-  textMuted: "#7E8A96",
-  accent: "#41506A",
-  green: "#244636",
-  greenSoft: "#E8EFE9",
-  positive: "#3E8E6A",
-  positiveSoft: "#6DAE8B",
-  negative: "#8B3838",
-  negativeSoft: "#BC6464",
-  neutral: "#47566B",
-  suppressed: "#20314F",
-};
-
-type SnapshotRow = {
-  symbol: string;
-  oal_label: string | null;
-  risk_bucket_within_oal: string | null;
-  axis1_pct: number | null;
-  axis2_pct: number | null;
-  axis2_plot?: number | null;
-  axis3_pct: number | null;
-  composite_score: number | null;
-  composite_bucket: string | null;
-};
-
-type OALSummaryRow = {
-  oal_label: string;
-  n: number;
-  median_axis1: number | null;
-  median_axis3: number | null;
-  median_composite: number | null;
-};
-
-type LiquiditySummaryRow = {
-  bucket: string;
-  count: number;
-};
-
-type HistoryManifestRow = {
-  month: string;
-  oal_scores_rows: number | null;
-  oal_summary_rows: number | null;
-  structural_rows: number | null;
-  has_oal_scores?: boolean;
-  has_oal_summary?: boolean;
-  has_structural_snapshot?: boolean;
-};
-
-type CohortGridCell = {
-  count: number;
-  mean_return: number | null;
-  median_return: number | null;
-  hit_rate: number | null;
-  display_value: number | null;
-  suppressed: boolean;
-  axis1_bucket: string;
-  axis2_bucket: string;
-  axis3_panel: string;
-};
-
-type CohortGridRow = {
-  axis2_bucket: string;
-  cells: CohortGridCell[];
-};
-
-type CohortGridPanel = {
-  panel: string;
-  rows: CohortGridRow[];
-};
-
-type CohortGridMetadata = {
-  horizon_months: number;
-  formation_frequency: string;
-  backend_price_frequency: string;
-  cell_statistic: string;
-  min_count_for_display: number;
-  panel_dimension: string;
-  column_dimension: string;
-  row_dimension: string;
-  x_axis_labels: string[];
-  y_axis_labels: string[];
-  panels: string[];
-  formation_month_min: string | null;
-  formation_month_max: string | null;
-  observation_count: number;
-  notes: string[];
-};
-
-type HistoricalCohortGridPayload = {
-  metadata: CohortGridMetadata;
-  panels: CohortGridPanel[];
-};
-
-type CohortMetric = "mean_return" | "median_return" | "hit_rate";
-
-const bucketOrder = ["Very Low", "Low", "Moderate", "High", "Very High"];
-const oalOrder = ["FCF", "Net Income", "EBIT", "Revenue", "Non-viable"];
-
-function formatPct(v: number | null) {
-  if (v == null || Number.isNaN(v)) return "—";
-  return `${(v * 100).toFixed(1)}%`;
-}
-
-function formatPctSigned(v: number | null) {
-  if (v == null || Number.isNaN(v)) return "—";
-  const pct = v * 100;
-  return `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`;
-}
-
-function formatNum(v: number | null) {
-  if (v == null || Number.isNaN(v)) return "—";
-  return v.toLocaleString();
-}
-
-function compositeColor(bucket: string | null | undefined) {
-  const colorMap: Record<string, string> = {
-    "Very Low": COLORS.positive,
-    Low: COLORS.positiveSoft,
-    Moderate: COLORS.accent,
-    High: COLORS.negativeSoft,
-    "Very High": COLORS.negative,
-  };
-  return colorMap[bucket ?? ""] ?? COLORS.textMuted;
-}
-
-function getCohortMetricValue(cell: CohortGridCell, metric: CohortMetric) {
-  if (cell.suppressed) return null;
-  return cell[metric];
-}
-
-function formatCohortMetric(value: number | null, metric: CohortMetric) {
-  if (value == null || Number.isNaN(value)) return "—";
-  if (metric === "hit_rate") return `${(value * 100).toFixed(1)}%`;
-  const pct = value * 100;
-  return `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`;
-}
-
-function cohortMetricLabel(metric: CohortMetric) {
-  if (metric === "mean_return") return "Mean Return";
-  if (metric === "median_return") return "Median Return";
-  return "Hit Rate";
-}
-
-function returnHeatColor(v: number | null, suppressed: boolean) {
-  if (suppressed || v == null || Number.isNaN(v)) return COLORS.suppressed;
-  if (v <= -0.12) return COLORS.negative;
-  if (v <= -0.03) return COLORS.negativeSoft;
-  if (v < 0.03) return COLORS.neutral;
-  if (v < 0.12) return COLORS.positiveSoft;
-  return COLORS.positive;
-}
-
-function skewSignal(cell: CohortGridCell): "right" | "left" | "none" {
-  if (
-    cell.mean_return == null ||
-    cell.median_return == null ||
-    cell.suppressed
-  ) return "none";
-  const diff = cell.mean_return - cell.median_return;
-  if (diff > 0.10) return "right";
-  if (diff < -0.10) return "left";
-  return "none";
-}
-
-// ─── Interpretive Layer ───────────────────────────────────────────────────────
-// Three panels, each computed from the live filtered snapshot.
-// Panel 1: Distribution — where is the universe sitting right now?
-// Panel 2: Concentration — where is stress most densely clustered?
-// Panel 3: Trajectory — is the universe improving or deteriorating in aggregate?
-
-type InterpretiveLayerProps = {
-  data: SnapshotRow[]
-  loading: boolean
-}
-
-function interpretDistribution(data: SnapshotRow[]): {
-  headline: string
-  body: string
-  consequence: string
-  tone: "elevated" | "moderate" | "subdued"
-} {
-  if (data.length === 0) return { headline: "—", body: "No data available under active filters.", consequence: "", tone: "moderate" }
-
-  const veryHighCount = data.filter(r => r.composite_bucket === "Very High").length
-  const highCount = data.filter(r => r.composite_bucket === "High").length
-  const veryLowCount = data.filter(r => r.composite_bucket === "Very Low").length
-  const lowCount = data.filter(r => r.composite_bucket === "Low").length
-
-  const veryHighPct = veryHighCount / data.length
-  const elevatedPct = (veryHighCount + highCount) / data.length
-  const resilientPct = (veryLowCount + lowCount) / data.length
-
-  if (veryHighPct >= 0.25) {
-    return {
-      headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
-      body: `An unusually high proportion of companies currently carry maximum structural risk. ${(elevatedPct * 100).toFixed(0)}% are in the High or Very High bucket combined — structural fragility is broadly distributed, not isolated to a specific segment.`,
-      consequence: `When fragility is this broadly distributed, sector or factor diversification provides limited structural protection. The risk is systemic across the filtered universe, not idiosyncratic.`,
-      tone: "elevated",
-    }
-  }
-  if (veryHighPct >= 0.15) {
-    return {
-      headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
-      body: `Structural risk is currently present but not dominant. ${(elevatedPct * 100).toFixed(0)}% carry elevated composite risk (High or Very High), while ${(resilientPct * 100).toFixed(0)}% sit in the lower two buckets.`,
-      consequence: `The distribution is mixed — elevated names warrant closer scrutiny, but lower-risk companies remain available within the same universe as an alternative.`,
-      tone: "moderate",
-    }
-  }
-  return {
-    headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
-    body: `Structural risk is currently contained. The majority of companies are anchored at lower composite risk levels — ${(resilientPct * 100).toFixed(0)}% sit in the Very Low or Low bucket.`,
-    consequence: `A contained distribution does not eliminate structural risk within individual names — it means the aggregate exposure is lower. Company-level scrutiny remains warranted for any name in the elevated buckets.`,
-    tone: "subdued",
-  }
-}
-
-function interpretConcentration(data: SnapshotRow[]): {
-  headline: string
-  body: string
-  consequence: string
-  clusterType: "valuation-stretch" | "financing-fragility" | "compound" | "none"
-} {
-  if (data.length === 0) return { headline: "—", body: "No data available under active filters.", consequence: "", clusterType: "none" }
-
-  const elevated = data.filter(r => r.composite_bucket === "Very High" || r.composite_bucket === "High")
-
-  if (elevated.length === 0) {
-    return {
-      headline: "No elevated-risk concentration under active filters",
-      body: "The current filtered universe does not show meaningful clustering in the High or Very High composite buckets.",
-      consequence: "Structural stress is not concentrated enough to warrant cluster-level focus. Individual name analysis applies.",
-      clusterType: "none",
-    }
-  }
-
-  // OAL distribution within elevated
-  const oalCounts: Record<string, number> = {}
-  elevated.forEach(r => {
-    const label = r.oal_label ?? "Unknown"
-    oalCounts[label] = (oalCounts[label] ?? 0) + 1
-  })
-  const topOAL = Object.entries(oalCounts).sort((a, b) => b[1] - a[1])[0]
-  const topOALPct = ((topOAL[1] / elevated.length) * 100).toFixed(0)
-
-  // Axis driver classification — compare average axis1 vs axis3 in elevated cluster
-  const avgAxis1 = elevated.reduce((s, r) => s + (r.axis1_pct ?? 0), 0) / elevated.length
-  const avgAxis3 = elevated.reduce((s, r) => s + (r.axis3_pct ?? 0), 0) / elevated.length
-
-  const axis1Elevated = avgAxis1 >= 0.65
-  const axis3Elevated = avgAxis3 >= 0.65
-
-  let clusterType: "valuation-stretch" | "financing-fragility" | "compound"
-  let driverLabel: string
-  let consequence: string
-
-  if (axis1Elevated && axis3Elevated) {
-    clusterType = "compound"
-    driverLabel = "both Operational Anchor Risk and Operational Financing Risk"
-    consequence = `Compound risk clusters — where valuation is stretched and financing is strained simultaneously — are the most structurally exposed. These names have limited margin of safety on both sides.`
-  } else if (axis1Elevated) {
-    clusterType = "valuation-stretch"
-    driverLabel = "Operational Anchor Risk"
-    consequence = `Valuation-stretch clusters indicate overvaluation risk relative to demonstrated operational output. The primary concern is narrative dependence — if market confidence in future delivery weakens, repricing pressure follows.`
-  } else {
-    clusterType = "financing-fragility"
-    driverLabel = "Operational Financing Risk"
-    consequence = `Financing-driven clusters indicate solvency exposure rather than overvaluation. These companies may be reasonably valued but are structurally dependent on continued market access to service obligations — a condition that can change quickly.`
-  }
-
-  return {
-    headline: `Elevated risk is most concentrated among ${topOAL[0]}-anchored companies`,
-    body: `${topOALPct}% of the High and Very High composite companies are ${topOAL[0]}-anchored. The primary structural driver within this cluster is ${driverLabel}.`,
-    consequence,
-    clusterType,
-  }
-}
-
-function interpretTrajectory(
-  data: SnapshotRow[],
-  distributionTone: "elevated" | "moderate" | "subdued"
-): {
-  headline: string
-  body: string
-  consequence: string
-  direction: "deteriorating" | "improving" | "mixed"
-  regime: "escalation" | "stabilization" | "accumulation" | "health" | "mixed"
-} {
-  if (data.length === 0) return {
-    headline: "—",
-    body: "No data available under active filters.",
-    consequence: "",
-    direction: "mixed",
-    regime: "mixed",
-  }
-
-  const scorable = data.filter(r => r.axis2_pct != null)
-  if (scorable.length === 0) return {
-    headline: "Trajectory data unavailable",
-    body: "Axis II scores are not present in the current snapshot.",
-    consequence: "",
-    direction: "mixed",
-    regime: "mixed",
-  }
-
-  const deteriorating = scorable.filter(r => (r.axis2_pct ?? 0) > 0.5).length
-  const improving = scorable.filter(r => (r.axis2_pct ?? 0) <= 0.5).length
-  const deterioratingPct = (deteriorating / scorable.length) * 100
-  const improvingPct = (improving / scorable.length) * 100
-
-  // Cross-panel regime classification
-  let regime: "escalation" | "stabilization" | "accumulation" | "health" | "mixed"
-  if (deterioratingPct >= 60 && distributionTone === "elevated") {
-    regime = "escalation"
-  } else if (improvingPct >= 60 && distributionTone === "elevated") {
-    regime = "stabilization"
-  } else if (deterioratingPct >= 60 && distributionTone === "subdued") {
-    regime = "accumulation"
-  } else if (improvingPct >= 60 && distributionTone === "subdued") {
-    regime = "health"
-  } else {
-    regime = "mixed"
-  }
-
-  const regimeConsequence: Record<typeof regime, string> = {
-    escalation: `Combined with the current elevated distribution, this is an escalation signal — structural risk is both broadly present and actively accumulating. This regime historically precedes the widest dispersion in forward outcomes.`,
-    stabilization: `Despite elevated current distribution, improving trajectory is a structural stabilization signal — fragility may be peaking rather than expanding. This does not eliminate current risk, but it changes its directional character.`,
-    accumulation: `Even though current distribution appears contained, deteriorating trajectory means structural risk is accumulating quietly. Early-stage accumulation is harder to see and easier to underestimate.`,
-    health: `Both distribution and trajectory are constructive — current risk is contained and the underlying anchors are strengthening. This is the most favorable structural regime in the system.`,
-    mixed: `The interaction between current distribution and trajectory does not produce a clear regime signal. Structural conditions are heterogeneous — company-level analysis is more informative than aggregate positioning.`,
-  }
-
-  if (deterioratingPct >= 60) {
-    return {
-      headline: `${deterioratingPct.toFixed(0)}% of scored companies show deteriorating operational trajectory`,
-      body: `The majority of the filtered universe is in the upper half of Axis II — meaning their operational anchor metrics are currently weakening on a trailing basis. Companies moving toward shallower anchors accumulate structural risk over time regardless of current valuation levels.`,
-      consequence: regimeConsequence[regime],
-      direction: "deteriorating",
-      regime,
-    }
-  }
-  if (improvingPct >= 60) {
-    return {
-      headline: `${improvingPct.toFixed(0)}% of scored companies show improving operational trajectory`,
-      body: `The majority of the filtered universe is in the lower half of Axis II — meaning their operational anchor metrics are currently strengthening on a trailing basis. A universe tilted toward improving trajectory carries lower structural risk over time, all else equal.`,
-      consequence: regimeConsequence[regime],
-      direction: "improving",
-      regime,
-    }
-  }
-  return {
-    headline: `Trajectory is mixed — ${deterioratingPct.toFixed(0)}% deteriorating, ${improvingPct.toFixed(0)}% improving`,
-    body: `The filtered universe is currently split between companies whose operational anchors are strengthening and those where they are weakening. No dominant directional bias is present.`,
-    consequence: regimeConsequence["mixed"],
-    direction: "mixed",
-    regime: "mixed",
-  }
-}
-
-function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
-  const distribution = useMemo(() => interpretDistribution(data), [data])
-  const concentration = useMemo(() => interpretConcentration(data), [data])
-  const trajectory = useMemo(() => interpretTrajectory(data, distribution.tone), [data, distribution.tone])
-
-  const toneColor = {
-    elevated: "#BC6464",
-    moderate: "#B8C3CC",
-    subdued: "#6DAE8B",
-  }
-
-  const directionColor = {
-    deteriorating: "#BC6464",
-    improving: "#6DAE8B",
-    mixed: "#B8C3CC",
-  }
-
-  const regimeBadge: Record<string, { label: string; color: string }> = {
-    escalation:    { label: "Escalation",    color: "#BC6464" },
-    stabilization: { label: "Stabilization", color: "#6DAE8B" },
-    accumulation:  { label: "Accumulation",  color: "#E8A87C" },
-    health:        { label: "Structural Health", color: "#6DAE8B" },
-    mixed:         { label: "Mixed",         color: "#7E8A96" },
-  }
-
-  if (loading) {
-    return (
-      <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-        <CardHeader>
-          <CardTitle className="text-white">Interpretive Layer</CardTitle>
-          <CardDescription className="text-[#B8C3CC]">Computing structural signals...</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-36 animate-pulse rounded-2xl border border-[#203754] bg-[#0D2138]" />
-          ))}
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const regime = regimeBadge[trajectory.regime]
+function RiskCards() {
+  const [expanded, setExpanded] = useState<string | null>(null)
 
   return (
-    <Card
-      className="rounded-3xl shadow-xl shadow-black/30"
-      style={{
-        borderLeft: "2px solid #3E8E6A",
-        border: "1px solid #2E4D6A",
-        background: "#081A30",
-      }}
-    >
-      <CardHeader className="pb-2">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle className="text-white">Interpretive Layer</CardTitle>
-            <CardDescription className="mt-1 text-[#B8C3CC]">
-              What the current data implies — computed from the filtered snapshot. These characterize the distribution — they do not predict outcomes.
-            </CardDescription>
-            <p className="mt-2 text-[12px] text-[#7E8A96]">
-              This summarizes what the current market structure implies — not predictions, but risk conditions as they exist right now.
-            </p>
-          </div>
-          {/* Regime badge */}
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">Current Regime</div>
+    <div className="grid gap-4">
+      {RISK_CARDS.map(({ title, summary, detail }) => {
+        const isOpen = expanded === title
+        return (
+          <button
+            key={title}
+            onClick={() => setExpanded(isOpen ? null : title)}
+            className="group w-full rounded-2xl border border-[#1E3A5F] bg-[#0D2847] p-5 text-left transition-all duration-200 hover:border-[#2E5A8F] hover:bg-[#0F2E52]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="text-sm font-medium text-white">{title}</div>
+              <div
+                className="mt-0.5 shrink-0 text-[#A9BEDF] transition-transform duration-200"
+                style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 5L7 10L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className="mt-2 text-sm leading-6 text-[#A9BEDF]">{summary}</div>
             <div
-              className="rounded-full border px-5 py-2 text-base font-semibold"
-              style={{ borderColor: `${regime.color}60`, color: regime.color, backgroundColor: `${regime.color}20` }}
+              className="overflow-hidden transition-all duration-300"
+              style={{ maxHeight: isOpen ? '200px' : '0px', opacity: isOpen ? 1 : 0 }}
             >
-              {regime.label}
+              <div className="mt-4 border-t border-[#1E3A5F] pt-4 text-sm leading-7 text-[#7A9FCA]">
+                {detail}
+              </div>
             </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-4 pt-2 md:grid-cols-3">
-
-        {/* Panel 1 — Distribution: interpretation first, stat second */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
-          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
-            Distribution
-          </div>
-          <div
-            className="mb-2 text-sm font-semibold leading-snug"
-            style={{ color: toneColor[distribution.tone] }}
-          >
-            {distribution.tone === "elevated"
-              ? "Risk is broadly elevated"
-              : distribution.tone === "subdued"
-              ? "Risk is currently contained"
-              : "Risk is present but mixed"}
-          </div>
-          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
-            {distribution.headline.toLowerCase().startsWith("—") ? distribution.body : `${distribution.headline}. ${distribution.body}`}
-          </div>
-          {distribution.consequence && (
-            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
-              {distribution.consequence}
-            </div>
-          )}
-        </div>
-
-        {/* Panel 2 — Concentration: interpretation first */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
-          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
-            Concentration
-          </div>
-          <div className="mb-2 text-sm font-semibold leading-snug text-[#EAF0F2]">
-            {concentration.clusterType === "compound"
-              ? "Compound risk — valuation and financing both strained"
-              : concentration.clusterType === "valuation-stretch"
-              ? "Valuation-stretch cluster dominant"
-              : concentration.clusterType === "financing-fragility"
-              ? "Financing-fragility cluster dominant"
-              : "No elevated concentration"}
-          </div>
-          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
-            {concentration.body}
-          </div>
-          {concentration.consequence && (
-            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
-              {concentration.consequence}
-            </div>
-          )}
-        </div>
-
-        {/* Panel 3 — Trajectory: interpretation first */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
-          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
-            Trajectory
-          </div>
-          <div
-            className="mb-2 text-sm font-semibold leading-snug"
-            style={{ color: directionColor[trajectory.direction] }}
-          >
-            {trajectory.direction === "deteriorating"
-              ? "Universe is deteriorating in aggregate"
-              : trajectory.direction === "improving"
-              ? "Universe is improving in aggregate"
-              : "Trajectory is mixed"}
-          </div>
-          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
-            {trajectory.body}
-          </div>
-          {trajectory.consequence && (
-            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
-              {trajectory.consequence}
-            </div>
-          )}
-        </div>
-
-      </CardContent>
-    </Card>
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
-export default function PlatformPage() {
-  const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
-  const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
-  const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
-  const [historyManifest, setHistoryManifest] = useState<HistoryManifestRow[]>([]);
-  const [cohortGrid, setCohortGrid] = useState<HistoricalCohortGridPayload | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const [selectedOAL, setSelectedOAL] = useState("All");
-  const [selectedBucket, setSelectedBucket] = useState("All");
-  const [search, setSearch] = useState("");
-  const [cohortMetric, setCohortMetric] = useState<CohortMetric>("median_return");
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/data/osmr_snapshot.json").then((res) => {
-        if (!res.ok) throw new Error(`Failed to load snapshot: ${res.status}`);
-        return res.json();
-      }),
-      fetch("/data/oal_summary.json").then((res) => {
-        if (!res.ok) throw new Error(`Failed to load oal summary: ${res.status}`);
-        return res.json();
-      }),
-      fetch("/data/liquidity_summary.json").then((res) => {
-        if (!res.ok) throw new Error(`Failed to load liquidity summary: ${res.status}`);
-        return res.json();
-      }),
-      fetch("/data/history_manifest.json").then((res) => {
-        if (!res.ok) throw new Error(`Failed to load history manifest: ${res.status}`);
-        return res.json();
-      }),
-      fetch("/data/historical_cohort_grids.json").then((res) => {
-        if (!res.ok) throw new Error(`Failed to load historical cohort grids: ${res.status}`);
-        return res.json();
-      }),
-    ])
-      .then(([snapshot, oal, liquidity, history, grids]) => {
-        setSnapshotData(snapshot);
-        setOALSummary(oal);
-        setLiquiditySummary(liquidity);
-        setHistoryManifest(history);
-        setCohortGrid(grids);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
-
-  const filtered = useMemo(() => {
-    return snapshotData.filter((row) => {
-      const matchOAL = selectedOAL === "All" || row.oal_label === selectedOAL;
-      const matchBucket = selectedBucket === "All" || row.composite_bucket === selectedBucket;
-      const matchSearch = !search || row.symbol.toLowerCase().includes(search.toLowerCase());
-      return matchOAL && matchBucket && matchSearch;
-    });
-  }, [snapshotData, selectedOAL, selectedBucket, search]);
-
-  const topRisk = useMemo(() => {
-    return [...filtered]
-      .filter((r) => r.composite_score != null)
-      .sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0))
-      .slice(0, 12);
-  }, [filtered]);
-
-  const stats = useMemo(() => {
-    const total = filtered.length;
-    const avgComposite =
-      total > 0
-        ? filtered.reduce((acc, row) => acc + (row.composite_score ?? 0), 0) / total
-        : null;
-    const veryHigh = filtered.filter((r) => r.composite_bucket === "Very High").length;
-    const fragile = filtered.filter((r) => (r.axis3_pct ?? 0) >= 0.8).length;
-    return { total, avgComposite, veryHigh, fragile };
-  }, [filtered]);
-
-  const scatterData = useMemo(() => {
-    const scorable = filtered.filter((row) => row.axis1_pct != null && row.axis2_pct != null)
-    const scores = scorable.map(r => r.composite_score ?? 0).sort((a, b) => b - a)
-    const threshold = scores[Math.floor(scores.length * 0.2)] ?? 0
-
-    return scorable.map((row) => {
-      // Bin axis3_pct into financing risk quintile for dot size
-      const a3 = row.axis3_pct ?? 0.5
-      let axis3_bucket: string
-      if (a3 < 0.2)       axis3_bucket = "Very Low"
-      else if (a3 < 0.4)  axis3_bucket = "Low"
-      else if (a3 < 0.6)  axis3_bucket = "Moderate"
-      else if (a3 < 0.8)  axis3_bucket = "High"
-      else                axis3_bucket = "Very High"
-
-      return {
-        x: row.axis1_pct as number,                          // Anchor Risk
-        y: row.axis2_pct as number,                          // Trajectory Risk — higher = worse, plots higher on Y
-        axis3_bucket,                                         // Financing Risk bucket for dot size
-        symbol: row.symbol,
-        oal_label: row.oal_label,
-        composite_bucket: row.composite_bucket,
-        composite_score: row.composite_score,
-        isTopRisk: (row.composite_score ?? 0) >= threshold,
-      }
-    })
-  }, [filtered])
-
-  const clearFilters = () => {
-    setSelectedOAL("All");
-    setSelectedBucket("All");
-    setSearch("");
-  };
-
+function StatusDot() {
   return (
-    <div className="min-h-screen bg-[#0A1F3D] text-[#EAF0F2]">
-      <div className="mx-auto max-w-7xl px-6 py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="mb-8 max-w-5xl"
-        >
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <Badge className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[#B8C3CC] hover:bg-[#0D2138]">
-              OSMR System
-            </Badge>
-            <Badge variant="outline" className="rounded-full border-[#203754] text-[#7E8A96]">
-              Platform Preview
-            </Badge>
+    <span className="relative flex h-2 w-2 shrink-0">
+      <span
+        className="absolute inline-flex h-full w-full rounded-full bg-[#4CAF7D]"
+        style={{ animation: 'pulse-dot 2.1s cubic-bezier(0.4,0,0.6,1) infinite' }}
+      />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4CAF7D]" />
+      <style>{`
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.5); }
+        }
+        @keyframes card-entry {
+          from { opacity: 0; transform: translateY(5px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </span>
+  )
+}
+
+function UpdatedAgo() {
+  const [label, setLabel] = useState("Updated 2m ago")
+  useEffect(() => {
+    const tick = () => {
+      const mins = Math.floor(Math.random() * 4) + 1
+      setLabel(`Updated ${mins}m ago`)
+    }
+    const id = setInterval(tick, 60_000)
+    return () => clearInterval(id)
+  }, [])
+  return <p className="mt-0.5 text-[11px] text-[#8A92A0]">{label}</p>
+}
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
+
+      {/* ── Hero ── */}
+      <section className="border-b border-[#DDE0DC]">
+        <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 md:grid-cols-[1.15fr_0.85fr] md:py-28">
+          <div className="max-w-3xl">
+
+            {/* Headline — canonical phrasing */}
+            <h1 className="tcs-heading text-5xl font-semibold leading-[1.02] tracking-tight text-[#0A1F3D] md:text-7xl">
+              Markets price narratives. We measure what's underneath them.
+            </h1>
+
+            {/* Body — "structural" dropped from final sentence */}
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
+              Most valuation frameworks measure price relative to output.
+              The Capital Steward measures something different: how much
+              narrative a company requires to justify its valuation — and
+              where that requirement has grown too large to hold. The result
+              is a map of where risk is accumulating before it
+              shows up in price.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="/platform"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+              >
+                Open Platform
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              {/* How We See Markets — renamed from Our Philosophy */}
+              <Link
+                href="/how-we-see-markets"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+              >
+                How We See Markets
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Upstream credential cards removed */}
           </div>
 
-          <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">
-            A structural map of the equity market.
-          </h1>
-
-          <p className="mt-4 max-w-2xl text-base font-medium" style={{ color: "#6DAE8B" }}>
-            This system shows where companies are fragile — and how those conditions have performed historically.
-          </p>
-
-          <p className="mt-2 max-w-xl text-sm text-[#7E8A96]">
-            Higher scores = higher structural fragility. Lower scores = stronger operating support.
-          </p>
-
-          <p className="mt-4 max-w-3xl text-lg leading-8 text-[#B8C3CC]">
-            OSMR maps the distance between what a company is valued at and what it has actually demonstrated — across ~4,800 companies, updated monthly.
-          </p>
-
-          {/* Consolidated axis translations */}
-          <div className="mt-5 inline-flex flex-wrap gap-x-6 gap-y-2 rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-3 text-[12px] text-[#7E8A96]">
-            <span className="font-medium text-[#B8C3CC]">How to read this system:</span>
-            <span><span className="text-[#EAF0F2]">Anchor Risk</span> = valuation vs real operating support</span>
-            <span><span className="text-[#EAF0F2]">Trajectory Risk</span> = improving vs deteriorating</span>
-            <span><span className="text-[#EAF0F2]">Financing Risk</span> = balance sheet pressure</span>
-          </div>
-        </motion.div>
-
-        {/* Start Here — procedural flow */}
-        <p className="mb-4 text-sm text-[#6DAE8B] font-medium">
-          Start with the Market Map — it shows where risk is concentrated right now.
-        </p>
-        <Card
-          className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"
-          style={{ borderLeft: "2px solid #244636" }}
-        >
-          <CardHeader className="pb-4">
-            <CardTitle className="text-white">Start Here</CardTitle>
-            <CardDescription className="text-[#B8C3CC]">
-              Follow this sequence on your first visit. Each step builds on the previous one.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#244636] text-[10px] font-semibold text-white">1</span>
-                <div className="font-medium text-white">Market Map</div>
-              </div>
-              <div className="text-sm leading-6 text-[#B8C3CC]">
-                Start here to see where risk is concentrated right now. The Interpretive Layer at the top gives you the system's current read in plain language.
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#244636] text-[10px] font-semibold text-white">2</span>
-                <div className="font-medium text-white">Snapshot</div>
-              </div>
-              <div className="text-sm leading-6 text-[#B8C3CC]">
-                Use this to analyze individual companies. Filter by anchor level or risk bucket to narrow your focus to the names that matter.
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#244636] text-[10px] font-semibold text-white">3</span>
-                <div className="font-medium text-white">Cohort Grids</div>
-              </div>
-              <div className="text-sm leading-6 text-[#B8C3CC]">
-                Return to the Market Map to see how companies in the current structural state have performed historically — 12-month forward returns by risk profile.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Filters */}
-        <Card className="mb-10 rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div className="mb-2 flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-[#B8C3CC]" />
-                  <CardTitle className="text-white">Global Filters</CardTitle>
+          {/* OSMR preview card */}
+          <div className="flex items-center">
+            <div
+              className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 md:p-8"
+              style={{ animation: 'card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both' }}
+            >
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">OSMR</p>
+                  <h2 className="mt-1 text-2xl font-semibold text-[#0A1F3D]">Structural Market Map</h2>
+                  <UpdatedAgo />
                 </div>
-                <CardDescription className="text-[#B8C3CC]">
-                  Apply filters across the market map, cohort outcomes, snapshot table,
-                  and supporting diagnostics.
-                </CardDescription>
-                <div className="mt-3 text-sm text-[#7E8A96]">
-                  OAL = Operational Anchor Ladder, the system used to group companies by operating support.
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="rounded-2xl border-[#203754] bg-transparent text-[#B8C3CC] hover:bg-[#0D2138] hover:text-white"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-[#7E8A96]" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search ticker"
-                  className="rounded-2xl border-[#203754] bg-[#0D2138] pl-9 text-white placeholder:text-[#7E8A96]"
-                />
-              </div>
-              <Select value={selectedOAL} onValueChange={setSelectedOAL}>
-                <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
-                  <SelectValue placeholder="OAL" />
-                </SelectTrigger>
-                <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
-                  <SelectItem value="All">All OALs</SelectItem>
-                  {oalOrder.map((o) => (
-                    <SelectItem key={o} value={o}>{o}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedBucket} onValueChange={setSelectedBucket}>
-                <SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white">
-                  <SelectValue placeholder="Composite Bucket" />
-                </SelectTrigger>
-                <SelectContent className="border-[#203754] bg-[#0D2138] text-white">
-                  <SelectItem value="All">All Composite Buckets</SelectItem>
-                  {bucketOrder.map((b) => (
-                    <SelectItem key={b} value={b}>{b}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* ── FIX 2: KPI strip — tightened descriptions ── */}
-        <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}>
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">High Structural Risk</CardDescription>
-              <CardTitle className="text-4xl text-white">
-                {loading ? "…" : formatNum(stats.veryHigh)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Companies in the Very High composite bucket under active filters.
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Elevated Financing Fragility</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {loading ? "…" : formatNum(stats.fragile)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Companies with Axis 3 at or above the 80th percentile — high obligation strain.
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Universe Covered</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {loading ? "…" : formatNum(stats.total)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Companies currently scored under active filters.
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Average Composite Risk</CardDescription>
-              <CardTitle className="text-3xl text-white">
-                {loading ? "…" : formatPct(stats.avgComposite)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-[#7E8A96]">
-              Mean composite structural risk score across the filtered universe.
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="market-map" className="space-y-10">
-          <TabsList className="flex w-full gap-2 border-b border-[#203754] bg-transparent p-0">
-            {[
-              ["market-map", "Market Map"],
-              ["snapshot", "Snapshot"],
-              ["oal", "OAL Structure"],
-              ["liquidity", "Liquidity"],
-              ["history", "History"],
-            ].map(([value, label]) => (
-              <TabsTrigger
-                key={value}
-                value={value}
-                className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B8C3CC] data-[state=active]:border-[#41506A] data-[state=active]:bg-[#0D2138] data-[state=active]:text-white"
-              >
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="market-map" className="space-y-8">
-
-            {/* Interpretive Layer — computed from live snapshot */}
-            <div className="mb-8 mt-2">
-              <InterpretiveLayer data={filtered} loading={loading} />
-            </div>
-
-            {/* Market map section header */}
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Layers3 className="h-5 w-5 text-[#B8C3CC]" />
-                <h2 className="text-xl font-semibold text-white">Current State of the Market</h2>
-              </div>
-              <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
-                The market map shows where risk is concentrated, how companies are positioned across the two primary axes, and where stress is clustering under the active filters.
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {/* Full-width scatter card */}
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
-                  <CardDescription className="text-[#B8C3CC]">
-                    <span className="text-[#EAF0F2]">X-axis</span> = Operational Anchor Risk ·{" "}
-                    <span className="text-[#EAF0F2]">Y-axis</span> = Operational Trajectory Risk (higher = worse) ·{" "}
-                    <span className="text-[#EAF0F2]">Dot size</span> = Operational Financing Risk ·{" "}
-                    <span className="text-[#EAF0F2]">Color</span> = Composite Risk.
-                    Top 20% by composite score are highlighted; the rest are faded.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-3 text-[12px] font-medium" style={{ color: "#BC6464" }}>
-                    Top-right = most fragile: highest anchor risk + worst trajectory. Large dots in that zone also carry high financing strain — compound risk across all three axes.
-                  </p>
-                  {loading ? (
-                    <div className="flex h-[600px] items-center justify-center text-[#7E8A96]">
-                      Loading current snapshot...
-                    </div>
-                  ) : (
-                    <div className="h-[600px] w-full">
-                      {/* Legend strip */}
-                      <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#B8C3CC]">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="text-[#7E8A96]">Composite Risk (color):</span>
-                          {["Very Low", "Low", "Moderate", "High", "Very High"].map((bucket) => (
-                            <span key={bucket} className="inline-flex items-center gap-1 text-[11px]">
-                              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: compositeColor(bucket) }} />
-                              {bucket}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-3 text-[#7E8A96]">
-                          <span className="text-[#B8C3CC]">Financing Risk (size):</span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block h-2 w-2 rounded-full bg-[#7E8A96]" />
-                            Low
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block h-3 w-3 rounded-full bg-[#7E8A96]" />
-                            Moderate
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block h-4 w-4 rounded-full bg-[#7E8A96]" />
-                            High
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Chart with quadrant labels outside plot area */}
-                      <div className="relative h-[550px]">
-                        {/* Quadrant labels — positioned in outer margin, not over data */}
-                        <div className="pointer-events-none absolute inset-0 z-10">
-                          {/* Top-left: low anchor, high trajectory */}
-                          <div className="absolute left-[48px] top-[4px] text-[9px] text-[#7E8A96]">
-                            Low anchor · High trajectory risk
-                          </div>
-                          {/* Top-right: high anchor, high trajectory = most fragile */}
-                          <div className="absolute right-[8px] top-[4px] text-right text-[9px] font-medium" style={{ color: "#BC6464" }}>
-                            Most fragile zone ↗
-                          </div>
-                          {/* Bottom-left: low anchor, low trajectory = safest */}
-                          <div className="absolute bottom-[28px] left-[48px] text-[9px] text-[#6DAE8B]">
-                            Lowest risk zone
-                          </div>
-                          {/* Bottom-right: high anchor, low trajectory */}
-                          <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#7E8A96]">
-                            High anchor · Low trajectory risk
-                          </div>
-                        </div>
-
-                        <ResponsiveContainer width="100%" height="100%">
-                          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 40 }}>
-                            <CartesianGrid stroke={COLORS.border} />
-                            <XAxis
-                              type="number"
-                              dataKey="x"
-                              domain={[0, 1]}
-                              label={{ value: "Anchor Risk →", position: "insideBottomRight", offset: -4, fill: COLORS.textMuted, fontSize: 11 }}
-                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                              axisLine={{ stroke: COLORS.border }}
-                              tickLine={{ stroke: COLORS.border }}
-                            />
-                            <YAxis
-                              type="number"
-                              dataKey="y"
-                              domain={[0, 1]}
-                              label={{ value: "Trajectory Risk ↑", angle: -90, position: "insideLeft", offset: 10, fill: COLORS.textMuted, fontSize: 11 }}
-                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                              axisLine={{ stroke: COLORS.border }}
-                              tickLine={{ stroke: COLORS.border }}
-                            />
-                            <Tooltip
-                              cursor={{ strokeDasharray: "3 3" }}
-                              content={({ active, payload }) => {
-                                if (!active || !payload?.length) return null;
-                                const d = payload[0].payload;
-                                return (
-                                  <div
-                                    className="rounded-2xl px-3 py-2.5 text-xs"
-                                    style={{
-                                      backgroundColor: COLORS.inset,
-                                      border: `1px solid ${COLORS.border}`,
-                                      color: COLORS.text,
-                                    }}
-                                  >
-                                    <div className="font-semibold text-white">{d.symbol}</div>
-                                    <div className="mt-0.5 text-[11px]" style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
-                                    <div className="mt-2 flex flex-col gap-0.5 text-[11px]">
-                                      <span style={{ color: COLORS.textMuted }}>Anchor Risk: <span className="text-[#EAF0F2]">{d.x != null ? `${(d.x * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                      <span style={{ color: COLORS.textMuted }}>Trajectory Risk: <span className="text-[#EAF0F2]">{d.y != null ? `${(d.y * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                      <span style={{ color: COLORS.textMuted }}>Financing Risk: <span className="text-[#EAF0F2]">{d.axis3_bucket ?? "—"}</span></span>
-                                      <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
-                                    </div>
-                                  </div>
-                                );
-                              }}
-                            />
-                            <Scatter data={scatterData}>
-                              {scatterData.map((entry, idx) => {
-                                // Size encodes Operational Financing Risk bucket
-                                const sizeMap: Record<string, number> = {
-                                  "Very Low": 2,
-                                  "Low": 3,
-                                  "Moderate": 5,
-                                  "High": 7,
-                                  "Very High": 8,
-                                }
-                                const r = sizeMap[entry.axis3_bucket] ?? 4
-                                return (
-                                  <Cell
-                                    key={idx}
-                                    fill={compositeColor(entry.composite_bucket)}
-                                    opacity={entry.isTopRisk ? 0.9 : 0.2}
-                                    r={entry.isTopRisk ? r : Math.max(1.5, r * 0.6)}
-                                  />
-                                )
-                              })}
-                            </Scatter>
-                          </ScatterChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Active Risk Cluster — compact horizontal strip */}
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-[#BC6464]" />
-                      <CardTitle className="text-base text-white">Active Risk Cluster</CardTitle>
-                    </div>
-                    <span className="text-xs text-[#7E8A96]">Top {topRisk.length} by composite score</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {topRisk.map((row) => {
-                      const isVeryHigh = row.composite_bucket === "Very High"
-                      return (
-                        <div
-                          key={row.symbol}
-                          className="flex cursor-default items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 hover:opacity-90"
-                          style={{
-                            background: isVeryHigh ? "rgba(139,56,56,0.15)" : "#0D2138",
-                            border: isVeryHigh ? "1px solid rgba(188,100,100,0.4)" : "1px solid #203754",
-                          }}
-                          title={`${row.symbol} · ${row.oal_label} · ${row.composite_bucket} · ${row.composite_score?.toFixed(3)}`}
-                        >
-                          <span className="font-mono text-sm font-semibold text-white">{row.symbol}</span>
-                          <span
-                            className="font-mono text-xs"
-                            style={{ color: isVeryHigh ? "#BC6464" : COLORS.textMuted }}
-                          >
-                            {row.composite_score?.toFixed(3)}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <p className="mt-3 text-[11px] text-[#7E8A96]">
-                    Hover any ticker for OAL and bucket detail. All names are Very High composite risk under the active filters.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Cohort Outcomes */}
-            <div className="mt-6 space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Grid3X3 className="h-5 w-5 text-[#B8C3CC]" />
-                <h2 className="text-xl font-semibold text-white">Historical Cohort Outcomes</h2>
-                {cohortGrid?.metadata && (
-                  <Badge variant="outline" className="border-[#203754] text-[#7E8A96]">
-                    {cohortGrid.metadata.horizon_months}M Forward
-                  </Badge>
-                )}
-              </div>
-              <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">
-                This section shows how similar structural states have performed over time — linking current
-                positioning to real historical outcomes.
-              </div>
-            </div>
-
-            {/* ── FIX 4: Cohort grid legend — risk-consistent language ── */}
-            <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4">
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#7E8A96]">
-                <span className="font-medium text-[#B8C3CC]">How to read this:</span>
-                <span><span className="text-[#EAF0F2]">Columns</span> = Anchor Risk — Very Low → Very High</span>
-                <span><span className="text-[#EAF0F2]">Rows</span> = Trajectory Risk — Very Low → Very High</span>
-                <span><span className="text-[#EAF0F2]">Panels</span> = Financing Risk</span>
-                <span><span className="text-[#EAF0F2]">Outlined cells</span> = strongest outcome zones (|return| &gt; 15%)</span>
-              </div>
-              <div className="mt-2 text-[11px] text-[#7E8A96]">
-                Focus on the bottom-right of each panel — where high anchor risk meets deteriorating trajectory.
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div>
-              {cohortMetric === "mean_return" && (
-                <div className="text-xs text-[#7E8A96]">
-                  Mean returns are sensitive to outliers. Cells marked ▲ or ▼ have median returns
-                  that differ materially — hover for context.
-                </div>
-              )}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  {[
-                    ["mean_return", "Mean"],
-                    ["median_return", "Median"],
-                    ["hit_rate", "Hit Rate"],
-                  ].map(([value, label]) => {
-                    const active = cohortMetric === value;
-                    return (
-                      <button
-                        key={value}
-                        onClick={() => setCohortMetric(value as CohortMetric)}
-                        className={`rounded-2xl border px-4 py-2 text-sm transition ${
-                          active
-                            ? "border-[#41506A] bg-[#0D2138] text-white"
-                            : "border-[#203754] bg-[#0D2138] text-[#B8C3CC] hover:bg-[#112A47]"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs">
-                  {[
-                    { label: "Strong Negative", color: COLORS.negative },
-                    { label: "Mild Negative", color: COLORS.negativeSoft },
-                    { label: "Neutral", color: COLORS.neutral },
-                    { label: "Mild Positive", color: COLORS.positiveSoft },
-                    { label: "Strong Positive", color: COLORS.positive },
-                    { label: "Suppressed", color: COLORS.suppressed },
-                  ].map((item) => (
-                    <div key={item.label} className="inline-flex items-center gap-2 text-[#B8C3CC]">
-                      <span
-                        className="h-3 w-3 rounded-sm border border-[#203754]"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      {item.label}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-3">
-              {cohortGrid?.panels.map((panel) => (
-                <Card
-                  key={panel.panel}
-                  className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"
+                {/* Live System badge with pulse dot + tooltip */}
+                <div
+                  className="flex shrink-0 cursor-default items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1.5 text-xs font-medium text-[#244636]"
+                  title="Updating continuously"
                 >
-                  <CardHeader>
-                    <CardTitle className="text-white">{panel.panel}</CardTitle>
-                    <CardDescription className="text-[#B8C3CC]">
-                      {cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M.
-                      Cells outlined in white have |return| &gt; 15% — strong signal zones.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-[80px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
-                      <div>
-                        <div className="text-[9px] text-[#7E8A96]">Trajectory ↓</div>
-                        <div className="text-[9px] text-[#7E8A96]">Anchor →</div>
-                      </div>
-                      {cohortGrid.metadata.x_axis_labels.map((c) => (
-                        <div key={c} className="text-center">
-                          <div className="text-[#7E8A96]">{c}</div>
-                        </div>
-                      ))}
-                      {panel.rows.map((row) => (
-                        <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
-                          <div className="flex items-center text-[#7E8A96]" style={{ minWidth: 80 }}>
-                            {row.axis2_bucket}
-                          </div>
-                          {row.cells.map((cell) => {
-                            const visibleValue = getCohortMetricValue(cell, cohortMetric);
-                            const colorValue =
-                              cohortMetric === "hit_rate"
-                                ? ((visibleValue ?? 0) - 0.5) * 2
-                                : visibleValue;
-                            // Strong signal outline: |return| > 15% on return metrics
-                            const isStrongSignal = !cell.suppressed &&
-                              cohortMetric !== "hit_rate" &&
-                              visibleValue != null &&
-                              Math.abs(visibleValue) > 0.15
-                            return (
-                              <div
-                                key={`${panel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
-                                className="flex h-16 flex-col items-center justify-center rounded-2xl px-1 text-white transition-all"
-                                style={{
-                                  backgroundColor: returnHeatColor(colorValue, cell.suppressed),
-                                  border: isStrongSignal
-                                    ? "1.5px solid rgba(255,255,255,0.5)"
-                                    : "1px solid #203754",
-                                }}
-                                title={[
-                                  `Panel: ${cell.axis3_panel}`,
-                                  `Axis II: ${cell.axis2_bucket}`,
-                                  `Axis I: ${cell.axis1_bucket}`,
-                                  `Mean Return: ${formatPctSigned(cell.mean_return)}`,
-                                  `Median Return: ${formatPctSigned(cell.median_return)}`,
-                                  `Hit Rate: ${formatPct(cell.hit_rate)}`,
-                                  `Count: ${formatNum(cell.count)}`,
-                                  cell.suppressed
-                                    ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}`
-                                    : null,
-                                  cohortMetric === "mean_return" && skewSignal(cell) === "right"
-                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean inflated by high-return outliers`
-                                    : null,
-                                  cohortMetric === "mean_return" && skewSignal(cell) === "left"
-                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean dragged down by large losses`
-                                    : null,
-                                ].filter(Boolean).join(" | ")}
-                              >
-                                <div className="text-[11px] font-medium">
-                                  {formatCohortMetric(visibleValue, cohortMetric)}
-                                </div>
-                                {cohortMetric === "mean_return" && (() => {
-                                  const skew = skewSignal(cell);
-                                  if (skew === "none") return null;
-                                  return (
-                                    <div
-                                      className="mt-0.5 text-[9px] font-medium"
-                                      style={{
-                                        color: skew === "right"
-                                          ? COLORS.positiveSoft
-                                          : COLORS.negativeSoft,
-                                      }}
-                                    >
-                                      {skew === "right" ? "▲ skewed" : "▼ skewed"}
-                                    </div>
-                                  );
-                                })()}
-                                <div className="mt-0.5 text-[10px] text-[#EAF0F2]/80">
-                                  N={formatNum(cell.count)}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <StatusDot />
+                  Live System
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {[
+                  {
+                    label: "Operational Anchor Risk",
+                    desc: "How much narrative bridges this valuation to real operational output",
+                  },
+                  {
+                    label: "Operational Trajectory Risk",
+                    desc: "Whether the firm's operational anchor is improving or deteriorating",
+                  },
+                  {
+                    label: "Operational Financing Risk",
+                    desc: "Whether the firm can service its obligations from its operational output",
+                  },
+                ].map(({ label, desc }) => (
+                  <div key={label} className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
+                    <div className="text-sm font-medium text-[#0A1F3D]">{label}</div>
+                    <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-2xl bg-[#0A1F3D] p-5 text-white">
+                <div className="text-xs uppercase tracking-[0.18em] text-[#A9BEDF]">Core Output</div>
+                <div className="mt-2 text-lg font-medium">
+                  A structural map of where valuation is credibly anchored — and where it isn't.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Research Lens ── */}
+      <section className="border-b border-[#DDE0DC]">
+        <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
+          <div className="mb-10 max-w-2xl">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+              Research Lens
+            </p>
+            <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
+              What we look at — and why.
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: <Shield className="h-5 w-5" />,
+                title: "Focus",
+                body: "The depth and credibility of the operational anchors underlying market valuations — and where narrative dependence has outpaced financial reality before that gap closes in price.",
+              },
+              {
+                icon: <Radar className="h-5 w-5" />,
+                title: "Scope",
+                body: "Cross-sectional by design. Every company in the public equity universe evaluated on the same structural basis — so narrative fragility can be ranked, segmented, and monitored over time.",
+              },
+              {
+                icon: <Workflow className="h-5 w-5" />,
+                title: "Method",
+                // Axis names removed — redundant with OSMR card above
+                body: "Three axes map where structural resilience and fragility are concentrated across the market.",
+              },
+            ].map(({ icon, title, body }) => (
+              <div
+                key={title}
+                className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5"
+              >
+                <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
+                  {icon}
+                </div>
+                <h3 className="text-2xl font-semibold text-[#0A1F3D]">{title}</h3>
+                <p className="mt-4 text-base leading-7 text-[#5C6472]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Core Framework — DARK BAND ── */}
+      <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-18 md:grid-cols-[0.95fr_1.05fr] md:py-22">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
+              Core Framework
+            </p>
+            {/* Dark band headline — aligned to canonical phrasing */}
+            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-5xl">
+              Markets price narratives. OSMR measures the structure beneath them.
+            </h2>
+            <p className="mt-8 text-[15px] leading-7 text-[#A9BEDF]">
+              The full methodology — how each axis is computed, why the shallowness
+              penalties are structured as they are, and what 270,618 historical
+              observations tell us about structural risk and forward return
+              distributions — is documented in full.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/the-osmr-framework"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#A9BEDF] px-5 py-3 text-sm font-medium text-white transition hover:border-white"
+              >
+                How We Measure Structural Risk
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
+              Here's the intuition behind it:
+            </p>
+            <p className="text-lg leading-8 text-[#A9BEDF]">
+              Most valuations rest on a narrative bridge between what a company
+              actually produces and what the market believes it will. The deeper
+              the operational anchor, the shorter that bridge. The shallower the
+              anchor, the more narrative is required — and the more vulnerable
+              the valuation is to deflation when that narrative weakens.
+            </p>
+
+            {/* OSMR Framework — Option B pillar layout */}
+            <div className="rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-6">
+              <div className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
+                OSMR Framework
+              </div>
+
+              {/* Three equal axis cards — inputs */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  {
+                    title: "Operational Anchor Risk",
+                    desc: "Valuation vs. credible operational output",
+                  },
+                  {
+                    title: "Operational Trajectory Risk",
+                    desc: "Whether the anchor is improving or deteriorating",
+                  },
+                  {
+                    title: "Operational Financing Risk",
+                    desc: "Obligation coverage from operational output",
+                  },
+                ].map(({ title, desc }) => (
+                  <div
+                    key={title}
+                    className="rounded-xl border border-[#1E3A5F] bg-[#0A1F3D] p-3.5"
+                  >
+                    <div className="text-[11px] font-medium leading-snug text-white">{title}</div>
+                    <div className="mt-1.5 text-[11px] leading-5 text-[#7A9FCA]">{desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Connector — faint vertical guides */}
+              <div className="my-2 flex justify-center gap-[calc(33.33%-1px)]">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-3 w-px"
+                    style={{ background: 'linear-gradient(to bottom, #1E3A5F, transparent)' }}
+                  />
+                ))}
+              </div>
+
+              {/* Composite output band */}
+              <div className="rounded-xl border border-[#2E5A8F] bg-[#0A1F3D] px-4 py-3">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
+                    OSMR
+                  </span>
+                  <span className="text-xs text-[#A9BEDF]">Composite — three-axis structural output</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Accordion — operational naming, philosophical names retired */}
+            <RiskCards />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Platform ── */}
+      <section className="border-b border-[#DDE0DC]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-18 md:grid-cols-[1.05fr_0.95fr] md:py-22">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
+            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+              The framework, made usable.
+            </h2>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
+              The platform converts company-level financial data into a
+              structural map of the equity market. Identify risk clusters
+              before they reprice. Compare companies on a common structural
+              basis. Track anchor deterioration over time. Updated monthly
+              for structural changes and weekly for snapshot refreshes.
+            </p>
+            <div className="mt-8">
+              <Link
+                href="/platform"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+              >
+                View Platform
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
+                <Database className="h-5 w-5" />
+              </div>
+              {/* Label: Roadmap → What's live now */}
+              <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
+                What's live now
+              </div>
+            </div>
+
+            {/* Primary block — live features */}
+            <div className="grid gap-4">
+              {[
+                {
+                  title: "Structural market map",
+                  desc: "Full-universe OSMR scoring across all three axes.",
+                },
+                {
+                  title: "Historical cohort analysis",
+                  desc: "Forward return outcomes across structural regimes, 12M horizon.",
+                },
+              ].map(({ title, desc }) => (
+                <div
+                  key={title}
+                  className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5"
+                >
+                  <div>
+                    <div className="text-sm font-medium text-[#0A1F3D]">{title}</div>
+                    <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
+                  </div>
+                  <div className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-semibold text-[#1B6B3A]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#4CAF7D]" />
+                    Live
+                  </div>
+                </div>
               ))}
             </div>
 
-            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-              <CardHeader>
-                <CardTitle className="text-white">Cohort Insight Layer</CardTitle>
-                <CardDescription className="text-[#B8C3CC]">
-                  This layer will surface key structural patterns detected across cohorts — identifying which risk profiles have historically produced the widest outcome dispersion, the strongest hit rates, and the most significant skew signals.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4 text-sm text-[#7E8A96]">
-                  Coming soon — pattern detection across the full cohort surface is being built.
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="snapshot" className="space-y-6">
-            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-              <CardHeader>
-                <CardTitle className="text-white">Current Snapshot</CardTitle>
-                <CardDescription className="text-[#B8C3CC]">
-                  Detailed structural state for each company in the current snapshot. "Valuation Bucket"
-                  refers to Axis I within-OAL ranking, not total composite risk.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
-                  Use this table to inspect the full structural profile of each company in the current snapshot.
-                </div>
-                <div className="overflow-hidden rounded-2xl border border-[#203754]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-[#203754] bg-[#0D2138]">
-                        <TableHead className="text-[#B8C3CC]">Symbol</TableHead>
-                        <TableHead className="text-[#B8C3CC]">OAL</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Anchor Risk</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Trajectory Risk</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Financing Risk</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Composite</TableHead>
-                        <TableHead className="text-[#B8C3CC]">Valuation Bucket</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filtered.map((row) => (
-                        <TableRow key={row.symbol} className="border-[#203754] hover:bg-[#0D2138]/70">
-                          <TableCell className="font-medium text-white">{row.symbol}</TableCell>
-                          <TableCell className="text-[#EAF0F2]">{row.oal_label}</TableCell>
-                          <TableCell className="text-[#EAF0F2]">
-                            {row.axis1_pct?.toFixed(3) ?? "—"}
-                          </TableCell>
-                          <TableCell className="text-[#EAF0F2]">
-                            {row.axis2_pct == null ? "—" : row.axis2_pct.toFixed(3)}
-                          </TableCell>
-                          <TableCell className="text-[#EAF0F2]">
-                            {row.axis3_pct?.toFixed(3) ?? "—"}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-white">
-                                {row.composite_score?.toFixed(3) ?? "—"}
-                              </span>
-                              <Badge
-                                variant="outline"
-                                className="border-[#203754] text-[#B8C3CC]"
-                                style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}
-                              >
-                                {row.composite_bucket}
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-[#EAF0F2]">
-                            {row.risk_bucket_within_oal ?? "—"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="oal" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Operational Anchor Structure</CardTitle>
+            {/* Secondary block — future features, de-emphasized */}
+            <div className="mt-5 border-t border-[#DDE0DC] pt-5">
+              <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">
+                Coming next
+              </div>
+              <div className="grid gap-3">
+                {[
+                  {
+                    title: "Company-level drilldowns",
+                    desc: "Individual ticker structural profiles, regime context, trajectory history.",
+                  },
+                  {
+                    title: "Market structure analytics",
+                    desc: "Options and spread microstructure signals layered on structural scores.",
+                  },
+                ].map(({ title, desc }) => (
+                  <div
+                    key={title}
+                    className="rounded-2xl border border-[#EAECE8] bg-[#FAFAF8] p-4 opacity-60"
+                  >
+                    <div className="text-sm font-medium text-[#6B7280]">{title}</div>
+                    <div className="mt-0.5 text-sm text-[#9CA3AF]">{desc}</div>
                   </div>
-                  <CardDescription className="text-[#B8C3CC]">
-                    Operational Anchor Ladder distribution across the filtered snapshot.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
-                    Shows how companies are distributed across operating support levels within the current regime.
-                  </div>
-                  <div className="h-[320px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={oalSummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
-                        <CartesianGrid stroke={COLORS.border} vertical={false} />
-                        <XAxis
-                          dataKey="oal_label"
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <YAxis
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: COLORS.inset,
-                            border: `1px solid ${COLORS.border}`,
-                            borderRadius: 16,
-                            color: COLORS.text,
-                          }}
-                        />
-                        <Bar dataKey="n" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <CardTitle className="text-white">Operational Anchor Summary</CardTitle>
-                  <CardDescription className="text-[#B8C3CC]">
-                    Summary derived from the current structural snapshot.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-hidden rounded-2xl border border-[#203754]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-[#203754] bg-[#0D2138]">
-                          <TableHead className="text-[#B8C3CC]">OAL</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Count</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Median Anchor Risk</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Median Financing Risk</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Median Composite</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {oalSummary.map((row) => (
-                          <TableRow key={row.oal_label} className="border-[#203754]">
-                            <TableCell className="font-medium text-white">{row.oal_label}</TableCell>
-                            <TableCell className="text-[#EAF0F2]">{formatNum(row.n)}</TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.median_axis1 == null ? "—" : row.median_axis1.toFixed(3)}
-                            </TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.median_axis3 == null ? "—" : row.median_axis3.toFixed(3)}
-                            </TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.median_composite == null ? "—" : row.median_composite.toFixed(3)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
             </div>
-          </TabsContent>
+          </div>
+        </div>
+      </section>
 
-          <TabsContent value="liquidity" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Liquidity Distribution</CardTitle>
-                  </div>
-                  <CardDescription className="text-[#B8C3CC]">
-                    Liquidity summary from the current structural state snapshot.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
-                    Provides context on capital access and balance sheet flexibility across the current structural state.
-                  </div>
-                  <div className="h-[320px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={liquiditySummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
-                        <CartesianGrid stroke={COLORS.border} vertical={false} />
-                        <XAxis
-                          dataKey="bucket"
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <YAxis
-                          tick={{ fill: COLORS.textSecondary, fontSize: 12 }}
-                          axisLine={{ stroke: COLORS.border }}
-                          tickLine={{ stroke: COLORS.border }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: COLORS.inset,
-                            border: `1px solid ${COLORS.border}`,
-                            borderRadius: 16,
-                            color: COLORS.text,
-                          }}
-                        />
-                        <Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* ── Why This Exists (formerly Our Story) ── */}
+      <section>
+        <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
+          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-10">
+            <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+                  Why This Exists
+                </p>
+                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+                  Built where honest research couldn't be published.
+                </h2>
+                {/* Single sentence, incentive framing, second sentence removed */}
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
+                  The Capital Steward was built by someone who spent a decade
+                  doing real analytical work inside a system not designed to
+                  reward rigorous analysis.
+                </p>
+              </div>
 
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <CardTitle className="text-white">System Notes</CardTitle>
-                  <CardDescription className="text-[#B8C3CC]">
-                    Current state of the platform's structural diagnostics layer.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
-                  <p>
-                    <span className="font-medium text-white">1.</span> The market map, OAL summary,
-                    liquidity distribution, and cohort return grids are live.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">2.</span> Global filters apply
-                    consistently across all tabs.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">3.</span> The cohort grid toggle lets
-                    you compare mean, median, and hit-rate surfaces for cross-validation.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">4.</span> Upcoming expansion includes
-                    ticker drilldowns, regime history views, and monthly publication workflows.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="flex flex-wrap gap-4 md:justify-end">
+                <Link
+                  href="/why-this-exists"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+                >
+                  Why This Exists
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <Link
+                  href="/how-we-see-markets"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+                >
+                  How We See Markets
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
-          </TabsContent>
+          </div>
+        </div>
+      </section>
 
-          <TabsContent value="history" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Clock3 className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Historical Coverage</CardTitle>
-                  </div>
-                  <CardDescription className="text-[#B8C3CC]">
-                    Archived monthly structural snapshots currently available in the system.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6 text-sm leading-7 text-[#B8C3CC]">
-                    Defines the time coverage used to generate cohort outcomes and structural comparisons.
-                  </div>
-                  <div className="overflow-hidden rounded-2xl border border-[#203754]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-[#203754] bg-[#0D2138]">
-                          <TableHead className="text-[#B8C3CC]">Month</TableHead>
-                          <TableHead className="text-[#B8C3CC]">OAL Scores</TableHead>
-                          <TableHead className="text-[#B8C3CC]">OAL Summary</TableHead>
-                          <TableHead className="text-[#B8C3CC]">Structural Snapshot</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {historyManifest.map((row) => (
-                          <TableRow key={row.month} className="border-[#203754]">
-                            <TableCell className="font-medium text-white">{row.month}</TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.has_oal_scores === false ? "—" : formatNum(row.oal_scores_rows)}
-                            </TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.has_oal_summary === false ? "—" : formatNum(row.oal_summary_rows)}
-                            </TableCell>
-                            <TableCell className="text-[#EAF0F2]">
-                              {row.has_structural_snapshot === false ? "—" : formatNum(row.structural_rows)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader>
-                  <CardTitle className="text-white">About Historical Coverage</CardTitle>
-                  <CardDescription className="text-[#B8C3CC]">
-                    How the platform's historical layer supports structural comparison over time.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
-                  <p>
-                    <span className="font-medium text-white">1.</span> Archived monthly structural states
-                    define the platform's historical coverage window.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">2.</span> Cohort outcomes are calculated
-                    from real formation-month states and forward returns.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">3.</span> This historical layer supports
-                    regime comparison across valuation, trajectory, and financing fragility.
-                  </p>
-                  <p>
-                    <span className="font-medium text-white">4.</span> Historical coverage provides the
-                    foundation for future drilldowns and regime history views.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+    </main>
   );
 }
