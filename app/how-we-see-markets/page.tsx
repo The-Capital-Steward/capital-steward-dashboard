@@ -322,14 +322,12 @@ export default function HowWeSeeMarketsPage() {
             <p className="mt-7 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               The three dimensions above are not abstractions. Each is a precise,
               quantifiable measurement applied to every company in the U.S. equity
-              universe — roughly 4,800 companies, updated on a monthly cadence. The
-              full methodology is written to be read by someone who wants to evaluate
-              the framework rigorously, not just use it. If that is you, it is worth
-              the time.
+              universe — roughly 4,800 companies, updated on a monthly cadence.
             </p>
 
-            <p className="mt-7 text-[15px] leading-7 text-[#4F5968]">
-              If you want to see how this is measured in full —
+            <p className="mt-7 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
+              The full methodology is written to be read by someone who wants to evaluate
+              the framework rigorously, not just use it. If that is you, read:
             </p>
 
             <div className="mt-5">
