@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from "react"
 import Link from "next/link";
 import {
   ArrowRight,
@@ -8,6 +11,64 @@ import {
   Database,
   Waypoints,
 } from "lucide-react";
+
+const RISK_CARDS = [
+  {
+    title: "Narrative Bridge Risk",
+    summary: "The further a valuation reaches beyond credible operational output, the more narrative is required to sustain it — and the more vulnerable it is to deflation.",
+    detail: "A firm will use the deepest operational anchor it can credibly claim to justify its valuation. If free cash flow supports that valuation, the bridge between price and economic reality is short. If the market must reach to revenue — or beyond — the bridge grows long, fragile, and dependent on conditions outside the firm's control. The penalty for anchor shallowness reflects the length and fragility of the narrative required.",
+  },
+  {
+    title: "Narrative Durability Risk",
+    summary: "A firm whose anchor is consistently improving is shortening its narrative bridge. One whose anchor is deteriorating is lengthening it — becoming more dependent on narrative to justify its price.",
+    detail: "This dimension captures trajectory, not just position. A company moving toward demonstrated cash generation is reducing its structural risk over time. A company whose anchor metric is deteriorating — even if its current valuation is not yet stretched — is accumulating structural risk regardless of where its price sits. Consistency of improvement matters as much as the improvement itself.",
+  },
+  {
+    title: "Obligation Risk",
+    summary: "Whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.",
+    detail: "Debt is not inherently fragile. A mature firm running significant debt with strong coverage from operational output is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it. Firms unable to cover their obligations from their actual operational anchor are exposed — regardless of what narrative surrounds their balance sheet.",
+  },
+]
+
+function RiskCards() {
+  const [expanded, setExpanded] = useState<string | null>(null)
+
+  return (
+    <div className="grid gap-4">
+      {RISK_CARDS.map(({ title, summary, detail }) => {
+        const isOpen = expanded === title
+        return (
+          <button
+            key={title}
+            onClick={() => setExpanded(isOpen ? null : title)}
+            className="group w-full rounded-2xl border border-[#1E3A5F] bg-[#0D2847] p-5 text-left transition-all duration-200 hover:border-[#2E5A8F] hover:bg-[#0F2E52]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="text-sm font-medium text-white">{title}</div>
+              <div
+                className="mt-0.5 shrink-0 text-[#A9BEDF] transition-transform duration-200"
+                style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 5L7 10L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className="mt-2 text-sm leading-6 text-[#A9BEDF]">{summary}</div>
+            <div
+              className="overflow-hidden transition-all duration-300"
+              style={{ maxHeight: isOpen ? '200px' : '0px', opacity: isOpen ? 1 : 0 }}
+            >
+              <div className="mt-4 border-t border-[#1E3A5F] pt-4 text-sm leading-7 text-[#7A9FCA]">
+                {detail}
+              </div>
+            </div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function HomePage() {
   return (
@@ -22,9 +83,12 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
-              The Capital Steward measures how deeply a company's valuation is
-              anchored to real operational output — and how much narrative it
-              requires to sustain it.
+              Most valuation frameworks measure price relative to output.
+              The Capital Steward measures something different: how much
+              narrative a company requires to justify its valuation — and
+              where that requirement has grown too large to hold. The result
+              is a structural map of where risk is accumulating before it
+              shows up in price.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
@@ -64,7 +128,7 @@ export default function HomePage() {
 
           {/* OSMR preview card */}
           <div className="flex items-center">
-            <div className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] md:p-8">
+            <div className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-0.5 md:p-8">
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">OSMR</p>
@@ -115,7 +179,7 @@ export default function HomePage() {
               Research Lens
             </p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
-              The lens behind the system.
+              What we look at — and why.
             </h2>
           </div>
 
@@ -124,22 +188,22 @@ export default function HomePage() {
               {
                 icon: <Shield className="h-5 w-5" />,
                 title: "Focus",
-                body: "We study the depth and credibility of the operational anchors underlying market valuations. The goal is to identify where narrative dependence has outpaced financial reality — before that gap closes in price.",
+                body: "The depth and credibility of the operational anchors underlying market valuations — and where narrative dependence has outpaced financial reality before that gap closes in price.",
               },
               {
                 icon: <Radar className="h-5 w-5" />,
                 title: "Scope",
-                body: "Our work is cross-sectional by design, built to compare firms across the public equity universe on a common structural basis. That makes narrative fragility easier to rank, segment, and monitor over time.",
+                body: "Cross-sectional by design. Every company in the public equity universe evaluated on the same structural basis — so narrative fragility can be ranked, segmented, and monitored over time.",
               },
               {
                 icon: <Workflow className="h-5 w-5" />,
                 title: "Method",
-                body: "OSMR evaluates firms across three axes — Operational Anchor Risk, Operational Trajectory Risk, and Operational Financing Risk — to map where structural resilience and structural fragility are concentrated.",
+                body: "Three axes — Operational Anchor Risk, Operational Trajectory Risk, and Operational Financing Risk — map where structural resilience and fragility are concentrated across the market.",
               },
             ].map(({ icon, title, body }) => (
               <div
                 key={title}
-                className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)]"
+                className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5"
               >
                 <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
                   {icon}
@@ -162,9 +226,27 @@ export default function HomePage() {
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-5xl">
               Markets price assets through narrative. OSMR measures the structure beneath it.
             </h2>
+            <p className="mt-8 text-[15px] leading-7 text-[#A9BEDF]">
+              The full methodology — how each axis is computed, why the shallowness
+              penalties are structured as they are, and what 270,618 historical
+              observations tell us about structural risk and forward return
+              distributions — is documented in full.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/the-osmr-framework"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#A9BEDF] px-5 py-3 text-sm font-medium text-white transition hover:border-white"
+              >
+                How We Measure Structural Risk
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
           <div className="space-y-6">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
+              Here's the intuition behind it:
+            </p>
             <p className="text-lg leading-8 text-[#A9BEDF]">
               Most valuations rest on a narrative bridge between what a company
               actually produces and what the market believes it will. The deeper
@@ -217,31 +299,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Philosophical risk type cards */}
-            <div className="grid gap-4">
-              {[
-                {
-                  title: "Narrative Bridge Risk",
-                  body: "The further a valuation reaches beyond credible operational output, the more narrative is required to sustain it — and the more vulnerable it is to deflation.",
-                },
-                {
-                  title: "Narrative Durability Risk",
-                  body: "A firm whose anchor is consistently improving is shortening its narrative bridge. One whose anchor is deteriorating is lengthening it — becoming more dependent on narrative to justify its price.",
-                },
-                {
-                  title: "Obligation Risk",
-                  body: "Whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.",
-                },
-              ].map(({ title, body }) => (
-                <div
-                  key={title}
-                  className="rounded-2xl border border-[#1E3A5F] bg-[#0D2847] p-5"
-                >
-                  <div className="text-sm font-medium text-white">{title}</div>
-                  <div className="mt-2 text-sm leading-6 text-[#A9BEDF]">{body}</div>
-                </div>
-              ))}
-            </div>
+            {/* Philosophical risk type cards — hover to expand */}
+            <RiskCards />
           </div>
         </div>
       </section>
@@ -252,25 +311,27 @@ export default function HomePage() {
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-              Institutional-Grade Decision Infrastructure
+              The framework, made usable.
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-              The platform converts company-level financial data into a structural map
-              of the equity market — enabling cross-sectional diagnostics, historical
-              cohort analysis, and company-level structural drilldowns.
+              The platform converts company-level financial data into a
+              structural map of the equity market. Identify risk clusters
+              before they reprice. Compare companies on a common structural
+              basis. Track anchor deterioration over time. Updated monthly
+              for structural changes and weekly for snapshot refreshes.
             </p>
             <div className="mt-8">
               <Link
                 href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
               >
-                View Platform Status
+                View Platform
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)]">
+          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
             <div className="mb-5 flex items-center gap-3">
               <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
                 <Database className="h-5 w-5" />
@@ -281,53 +342,45 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-4">
-              <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
-                <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Structural market map</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">
-                    Full-universe OSMR scoring across all three axes.
+              {[
+                {
+                  title: "Structural market map",
+                  desc: "Full-universe OSMR scoring across all three axes.",
+                  status: "Live",
+                  statusColor: "bg-[#E8EFE9] text-[#244636]",
+                },
+                {
+                  title: "Historical cohort analysis",
+                  desc: "Forward return outcomes across structural regimes, 12M horizon.",
+                  status: "Live",
+                  statusColor: "bg-[#E8EFE9] text-[#244636]",
+                },
+                {
+                  title: "Company-level drilldowns",
+                  desc: "Individual ticker structural profiles, regime context, trajectory history.",
+                  status: "Coming Next",
+                  statusColor: "bg-[#ECEDE7] text-[#5B665E]",
+                },
+                {
+                  title: "Market structure analytics",
+                  desc: "Options and spread microstructure signals layered on structural scores.",
+                  status: "Planned",
+                  statusColor: "bg-[#ECEDE7] text-[#5B665E]",
+                },
+              ].map(({ title, desc, status, statusColor }) => (
+                <div
+                  key={title}
+                  className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5"
+                >
+                  <div>
+                    <div className="text-sm font-medium text-[#0A1F3D]">{title}</div>
+                    <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
+                  </div>
+                  <div className={`ml-4 shrink-0 rounded-full px-3 py-1 text-xs font-medium ${statusColor}`}>
+                    {status}
                   </div>
                 </div>
-                <div className="ml-4 shrink-0 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
-                  Live
-                </div>
-              </div>
-
-              <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
-                <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Historical cohort analysis</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">
-                    Forward return outcomes across structural regimes, 12M horizon.
-                  </div>
-                </div>
-                <div className="ml-4 shrink-0 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-medium text-[#244636]">
-                  Live
-                </div>
-              </div>
-
-              <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
-                <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Company-level drilldowns</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">
-                    Individual ticker structural profiles, regime context, trajectory history.
-                  </div>
-                </div>
-                <div className="ml-4 shrink-0 rounded-full bg-[#ECEDE7] px-3 py-1 text-xs font-medium text-[#5B665E]">
-                  Coming Next
-                </div>
-              </div>
-
-              <div className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5">
-                <div>
-                  <div className="text-sm font-medium text-[#0A1F3D]">Market structure analytics</div>
-                  <div className="mt-1 text-sm text-[#5C6472]">
-                    Options and spread microstructure signals layered on structural scores.
-                  </div>
-                </div>
-                <div className="ml-4 shrink-0 rounded-full bg-[#ECEDE7] px-3 py-1 text-xs font-medium text-[#5B665E]">
-                  Planned
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -336,21 +389,20 @@ export default function HomePage() {
       {/* ── Our Story ── */}
       <section>
         <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
-          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] md:p-10">
+          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-10">
             <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
                   Our Story
                 </p>
                 <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-                  Why The Capital Steward exists.
+                  Built where honest research couldn't be published.
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-                  This platform was built on a simple conviction: most financial
-                  analysis is downstream of narrative, not upstream of it. The
-                  Capital Steward is a space to think structurally — honestly,
-                  without the incentive distortions that shape how most financial
-                  information gets packaged and sold.
+                  The Capital Steward was built by someone who spent a decade
+                  doing real analytical work inside a system not designed for
+                  honesty. When the framework became too rigorous to publish
+                  there, it became the reason to build something independent.
                 </p>
               </div>
 
@@ -375,6 +427,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
     </main>
   );
 }

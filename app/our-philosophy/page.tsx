@@ -340,7 +340,7 @@ export default function OurPhilosophyPage() {
       </section>
 
       {/* ── Closing conviction ── */}
-      <section>
+      <section className="border-b border-[#DDE0DC]">
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
           <article className="mx-auto max-w-3xl">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
@@ -372,7 +372,59 @@ export default function OurPhilosophyPage() {
                 It is to map the conditions that determine which companies endure.
               </p>
             </div>
+          </article>
+        </div>
+      </section>
 
+      {/* ── Bridge to framework — NEW SECTION ── */}
+      <section className="border-b border-[#DDE0DC] bg-white">
+        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+          <article className="mx-auto max-w-3xl">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
+              The Measurement
+            </p>
+            <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-[2.35rem]">
+              How we actually do it.
+            </h2>
+
+            <div className="mt-6 space-y-6 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
+              <p>
+                The three dimensions above are not abstractions. Each is a precise,
+                quantifiable measurement applied to every company in the U.S. equity
+                universe — roughly 4,800 companies, updated on a monthly cadence.
+              </p>
+              <p>
+                The full methodology — how the Operational Anchor Ladder assigns each
+                company to its deepest credible anchor, how the shallowness penalties
+                are structured and why, how YoY consistency outperformed more
+                mathematically sophisticated alternatives in cohort validation, and
+                what 270,618 historical observations tell us about the relationship
+                between structural risk and forward return distributions — is documented
+                in full.
+              </p>
+              <p>
+                It is written to be read by someone who wants to evaluate the framework
+                honestly, not just use it. If that is you, it is worth the time.
+              </p>
+            </div>
+
+            <div className="mt-10">
+              <Link
+                href="/the-osmr-framework"
+                className="inline-flex items-center gap-2.5 rounded-2xl border border-[#0A1F3D] bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+              >
+                How We Measure Structural Risk
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      {/* ── Final CTAs ── */}
+      <section>
+        <div className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+          <article className="mx-auto max-w-3xl">
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/platform"
