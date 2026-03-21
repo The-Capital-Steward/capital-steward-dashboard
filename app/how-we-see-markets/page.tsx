@@ -93,6 +93,7 @@ export default function HowWeSeeMarketsPage() {
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#244636]">
             How We See Markets
           </p>
+          {/* Contrast line promoted to h1 — distinct entry point from homepage canonical line */}
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
             Most analysis begins with stories. We begin with structure.
           </h1>
@@ -107,10 +108,11 @@ export default function HowWeSeeMarketsPage() {
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
               The condition
             </p>
+            {/* Hedges removed — unqualified version is more precise */}
             <p className="mt-4 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               Markets are psychosocial systems. The financials participants choose to
-              focus on are often selected because they better support a narrative —
-              not because they always represent the firm's economic reality.
+              focus on are selected because they better support a narrative —
+              not because they represent the firm's economic reality.
             </p>
 
             <p className="mt-10 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
@@ -171,7 +173,6 @@ export default function HowWeSeeMarketsPage() {
               narrative no longer holds.
             </p>
 
-            {/* Pattern cards — compressed */}
             <div className="mt-8 grid gap-3 md:grid-cols-3">
               {[
                 { label: "Pattern one", text: "Valuations persist despite weakening operational anchors." },
@@ -209,20 +210,22 @@ export default function HowWeSeeMarketsPage() {
               {[
                 {
                   num: "I",
-                  eyebrow: "Operational Anchor Risk",
-                  title: "Narrative Bridge Risk",
+                  // Tightened from "the narrative given to shareholders"
+                  eyebrow: "How deep is the operational foundation supporting the valuation?",
+                  title: "Operational Anchor Risk",
                   body: "How far is the valuation from what the company has actually demonstrated? The further the reach — from FCF toward revenue — the longer and more fragile the narrative bridge.",
                 },
                 {
                   num: "II",
-                  eyebrow: "Operational Trajectory Risk",
-                  title: "Narrative Durability Risk",
+                  eyebrow: "How durably has that foundation supported the narrative?",
+                  title: "Operational Trajectory Risk",
                   body: "Is the operational anchor improving or deteriorating? A firm moving toward demonstrated cash generation is shortening its narrative bridge. A firm deteriorating is lengthening it.",
                 },
                 {
                   num: "III",
-                  eyebrow: "Operational Financing Risk",
-                  title: "Obligation Risk",
+                  // Typo fixed: "can meets" → "can meet"
+                  eyebrow: "How well can a firm assure creditors that it can meet its obligations?",
+                  title: "Operational Financing Risk",
                   body: "Can the firm service its obligations from its actual operational output? A gap between what is owed and what can be produced creates structural exposure — regardless of the narrative surrounding the balance sheet.",
                 },
               ].map(({ num, eyebrow, title, body }) => (
