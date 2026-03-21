@@ -204,6 +204,329 @@ function skewSignal(cell: CohortGridCell): "right" | "left" | "none" {
   return "none";
 }
 
+// ─── Interpretive Layer ───────────────────────────────────────────────────────
+// Three panels, each computed from the live filtered snapshot.
+// Panel 1: Distribution — where is the universe sitting right now?
+// Panel 2: Concentration — where is stress most densely clustered?
+// Panel 3: Trajectory — is the universe improving or deteriorating in aggregate?
+
+type InterpretiveLayerProps = {
+  data: SnapshotRow[]
+  loading: boolean
+}
+
+function interpretDistribution(data: SnapshotRow[]): {
+  headline: string
+  body: string
+  consequence: string
+  tone: "elevated" | "moderate" | "subdued"
+} {
+  if (data.length === 0) return { headline: "—", body: "No data available under active filters.", consequence: "", tone: "moderate" }
+
+  const veryHighCount = data.filter(r => r.composite_bucket === "Very High").length
+  const highCount = data.filter(r => r.composite_bucket === "High").length
+  const veryLowCount = data.filter(r => r.composite_bucket === "Very Low").length
+  const lowCount = data.filter(r => r.composite_bucket === "Low").length
+
+  const veryHighPct = veryHighCount / data.length
+  const elevatedPct = (veryHighCount + highCount) / data.length
+  const resilientPct = (veryLowCount + lowCount) / data.length
+
+  if (veryHighPct >= 0.25) {
+    return {
+      headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
+      body: `An unusually high proportion of companies currently carry maximum structural risk. ${(elevatedPct * 100).toFixed(0)}% are in the High or Very High bucket combined — structural fragility is broadly distributed, not isolated to a specific segment.`,
+      consequence: `When fragility is this broadly distributed, sector or factor diversification provides limited structural protection. The risk is systemic across the filtered universe, not idiosyncratic.`,
+      tone: "elevated",
+    }
+  }
+  if (veryHighPct >= 0.15) {
+    return {
+      headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
+      body: `Structural risk is currently present but not dominant. ${(elevatedPct * 100).toFixed(0)}% carry elevated composite risk (High or Very High), while ${(resilientPct * 100).toFixed(0)}% sit in the lower two buckets.`,
+      consequence: `The distribution is mixed — elevated names warrant closer structural scrutiny, but resilient companies remain available within the same universe as a structural alternative.`,
+      tone: "moderate",
+    }
+  }
+  return {
+    headline: `${(veryHighPct * 100).toFixed(0)}% of the filtered universe is in the Very High composite bucket`,
+    body: `Structural risk is currently contained. The majority of companies are anchored at lower composite risk levels — ${(resilientPct * 100).toFixed(0)}% sit in the Very Low or Low bucket.`,
+    consequence: `A contained distribution does not eliminate structural risk within individual names — it means the aggregate exposure is lower. Company-level scrutiny remains warranted for any name in the elevated buckets.`,
+    tone: "subdued",
+  }
+}
+
+function interpretConcentration(data: SnapshotRow[]): {
+  headline: string
+  body: string
+  consequence: string
+  clusterType: "valuation-stretch" | "financing-fragility" | "compound" | "none"
+} {
+  if (data.length === 0) return { headline: "—", body: "No data available under active filters.", consequence: "", clusterType: "none" }
+
+  const elevated = data.filter(r => r.composite_bucket === "Very High" || r.composite_bucket === "High")
+
+  if (elevated.length === 0) {
+    return {
+      headline: "No elevated-risk concentration under active filters",
+      body: "The current filtered universe does not show meaningful clustering in the High or Very High composite buckets.",
+      consequence: "Structural stress is not concentrated enough to warrant cluster-level focus. Individual name analysis applies.",
+      clusterType: "none",
+    }
+  }
+
+  // OAL distribution within elevated
+  const oalCounts: Record<string, number> = {}
+  elevated.forEach(r => {
+    const label = r.oal_label ?? "Unknown"
+    oalCounts[label] = (oalCounts[label] ?? 0) + 1
+  })
+  const topOAL = Object.entries(oalCounts).sort((a, b) => b[1] - a[1])[0]
+  const topOALPct = ((topOAL[1] / elevated.length) * 100).toFixed(0)
+
+  // Axis driver classification — compare average axis1 vs axis3 in elevated cluster
+  const avgAxis1 = elevated.reduce((s, r) => s + (r.axis1_pct ?? 0), 0) / elevated.length
+  const avgAxis3 = elevated.reduce((s, r) => s + (r.axis3_pct ?? 0), 0) / elevated.length
+
+  const axis1Elevated = avgAxis1 >= 0.65
+  const axis3Elevated = avgAxis3 >= 0.65
+
+  let clusterType: "valuation-stretch" | "financing-fragility" | "compound"
+  let driverLabel: string
+  let consequence: string
+
+  if (axis1Elevated && axis3Elevated) {
+    clusterType = "compound"
+    driverLabel = "both Operational Anchor Risk and Operational Financing Risk"
+    consequence = `Compound risk clusters — where valuation is stretched and financing is strained simultaneously — are the most structurally exposed. These names have limited margin of safety on both sides.`
+  } else if (axis1Elevated) {
+    clusterType = "valuation-stretch"
+    driverLabel = "Operational Anchor Risk"
+    consequence = `Valuation-stretch clusters indicate overvaluation risk relative to demonstrated operational output. The primary concern is narrative dependence — if market confidence in future delivery weakens, repricing pressure follows.`
+  } else {
+    clusterType = "financing-fragility"
+    driverLabel = "Operational Financing Risk"
+    consequence = `Financing-driven clusters indicate solvency exposure rather than overvaluation. These companies may be reasonably valued but are structurally dependent on continued market access to service obligations — a condition that can change quickly.`
+  }
+
+  return {
+    headline: `Elevated risk is most concentrated among ${topOAL[0]}-anchored companies`,
+    body: `${topOALPct}% of the High and Very High composite companies are ${topOAL[0]}-anchored. The primary structural driver within this cluster is ${driverLabel}.`,
+    consequence,
+    clusterType,
+  }
+}
+
+function interpretTrajectory(
+  data: SnapshotRow[],
+  distributionTone: "elevated" | "moderate" | "subdued"
+): {
+  headline: string
+  body: string
+  consequence: string
+  direction: "deteriorating" | "improving" | "mixed"
+  regime: "escalation" | "stabilization" | "accumulation" | "health" | "mixed"
+} {
+  if (data.length === 0) return {
+    headline: "—",
+    body: "No data available under active filters.",
+    consequence: "",
+    direction: "mixed",
+    regime: "mixed",
+  }
+
+  const scorable = data.filter(r => r.axis2_pct != null)
+  if (scorable.length === 0) return {
+    headline: "Trajectory data unavailable",
+    body: "Axis II scores are not present in the current snapshot.",
+    consequence: "",
+    direction: "mixed",
+    regime: "mixed",
+  }
+
+  const deteriorating = scorable.filter(r => (r.axis2_pct ?? 0) > 0.5).length
+  const improving = scorable.filter(r => (r.axis2_pct ?? 0) <= 0.5).length
+  const deterioratingPct = (deteriorating / scorable.length) * 100
+  const improvingPct = (improving / scorable.length) * 100
+
+  // Cross-panel regime classification
+  let regime: "escalation" | "stabilization" | "accumulation" | "health" | "mixed"
+  if (deterioratingPct >= 60 && distributionTone === "elevated") {
+    regime = "escalation"
+  } else if (improvingPct >= 60 && distributionTone === "elevated") {
+    regime = "stabilization"
+  } else if (deterioratingPct >= 60 && distributionTone === "subdued") {
+    regime = "accumulation"
+  } else if (improvingPct >= 60 && distributionTone === "subdued") {
+    regime = "health"
+  } else {
+    regime = "mixed"
+  }
+
+  const regimeConsequence: Record<typeof regime, string> = {
+    escalation: `Combined with the current elevated distribution, this is an escalation signal — structural risk is both broadly present and actively accumulating. This regime historically precedes the widest dispersion in forward outcomes.`,
+    stabilization: `Despite elevated current distribution, improving trajectory is a structural stabilization signal — fragility may be peaking rather than expanding. This does not eliminate current risk, but it changes its directional character.`,
+    accumulation: `Even though current distribution appears contained, deteriorating trajectory means structural risk is accumulating quietly. Early-stage accumulation is harder to see and easier to underestimate.`,
+    health: `Both distribution and trajectory are constructive — current risk is contained and the underlying anchors are strengthening. This is the most favorable structural regime in the system.`,
+    mixed: `The interaction between current distribution and trajectory does not produce a clear regime signal. Structural conditions are heterogeneous — company-level analysis is more informative than aggregate positioning.`,
+  }
+
+  if (deterioratingPct >= 60) {
+    return {
+      headline: `${deterioratingPct.toFixed(0)}% of scored companies show deteriorating operational trajectory`,
+      body: `The majority of the filtered universe is in the upper half of Axis II — meaning their operational anchor metrics are currently weakening on a trailing basis. Companies moving toward shallower anchors accumulate structural risk over time regardless of current valuation levels.`,
+      consequence: regimeConsequence[regime],
+      direction: "deteriorating",
+      regime,
+    }
+  }
+  if (improvingPct >= 60) {
+    return {
+      headline: `${improvingPct.toFixed(0)}% of scored companies show improving operational trajectory`,
+      body: `The majority of the filtered universe is in the lower half of Axis II — meaning their operational anchor metrics are currently strengthening on a trailing basis. A universe tilted toward improving trajectory carries lower structural risk over time, all else equal.`,
+      consequence: regimeConsequence[regime],
+      direction: "improving",
+      regime,
+    }
+  }
+  return {
+    headline: `Trajectory is mixed — ${deterioratingPct.toFixed(0)}% deteriorating, ${improvingPct.toFixed(0)}% improving`,
+    body: `The filtered universe is currently split between companies whose operational anchors are strengthening and those where they are weakening. No dominant directional bias is present.`,
+    consequence: regimeConsequence["mixed"],
+    direction: "mixed",
+    regime: "mixed",
+  }
+}
+
+function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
+  const distribution = useMemo(() => interpretDistribution(data), [data])
+  const concentration = useMemo(() => interpretConcentration(data), [data])
+  const trajectory = useMemo(() => interpretTrajectory(data, distribution.tone), [data, distribution.tone])
+
+  const toneColor = {
+    elevated: "#BC6464",
+    moderate: "#B8C3CC",
+    subdued: "#6DAE8B",
+  }
+
+  const directionColor = {
+    deteriorating: "#BC6464",
+    improving: "#6DAE8B",
+    mixed: "#B8C3CC",
+  }
+
+  const regimeBadge: Record<string, { label: string; color: string }> = {
+    escalation:    { label: "Escalation",    color: "#BC6464" },
+    stabilization: { label: "Stabilization", color: "#6DAE8B" },
+    accumulation:  { label: "Accumulation",  color: "#E8A87C" },
+    health:        { label: "Structural Health", color: "#6DAE8B" },
+    mixed:         { label: "Mixed",         color: "#7E8A96" },
+  }
+
+  if (loading) {
+    return (
+      <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+        <CardHeader>
+          <CardTitle className="text-white">Interpretive Layer</CardTitle>
+          <CardDescription className="text-[#B8C3CC]">Computing structural signals...</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-36 animate-pulse rounded-2xl border border-[#203754] bg-[#0D2138]" />
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const regime = regimeBadge[trajectory.regime]
+
+  return (
+    <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20" style={{ borderLeft: "2px solid #244636" }}>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-white">Interpretive Layer</CardTitle>
+            <CardDescription className="mt-1 text-[#B8C3CC]">
+              Structural signals computed from the current filtered snapshot. These characterize the distribution — they do not predict outcomes.
+            </CardDescription>
+          </div>
+          {/* Regime badge — cross-panel signal */}
+          <div
+            className="shrink-0 rounded-full border px-3 py-1 text-xs font-medium"
+            style={{ borderColor: `${regime.color}40`, color: regime.color, backgroundColor: `${regime.color}14` }}
+          >
+            Regime: {regime.label}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-4 md:grid-cols-3">
+
+        {/* Panel 1 — Distribution */}
+        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
+            Distribution Signal
+          </div>
+          <div
+            className="mb-2 text-sm font-medium leading-snug"
+            style={{ color: toneColor[distribution.tone] }}
+          >
+            {distribution.headline}
+          </div>
+          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
+            {distribution.body}
+          </div>
+          {distribution.consequence && (
+            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
+              {distribution.consequence}
+            </div>
+          )}
+        </div>
+
+        {/* Panel 2 — Concentration */}
+        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
+            Concentration Signal
+          </div>
+          <div className="mb-2 text-sm font-medium leading-snug text-[#EAF0F2]">
+            {concentration.headline}
+          </div>
+          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
+            {concentration.body}
+          </div>
+          {concentration.consequence && (
+            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
+              {concentration.consequence}
+            </div>
+          )}
+        </div>
+
+        {/* Panel 3 — Trajectory */}
+        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
+          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">
+            Trajectory Signal
+          </div>
+          <div
+            className="mb-2 text-sm font-medium leading-snug"
+            style={{ color: directionColor[trajectory.direction] }}
+          >
+            {trajectory.headline}
+          </div>
+          <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">
+            {trajectory.body}
+          </div>
+          {trajectory.consequence && (
+            <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">
+              {trajectory.consequence}
+            </div>
+          )}
+        </div>
+
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function PlatformPage() {
   const [snapshotData, setSnapshotData] = useState<SnapshotRow[]>([]);
   const [oalSummary, setOALSummary] = useState<OALSummaryRow[]>([]);
@@ -496,36 +819,8 @@ export default function PlatformPage() {
 
           <TabsContent value="market-map" className="space-y-8">
 
-            {/* Interpretive layer placeholder */}
-            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-              <CardHeader>
-                <CardTitle className="text-white">Interpretive Layer</CardTitle>
-                <CardDescription className="text-[#B8C3CC]">
-                  This layer will surface current structural signals, directional positioning,
-                  and regime-level context once the data-driven insight engine is active.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Structural Signal</div>
-                  <div className="text-sm leading-6 text-[#B8C3CC]">
-                    Will summarize what the current market state implies under the active filters.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Structural Positioning</div>
-                  <div className="text-sm leading-6 text-[#B8C3CC]">
-                    Will distinguish favorable, unfavorable, and mixed structural zones.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[#203754] bg-[#0D2138] p-4">
-                  <div className="mb-2 text-sm uppercase tracking-[0.14em] text-[#7E8A96]">Decision Layer</div>
-                  <div className="text-sm leading-6 text-[#B8C3CC]">
-                    Will guide focus areas and regime interpretation once the signal engine is live.
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Interpretive Layer — computed from live snapshot */}
+            <InterpretiveLayer data={filtered} loading={loading} />
 
             {/* Market map section header */}
             <div className="space-y-4">
