@@ -1602,4 +1602,13 @@ export default function PlatformPage() {
       </div>
     </div>
   );
+  {/* ── Footer ── */}
+            <div className="pt-6 border-t border-[#DDE0DC] text-center">
+              <p className="text-[12px] text-[#aaa] leading-[1.8]">
+                The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
+                <br />
+                © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
+                investment advice.
+              </p>
+            </div>
 }

@@ -327,7 +327,7 @@ export default function HowWeSeeMarketsPage() {
 
             <p className="mt-7 text-[17px] leading-[1.8] text-[#4F5968] md:text-[18px]">
               The full methodology is written to be read by someone who wants to evaluate
-              the framework rigorously, not just use it. If that is you, read:
+              the framework rigorously, not just use it. If that is you, you can view it here:
             </p>
 
             <div className="mt-5">
@@ -342,7 +342,15 @@ export default function HowWeSeeMarketsPage() {
           </article>
         </div>
       </section>
-
+{/* ── Footer ── */}
+            <div className="pt-6 border-t border-[#DDE0DC] text-center">
+              <p className="text-[12px] text-[#aaa] leading-[1.8]">
+                The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
+                <br />
+                © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
+                investment advice.
+              </p>
+            </div>
     </main>
   );
 }

@@ -335,7 +335,7 @@ export default function HomePage() {
           {/* 5. CTA — primary, centered */}
           <div className="mt-12 flex justify-center">
             <Link
-              href="/the-osmr-framework"
+              href="/osmr-methodology"
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
             >
               Explore the Full Framework
@@ -482,7 +482,15 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+{/* ── Footer ── */}
+            <div className="pt-6 border-t border-[#DDE0DC] text-center">
+              <p className="text-[12px] text-[#aaa] leading-[1.8]">
+                The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
+                <br />
+                © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
+                investment advice.
+              </p>
+            </div>
     </main>
   );
 }
