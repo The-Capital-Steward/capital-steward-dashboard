@@ -782,7 +782,7 @@ export default function PlatformPage() {
         <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}>
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#B8C3CC]">Structural Stress (Very High Count)</CardDescription>
+              <CardDescription className="text-[#B8C3CC]">Structural Stress</CardDescription>
               <CardTitle className="text-4xl text-white">
                 {loading ? "…" : formatNum(stats.veryHigh)}
               </CardTitle>
@@ -833,7 +833,7 @@ export default function PlatformPage() {
               ["market-map", "Market Map"],
               ["snapshot", "Snapshot"],
               ["oal", "OAL Structure"],
-              ["liquidity", "Liquidity"],
+              ["liquidity", "Financing Context"],
               ["history", "History"],
             ].map(([value, label]) => (
               <TabsTrigger
@@ -845,6 +845,9 @@ export default function PlatformPage() {
               </TabsTrigger>
             ))}
           </TabsList>
+          <p className="text-[11px] text-[#7E8A96]">
+            Every tab reflects the same structural model through a different analytical lens.
+          </p>
 
           {/* ══════════════════════════════════════════════════════════════════
               MARKET MAP TAB
@@ -966,7 +969,7 @@ export default function PlatformPage() {
                                     <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
                                   </div>
                                   <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
-                                    Company drilldown will open here.
+                                    Company detail opens from this view.
                                   </div>
                                 </div>
                               );
@@ -1254,7 +1257,7 @@ export default function PlatformPage() {
                   </p>
                 </div>
                 <p className="mb-3 text-[11px] text-[#7E8A96]">
-                  "Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Company drilldown will open here.
+                  "Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Company detail is accessed from this table.
                 </p>
                 <div className="overflow-hidden rounded-2xl border border-[#203754]">
                   <Table>
@@ -1319,7 +1322,6 @@ export default function PlatformPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {/* Framing line + why-open-now directive */}
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">
                     This shows how the current universe is distributed across levels of demonstrated operating support — from FCF-anchored companies at the deepest end to revenue-only and unanchored companies at the shallowest.
                   </p>
@@ -1391,16 +1393,16 @@ export default function PlatformPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Activity className="h-5 w-5 text-[#B8C3CC]" />
-                    <CardTitle className="text-white">Liquidity Distribution</CardTitle>
+                    <CardTitle className="text-white">Financing Context</CardTitle>
                   </div>
                   <CardDescription className="text-[#B8C3CC]">
-                    Balance sheet flexibility across the current filtered universe.
+                    Balance sheet flexibility and financing strain across the current filtered universe.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {/* Framing line + why-open-now directive */}
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">
-                    This shows how balance sheet flexibility is distributed across the current universe — providing context for how much financial runway companies have to allow their structural narrative to play out.
+                    This shows how balance sheet flexibility is distributed across the current universe — context for how much financial runway companies have to allow their structural narrative to play out.
                   </p>
                   <p className="mb-5 text-sm text-[#7E8A96]">
                     Use this tab when financing strain may be the limiting factor on whether current narratives can continue.
@@ -1454,7 +1456,7 @@ export default function PlatformPage() {
                 <CardContent>
                   {/* Framing line + why-open-now directive */}
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">
-                    This defines the historical coverage used to evaluate structural outcomes and regime shifts. Each month represents a formation state from which forward returns were measured.
+                    This shows the historical coverage used to evaluate structural outcomes and regime shifts. Each month represents a formation state from which forward returns were measured.
                   </p>
                   <p className="mb-5 text-sm text-[#7E8A96]">
                     Use this tab when you want to know how much historical depth is supporting the current market interpretation.
