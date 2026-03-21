@@ -94,15 +94,8 @@ export default function HowWeSeeMarketsPage() {
             How We See Markets
           </p>
           <h1 className="tcs-heading mt-4 max-w-3xl text-5xl font-semibold leading-[1.03] tracking-tight text-[#0A1F3D] md:text-6xl">
-            Markets price narratives.
-            <br />
-            We measure the structure beneath them.
+            Most analysis begins with stories. We begin with structure.
           </h1>
-          <div className="mt-8 max-w-2xl border-l border-[#C9D8CD] pl-5">
-            <p className="text-lg leading-8 text-[#5C6472] md:text-[19px]">
-              Most analysis begins with stories. We begin with structure.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -116,8 +109,8 @@ export default function HowWeSeeMarketsPage() {
             </p>
             <p className="mt-4 text-[17px] leading-8 text-[#4F5968] md:text-[18px]">
               Markets are psychosocial systems. The financials participants choose to
-              focus on are selected because they better support a narrative —
-              not because they represent the firm's economic reality.
+              focus on are often selected because they better support a narrative —
+              not because they always represent the firm's economic reality.
             </p>
 
             <p className="mt-10 text-[11px] font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
