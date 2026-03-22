@@ -5,9 +5,9 @@
     "backend_price_frequency": "daily_or_weekly",
     "cell_statistic": "mean_forward_return",
     "min_count_for_display": 15,
-    "panel_dimension": "Axis III / Financing Fragility",
-    "column_dimension": "Axis I / Valuation Pressure within OAL",
-    "row_dimension": "Axis II / Cash-Engine Trajectory",
+    "panel_dimension": "Axis III / Operational Financing Risk",
+    "column_dimension": "Axis I / Operational Anchor Risk (within-OAL)",
+    "row_dimension": "Axis II / Operational Trajectory Risk",
     "x_axis_labels": [
       "Very Low",
       "Low",
@@ -16,939 +16,1552 @@
       "Very High"
     ],
     "y_axis_labels": [
-      "Very Weak",
-      "Weak",
-      "Neutral",
-      "Strong",
-      "Very Strong"
+      "Very Low",
+      "Low",
+      "Moderate",
+      "High",
+      "Very High"
     ],
     "panels": [
-      "Low Fragility",
-      "Moderate Fragility",
-      "High Fragility"
+      "Very Low",
+      "Low",
+      "Moderate",
+      "High",
+      "Very High"
     ],
-    "formation_month_min": "2019-01",
+    "formation_month_min": "2018-01",
     "formation_month_max": "2025-02",
-    "observation_count": 270618,
+    "observation_count": 304236,
     "notes": [
-      "Panels are Axis III financing fragility terciles.",
-      "Columns are Axis I valuation buckets within OAL.",
-      "Rows are Axis II trajectory buckets derived from axis2_pct quintile bands.",
+      "Panels are Axis III financing risk quintiles (Very Low / Low / Moderate / High / Very High).",
+      "Columns are Axis I valuation buckets within OAL (within-OAL percentile quintiles).",
+      "Rows are Axis II trajectory risk buckets (global percentile quintiles, risk-consistent labels).",
+      "Higher Axis II bucket = higher trajectory risk (more deteriorating).",
       "Cell values are mean forward returns over the selected horizon.",
       "Low-N cells are suppressed from display_value but still include count and summary stats."
     ]
   },
   "panels": [
     {
-      "panel": "Low Fragility",
+      "panel": "Very Low",
       "rows": [
         {
-          "axis2_bucket": "Very Weak",
+          "axis2_bucket": "Very Low",
           "cells": [
             {
-              "count": 7688,
-              "mean_return": 0.1296974555198808,
-              "median_return": 0.030201857608052163,
-              "hit_rate": 0.5382414151925078,
-              "display_value": 0.1296974555198808,
+              "count": 3913,
+              "mean_return": 0.11944439255641312,
+              "median_return": 0.016155088852988664,
+              "hit_rate": 0.5210835675951955,
+              "display_value": 0.11944439255641312,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 5407,
-              "mean_return": 0.1297739650725885,
-              "median_return": 0.029529711994166874,
-              "hit_rate": 0.5361568337340484,
-              "display_value": 0.1297739650725885,
+              "count": 3243,
+              "mean_return": 0.1450707006034176,
+              "median_return": 0.042643587726199916,
+              "hit_rate": 0.5482577860006167,
+              "display_value": 0.1450707006034176,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 5065,
-              "mean_return": 0.14595449062962176,
-              "median_return": 0.05029281277728481,
-              "hit_rate": 0.5555774925962488,
-              "display_value": 0.14595449062962176,
+              "count": 3159,
+              "mean_return": 0.1573290332484257,
+              "median_return": 0.0840559193063175,
+              "hit_rate": 0.5935422602089269,
+              "display_value": 0.1573290332484257,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 5275,
-              "mean_return": 0.16186339033888553,
-              "median_return": 0.0763027295285359,
-              "hit_rate": 0.5918483412322275,
-              "display_value": 0.16186339033888553,
+              "count": 1445,
+              "mean_return": 0.14016768477211183,
+              "median_return": -0.004175229853975115,
+              "hit_rate": 0.4982698961937716,
+              "display_value": 0.14016768477211183,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 4578,
-              "mean_return": 0.1959707151189239,
-              "median_return": 0.010959573500063047,
-              "hit_rate": 0.508955875928353,
-              "display_value": 0.1959707151189239,
+              "count": 239,
+              "mean_return": 0.25787788480739227,
+              "median_return": 0.05552754771335988,
+              "hit_rate": 0.5523012552301255,
+              "display_value": 0.25787788480739227,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very Low"
             }
           ]
         },
         {
-          "axis2_bucket": "Weak",
+          "axis2_bucket": "Low",
           "cells": [
             {
-              "count": 6213,
-              "mean_return": 0.14494243822350994,
-              "median_return": 0.006187161639597871,
-              "hit_rate": 0.5050700144857557,
-              "display_value": 0.14494243822350994,
+              "count": 3950,
+              "mean_return": 0.09724376772329393,
+              "median_return": -0.020013349649571632,
+              "hit_rate": 0.47341772151898737,
+              "display_value": 0.09724376772329393,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 5187,
-              "mean_return": 0.11136868931467286,
-              "median_return": 0.02044109736417421,
-              "hit_rate": 0.5228455754771544,
-              "display_value": 0.11136868931467286,
+              "count": 2729,
+              "mean_return": 0.10643265419047121,
+              "median_return": 0.017272185824895647,
+              "hit_rate": 0.5240014657383657,
+              "display_value": 0.10643265419047121,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very Low"
             },
             {
-              "count": 4604,
-              "mean_return": 0.10448143862112555,
-              "median_return": 0.044648687831376654,
-              "hit_rate": 0.5558210251954822,
-              "display_value": 0.10448143862112555,
+              "count": 2214,
+              "mean_return": 0.16367808007871898,
+              "median_return": 0.04610841913991526,
+              "hit_rate": 0.5510388437217706,
+              "display_value": 0.16367808007871898,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very Low"
             },
+            {
+              "count": 1217,
+              "mean_return": 0.07715804870654477,
+              "median_return": -0.017167381974249052,
+              "hit_rate": 0.48397699260476584,
+              "display_value": 0.07715804870654477,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 322,
+              "mean_return": 0.038845812536004866,
+              "median_return": -0.06050023806689686,
+              "hit_rate": 0.4440993788819876,
+              "display_value": 0.038845812536004866,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Moderate",
+          "cells": [
+            {
+              "count": 3685,
+              "mean_return": 0.07044305566522722,
+              "median_return": -0.02987303958177745,
+              "hit_rate": 0.4526458616010855,
+              "display_value": 0.07044305566522722,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2677,
+              "mean_return": 0.09318428682365837,
+              "median_return": -0.01016125469405793,
+              "hit_rate": 0.48673888681359734,
+              "display_value": 0.09318428682365837,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2399,
+              "mean_return": 0.11435952793003729,
+              "median_return": 0.012736395214203,
+              "hit_rate": 0.5147978324301793,
+              "display_value": 0.11435952793003729,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 1411,
+              "mean_return": 0.10162301477405497,
+              "median_return": -0.019901458796251603,
+              "hit_rate": 0.47696669029057404,
+              "display_value": 0.10162301477405497,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 420,
+              "mean_return": -0.041962754034089486,
+              "median_return": -0.0856924279594114,
+              "hit_rate": 0.39285714285714285,
+              "display_value": -0.041962754034089486,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "High",
+          "cells": [
+            {
+              "count": 1591,
+              "mean_return": 0.22349958943497147,
+              "median_return": -0.0461538461538461,
+              "hit_rate": 0.4305468258956631,
+              "display_value": 0.22349958943497147,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2259,
+              "mean_return": 0.006206720387763919,
+              "median_return": -0.029187817258883197,
+              "hit_rate": 0.4400177069499779,
+              "display_value": 0.006206720387763919,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2342,
+              "mean_return": 0.06854723927693088,
+              "median_return": -0.024126073978009088,
+              "hit_rate": 0.448334756618275,
+              "display_value": 0.06854723927693088,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 3898,
+              "mean_return": 0.08834091906780114,
+              "median_return": -0.0030064399502880423,
+              "hit_rate": 0.49204720369420213,
+              "display_value": 0.08834091906780114,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2461,
+              "mean_return": 0.07407586334149252,
+              "median_return": -0.052152317880794774,
+              "hit_rate": 0.45388053636733033,
+              "display_value": 0.07407586334149252,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Very High",
+          "cells": [
+            {
+              "count": 387,
+              "mean_return": 0.28443104247749396,
+              "median_return": -0.22124002455494174,
+              "hit_rate": 0.36175710594315247,
+              "display_value": 0.28443104247749396,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 337,
+              "mean_return": 0.24016826197369834,
+              "median_return": -0.18000000000000005,
+              "hit_rate": 0.3649851632047478,
+              "display_value": 0.24016826197369834,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 778,
+              "mean_return": 0.607186188206352,
+              "median_return": -0.03553391053391053,
+              "hit_rate": 0.4730077120822622,
+              "display_value": 0.607186188206352,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 2437,
+              "mean_return": 0.3217961189937986,
+              "median_return": -0.08708737864077665,
+              "hit_rate": 0.4415264669675831,
+              "display_value": 0.3217961189937986,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very Low"
+            },
+            {
+              "count": 9578,
+              "mean_return": 0.03898364773253995,
+              "median_return": -0.21951571372989614,
+              "hit_rate": 0.35779912299018585,
+              "display_value": 0.03898364773253995,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very Low"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "Low",
+      "rows": [
+        {
+          "axis2_bucket": "Very Low",
+          "cells": [
+            {
+              "count": 8867,
+              "mean_return": 0.10213089529646316,
+              "median_return": 0.019546520719311955,
+              "hit_rate": 0.5238524867486185,
+              "display_value": 0.10213089529646316,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 6591,
+              "mean_return": 0.09770200096362816,
+              "median_return": 0.048171666301729754,
+              "hit_rate": 0.5677438931876801,
+              "display_value": 0.09770200096362816,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 5091,
+              "mean_return": 0.15235782164652875,
+              "median_return": 0.09295162167059257,
+              "hit_rate": 0.6207032017285405,
+              "display_value": 0.15235782164652875,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 1367,
+              "mean_return": 0.11736817272588747,
+              "median_return": 0.029982363315696592,
+              "hit_rate": 0.5164594001463058,
+              "display_value": 0.11736817272588747,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 178,
+              "mean_return": 0.8938759657061478,
+              "median_return": 0.19944410877596164,
+              "hit_rate": 0.5842696629213483,
+              "display_value": 0.8938759657061478,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Low",
+          "cells": [
+            {
+              "count": 6764,
+              "mean_return": 0.11843678860693664,
+              "median_return": 0.019041436687519453,
+              "hit_rate": 0.5277942046126552,
+              "display_value": 0.11843678860693664,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 5333,
+              "mean_return": 0.1097725198365694,
+              "median_return": 0.045334064527922546,
+              "hit_rate": 0.5632852053253329,
+              "display_value": 0.1097725198365694,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 3703,
+              "mean_return": 0.13501494978418024,
+              "median_return": 0.07960231761917314,
+              "hit_rate": 0.6011342155009451,
+              "display_value": 0.13501494978418024,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 807,
+              "mean_return": 0.1413020777495598,
+              "median_return": 0.016462873147072843,
+              "hit_rate": 0.5142503097893433,
+              "display_value": 0.1413020777495598,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 88,
+              "mean_return": 0.33451710352024816,
+              "median_return": 0.0025083688444446084,
+              "hit_rate": 0.5,
+              "display_value": 0.33451710352024816,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Moderate",
+          "cells": [
+            {
+              "count": 5410,
+              "mean_return": 0.10436071473333465,
+              "median_return": 0.01985550112456469,
+              "hit_rate": 0.533271719038817,
+              "display_value": 0.10436071473333465,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 4355,
+              "mean_return": 0.08675106828798934,
+              "median_return": 0.016074766355140158,
+              "hit_rate": 0.5214695752009185,
+              "display_value": 0.08675106828798934,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 3179,
+              "mean_return": 0.10010854592079722,
+              "median_return": 0.0658105939004816,
+              "hit_rate": 0.5986159169550173,
+              "display_value": 0.10010854592079722,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 968,
+              "mean_return": 0.0910008936406311,
+              "median_return": -0.02445477044295169,
+              "hit_rate": 0.46487603305785125,
+              "display_value": 0.0910008936406311,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 180,
+              "mean_return": -0.08599834348668874,
+              "median_return": -0.22089297357717258,
+              "hit_rate": 0.37777777777777777,
+              "display_value": -0.08599834348668874,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "High",
+          "cells": [
+            {
+              "count": 1072,
+              "mean_return": 0.0479456327490444,
+              "median_return": -0.007989411239395172,
+              "hit_rate": 0.478544776119403,
+              "display_value": 0.0479456327490444,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 908,
+              "mean_return": 0.06564871153184285,
+              "median_return": 0.01447290417073499,
+              "hit_rate": 0.5209251101321586,
+              "display_value": 0.06564871153184285,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 1203,
+              "mean_return": 0.0322629471201694,
+              "median_return": -0.02126168224299052,
+              "hit_rate": 0.46633416458852867,
+              "display_value": 0.0322629471201694,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 1284,
+              "mean_return": 0.05363920786228935,
+              "median_return": -0.02954956140503634,
+              "hit_rate": 0.4618380062305296,
+              "display_value": 0.05363920786228935,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 607,
+              "mean_return": -0.07922785452628958,
+              "median_return": -0.23619631901840477,
+              "hit_rate": 0.34102141680395387,
+              "display_value": -0.07922785452628958,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "High",
+              "axis3_bucket": "Low"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Very High",
+          "cells": [
+            {
+              "count": 225,
+              "mean_return": -0.09856604276534442,
+              "median_return": -0.26449275362318847,
+              "hit_rate": 0.3377777777777778,
+              "display_value": -0.09856604276534442,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 178,
+              "mean_return": -0.06611894642983224,
+              "median_return": -0.25889952810738986,
+              "hit_rate": 0.34831460674157305,
+              "display_value": -0.06611894642983224,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 562,
+              "mean_return": 0.4296325575165745,
+              "median_return": -0.04254098360655734,
+              "hit_rate": 0.47686832740213525,
+              "display_value": 0.4296325575165745,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 1249,
+              "mean_return": 0.07409240484637228,
+              "median_return": -0.20125000000000004,
+              "hit_rate": 0.3466773418734988,
+              "display_value": 0.07409240484637228,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Low"
+            },
+            {
+              "count": 1538,
+              "mean_return": 0.06405524522074774,
+              "median_return": -0.2634494605449677,
+              "hit_rate": 0.35565669700910274,
+              "display_value": 0.06405524522074774,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Low"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "Moderate",
+      "rows": [
+        {
+          "axis2_bucket": "Very Low",
+          "cells": [
+            {
+              "count": 5709,
+              "mean_return": 0.12543151244117223,
+              "median_return": 0.006514657980455807,
+              "hit_rate": 0.5079698721317218,
+              "display_value": 0.12543151244117223,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 6171,
+              "mean_return": 0.05964374400210814,
+              "median_return": -0.0071275837491090455,
+              "hit_rate": 0.490034030140982,
+              "display_value": 0.05964374400210814,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 4625,
+              "mean_return": 0.09548985886276315,
+              "median_return": 0.03702737940026091,
+              "hit_rate": 0.550054054054054,
+              "display_value": 0.09548985886276315,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 1028,
+              "mean_return": 0.18062104021787184,
+              "median_return": 0.03754423657090655,
+              "hit_rate": 0.5398832684824902,
+              "display_value": 0.18062104021787184,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 144,
+              "mean_return": 0.17777136679750982,
+              "median_return": -0.1418831168831169,
+              "hit_rate": 0.3958333333333333,
+              "display_value": 0.17777136679750982,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Moderate"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Low",
+          "cells": [
+            {
+              "count": 5321,
+              "mean_return": 0.1368627567774972,
+              "median_return": -0.0009980039920159944,
+              "hit_rate": 0.49746288291674495,
+              "display_value": 0.1368627567774972,
+              "suppressed": false,
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 5893,
+              "mean_return": 0.09449184637014943,
+              "median_return": 0.017958001448226124,
+              "hit_rate": 0.5245206176819955,
+              "display_value": 0.09449184637014943,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 4236,
+              "mean_return": 0.07129894507197752,
+              "median_return": 0.04734507760840878,
+              "hit_rate": 0.5630311614730878,
+              "display_value": 0.07129894507197752,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 984,
+              "mean_return": 0.09380478194924725,
+              "median_return": 0.031591319982657295,
+              "hit_rate": 0.5284552845528455,
+              "display_value": 0.09380478194924725,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 98,
+              "mean_return": 0.1710555450023396,
+              "median_return": 0.013512937674299508,
+              "hit_rate": 0.5204081632653061,
+              "display_value": 0.1710555450023396,
+              "suppressed": false,
+              "axis1_bucket": "Very High",
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Moderate"
+            }
+          ]
+        },
+        {
+          "axis2_bucket": "Moderate",
+          "cells": [
             {
               "count": 4312,
-              "mean_return": 0.10610188266127303,
-              "median_return": 0.034726715744280434,
-              "hit_rate": 0.5454545454545454,
-              "display_value": 0.10610188266127303,
+              "mean_return": 0.12710857808682735,
+              "median_return": 0.003775263379264593,
+              "hit_rate": 0.5046382189239332,
+              "display_value": 0.12710857808682735,
               "suppressed": false,
-              "axis1_bucket": "High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Low Fragility"
+              "axis1_bucket": "Very Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 2893,
-              "mean_return": 0.10424773550569386,
-              "median_return": -0.02632515119174661,
-              "hit_rate": 0.47839612858624264,
-              "display_value": 0.10424773550569386,
+              "count": 6168,
+              "mean_return": 0.07298231630136226,
+              "median_return": 0.023560224491191772,
+              "hit_rate": 0.5368028534370947,
+              "display_value": 0.07298231630136226,
+              "suppressed": false,
+              "axis1_bucket": "Low",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 4962,
+              "mean_return": 0.07405515800301282,
+              "median_return": 0.037437910644498085,
+              "hit_rate": 0.5536074163643692,
+              "display_value": 0.07405515800301282,
+              "suppressed": false,
+              "axis1_bucket": "Moderate",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 1523,
+              "mean_return": 0.09827485746609559,
+              "median_return": 0.033507397737162714,
+              "hit_rate": 0.5443204202232436,
+              "display_value": 0.09827485746609559,
+              "suppressed": false,
+              "axis1_bucket": "High",
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Moderate"
+            },
+            {
+              "count": 188,
+              "mean_return": 0.0394796948027118,
+              "median_return": -0.03131857157124307,
+              "hit_rate": 0.4574468085106383,
+              "display_value": 0.0394796948027118,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Moderate"
             }
           ]
         },
         {
-          "axis2_bucket": "Neutral",
+          "axis2_bucket": "High",
           "cells": [
             {
-              "count": 5724,
-              "mean_return": 0.11841949432985076,
-              "median_return": -0.008667781493868432,
-              "hit_rate": 0.4888190076869322,
-              "display_value": 0.11841949432985076,
+              "count": 843,
+              "mean_return": 0.4046239723149306,
+              "median_return": 0.017341040462427904,
+              "hit_rate": 0.5160142348754448,
+              "display_value": 0.4046239723149306,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 5040,
-              "mean_return": 0.0946149569201691,
-              "median_return": -0.0015388371899245912,
-              "hit_rate": 0.49563492063492065,
-              "display_value": 0.0946149569201691,
+              "count": 1278,
+              "mean_return": 0.17085102776474748,
+              "median_return": 0.02163685605031951,
+              "hit_rate": 0.5367762128325508,
+              "display_value": 0.17085102776474748,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 3987,
-              "mean_return": 0.1092602834148724,
-              "median_return": 0.020998240985048433,
-              "hit_rate": 0.5344870830198144,
-              "display_value": 0.1092602834148724,
+              "count": 1557,
+              "mean_return": 0.0715479577540331,
+              "median_return": -0.009017839639286485,
+              "hit_rate": 0.48683365446371224,
+              "display_value": 0.0715479577540331,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 3558,
-              "mean_return": 0.10504206920345072,
-              "median_return": 0.035695885773165514,
-              "hit_rate": 0.544406970207982,
-              "display_value": 0.10504206920345072,
+              "count": 1810,
+              "mean_return": 0.06812447248300921,
+              "median_return": -0.009788032413875714,
+              "hit_rate": 0.487292817679558,
+              "display_value": 0.06812447248300921,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 2674,
-              "mean_return": 0.07603959582082806,
-              "median_return": -0.028953753400485283,
-              "hit_rate": 0.46522064323111445,
-              "display_value": 0.07603959582082806,
+              "count": 809,
+              "mean_return": -0.018617862255104187,
+              "median_return": -0.12488687782805441,
+              "hit_rate": 0.39184177997527814,
+              "display_value": -0.018617862255104187,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Moderate"
             }
           ]
         },
         {
-          "axis2_bucket": "Strong",
+          "axis2_bucket": "Very High",
           "cells": [
             {
-              "count": 3791,
-              "mean_return": 0.18141831459721747,
-              "median_return": -0.022292993630573354,
-              "hit_rate": 0.4674228435768926,
-              "display_value": 0.18141831459721747,
+              "count": 162,
+              "mean_return": 1.4166145769777967,
+              "median_return": 0.02184557438794721,
+              "hit_rate": 0.5061728395061729,
+              "display_value": 1.4166145769777967,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 3803,
-              "mean_return": 0.16024511256871382,
-              "median_return": -0.01980198019801971,
-              "hit_rate": 0.47199579279516174,
-              "display_value": 0.16024511256871382,
+              "count": 310,
+              "mean_return": 0.30713357644105066,
+              "median_return": -0.04557646261576681,
+              "hit_rate": 0.47096774193548385,
+              "display_value": 0.30713357644105066,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 3200,
-              "mean_return": 0.11413261044160058,
-              "median_return": -0.017831241033711198,
-              "hit_rate": 0.478125,
-              "display_value": 0.11413261044160058,
+              "count": 700,
+              "mean_return": 0.17318221019996233,
+              "median_return": -0.09933519944016794,
+              "hit_rate": 0.4471428571428571,
+              "display_value": 0.17318221019996233,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 2510,
-              "mean_return": 0.1146707653985109,
-              "median_return": -0.007521832601294021,
-              "hit_rate": 0.4940239043824701,
-              "display_value": 0.1146707653985109,
+              "count": 1394,
+              "mean_return": 0.3218144857738184,
+              "median_return": -0.13902854026385747,
+              "hit_rate": 0.42037302725968434,
+              "display_value": 0.3218144857738184,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Moderate"
             },
             {
-              "count": 2566,
-              "mean_return": -0.010248592631939212,
-              "median_return": -0.09530297132476973,
-              "hit_rate": 0.4099766173031956,
-              "display_value": -0.010248592631939212,
+              "count": 1582,
+              "mean_return": -0.03326837208777967,
+              "median_return": -0.3191692542035268,
+              "hit_rate": 0.34576485461441214,
+              "display_value": -0.03326837208777967,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Low Fragility"
-            }
-          ]
-        },
-        {
-          "axis2_bucket": "Very Strong",
-          "cells": [
-            {
-              "count": 2359,
-              "mean_return": 0.10272775685133216,
-              "median_return": -0.06779661016949157,
-              "hit_rate": 0.42390843577787196,
-              "display_value": 0.10272775685133216,
-              "suppressed": false,
-              "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Low Fragility"
-            },
-            {
-              "count": 1922,
-              "mean_return": 0.11440682244514395,
-              "median_return": -0.02981106091484448,
-              "hit_rate": 0.4505723204994797,
-              "display_value": 0.11440682244514395,
-              "suppressed": false,
-              "axis1_bucket": "Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Low Fragility"
-            },
-            {
-              "count": 1977,
-              "mean_return": 0.19703219867278296,
-              "median_return": -0.05067064083457529,
-              "hit_rate": 0.45220030349013657,
-              "display_value": 0.19703219867278296,
-              "suppressed": false,
-              "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Low Fragility"
-            },
-            {
-              "count": 2373,
-              "mean_return": 0.0755247964208641,
-              "median_return": -0.17816954238559635,
-              "hit_rate": 0.36578171091445427,
-              "display_value": 0.0755247964208641,
-              "suppressed": false,
-              "axis1_bucket": "High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Low Fragility"
-            },
-            {
-              "count": 3303,
-              "mean_return": -0.06579064750484807,
-              "median_return": -0.2919254658385094,
-              "hit_rate": 0.3439297608234938,
-              "display_value": -0.06579064750484807,
-              "suppressed": false,
-              "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Low Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Moderate"
             }
           ]
         }
       ]
     },
     {
-      "panel": "Moderate Fragility",
+      "panel": "High",
       "rows": [
         {
-          "axis2_bucket": "Very Weak",
+          "axis2_bucket": "Very Low",
           "cells": [
             {
-              "count": 3543,
-              "mean_return": 0.13500946409989792,
-              "median_return": 0.006749156355455588,
-              "hit_rate": 0.5094552639006492,
-              "display_value": 0.13500946409989792,
+              "count": 1811,
+              "mean_return": 0.16095891068601834,
+              "median_return": 0.07301066447908133,
+              "hit_rate": 0.6024295969077857,
+              "display_value": 0.16095891068601834,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3739,
-              "mean_return": 0.07214275122573596,
-              "median_return": -0.007920792079208039,
-              "hit_rate": 0.4872960684675047,
-              "display_value": 0.07214275122573596,
+              "count": 2655,
+              "mean_return": 0.09240104097054622,
+              "median_return": -0.0235183443085607,
+              "hit_rate": 0.471939736346516,
+              "display_value": 0.09240104097054622,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3420,
-              "mean_return": 0.10255774159440688,
-              "median_return": 0.02235380319658009,
-              "hit_rate": 0.533625730994152,
-              "display_value": 0.10255774159440688,
+              "count": 2732,
+              "mean_return": 0.12749142743969316,
+              "median_return": 0.0008475164940533464,
+              "hit_rate": 0.5007320644216691,
+              "display_value": 0.12749142743969316,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3111,
-              "mean_return": 0.05325173601994036,
-              "median_return": 0.017209302325581488,
-              "hit_rate": 0.5216972034715526,
-              "display_value": 0.05325173601994036,
+              "count": 1387,
+              "mean_return": 0.08648629339073897,
+              "median_return": 0.014792899408283988,
+              "hit_rate": 0.5133381398702235,
+              "display_value": 0.08648629339073897,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1661,
-              "mean_return": 0.1101826325743366,
-              "median_return": 0.028020211299954134,
-              "hit_rate": 0.5273931366646598,
-              "display_value": 0.1101826325743366,
+              "count": 253,
+              "mean_return": 0.057338193598460534,
+              "median_return": -0.16353297513582676,
+              "hit_rate": 0.3557312252964427,
+              "display_value": 0.057338193598460534,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "High"
             }
           ]
         },
         {
-          "axis2_bucket": "Weak",
+          "axis2_bucket": "Low",
           "cells": [
             {
-              "count": 3110,
-              "mean_return": 0.19079805571994404,
-              "median_return": 0.019986440025259844,
-              "hit_rate": 0.5279742765273312,
-              "display_value": 0.19079805571994404,
+              "count": 2275,
+              "mean_return": 0.13186690779015448,
+              "median_return": 0.0755555555555556,
+              "hit_rate": 0.5982417582417583,
+              "display_value": 0.13186690779015448,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 4026,
-              "mean_return": 0.09582739597138784,
-              "median_return": -0.0026518960135852865,
-              "hit_rate": 0.496274217585693,
-              "display_value": 0.09582739597138784,
+              "count": 3424,
+              "mean_return": 0.11368457230747903,
+              "median_return": -0.011318494213194363,
+              "hit_rate": 0.48364485981308414,
+              "display_value": 0.11368457230747903,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3783,
-              "mean_return": 0.06685338478761493,
-              "median_return": 0.02368472141331779,
-              "hit_rate": 0.5342320909331219,
-              "display_value": 0.06685338478761493,
+              "count": 3820,
+              "mean_return": 0.07498791982577448,
+              "median_return": -0.010960189188811031,
+              "hit_rate": 0.4829842931937173,
+              "display_value": 0.07498791982577448,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3504,
-              "mean_return": 0.09759593906597414,
-              "median_return": 0.06852638841125047,
-              "hit_rate": 0.598458904109589,
-              "display_value": 0.09759593906597414,
+              "count": 1982,
+              "mean_return": 0.10153551710636373,
+              "median_return": 0.002593348321196398,
+              "hit_rate": 0.5030272452068617,
+              "display_value": 0.10153551710636373,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1440,
-              "mean_return": 0.1321628374495692,
-              "median_return": 0.06180141579731746,
-              "hit_rate": 0.5645833333333333,
-              "display_value": 0.1321628374495692,
+              "count": 240,
+              "mean_return": 0.3792341068323516,
+              "median_return": -0.06262046126032472,
+              "hit_rate": 0.4708333333333333,
+              "display_value": 0.3792341068323516,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "High"
             }
           ]
         },
         {
-          "axis2_bucket": "Neutral",
+          "axis2_bucket": "Moderate",
           "cells": [
             {
-              "count": 2134,
-              "mean_return": 0.1681996717922013,
-              "median_return": -0.006483064596120802,
-              "hit_rate": 0.48828491096532334,
-              "display_value": 0.1681996717922013,
+              "count": 2932,
+              "mean_return": 0.14097197518692156,
+              "median_return": 0.08352585426872239,
+              "hit_rate": 0.6268758526603001,
+              "display_value": 0.14097197518692156,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3251,
-              "mean_return": 0.11123675620806825,
-              "median_return": 0.019911504424778848,
-              "hit_rate": 0.5269147954475546,
-              "display_value": 0.11123675620806825,
+              "count": 4211,
+              "mean_return": 0.123020604041673,
+              "median_return": 0.011838989739542338,
+              "hit_rate": 0.5162669199715032,
+              "display_value": 0.123020604041673,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "High"
             },
             {
-              "count": 4018,
-              "mean_return": 0.07261450721418639,
-              "median_return": 0.012246998141806076,
-              "hit_rate": 0.5164260826281732,
-              "display_value": 0.07261450721418639,
+              "count": 5681,
+              "mean_return": 0.08569925295378433,
+              "median_return": -0.02215384615384608,
+              "hit_rate": 0.47262805844041544,
+              "display_value": 0.08569925295378433,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3276,
-              "mean_return": 0.08034502278661358,
-              "median_return": 0.0352029476367256,
-              "hit_rate": 0.5506715506715507,
-              "display_value": 0.08034502278661358,
+              "count": 3407,
+              "mean_return": 0.0748249858564019,
+              "median_return": -0.0015489467162330683,
+              "hit_rate": 0.4969181097739947,
+              "display_value": 0.0748249858564019,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1602,
-              "mean_return": 0.14634779407561108,
-              "median_return": 0.043697098682143,
-              "hit_rate": 0.5480649188514357,
-              "display_value": 0.14634779407561108,
+              "count": 476,
+              "mean_return": 0.05197344793017372,
+              "median_return": -0.018864338514792245,
+              "hit_rate": 0.47689075630252103,
+              "display_value": 0.05197344793017372,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "High"
             }
           ]
         },
         {
-          "axis2_bucket": "Strong",
+          "axis2_bucket": "High",
           "cells": [
             {
-              "count": 1342,
-              "mean_return": 0.5397326493780092,
-              "median_return": 0.03730370999338306,
-              "hit_rate": 0.5432190760059612,
-              "display_value": 0.5397326493780092,
+              "count": 704,
+              "mean_return": 0.380944499817555,
+              "median_return": -0.0020768972659007123,
+              "hit_rate": 0.4971590909090909,
+              "display_value": 0.380944499817555,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 2271,
-              "mean_return": 0.12468472320336182,
-              "median_return": 0.013798111837327598,
-              "hit_rate": 0.5195948921180097,
-              "display_value": 0.12468472320336182,
+              "count": 1028,
+              "mean_return": 0.25591484296596145,
+              "median_return": -0.028017011184570395,
+              "hit_rate": 0.4678988326848249,
+              "display_value": 0.25591484296596145,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 3014,
-              "mean_return": 0.12178636393294262,
-              "median_return": 0.023649664051471286,
-              "hit_rate": 0.5311877903118779,
-              "display_value": 0.12178636393294262,
+              "count": 2966,
+              "mean_return": 0.12524253463452972,
+              "median_return": -0.007430239098947633,
+              "hit_rate": 0.4915711395819285,
+              "display_value": 0.12524253463452972,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 2782,
-              "mean_return": 0.05836410468653572,
-              "median_return": 0.0024695553625116995,
-              "hit_rate": 0.505391804457225,
-              "display_value": 0.05836410468653572,
+              "count": 6905,
+              "mean_return": 0.058405982929033595,
+              "median_return": -0.013297474973853252,
+              "hit_rate": 0.48066618392469224,
+              "display_value": 0.058405982929033595,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1551,
-              "mean_return": 0.11081332104175802,
-              "median_return": 0.026058399371742702,
-              "hit_rate": 0.5306254029658285,
-              "display_value": 0.11081332104175802,
+              "count": 2118,
+              "mean_return": -0.011703028870800401,
+              "median_return": -0.11982155386359888,
+              "hit_rate": 0.40321057601510857,
+              "display_value": -0.011703028870800401,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "High"
             }
           ]
         },
         {
-          "axis2_bucket": "Very Strong",
+          "axis2_bucket": "Very High",
           "cells": [
             {
-              "count": 506,
-              "mean_return": -0.045678151071647244,
-              "median_return": -0.11975784852762,
-              "hit_rate": 0.37351778656126483,
-              "display_value": -0.045678151071647244,
+              "count": 292,
+              "mean_return": 0.5272865879071305,
+              "median_return": -0.23194045069848068,
+              "hit_rate": 0.3801369863013699,
+              "display_value": 0.5272865879071305,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 783,
-              "mean_return": 0.08289893417020419,
-              "median_return": -0.012328767123287676,
-              "hit_rate": 0.4789272030651341,
-              "display_value": 0.08289893417020419,
+              "count": 646,
+              "mean_return": 0.4937654488659276,
+              "median_return": -0.06767718880285889,
+              "hit_rate": 0.46904024767801855,
+              "display_value": 0.4937654488659276,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1044,
-              "mean_return": 0.06161864301952981,
-              "median_return": 0.011555232551440198,
-              "hit_rate": 0.5172413793103449,
-              "display_value": 0.06161864301952981,
+              "count": 1783,
+              "mean_return": 0.20279225844109555,
+              "median_return": -0.11111111111111105,
+              "hit_rate": 0.43185642176107686,
+              "display_value": 0.20279225844109555,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 1365,
-              "mean_return": 0.06920815279554199,
-              "median_return": 0.00499919367843904,
-              "hit_rate": 0.5076923076923077,
-              "display_value": 0.06920815279554199,
+              "count": 3499,
+              "mean_return": 0.1869185624744937,
+              "median_return": -0.09067357512953367,
+              "hit_rate": 0.43355244355530154,
+              "display_value": 0.1869185624744937,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "High"
             },
             {
-              "count": 676,
-              "mean_return": 0.014816666548881207,
-              "median_return": -0.03541274226430341,
-              "hit_rate": 0.46005917159763315,
-              "display_value": 0.014816666548881207,
+              "count": 3948,
+              "mean_return": 0.06251108861356534,
+              "median_return": -0.2611669933368603,
+              "hit_rate": 0.35815602836879434,
+              "display_value": 0.06251108861356534,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "Moderate Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "High"
             }
           ]
         }
       ]
     },
     {
-      "panel": "High Fragility",
+      "panel": "Very High",
       "rows": [
         {
-          "axis2_bucket": "Very Weak",
+          "axis2_bucket": "Very Low",
           "cells": [
             {
-              "count": 2059,
-              "mean_return": 0.926899272793172,
-              "median_return": 0.12094207511139388,
-              "hit_rate": 0.6143759106362312,
-              "display_value": 0.926899272793172,
+              "count": 55,
+              "mean_return": 0.4195815995555727,
+              "median_return": 0.23357811763120662,
+              "hit_rate": 0.8909090909090909,
+              "display_value": 0.4195815995555727,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 2483,
-              "mean_return": 0.19064144307656763,
-              "median_return": 0.03400000000000003,
-              "hit_rate": 0.5400724929520742,
-              "display_value": 0.19064144307656763,
+              "count": 66,
+              "mean_return": 0.06275152537113225,
+              "median_return": 0.09412205747379043,
+              "hit_rate": 0.6060606060606061,
+              "display_value": 0.06275152537113225,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 2456,
-              "mean_return": 0.2692642991716585,
-              "median_return": 0.0025183586572056216,
-              "hit_rate": 0.5028501628664495,
-              "display_value": 0.2692642991716585,
+              "count": 308,
+              "mean_return": 0.1740328839539112,
+              "median_return": -0.002942209246343863,
+              "hit_rate": 0.4967532467532468,
+              "display_value": 0.1740328839539112,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 2627,
-              "mean_return": 0.14047238046739227,
-              "median_return": -0.0714285714285714,
-              "hit_rate": 0.4248191853825657,
-              "display_value": 0.14047238046739227,
+              "count": 680,
+              "mean_return": 0.2214328328935635,
+              "median_return": 0.01062781140073521,
+              "hit_rate": 0.5073529411764706,
+              "display_value": 0.2214328328935635,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 3169,
-              "mean_return": 0.08924653443521335,
-              "median_return": -0.07750000000000001,
-              "hit_rate": 0.42063742505522245,
-              "display_value": 0.08924653443521335,
+              "count": 433,
+              "mean_return": 0.2218617815654447,
+              "median_return": 0.027933199504548867,
+              "hit_rate": 0.5404157043879908,
+              "display_value": 0.2218617815654447,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very Low",
+              "axis3_bucket": "Very High"
             }
           ]
         },
         {
-          "axis2_bucket": "Weak",
+          "axis2_bucket": "Low",
           "cells": [
             {
-              "count": 2880,
-              "mean_return": 0.2760806948756163,
-              "median_return": 0.10428356890876556,
-              "hit_rate": 0.6034722222222222,
-              "display_value": 0.2760806948756163,
+              "count": 94,
+              "mean_return": 0.16218190659077394,
+              "median_return": 0.09215462853812284,
+              "hit_rate": 0.6914893617021277,
+              "display_value": 0.16218190659077394,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 3466,
-              "mean_return": 0.27811314772420914,
-              "median_return": 0.029722285272592353,
-              "hit_rate": 0.5279861511829198,
-              "display_value": 0.27811314772420914,
+              "count": 159,
+              "mean_return": 0.06626182562771588,
+              "median_return": -0.012891344383057168,
+              "hit_rate": 0.4716981132075472,
+              "display_value": 0.06626182562771588,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 3489,
-              "mean_return": 0.12352323288827959,
-              "median_return": -0.01463907117617358,
-              "hit_rate": 0.47922040699340784,
-              "display_value": 0.12352323288827959,
+              "count": 470,
+              "mean_return": 0.23868134663192628,
+              "median_return": -0.02497038215482511,
+              "hit_rate": 0.4808510638297872,
+              "display_value": 0.23868134663192628,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 3374,
-              "mean_return": 0.12763826450550364,
-              "median_return": -0.01792857142857146,
-              "hit_rate": 0.47925311203319504,
-              "display_value": 0.12763826450550364,
+              "count": 1227,
+              "mean_return": 0.1216658728473588,
+              "median_return": -0.040100250626566414,
+              "hit_rate": 0.45639771801140994,
+              "display_value": 0.1216658728473588,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 4164,
-              "mean_return": 0.1782835203962314,
-              "median_return": -0.015150711087492885,
-              "hit_rate": 0.484149855907781,
-              "display_value": 0.1782835203962314,
+              "count": 757,
+              "mean_return": 0.21277558514903103,
+              "median_return": -0.03966146697643547,
+              "hit_rate": 0.44914134742404227,
+              "display_value": 0.21277558514903103,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Weak",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Low",
+              "axis3_bucket": "Very High"
             }
           ]
         },
         {
-          "axis2_bucket": "Neutral",
+          "axis2_bucket": "Moderate",
           "cells": [
             {
-              "count": 2952,
-              "mean_return": 0.3690409312352241,
-              "median_return": 0.06182233607976184,
-              "hit_rate": 0.5623306233062331,
-              "display_value": 0.3690409312352241,
+              "count": 294,
+              "mean_return": 0.17039984919180923,
+              "median_return": 0.14254674615771745,
+              "hit_rate": 0.6530612244897959,
+              "display_value": 0.17039984919180923,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 3311,
-              "mean_return": 0.2123270052000222,
-              "median_return": 0.014150943396226356,
-              "hit_rate": 0.5116279069767442,
-              "display_value": 0.2123270052000222,
+              "count": 349,
+              "mean_return": 0.4130498656766409,
+              "median_return": 0.12453703703703689,
+              "hit_rate": 0.6762177650429799,
+              "display_value": 0.4130498656766409,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 4024,
-              "mean_return": 0.20006519956804406,
-              "median_return": -0.004043152275341189,
-              "hit_rate": 0.4952783300198807,
-              "display_value": 0.20006519956804406,
+              "count": 886,
+              "mean_return": 0.1586085012621972,
+              "median_return": 0.01688458299789941,
+              "hit_rate": 0.5316027088036117,
+              "display_value": 0.1586085012621972,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 4454,
-              "mean_return": 0.15435824363683828,
-              "median_return": -0.01272322316350466,
-              "hit_rate": 0.4818140996856758,
-              "display_value": 0.15435824363683828,
+              "count": 2614,
+              "mean_return": 0.09185711123344491,
+              "median_return": -0.02283677813252677,
+              "hit_rate": 0.46863045141545523,
+              "display_value": 0.09185711123344491,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 6287,
-              "mean_return": 0.0864724376771715,
-              "median_return": -0.023691746940900704,
-              "hit_rate": 0.47176713853984414,
-              "display_value": 0.0864724376771715,
+              "count": 1495,
+              "mean_return": 0.060095762452463765,
+              "median_return": -0.04538341158059467,
+              "hit_rate": 0.4568561872909699,
+              "display_value": 0.060095762452463765,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Neutral",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Moderate",
+              "axis3_bucket": "Very High"
             }
           ]
         },
         {
-          "axis2_bucket": "Strong",
+          "axis2_bucket": "High",
           "cells": [
             {
-              "count": 4958,
-              "mean_return": 0.6322188787678422,
-              "median_return": 0.0044020849189326805,
-              "hit_rate": 0.5014118596208148,
-              "display_value": 0.6322188787678422,
+              "count": 288,
+              "mean_return": 0.8249882469220142,
+              "median_return": 0.09254023643355647,
+              "hit_rate": 0.6180555555555556,
+              "display_value": 0.8249882469220142,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 4563,
-              "mean_return": 0.1916905100168271,
-              "median_return": -0.07432865915131515,
-              "hit_rate": 0.4420337497260574,
-              "display_value": 0.1916905100168271,
+              "count": 379,
+              "mean_return": 1.8070093843459563,
+              "median_return": 0.02846705573127828,
+              "hit_rate": 0.5435356200527705,
+              "display_value": 1.8070093843459563,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 4571,
-              "mean_return": 0.21734195544850465,
-              "median_return": -0.04074464348436957,
-              "hit_rate": 0.4651061036972216,
-              "display_value": 0.21734195544850465,
+              "count": 1097,
+              "mean_return": 0.6495579020446572,
+              "median_return": 0.05828779599271394,
+              "hit_rate": 0.5487693710118505,
+              "display_value": 0.6495579020446572,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 5650,
-              "mean_return": 0.13505095043899068,
-              "median_return": -0.03921360607492608,
-              "hit_rate": 0.4561061946902655,
-              "display_value": 0.13505095043899068,
+              "count": 9775,
+              "mean_return": 0.2939595786058944,
+              "median_return": 0.012746234067207318,
+              "hit_rate": 0.5147826086956522,
+              "display_value": 0.2939595786058944,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 8484,
-              "mean_return": 0.13695284758203732,
-              "median_return": -0.04834999010488816,
-              "hit_rate": 0.4539132484677039,
-              "display_value": 0.13695284758203732,
+              "count": 10670,
+              "mean_return": 0.1066225068997047,
+              "median_return": -0.02676891140441301,
+              "hit_rate": 0.47525773195876286,
+              "display_value": 0.1066225068997047,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "High",
+              "axis3_bucket": "Very High"
             }
           ]
         },
         {
-          "axis2_bucket": "Very Strong",
+          "axis2_bucket": "Very High",
           "cells": [
             {
-              "count": 4148,
-              "mean_return": 0.4166558271728186,
-              "median_return": -0.1883216189816153,
-              "hit_rate": 0.39922854387656703,
-              "display_value": 0.4166558271728186,
+              "count": 179,
+              "mean_return": 0.10991781700170458,
+              "median_return": -0.22988505747126442,
+              "hit_rate": 0.33519553072625696,
+              "display_value": 0.10991781700170458,
               "suppressed": false,
               "axis1_bucket": "Very Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 5411,
-              "mean_return": 0.15745739313436666,
-              "median_return": -0.1745134965473948,
-              "hit_rate": 0.3906856403622251,
-              "display_value": 0.15745739313436666,
+              "count": 244,
+              "mean_return": 0.3880166665111212,
+              "median_return": -0.20597679480607783,
+              "hit_rate": 0.3524590163934426,
+              "display_value": 0.3880166665111212,
               "suppressed": false,
               "axis1_bucket": "Low",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 6059,
-              "mean_return": 0.08827815260672855,
-              "median_return": -0.15887300747014887,
-              "hit_rate": 0.38900808714309293,
-              "display_value": 0.08827815260672855,
+              "count": 1240,
+              "mean_return": 0.5657894838482773,
+              "median_return": -0.11320155592601411,
+              "hit_rate": 0.43951612903225806,
+              "display_value": 0.5657894838482773,
               "suppressed": false,
               "axis1_bucket": "Moderate",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 6404,
-              "mean_return": 0.1097070541408135,
-              "median_return": -0.18548876745598064,
-              "hit_rate": 0.38226108682073706,
-              "display_value": 0.1097070541408135,
+              "count": 6435,
+              "mean_return": 0.3431980309741708,
+              "median_return": -0.13057635949202218,
+              "hit_rate": 0.4257964257964258,
+              "display_value": 0.3431980309741708,
               "suppressed": false,
               "axis1_bucket": "High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very High"
             },
             {
-              "count": 8214,
-              "mean_return": -0.02081066885761272,
-              "median_return": -0.24786074745849485,
-              "hit_rate": 0.3326028731434137,
-              "display_value": -0.02081066885761272,
+              "count": 20262,
+              "mean_return": 0.13777715428761278,
+              "median_return": -0.2517949343415864,
+              "hit_rate": 0.34680683052018557,
+              "display_value": 0.13777715428761278,
               "suppressed": false,
               "axis1_bucket": "Very High",
-              "axis2_bucket": "Very Strong",
-              "axis3_panel": "High Fragility"
+              "axis2_bucket": "Very High",
+              "axis3_bucket": "Very High"
             }
           ]
         }
