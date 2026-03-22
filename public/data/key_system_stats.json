@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-22T15:30:14.997175+00:00",
+  "generated_at": "2026-03-22T22:56:26.072215+00:00",
   "universe": {
     "total": 5168
   },
@@ -31,13 +31,13 @@
     }
   },
   "cohort_returns": {
-    "axis1_very_high_median_return": -0.048,
-    "axis1_very_low_median_return": -0.0014,
-    "axis2_very_high_median_return": 0.0181,
-    "axis2_very_low_median_return": -0.115,
-    "axis3_very_high_median_return": -0.0409,
-    "axis3_very_low_median_return": -0.0195,
-    "total_observations": 270618,
+    "axis1_very_high_median_return": -0.0979,
+    "axis1_very_low_median_return": -0.0055,
+    "axis2_very_high_median_return": -0.162,
+    "axis2_very_low_median_return": 0.0313,
+    "axis3_very_high_median_return": null,
+    "axis3_very_low_median_return": null,
+    "total_observations": 304236,
     "cohort_source": "live"
   }
 }

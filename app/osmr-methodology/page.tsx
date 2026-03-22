@@ -168,7 +168,7 @@ export default function OsmrMethodology() {
           </p>
           <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#8A92A0]">
             <span>~5,200 companies · current universe snapshot</span>
-            <span>~270,000 historical observations</span>
+            <span>304,000+ historical observations</span>
           </div>
 
           {/* Section index */}
@@ -479,7 +479,7 @@ export default function OsmrMethodology() {
           <div className="mt-5 space-y-4 text-base leading-7 text-[#5C6472]">
             <p>
               A scoring framework without empirical grounding is a hypothesis.
-              OSMR has been validated against ~270,000 historical observations
+              OSMR has been validated against 304,000+ historical observations
               spanning multiple market cycles, testing whether structural risk
               classifications have any measurable relationship with subsequent
               return distributions.
@@ -496,8 +496,8 @@ export default function OsmrMethodology() {
             <h3 className="text-lg font-semibold text-[#0A1F3D]">Cohort Grid Structure</h3>
             <p>
               The cohort grid maps 12-month forward returns against OSMR
-              structural risk classifications: 3 panels (Low / Moderate / High
-              Fragility) × 5 Axis 1 buckets × 5 Axis 2 buckets = 75 cells per
+              structural risk classifications: 3 panels (Very Low / Moderate / Very
+              High financing risk) × 5 Axis 1 buckets × 5 Axis 2 buckets = 75 cells per
               panel. Each cell displays median return (primary), mean return with
               skew indicators when |mean − median| exceeds 10 percentage points,
               hit rate, and observation count.
@@ -507,23 +507,48 @@ export default function OsmrMethodology() {
           <div className="mt-8 rounded-xl border border-[#DDE0DC] bg-white overflow-hidden">
             <div className="px-6 py-4 border-b border-[#DDE0DC]">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0]">
-                Key finding — Mean/Median gap
+                Key finding — Highest structural risk
               </p>
               <p className="mt-1 text-sm text-[#5C6472]">
-                Highest-risk intersection: High Fragility / Very High Axis 1 / Very High Axis 2
+                Very High across all three axes simultaneously (N=20,262)
               </p>
             </div>
             <div className="divide-y divide-[#DDE0DC]">
               {[
-                { metric: "Mean 12-month return",   value: "+8.9%",  note: "Pulled upward by a subset of large positive outcomes" },
-                { metric: "Median 12-month return",  value: "−7.8%", note: "Typical outcome for the majority of observations" },
-                { metric: "Mean − Median gap",       value: "16.7 pp", note: "Positive skew; mean overstates the central tendency" },
-                { metric: "Hit rate",                value: "42.1%",  note: "Majority of observations had negative 12-month returns" },
-                { metric: "Observations (N)",        value: "3,169",  note: "Statistically robust sample" },
+                { metric: "Mean 12-month return",   value: "+13.8%",  note: "Pulled upward by a subset of large positive outcomes" },
+                { metric: "Median 12-month return",  value: "−25.2%", note: "Typical outcome for the majority of observations" },
+                { metric: "Mean − Median gap",       value: "39.0 pp", note: "Positive skew; mean overstates the central tendency" },
+                { metric: "Hit rate",                value: "34.7%",  note: "Nearly two-thirds of observations had negative 12-month returns" },
+                { metric: "Observations (N)",        value: "20,262",  note: "Statistically robust sample" },
               ].map(({ metric, value, note }) => (
                 <div key={metric} className="grid grid-cols-[1fr_auto_2fr] items-center gap-4 px-6 py-3 text-sm">
                   <span className="text-[#5C6472]">{metric}</span>
                   <span className="font-semibold text-[#0A1F3D]">{value}</span>
+                  <span className="text-[#8A92A0]">{note}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-[#DDE0DC] bg-white overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#DDE0DC]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0]">
+                Contrast — Lowest structural risk
+              </p>
+              <p className="mt-1 text-sm text-[#5C6472]">
+                Very Low across all three axes simultaneously (N=3,913)
+              </p>
+            </div>
+            <div className="divide-y divide-[#DDE0DC]">
+              {[
+                { metric: "Mean 12-month return",   value: "+11.9%",  note: "Consistent with broad market participation" },
+                { metric: "Median 12-month return",  value: "+1.6%",  note: "Typical outcome for the majority of observations" },
+                { metric: "Hit rate",                value: "52.1%",  note: "Slight majority of observations had positive 12-month returns" },
+                { metric: "Observations (N)",        value: "3,913",   note: "Smaller cohort — FCF-anchored, low-fragility companies" },
+              ].map(({ metric, value, note }) => (
+                <div key={metric} className="grid grid-cols-[1fr_auto_2fr] items-center gap-4 px-6 py-3 text-sm">
+                  <span className="text-[#5C6472]">{metric}</span>
+                  <span className="font-semibold text-[#244636]">{value}</span>
                   <span className="text-[#8A92A0]">{note}</span>
                 </div>
               ))}
@@ -535,13 +560,14 @@ export default function OsmrMethodology() {
               Key finding
             </p>
             <p className="text-sm leading-6 text-[#5C6472]">
-              The highest-risk cohort — High Fragility / Very High Axis 1 / Very
-              High Axis 2 — produced a median 12-month return of −7.8% across
-              3,169 observations, with only 42% of outcomes positive. The mean of
-              +8.9% is pulled upward by a subset of large positive outcomes. Using
-              mean as the headline figure here would be misleading — it would make
-              the highest-risk cohort appear marginally attractive when the typical
-              outcome was a loss.
+              The highest-risk cohort — Very High across all three axes
+              simultaneously — produced a median 12-month return of −25.2% across
+              20,262 observations, with only 34.7% of outcomes positive. The mean
+              of +13.8% is pulled upward by a subset of large positive outcomes.
+              Using mean as the headline figure here would be deeply misleading —
+              it would make the highest-risk cohort appear attractive when nearly
+              two-thirds of investors in this cohort lost money over the following
+              twelve months.
             </p>
           </div>
 
@@ -557,12 +583,12 @@ export default function OsmrMethodology() {
             </p>
             <p>
               In the highest-risk cohort, the mean is positive while the median is
-              negative. A framework that reported mean as its primary metric would
-              present this cohort as marginally worth holding. The median tells the
-              honest story: most investors in this cohort lost money over the
-              following twelve months. The framework shows mean with skew
-              indicators when the gap is material, so readers can see both the
-              central tendency and the tail.
+              deeply negative. A framework that reported mean as its primary metric
+              would present this cohort as worth holding. The median tells the
+              honest story: most investors in this cohort lost a quarter of their
+              capital over the following twelve months. The framework shows mean
+              with skew indicators when the gap is material, so readers can see
+              both the central tendency and the tail.
             </p>
           </div>
         </section>
@@ -717,7 +743,7 @@ export default function OsmrMethodology() {
                 {[
                   {
                     field: "Universe",
-                    value: "~4,800 U.S. equity securities (latest snapshot). Data source: Financial Modeling Prep (FMP) API. Updated monthly (full pipeline) and weekly (snapshot refresh).",
+                    value: "~5,200 U.S. equity securities (latest snapshot). Data source: Financial Modeling Prep (FMP) API. Updated monthly (full pipeline) and weekly (snapshot refresh).",
                   },
                   {
                     field: "OAL Assignment",
@@ -741,7 +767,7 @@ export default function OsmrMethodology() {
                   },
                   {
                     field: "Cohort Grid",
-                    value: "~270,000 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
+                    value: "304,236 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
                   },
                 ].map(({ field, value }) => (
                   <tr key={field} className="bg-white even:bg-[#F7F8F6]">
