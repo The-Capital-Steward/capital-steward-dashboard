@@ -1618,7 +1618,7 @@ export default function PlatformPage() {
                         {/* Recharts — axes, grid, tooltip only. No dots in Scatter. */}
                         <div ref={mapContainerRef} className="absolute inset-0">
                           <ResponsiveContainer width="100%" height="100%">
-                            <ScatterChart margin={{ top: 36, right: 12, bottom: 24, left: 40 }}>
+                            <ScatterChart margin={{ top: 36, right: 12, bottom: 24, left: 60 }}>
                               <CartesianGrid stroke={COLORS.border} strokeOpacity={0.5} />
                               <XAxis
                                 type="number" dataKey="x" domain={[0, 1]}
@@ -1668,20 +1668,29 @@ export default function PlatformPage() {
                         </div>
 
                         {/* ── Animated dot overlay ──────────────────────────────
-                            Positioned absolutely over the chart.
-                            Chart margins: top=36 right=12 bottom=24 left=40
-                            Plot area = container minus margins.
-                            Data domain [0,1] maps linearly to plot area pixels.
-                            Each circle has a stable key so framer-motion tracks
-                            identity across mapDecile changes and springs r/opacity.
+                            Margins must match ScatterChart margin prop exactly,
+                            plus Recharts' internal axis label space.
+                            Y-axis with tick labels renders ~60px wide (not 40).
+                            clipPath ensures dots never escape the plot area.
                         ─────────────────────────────────────────────────────── */}
                         <svg
                           className="pointer-events-none absolute inset-0 z-10"
                           width={mapDims.width}
                           height={mapDims.height}
                         >
+                          <defs>
+                            <clipPath id="map-plot-area">
+                              <rect
+                                x={60}
+                                y={36}
+                                width={Math.max(0, mapDims.width  - 60 - 12)}
+                                height={Math.max(0, mapDims.height - 36 - 24)}
+                              />
+                            </clipPath>
+                          </defs>
+                          <g clipPath="url(#map-plot-area)">
                           {(() => {
-                            const margin = { top: 36, right: 12, bottom: 24, left: 40 };
+                            const margin = { top: 36, right: 12, bottom: 24, left: 60 };
                             const plotW = mapDims.width  - margin.left - margin.right;
                             const plotH = mapDims.height - margin.top  - margin.bottom;
                             return scatterData.map(entry => {
@@ -1714,6 +1723,7 @@ export default function PlatformPage() {
                               );
                             });
                           })()}
+                          </g>
                         </svg>
                       </div>
 
