@@ -285,26 +285,26 @@ html {
    homepage section in homepage.tsx.
    ============================================================ */
 
-/* Desktop: proximity snap — sections have gravity but don't force */
 @media (min-width: 768px) {
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
   }
 
   .tcs-snap-section {
-    min-height: calc(100svh - 88px); /* 88px = nav height, adjust if nav changes */
+    min-height: calc(100svh - 88px);
     display: flex;
     align-items: center;
     scroll-snap-align: start;
-    scroll-snap-stop: normal;
+    scroll-snap-stop: always;
+    overflow-y: auto;
   }
 }
 
-/* Mobile: no snap, normal document flow, auto height */
 @media (max-width: 767px) {
   body {
     scroll-snap-type: none;

@@ -136,50 +136,50 @@ export default function HomePage() {
 
             {/* Left */}
             <div>
-              <h1 className="tcs-heading text-4xl font-semibold leading-[1.05] tracking-tight text-[#0A1F3D] md:text-[4rem] md:leading-[1.02] lg:text-[4.5rem]">
+              <h1 className="tcs-heading text-3xl font-semibold leading-[1.08] tracking-tight text-[#0A1F3D] md:text-[2.75rem] md:leading-[1.05] lg:text-[3.25rem]">
                 Markets price narratives. We measure what's underneath them.
               </h1>
 
-              <p className="mt-5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+              <p className="mt-4 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
                 OSMR measures three things: how far a company's valuation extends
                 beyond its demonstrated operational output, whether that operational
                 foundation is improving or deteriorating, and whether the firm can
                 service its obligations from what it actually produces.
               </p>
 
-              <p className="mt-3 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+              <p className="mt-2 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
                 Those measurements are computed from reported financials across the
                 U.S.-listed equity universe, then ranked and scored on a common
                 structural basis.
               </p>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 <div>
-                  <p className="text-base leading-7 text-[#1E2228] md:text-lg">
+                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
                     <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
                     sits in the elevated structural risk zone across all three axes simultaneously.
                   </p>
-                  <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
+                  <p className="mt-0.5 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
                     {revAnchorPct} of those companies are revenue-anchored.
                   </p>
                 </div>
                 <div>
-                  <p className="text-base leading-7 text-[#1E2228] md:text-lg">
+                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
                     <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
                     across all three axes.
                   </p>
-                  <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
+                  <p className="mt-0.5 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
                     {fcfAnchorPct} of those companies are FCF-anchored.
                   </p>
                 </div>
               </div>
 
-              <p className="mt-5 text-base font-medium leading-7 text-[#0A1F3D] md:text-lg">
+              <p className="mt-4 text-sm font-medium leading-6 text-[#0A1F3D] md:text-base md:leading-7">
                 The distribution is not a ranking artifact. It is a structural separation.
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]">
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#153761]">
                   Open Platform <ArrowRight className="h-4 w-4" />
                 </Link>
                 <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -284,40 +284,45 @@ export default function HomePage() {
           OSMR full name introduced in body copy.
       ──────────────────────────────────────────────────────────────────── */}
       <section className="tcs-snap-section border-b border-[#0D2440] bg-[#0A1F3D]">
-        <div className="mx-auto w-full max-w-5xl px-6 py-12">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">Core Framework</p>
-          <h2 className="tcs-heading mt-3 max-w-2xl text-3xl font-semibold leading-tight text-white md:text-5xl">
-            If narrative sustains a valuation, the question is what sustains the narrative.
-          </h2>
+        <div className="mx-auto w-full max-w-7xl px-6 py-10">
+          <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
 
-          <div className="mt-6 max-w-xl space-y-5 text-base leading-[1.9] text-[#A9BEDF] md:text-lg">
-            <p>
-              The strongest valuations rest on demonstrated cash generation — the
-              gap between price and operational reality is short, and the narrative
-              required to bridge it is minimal. The weakest rest on what a company
-              might become — the bridge is long, the narrative load is heavy, and
-              the valuation is exposed as that narrative weakens.
-            </p>
-            <p>
-              The Operational Structure Mispricing Risk (OSMR) framework maps where
-              that load is concentrated across the market. It does not predict which
-              narratives will fail. It measures how much structural weight each one
-              is already carrying.
-            </p>
-          </div>
+            {/* Left — headline + body, full column width, no max-w constraint */}
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">Core Framework</p>
+              <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
+                If narrative sustains a valuation, the question is what sustains the narrative.
+              </h2>
+              <div className="mt-5 space-y-4 text-base leading-[1.85] text-[#A9BEDF] md:text-lg">
+                <p>
+                  The strongest valuations rest on demonstrated cash generation — the
+                  gap between price and operational reality is short, and the narrative
+                  required to bridge it is minimal. The weakest rest on what a company
+                  might become — the bridge is long, the narrative load is heavy, and
+                  the valuation is exposed as that narrative weakens.
+                </p>
+                <p>
+                  The Operational Structure Mispricing Risk (OSMR) framework maps where
+                  that load is concentrated across the market. It does not predict which
+                  narratives will fail. It measures how much structural weight each one
+                  is already carrying.
+                </p>
+              </div>
+              <div className="mt-8">
+                <Link
+                  href="/the-osmr-framework"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
+                >
+                  Methodology <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
 
-          {/* Accordion — retained, diagram removed */}
-          <div className="mt-8">
-            <RiskCards />
-          </div>
+            {/* Right — accordion cards */}
+            <div>
+              <RiskCards />
+            </div>
 
-          <div className="mt-10 flex justify-start">
-            <Link
-              href="/the-osmr-framework"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
-            >
-              Methodology <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
