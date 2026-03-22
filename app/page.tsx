@@ -149,39 +149,53 @@ export default function HomePage() {
               Markets price narratives. We measure what's underneath them.
             </h1>
 
-            {/* Approved hero substructure */}
-            <div className="mt-8 max-w-2xl space-y-5 text-lg leading-8 text-[#5C6472] md:text-xl">
-              <p>
-                OSMR measures three things: how far a company's valuation extends
-                beyond its demonstrated operational output, whether that operational
-                foundation is improving or deteriorating, and whether the firm can
-                service its obligations from what it actually produces.
-              </p>
-              <p>
-                Those measurements are computed from reported financials across the
-                U.S.-listed equity universe, then ranked and scored on a common
-                structural basis.
-              </p>
-              <p>
-                {highRiskPct} of the universe currently sits in the elevated
-                structural risk zone across all three axes simultaneously.{" "}
-                {revAnchorPct} of those companies are revenue-anchored.
-              </p>
-              <p>
-                {lowRiskPct} sits in the structurally sound zone across all three
-                axes. {fcfAnchorPct} of those companies are FCF-anchored.
-              </p>
-              <p className="font-medium text-[#0A1F3D]">
-                The distribution is not a ranking artifact. It is a structural
-                separation.
-              </p>
+            {/* Measurement paragraph */}
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
+              OSMR measures three things: how far a company's valuation extends
+              beyond its demonstrated operational output, whether that operational
+              foundation is improving or deteriorating, and whether the firm can
+              service its obligations from what it actually produces.
+            </p>
+
+            {/* Source paragraph */}
+            <p className="mt-4 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
+              Those measurements are computed from reported financials across the
+              U.S.-listed equity universe, then ranked and scored on a common
+              structural basis.
+            </p>
+
+            {/* Fix 1 — empirical block broken out of paragraph flow */}
+            <div className="mt-8 max-w-2xl space-y-3">
+              <div className="rounded-xl border border-[#DDE0DC] bg-white px-5 py-4">
+                <p className="text-base leading-7 text-[#1E2228]">
+                  <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
+                  sits in the elevated structural risk zone across all three axes simultaneously.
+                </p>
+                <p className="mt-1 text-base leading-7 text-[#5C6472]">
+                  {revAnchorPct} of those companies are revenue-anchored.
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#DDE0DC] bg-white px-5 py-4">
+                <p className="text-base leading-7 text-[#1E2228]">
+                  <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally
+                  sound zone</span> across all three axes.
+                </p>
+                <p className="mt-1 text-base leading-7 text-[#5C6472]">
+                  {fcfAnchorPct} of those companies are FCF-anchored.
+                </p>
+              </div>
             </div>
 
-            {/* CTA row — three links */}
-            <div className="mt-10 flex flex-wrap gap-4">
+            {/* Conclusion line — breathing room above */}
+            <p className="mt-7 max-w-2xl text-lg font-medium leading-8 text-[#0A1F3D] md:text-xl">
+              The distribution is not a ranking artifact. It is a structural separation.
+            </p>
+
+            {/* Fix 2 — CTA hierarchy: Open Platform dominant, others secondary text links */}
+            <div className="mt-10 flex flex-wrap items-center gap-5">
               <Link
                 href="/platform"
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
               >
                 Open Platform
                 <ArrowRight className="h-4 w-4" />
@@ -189,18 +203,18 @@ export default function HomePage() {
 
               <Link
                 href="/how-we-see-markets"
-                className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
               >
                 How We See Markets
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Link>
 
               <Link
                 href="/how-to-use-osmr"
-                className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
               >
                 How to Use OSMR
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
@@ -260,67 +274,88 @@ export default function HomePage() {
       </section>
 
       {/* ── Research Lens ── */}
+      {/* Fix 4 — increased padding for section separation */}
       <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
-          <div className="mb-10 max-w-2xl">
+        <div className="mx-auto max-w-7xl px-6 py-24 md:py-28">
+          <div className="mb-12 max-w-2xl">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
               Research Lens
             </p>
-            {/* Updated header — approved */}
             <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
               How structural risk is defined.
             </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                icon: <Shield className="h-5 w-5" />,
-                title: "Focus",
-                body: "The depth and credibility of the operational anchors underlying market valuations — and where narrative dependence has outpaced financial reality before that gap closes in price.",
-              },
-              {
-                icon: <Radar className="h-5 w-5" />,
-                title: "Scope",
-                body: "Cross-sectional by design. Every company in the public equity universe evaluated on the same structural basis — so narrative fragility can be ranked, segmented, and monitored over time.",
-              },
-              {
-                icon: <Workflow className="h-5 w-5" />,
-                title: "Method",
-                // Updated — approved bridge line added
-                body: "Three axes map where structural resilience and fragility are concentrated across the market. Those axes answer a single question: what sustains the valuation in the first place.",
-              },
-            ].map(({ icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5"
-              >
-                <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
-                  {icon}
-                </div>
-                <h3 className="text-2xl font-semibold text-[#0A1F3D]">{title}</h3>
-                <p className="mt-4 text-base leading-7 text-[#5C6472]">{body}</p>
+          <div className="grid gap-8 md:grid-cols-3">
+
+            {/* Focus */}
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
+                <Shield className="h-5 w-5" />
               </div>
-            ))}
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Focus</h3>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                The depth and credibility of the operational anchors underlying
+                market valuations — and where narrative dependence has outpaced
+                financial reality before that gap closes in price.
+              </p>
+            </div>
+
+            {/* Scope */}
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
+                <Radar className="h-5 w-5" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Scope</h3>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                Cross-sectional by design. Every company in the public equity
+                universe evaluated on the same structural basis — so narrative
+                fragility can be ranked, segmented, and monitored over time.
+              </p>
+            </div>
+
+            {/* Fix 3 — Method: axes as unified system block, no new conceptual label */}
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
+                <Workflow className="h-5 w-5" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Method</h3>
+              {/* Axes grouped as one model — visual unity without a new headline */}
+              <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC] bg-[#F7F8F6] divide-y divide-[#DDE0DC]">
+                {[
+                  "Operational Anchor Risk",
+                  "Operational Trajectory Risk",
+                  "Operational Financing Risk",
+                ].map((axis) => (
+                  <div key={axis} className="px-4 py-3 text-sm font-medium text-[#0A1F3D]">
+                    {axis}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                Those axes answer a single question: what sustains the valuation
+                in the first place.
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* ── Core Framework — DARK BAND ── */}
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
-        <div className="mx-auto max-w-5xl px-6 py-18 md:py-24">
+        <div className="mx-auto max-w-5xl px-6 py-24 md:py-32">
 
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
             Core Framework
           </p>
 
-          {/* Updated opening — approved, no repetition of hero premise */}
           <h2 className="tcs-heading mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white md:text-5xl">
             If narrative sustains a valuation, the question is what sustains the narrative.
           </h2>
 
-          {/* Approved body — consequence, not premise restatement */}
-          <div className="mt-8 max-w-3xl space-y-5 text-lg leading-8 text-[#A9BEDF]">
+          {/* Slightly increased line spacing for dark band legibility */}
+          <div className="mt-8 max-w-2xl space-y-6 text-lg leading-[1.9] text-[#A9BEDF]">
             <p>
               The strongest valuations rest on demonstrated cash generation — the
               gap between price and operational reality is short, and the narrative
@@ -336,7 +371,7 @@ export default function HomePage() {
           </div>
 
           {/* Framework diagram */}
-          <div className="mt-12 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-8">
+          <div className="mt-14 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-8">
             <div className="mb-6 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
               OSMR Framework
             </div>
@@ -392,7 +427,7 @@ export default function HomePage() {
           </div>
 
           {/* CTA */}
-          <div className="mt-12 flex justify-center">
+          <div className="mt-14 flex justify-center">
             <Link
               href="/the-osmr-framework"
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
@@ -406,8 +441,9 @@ export default function HomePage() {
       </section>
 
       {/* ── Platform ── */}
+      {/* Fix 4 — increased padding for section separation */}
       <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-18 md:grid-cols-[1.05fr_0.95fr] md:py-22">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-[1.05fr_0.95fr] md:py-28">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
@@ -441,7 +477,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Live features — drilldowns now included */}
+            {/* Fix 5 — platform items: title semibold, increased mt between title and desc */}
             <div className="grid gap-4">
               {[
                 {
@@ -462,8 +498,8 @@ export default function HomePage() {
                   className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5"
                 >
                   <div>
-                    <div className="text-sm font-medium text-[#0A1F3D]">{title}</div>
-                    <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
+                    <div className="text-sm font-semibold text-[#0A1F3D]">{title}</div>
+                    <div className="mt-1.5 text-sm leading-6 text-[#5C6472]">{desc}</div>
                   </div>
                   <div className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-semibold text-[#1B6B3A]">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#4CAF7D]" />
@@ -474,25 +510,15 @@ export default function HomePage() {
             </div>
 
             {/* Coming next — market structure analytics only */}
-            <div className="mt-5 border-t border-[#DDE0DC] pt-5">
+            <div className="mt-6 border-t border-[#DDE0DC] pt-6">
               <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">
                 Coming next
               </div>
-              <div className="grid gap-3">
-                {[
-                  {
-                    title: "Market structure analytics",
-                    desc: "Options and spread microstructure signals layered on structural scores.",
-                  },
-                ].map(({ title, desc }) => (
-                  <div
-                    key={title}
-                    className="rounded-2xl border border-[#EAECE8] bg-[#FAFAF8] p-4 opacity-60"
-                  >
-                    <div className="text-sm font-medium text-[#6B7280]">{title}</div>
-                    <div className="mt-0.5 text-sm text-[#9CA3AF]">{desc}</div>
-                  </div>
-                ))}
+              <div className="rounded-2xl border border-[#EAECE8] bg-[#FAFAF8] p-4 opacity-60">
+                <div className="text-sm font-semibold text-[#6B7280]">Market structure analytics</div>
+                <div className="mt-1.5 text-sm leading-6 text-[#9CA3AF]">
+                  Options and spread microstructure signals layered on structural scores.
+                </div>
               </div>
             </div>
           </div>
@@ -500,8 +526,9 @@ export default function HomePage() {
       </section>
 
       {/* ── Why This Exists ── */}
+      {/* Fix 4 — increased padding signals mode change from platform to origin */}
       <section>
-        <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
+        <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
           <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-10">
             <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <div>
@@ -509,17 +536,17 @@ export default function HomePage() {
                   Why This Exists
                 </p>
 
-                {/* Approved opening bridge line */}
-                <p className="mt-3 text-sm font-medium text-[#5C6472]">
+                {/* Fix 6 — bridge line clearly secondary: smaller, muted */}
+                <p className="mt-3 text-sm text-[#8A92A0]">
                   This system did not originate here.
                 </p>
 
-                {/* Approved headline */}
-                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+                {/* Primary headline — unmistakably dominant */}
+                <h2 className="tcs-heading mt-2 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
                   Built where rigorous analysis could not be expressed fully.
                 </h2>
 
-                {/* Approved body — full rewrite */}
+                {/* Approved body */}
                 <div className="mt-6 max-w-2xl space-y-4 text-lg leading-8 text-[#5C6472]">
                   <p>
                     The principles behind OSMR were not invented for this platform.
@@ -546,7 +573,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* CTA block — primary + secondary How to Use OSMR */}
+              {/* CTA block */}
               <div className="flex flex-wrap gap-4 md:justify-end md:self-end">
                 <Link
                   href="/why-this-exists"
@@ -564,7 +591,7 @@ export default function HomePage() {
                   <ChevronRight className="h-4 w-4" />
                 </Link>
 
-                {/* Secondary How to Use OSMR CTA — approved placement */}
+                {/* Secondary How to Use OSMR CTA */}
                 <Link
                   href="/how-to-use-osmr"
                   className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
