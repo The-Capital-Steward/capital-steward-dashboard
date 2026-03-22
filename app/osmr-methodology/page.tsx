@@ -10,7 +10,7 @@ const OAL_RUNGS = [
     code: "FCF",
     label: "OAL 1 — Free Cash Flow",
     desc: "Positive TTM FCF · Deepest credible anchor",
-    count: "~2,872 cos.",
+    count: "~2,900 cos.",
     color: "#244636",
     bg: "#E8EFE9",
     border: "#C9D8CD",
@@ -20,7 +20,7 @@ const OAL_RUNGS = [
     code: "NI",
     label: "OAL 2 — Net Income",
     desc: "Positive TTM Net Income · Profitable but not FCF-positive",
-    count: "~641 cos.",
+    count: "~622 cos.",
     color: "#2D5A8E",
     bg: "#EAF0F8",
     border: "#C5D4E8",
@@ -30,7 +30,7 @@ const OAL_RUNGS = [
     code: "EBIT",
     label: "OAL 3 — EBIT",
     desc: "Positive TTM EBIT · Covers operations before interest & tax",
-    count: "~109 cos.",
+    count: "~111 cos.",
     color: "#7A5C2E",
     bg: "#F5EFE6",
     border: "#E0CEB0",
@@ -40,7 +40,7 @@ const OAL_RUNGS = [
     code: "Rev",
     label: "OAL 4 — Revenue",
     desc: "Positive TTM Revenue · Cannot cover operating costs",
-    count: "~1,168 cos.",
+    count: "~1,163 cos.",
     color: "#8B3A2A",
     bg: "#F8EEEC",
     border: "#E8C8C0",
@@ -167,8 +167,8 @@ export default function OsmrMethodology() {
             becomes visible.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#8A92A0]">
-            <span>~4,800 companies · current universe snapshot</span>
-            <span>~300,000 historical observations</span>
+            <span>~5,200 companies · current universe snapshot</span>
+            <span>~270,000 historical observations</span>
           </div>
 
           {/* Section index */}
@@ -479,7 +479,7 @@ export default function OsmrMethodology() {
           <div className="mt-5 space-y-4 text-base leading-7 text-[#5C6472]">
             <p>
               A scoring framework without empirical grounding is a hypothesis.
-              OSMR has been validated against ~300,000 historical observations
+              OSMR has been validated against ~270,000 historical observations
               spanning multiple market cycles, testing whether structural risk
               classifications have any measurable relationship with subsequent
               return distributions.
@@ -515,11 +515,11 @@ export default function OsmrMethodology() {
             </div>
             <div className="divide-y divide-[#DDE0DC]">
               {[
-                { metric: "Mean 12-month return",   value: "+92.7%", note: "Dominated by a small number of large winners" },
-                { metric: "Median 12-month return",  value: "+12.1%", note: "Typical outcome for the majority of observations" },
-                { metric: "Mean − Median gap",       value: "80.6 pp", note: "Extreme positive skew; fat-tailed distribution" },
-                { metric: "Hit rate",                value: "61.4%",  note: "Most observations had positive 12-month returns" },
-                { metric: "Observations (N)",        value: "2,059",  note: "Statistically robust sample" },
+                { metric: "Mean 12-month return",   value: "+8.9%",  note: "Pulled upward by a subset of large positive outcomes" },
+                { metric: "Median 12-month return",  value: "−7.8%", note: "Typical outcome for the majority of observations" },
+                { metric: "Mean − Median gap",       value: "16.7 pp", note: "Positive skew; mean overstates the central tendency" },
+                { metric: "Hit rate",                value: "42.1%",  note: "Majority of observations had negative 12-month returns" },
+                { metric: "Observations (N)",        value: "3,169",  note: "Statistically robust sample" },
               ].map(({ metric, value, note }) => (
                 <div key={metric} className="grid grid-cols-[1fr_auto_2fr] items-center gap-4 px-6 py-3 text-sm">
                   <span className="text-[#5C6472]">{metric}</span>
@@ -535,12 +535,13 @@ export default function OsmrMethodology() {
               Key finding
             </p>
             <p className="text-sm leading-6 text-[#5C6472]">
-              The 80.6 percentage point mean/median gap in the highest-risk cohort
-              is a characterization of structural risk, not an identification of
-              return opportunity. Extreme positive skew reflects the lottery-ticket
-              dynamics inherent in narrative-dependent valuation — a few large
-              winners cannot be distinguished in advance from the majority of poor
-              outcomes.
+              The highest-risk cohort — High Fragility / Very High Axis 1 / Very
+              High Axis 2 — produced a median 12-month return of −7.8% across
+              3,169 observations, with only 42% of outcomes positive. The mean of
+              +8.9% is pulled upward by a subset of large positive outcomes. Using
+              mean as the headline figure here would be misleading — it would make
+              the highest-risk cohort appear marginally attractive when the typical
+              outcome was a loss.
             </p>
           </div>
 
@@ -555,12 +556,13 @@ export default function OsmrMethodology() {
               predicting, in advance, who the outliers are.
             </p>
             <p>
-              Using mean as the primary metric in a risk characterization framework
-              would be dishonest. It would present the fat-tail outliers as if they
-              were the central tendency, making the highest-risk cohort appear most
-              attractive. The framework shows mean with skew indicators when the
-              gap is material, so readers can see both the central tendency and the
-              tail.
+              In the highest-risk cohort, the mean is positive while the median is
+              negative. A framework that reported mean as its primary metric would
+              present this cohort as marginally worth holding. The median tells the
+              honest story: most investors in this cohort lost money over the
+              following twelve months. The framework shows mean with skew
+              indicators when the gap is material, so readers can see both the
+              central tendency and the tail.
             </p>
           </div>
         </section>
@@ -739,7 +741,7 @@ export default function OsmrMethodology() {
                   },
                   {
                     field: "Cohort Grid",
-                    value: "~300,000 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
+                    value: "~270,000 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
                   },
                 ].map(({ field, value }) => (
                   <tr key={field} className="bg-white even:bg-[#F7F8F6]">
