@@ -200,6 +200,581 @@ function skewSignal(cell: CohortGridCell): "right" | "left" | "none" {
   return "none";
 }
 
+// ─── KPI Delta Row ────────────────────────────────────────────────────────────
+// Shows month-over-month directional change beneath each KPI.
+// Absent (renders nothing) when previous value is null.
+//
+// DATA CONTRACT — pipeline must export prior-month KPI values into a JSON file,
+// e.g. /data/osmr_snapshot_meta.json, with this shape:
+//
+//   {
+//     "formation_date": "2026-02-01",
+//     "prior_kpis": {
+//       "very_high_count": 838,
+//       "fragile_count": 1490,
+//       "total_count": 4790,
+//       "avg_composite": 0.508
+//     }
+//   }
+//
+// Then in PlatformPage:
+//   const [snapshotMeta, setSnapshotMeta] = useState<SnapshotMeta | null>(null);
+//   fetch("/data/osmr_snapshot_meta.json").then(...).then(setSnapshotMeta)
+//
+// And pass to KPIDelta:
+//   previous={snapshotMeta?.prior_kpis.very_high_count ?? null}
+//
+// Until that file exists, all KPIDelta instances render nothing — clean degradation.
+
+type KPIDeltaProps = {
+  current: number | null;
+  previous: number | null;
+  higherIsBad: boolean;
+  isDecimal?: boolean;
+};
+
+function KPIDelta({ current, previous, higherIsBad, isDecimal = false }: KPIDeltaProps) {
+  if (current == null || previous == null) return null;
+
+  const delta = current - previous;
+  if (delta === 0) {
+    return (
+      <div className="mt-1.5 text-[11px] text-[#7E8A96]">
+        Unchanged from last month
+      </div>
+    );
+  }
+
+  const isIncrease = delta > 0;
+  // For stress metrics: increase = bad (red), decrease = good (green)
+  const isAdverse = higherIsBad ? isIncrease : !isIncrease;
+  const color = isAdverse ? "#BC6464" : "#6DAE8B";
+  const arrow = isIncrease ? "↑" : "↓";
+
+  const formattedDelta = isDecimal
+    ? `${Math.abs(delta * 100).toFixed(1)}pp`
+    : formatNum(Math.abs(Math.round(delta)));
+
+  return (
+    <div className="mt-1.5 text-[11px]" style={{ color }}>
+      {arrow} {formattedDelta} from last month
+    </div>
+  );
+}
+
+// ─── Temporal Anchor Bar ──────────────────────────────────────────────────────
+// Derives formation date and next recalibration date from the history manifest.
+// Computes days remaining to next monthly recalibration client-side.
+// Static text only — no animation. Brightness shifts at ≤7 days remaining.
+
+type TemporalAnchorBarProps = {
+  historyManifest: HistoryManifestRow[];
+  loading: boolean;
+};
+
+function computeTemporalState(historyManifest: HistoryManifestRow[]): {
+  formationLabel: string;
+  nextRefreshLabel: string;
+  daysRemaining: number | null;
+} {
+  if (historyManifest.length === 0) {
+    return { formationLabel: "—", nextRefreshLabel: "—", daysRemaining: null };
+  }
+
+  // Most recent month in the manifest
+  const sorted = [...historyManifest].sort((a, b) => b.month.localeCompare(a.month));
+  const latest = sorted[0].month; // "YYYY-MM"
+
+  const [year, month] = latest.split("-").map(Number);
+  const formationDate = new Date(year, month - 1, 1);
+  const nextRefresh = new Date(year, month, 1); // 1st of following month
+
+  const now = new Date();
+  const msRemaining = nextRefresh.getTime() - now.getTime();
+  const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+
+  const formationLabel = formationDate.toLocaleDateString("en-US", {
+    month: "short", year: "numeric",
+  });
+  const nextRefreshLabel = nextRefresh.toLocaleDateString("en-US", {
+    month: "short", year: "numeric",
+  });
+
+  return { formationLabel, nextRefreshLabel, daysRemaining };
+}
+
+function TemporalAnchorBar({ historyManifest, loading }: TemporalAnchorBarProps) {
+  const { formationLabel, nextRefreshLabel, daysRemaining } = useMemo(
+    () => computeTemporalState(historyManifest),
+    [historyManifest]
+  );
+
+  // Approaching refresh: shift text brightness at ≤7 days — presence cue, not alarm
+  const approachingRefresh = daysRemaining != null && daysRemaining <= 7;
+  const textColor = approachingRefresh ? "#B8C3CC" : "#7E8A96";
+
+  const daysLabel =
+    daysRemaining == null ? "—" :
+    daysRemaining === 0 ? "Recalibrating today" :
+    daysRemaining === 1 ? "1 day remaining" :
+    `${daysRemaining} days remaining`;
+
+  if (loading) return null;
+
+  return (
+    <div
+      className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-1 rounded-xl border border-[#203754] bg-[#0D2138] px-5 py-2.5 text-[11px]"
+      style={{ color: textColor }}
+    >
+      <span>
+        <span className="text-[#7E8A96]">Current structural snapshot anchored to  </span>
+        <span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>
+          {formationLabel}
+        </span>
+      </span>
+      <span className="text-[#203754]">·</span>
+      <span>
+        <span className="text-[#7E8A96]">Next scheduled recalibration  </span>
+        <span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>
+          {nextRefreshLabel}
+        </span>
+      </span>
+      <span className="text-[#203754]">·</span>
+      <span style={{ color: approachingRefresh ? "#6DAE8B" : textColor }}>
+        {daysLabel}
+      </span>
+    </div>
+  );
+}
+
+// ─── Company Drilldown ────────────────────────────────────────────────────────
+
+type DrilldownProps = {
+  company: SnapshotRow;
+  allData: SnapshotRow[];
+  cohortGrid: HistoricalCohortGridPayload | null;
+  onClose: () => void;
+};
+
+// Map axis3_pct to the financing fragility panel label used in cohort grid.
+// Accepts the actual panel list from metadata when available — derives order from it
+// rather than assuming label strings. Falls back to hardcoded labels if not provided.
+function axis3Panel(axis3_pct: number | null, panels?: string[]): string {
+  const v = axis3_pct ?? 0.5;
+
+  // If we have the actual panel list, use positional thirds regardless of label strings
+  if (panels && panels.length === 3) {
+    if (v < 0.4) return panels[0];   // lowest fragility panel
+    if (v < 0.7) return panels[1];   // middle panel
+    return panels[2];                 // highest fragility panel
+  }
+
+  // Fallback: hardcoded labels matching expected pipeline output
+  if (v < 0.4) return "Low Fragility";
+  if (v < 0.7) return "Moderate Fragility";
+  return "High Fragility";
+}
+
+// Map a percentile score to a bucket label
+function pctToBucket(pct: number | null): string {
+  if (pct == null) return "—";
+  if (pct < 0.2) return "Very Low";
+  if (pct < 0.4) return "Low";
+  if (pct < 0.6) return "Moderate";
+  if (pct < 0.8) return "High";
+  return "Very High";
+}
+
+// Find the cohort cell matching this company's structural position
+function findCohortCell(
+  company: SnapshotRow,
+  cohortGrid: HistoricalCohortGridPayload | null
+): CohortGridCell | null {
+  if (!cohortGrid) return null;
+  // Pass actual panel strings from metadata so axis3Panel uses live labels
+  const panels = cohortGrid.metadata.panels;
+  const panel = axis3Panel(company.axis3_pct, panels);
+  const axis1Bucket = pctToBucket(company.axis1_pct);
+  const axis2Bucket = pctToBucket(company.axis2_pct);
+
+  const matchedPanel = cohortGrid.panels.find(p => p.panel === panel);
+  if (!matchedPanel) return null;
+
+  const matchedRow = matchedPanel.rows.find(r => r.axis2_bucket === axis2Bucket);
+  if (!matchedRow) return null;
+
+  return matchedRow.cells.find(c => c.axis1_bucket === axis1Bucket) ?? null;
+}
+
+// Generate deterministic structural narrative from axis scores
+function narrateCompany(company: SnapshotRow): {
+  headerRead: string;
+  trajectoryProfile: string;
+  takeaway: string;
+} {
+  const a1 = company.axis1_pct ?? 0.5;
+  const a2 = company.axis2_pct ?? 0.5;
+  const a3 = company.axis3_pct ?? 0.5;
+  const bucket = company.composite_bucket ?? "Moderate";
+
+  // Axis 1 driver description
+  const anchorRead =
+    a1 >= 0.8 ? "severely elevated valuation relative to its operational anchor" :
+    a1 >= 0.6 ? "elevated valuation relative to its operational anchor" :
+    a1 >= 0.4 ? "moderate valuation stretch relative to its operational anchor" :
+    "valuation that is well-supported by its operational anchor";
+
+  // Axis 2 driver description
+  const trajectoryRead =
+    a2 >= 0.8 ? "rapidly deteriorating operational trajectory" :
+    a2 >= 0.6 ? "deteriorating operational trajectory" :
+    a2 >= 0.4 ? "mixed operational trajectory" :
+    "improving operational trajectory";
+
+  // Axis 3 driver description
+  const financingRead =
+    a3 >= 0.8 ? "acute financing strain" :
+    a3 >= 0.6 ? "meaningful financing pressure" :
+    a3 >= 0.4 ? "moderate financing exposure" :
+    "limited financing pressure";
+
+  // Primary driver for header read
+  const drivers: string[] = [];
+  if (a1 >= 0.6) drivers.push("valuation stretch");
+  if (a2 >= 0.6) drivers.push("deteriorating trajectory");
+  if (a3 >= 0.6) drivers.push("financing strain");
+
+  const driverStr = drivers.length > 0
+    ? `driven by ${drivers.join(" and ")}`
+    : "with limited single-axis dominance";
+
+  const headerRead = `${bucket} structural risk ${driverStr}.`;
+
+  // Trajectory profile
+  const trajectoryProfile =
+    a2 >= 0.8 && a1 >= 0.8
+      ? "Trajectory is deteriorating while valuation is already highly stretched — an escalation profile. The narrative bridge is lengthening as the operational anchor weakens."
+      : a2 >= 0.6 && a1 >= 0.6
+      ? "Trajectory is deteriorating within an elevated risk profile. Structural pressure is accumulating on both the valuation and operational dimensions."
+      : a2 >= 0.6
+      ? "Trajectory is deteriorating. The operational anchor is weakening on a trailing basis, increasing the narrative dependence of the current valuation."
+      : a2 < 0.4
+      ? "Trajectory is improving. The operational anchor is strengthening on a trailing basis, which shortens the narrative bridge over time."
+      : "Trajectory is mixed. No dominant directional bias is present on the operational anchor.";
+
+  // Takeaway
+  const takeaway =
+    bucket === "Very High"
+      ? `This is a high structural risk profile. Valuation depends on ${anchorRead}, the company shows ${trajectoryRead}, and carries ${financingRead}. Historical outcomes for similar structural profiles are unfavorable at the median.`
+      : bucket === "High"
+      ? `This is an elevated structural risk profile characterized by ${anchorRead} and ${trajectoryRead}. The combination warrants scrutiny before any capital commitment.`
+      : bucket === "Moderate"
+      ? `This profile shows ${anchorRead} with ${trajectoryRead}. Structural risk is present but not dominant. Company-level context matters here.`
+      : `This profile shows ${anchorRead} with ${trajectoryRead}. Structural conditions are currently favorable relative to the broader universe.`;
+
+  return { headerRead, trajectoryProfile, takeaway };
+}
+
+function CompanyDrilldown({ company, allData, cohortGrid, onClose }: DrilldownProps) {
+  const narrative = narrateCompany(company);
+  const cohortCell = findCohortCell(company, cohortGrid);
+  const axis1Bucket = pctToBucket(company.axis1_pct);
+  const axis2Bucket = pctToBucket(company.axis2_pct);
+  const axis3Bucket = pctToBucket(company.axis3_pct);
+  // Use live panel strings from metadata — same source as findCohortCell
+  const panel = axis3Panel(company.axis3_pct, cohortGrid?.metadata.panels);
+
+  // Position in active universe
+  const scorable = allData.filter(r => r.composite_score != null);
+  const rank = scorable.filter(r => (r.composite_score ?? 0) > (company.composite_score ?? 0)).length + 1;
+  const topRiskPct = scorable.length > 0 ? Math.round((rank / scorable.length) * 100) : null;
+
+  // Axis interpretation text
+  const anchorInterp =
+    (company.axis1_pct ?? 0) >= 0.8 ? "Valuation is severely elevated relative to demonstrated operating output. The narrative bridge is very long." :
+    (company.axis1_pct ?? 0) >= 0.6 ? "Valuation is elevated relative to demonstrated operating output." :
+    (company.axis1_pct ?? 0) >= 0.4 ? "Valuation stretch is moderate. Operational support is partial." :
+    "Valuation is well-supported by demonstrated operational output.";
+
+  const trajectoryInterp =
+    (company.axis2_pct ?? 0) >= 0.8 ? "Operational anchor is weakening rapidly on a trailing basis." :
+    (company.axis2_pct ?? 0) >= 0.6 ? "Operational anchor is deteriorating on a trailing basis." :
+    (company.axis2_pct ?? 0) >= 0.4 ? "Operational trajectory is mixed — no clear directional signal." :
+    "Operational anchor is strengthening on a trailing basis.";
+
+  const financingInterp =
+    (company.axis3_pct ?? 0) >= 0.8 ? "Balance sheet flexibility is severely constrained. Structural narrative depends on continued financing access." :
+    (company.axis3_pct ?? 0) >= 0.6 ? "Financing pressure is meaningful. Obligation coverage leaves limited margin." :
+    (company.axis3_pct ?? 0) >= 0.4 ? "Financing exposure is moderate." :
+    "Balance sheet flexibility is sufficient. Financing risk is not a primary structural concern.";
+
+  const axis2Direction = (company.axis2_pct ?? 0.5) > 0.5 ? "deteriorating" : "improving";
+  const axis2DirectionColor = axis2Direction === "deteriorating" ? COLORS.negativeSoft : COLORS.positiveSoft;
+
+  return (
+    // Overlay
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-end"
+      style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+      onClick={onClose}
+    >
+      {/* Panel — restrained entrance: short slide from right, opacity, no bounce */}
+      <motion.div
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="relative h-full w-full max-w-xl overflow-y-auto"
+        style={{ background: "#071629", borderLeft: "1px solid #203754" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 rounded-full border border-[#203754] bg-[#0D2138] p-1.5 text-[#7E8A96] transition hover:text-white"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        <div className="px-7 py-8 space-y-6">
+
+          {/* Layer transition — orients user within system hierarchy */}
+          <p className="text-[11px] text-[#7E8A96] leading-[1.6]">
+            This is the individual structural profile behind the market positioning you observed.
+          </p>
+
+          {/* ── Section 1: Header ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-2">
+              Structural Profile
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-semibold text-white">{company.symbol}</h2>
+                <p className="mt-1 text-sm text-[#7E8A96]">{company.oal_label ?? "—"}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <div
+                  className="text-lg font-semibold"
+                  style={{ color: compositeColor(company.composite_bucket) }}
+                >
+                  {company.composite_bucket}
+                </div>
+                <div className="text-xs text-[#7E8A96]">
+                  {company.composite_score != null ? company.composite_score.toFixed(3) : "—"}
+                </div>
+              </div>
+            </div>
+            {/* One-line structural read */}
+            <div className="mt-4 rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-3">
+              <p className="text-[13px] leading-[1.7] text-[#B8C3CC]">{narrative.headerRead}</p>
+            </div>
+          </div>
+
+          <div className="border-t border-[#203754]" />
+
+          {/* ── Section 2: Three-Axis Breakdown ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">
+              Axis Breakdown
+            </div>
+            <div className="space-y-3">
+
+              {/* Anchor Risk */}
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Operational Anchor Risk</span>
+                  <span
+                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    style={{ color: compositeColor(axis1Bucket), backgroundColor: `${compositeColor(axis1Bucket)}20` }}
+                  >
+                    {axis1Bucket}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-1.5 flex-1 rounded-full bg-[#203754] overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${((company.axis1_pct ?? 0) * 100).toFixed(0)}%`, backgroundColor: compositeColor(axis1Bucket) }}
+                    />
+                  </div>
+                  <span className="text-xs text-[#7E8A96] shrink-0">
+                    {company.axis1_pct != null ? `${(company.axis1_pct * 100).toFixed(0)}th pct` : "—"}
+                  </span>
+                </div>
+                <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">{anchorInterp}</p>
+              </div>
+
+              {/* Trajectory Risk */}
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Operational Trajectory Risk</span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: axis2DirectionColor }}
+                  >
+                    {axis2Direction}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-1.5 flex-1 rounded-full bg-[#203754] overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${((company.axis2_pct ?? 0) * 100).toFixed(0)}%`, backgroundColor: compositeColor(axis2Bucket) }}
+                    />
+                  </div>
+                  <span className="text-xs text-[#7E8A96] shrink-0">
+                    {company.axis2_pct != null ? `${(company.axis2_pct * 100).toFixed(0)}th pct` : "—"}
+                  </span>
+                </div>
+                <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">{trajectoryInterp}</p>
+              </div>
+
+              {/* Financing Risk */}
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Operational Financing Risk</span>
+                  <span
+                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    style={{ color: compositeColor(axis3Bucket), backgroundColor: `${compositeColor(axis3Bucket)}20` }}
+                  >
+                    {axis3Bucket}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-1.5 flex-1 rounded-full bg-[#203754] overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${((company.axis3_pct ?? 0) * 100).toFixed(0)}%`, backgroundColor: compositeColor(axis3Bucket) }}
+                    />
+                  </div>
+                  <span className="text-xs text-[#7E8A96] shrink-0">
+                    {company.axis3_pct != null ? `${(company.axis3_pct * 100).toFixed(0)}th pct` : "—"}
+                  </span>
+                </div>
+                <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">{financingInterp}</p>
+              </div>
+
+            </div>
+          </div>
+
+          <div className="border-t border-[#203754]" />
+
+          {/* ── Section 3: Position in Market ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">
+              Position in Market
+            </div>
+            <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+              {topRiskPct != null ? (
+                <p className="text-[13px] leading-[1.7] text-[#B8C3CC]">
+                  This company ranks in the top{" "}
+                  <span className="font-semibold text-white">{topRiskPct}%</span>{" "}
+                  of structural risk in the active universe ({formatNum(scorable.length)} companies scored under active filters).
+                </p>
+              ) : (
+                <p className="text-[13px] text-[#7E8A96]">Position data unavailable.</p>
+              )}
+              {company.risk_bucket_within_oal && (
+                <p className="mt-2 text-[12px] text-[#7E8A96]">
+                  Within {company.oal_label}: <span className="text-[#B8C3CC]">{company.risk_bucket_within_oal}</span> valuation bucket.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-[#203754]" />
+
+          {/* ── Section 4: Cohort Context ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">
+              Historical Cohort Context
+            </div>
+            {cohortCell && !cohortCell.suppressed ? (
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <p className="mb-4 text-[12px] text-[#7E8A96]">
+                  Matched to cohort: <span className="text-[#B8C3CC]">{panel}</span> ·{" "}
+                  Anchor Risk <span className="text-[#B8C3CC]">{axis1Bucket}</span> ·{" "}
+                  Trajectory Risk <span className="text-[#B8C3CC]">{axis2Bucket}</span>
+                </p>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {[
+                    { label: "Median Return", value: formatPctSigned(cohortCell.median_return) },
+                    { label: "Hit Rate", value: formatPct(cohortCell.hit_rate) },
+                    { label: "Observations", value: formatNum(cohortCell.count) },
+                  ].map(stat => (
+                    <div key={stat.label} className="rounded-lg border border-[#203754] bg-[#071629] px-3 py-3 text-center">
+                      <div className="text-[17px] font-semibold text-white">{stat.value}</div>
+                      <div className="mt-0.5 text-[9px] uppercase tracking-wide text-[#7E8A96]">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">
+                  Companies in similar structural states have historically produced{" "}
+                  <span className="font-semibold text-white">{formatPctSigned(cohortCell.median_return)}</span>{" "}
+                  median returns over {cohortGrid?.metadata.horizon_months ?? 12} months, with a{" "}
+                  <span className="font-semibold text-white">{formatPct(cohortCell.hit_rate)}</span>{" "}
+                  hit rate ({formatNum(cohortCell.count)} observations).
+                  {skewSignal(cohortCell) === "right" && (
+                    <> Mean is materially higher ({formatPctSigned(cohortCell.mean_return)}) — distribution is right-skewed by a small number of large winners.</>
+                  )}
+                  {skewSignal(cohortCell) === "left" && (
+                    <> Mean is materially lower ({formatPctSigned(cohortCell.mean_return)}) — distribution is left-skewed by outsized losses in a subset of cases.</>
+                  )}
+                </p>
+              </div>
+            ) : cohortCell?.suppressed ? (
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <p className="text-[12px] text-[#7E8A96]">
+                  Cohort cell suppressed — insufficient observations for this structural profile.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+                <p className="text-[12px] text-[#7E8A96]">
+                  No cohort match found for this structural profile.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-[#203754]" />
+
+          {/* ── Section 5: Trajectory Context ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">
+              Trajectory Context
+            </div>
+            <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
+              <p className="text-[13px] leading-[1.7] text-[#B8C3CC]">{narrative.trajectoryProfile}</p>
+            </div>
+          </div>
+
+          <div className="border-t border-[#203754]" />
+
+          {/* ── Section 6: Structural Takeaway ── */}
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6DAE8B] mb-3">
+              Structural Takeaway
+            </div>
+            <div
+              className="rounded-xl px-5 py-5"
+              style={{ background: "#0A1F3D", border: "1px solid #2E4D6A" }}
+            >
+              <p className="text-[13px] leading-[1.8] text-[#B8C3CC]">{narrative.takeaway}</p>
+            </div>
+          </div>
+
+          {/* Bottom padding */}
+          <div className="h-6" />
+
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Interpretive Layer ───────────────────────────────────────────────────────
 
 type InterpretiveLayerProps = {
@@ -468,8 +1043,13 @@ function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
       </CardHeader>
       <CardContent className="grid gap-4 pt-2 md:grid-cols-3">
 
-        {/* Distribution */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
+        {/* Distribution — staggered mount: panel 1 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0, ease: "easeOut" }}
+          className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4"
+        >
           <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">Distribution</div>
           <div className="mb-2 text-sm font-semibold leading-snug" style={{ color: toneColor[distribution.tone] }}>
             {distribution.tone === "elevated"
@@ -486,10 +1066,15 @@ function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
               {distribution.consequence}
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Concentration */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
+        {/* Concentration — staggered mount: panel 2 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.08, ease: "easeOut" }}
+          className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4"
+        >
           <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">Concentration</div>
           <div className="mb-2 text-sm font-semibold leading-snug text-[#EAF0F2]">
             {concentration.clusterType === "compound"
@@ -506,10 +1091,15 @@ function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
               {concentration.consequence}
             </div>
           )}
-        </div>
+        </motion.div>
 
-        {/* Trajectory */}
-        <div className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
+        {/* Trajectory — staggered mount: panel 3 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.16, ease: "easeOut" }}
+          className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4"
+        >
           <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">Trajectory</div>
           <div className="mb-2 text-sm font-semibold leading-snug" style={{ color: directionColor[trajectory.direction] }}>
             {trajectory.direction === "deteriorating"
@@ -524,7 +1114,7 @@ function InterpretiveLayer({ data, loading }: InterpretiveLayerProps) {
               {trajectory.consequence}
             </div>
           )}
-        </div>
+        </motion.div>
 
       </CardContent>
     </Card>
@@ -545,6 +1135,7 @@ export default function PlatformPage() {
   const [selectedBucket, setSelectedBucket] = useState("All");
   const [search, setSearch] = useState("");
   const [cohortMetric, setCohortMetric] = useState<CohortMetric>("median_return");
+  const [selectedCompany, setSelectedCompany] = useState<SnapshotRow | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -622,6 +1213,15 @@ export default function PlatformPage() {
 
   return (
     <div className="min-h-screen bg-[#0A1F3D] text-[#EAF0F2]">
+      {/* Company Drilldown — renders as overlay when a company is selected */}
+      {selectedCompany && (
+        <CompanyDrilldown
+          company={selectedCompany}
+          allData={filtered}
+          cohortGrid={cohortGrid}
+          onClose={() => setSelectedCompany(null)}
+        />
+      )}
       <div className="mx-auto max-w-7xl px-6 py-10">
 
         {/* ── Hero ── */}
@@ -672,6 +1272,9 @@ export default function PlatformPage() {
             The market map shows current positioning. The snapshot shows individual companies. The cohort grids show how similar structural states have historically performed.
           </p>
         </motion.div>
+
+        {/* ── Temporal Anchor Bar ── */}
+        <TemporalAnchorBar historyManifest={historyManifest} loading={loading} />
 
         {/* ── Start Here ── */}
         <Card
@@ -778,7 +1381,6 @@ export default function PlatformPage() {
         </Card>
 
         {/* ── KPI Strip ── */}
-        {/* Labels tightened: more precise, less dashboard-y */}
         <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}>
             <CardHeader className="pb-2">
@@ -789,6 +1391,9 @@ export default function PlatformPage() {
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
               Companies in the Very High composite bucket under active filters.
+              {/* Delta row — shown when prior-month export is available */}
+              {/* Replace null below with prior-month veryHigh value when pipeline exports it */}
+              <KPIDelta current={stats.veryHigh} previous={null} higherIsBad={true} />
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -800,6 +1405,7 @@ export default function PlatformPage() {
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
               Companies with Axis 3 at or above the 80th percentile — high obligation strain.
+              <KPIDelta current={stats.fragile} previous={null} higherIsBad={true} />
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -811,6 +1417,7 @@ export default function PlatformPage() {
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
               Companies currently scored under active filters.
+              <KPIDelta current={stats.total} previous={null} higherIsBad={false} />
             </CardContent>
           </Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -822,6 +1429,7 @@ export default function PlatformPage() {
             </CardHeader>
             <CardContent className="text-sm text-[#7E8A96]">
               Mean composite structural risk score across the filtered universe.
+              <KPIDelta current={stats.avgComposite} previous={null} higherIsBad={true} isDecimal={true} />
             </CardContent>
           </Card>
         </div>
@@ -969,13 +1577,22 @@ export default function PlatformPage() {
                                     <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
                                   </div>
                                   <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
-                                    Company detail opens from this view.
+                                    Click to open company detail.
                                   </div>
                                 </div>
                               );
                             }}
                           />
-                          <Scatter data={scatterData}>
+                          <Scatter
+                            data={scatterData}
+                            onClick={(data) => {
+                              if (data && data.symbol) {
+                                const row = filtered.find(r => r.symbol === data.symbol)
+                                  ?? snapshotData.find(r => r.symbol === data.symbol);
+                                if (row) setSelectedCompany(row);
+                              }
+                            }}
+                          >
                             {scatterData.map((entry, idx) => {
                               const sizeMap: Record<string, number> = {
                                 "Very Low": 2, "Low": 3, "Moderate": 5, "High": 7, "Very High": 8,
@@ -1015,7 +1632,7 @@ export default function PlatformPage() {
               <CardContent>
                 {/* Causal framing with action directive */}
                 <p className="mb-3 text-sm text-[#B8C3CC]">
-                  These companies are currently driving the highest structural risk in the filtered universe. Use them as the first candidates for drilldown and comparison.
+                  These companies are currently driving the highest structural risk in the filtered universe. Use them as the first candidates for company detail and comparison.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {topRisk.map(row => {
@@ -1023,7 +1640,7 @@ export default function PlatformPage() {
                     return (
                       <div
                         key={row.symbol}
-                        // cursor-pointer signals interactivity; drilldown wired in Phase 2
+                        onClick={() => setSelectedCompany(row)}
                         className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 hover:opacity-90 hover:scale-[1.02] hover:shadow-md"
                         style={{
                           background: isVeryHigh ? "rgba(139,56,56,0.15)" : "#0D2138",
@@ -1040,7 +1657,7 @@ export default function PlatformPage() {
                   })}
                 </div>
                 <p className="mt-3 text-[11px] text-[#7E8A96]">
-                  Hover for OAL and bucket detail.
+                  Hover for OAL and bucket detail. Click any company to open company detail.
                 </p>
               </CardContent>
             </Card>
@@ -1056,7 +1673,17 @@ export default function PlatformPage() {
                   </Badge>
                 )}
               </div>
-              {/* Two-line entry guidance — how to read and where to start */}
+              {/* Observation timestamp — empirical authority visible on the surface */}
+              {cohortGrid?.metadata && (
+                <p className="text-[11px] text-[#7E8A96]">
+                  {formatNum(cohortGrid.metadata.observation_count)} observations
+                  {cohortGrid.metadata.formation_month_min && cohortGrid.metadata.formation_month_max && (
+                    <> · Formation window: {cohortGrid.metadata.formation_month_min} – {cohortGrid.metadata.formation_month_max}</>
+                  )}
+                  {" "}· Updated monthly
+                </p>
+              )}
+              {/* Two-line entry guidance */}
               <div className="max-w-3xl space-y-1">
                 <p className="text-sm leading-6 text-[#B8C3CC]">
                   This shows how companies in similar structural states have historically performed over the forward period.
@@ -1065,6 +1692,10 @@ export default function PlatformPage() {
                   Start by scanning the bottom-right of each panel — where anchor risk and trajectory risk are both highest.
                 </p>
               </div>
+              {/* Epistemic constraint — what this data does not establish */}
+              <p className="text-[11px] text-[#7E8A96]">
+                Historical cohort outcomes describe distributional tendencies across structural profiles. They do not establish causation, predict individual company returns, or account for conditions outside the formation window.
+              </p>
             </div>
 
             {/* Cohort legend */}
@@ -1257,7 +1888,7 @@ export default function PlatformPage() {
                   </p>
                 </div>
                 <p className="mb-3 text-[11px] text-[#7E8A96]">
-                  "Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Company detail is accessed from this table.
+                  "Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Click any row to open company detail.
                 </p>
                 <div className="overflow-hidden rounded-2xl border border-[#203754]">
                   <Table>
@@ -1276,7 +1907,7 @@ export default function PlatformPage() {
                       {filtered.map(row => (
                         <TableRow
                           key={row.symbol}
-                          // cursor-pointer and hover state signal future interactivity
+                          onClick={() => setSelectedCompany(row)}
                           className="cursor-pointer border-[#203754] hover:bg-[#0D2138]/70"
                         >
                           <TableCell className="font-medium text-white">{row.symbol}</TableCell>
