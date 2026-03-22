@@ -31,51 +31,42 @@ export default function RootLayout({
       <body>
         <header className="sticky top-0 z-50 border-b border-[#DDE0DC] bg-[#F1F3F0]/90 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
+            {/* Logo — navigates to / on other pages, smooth-scrolls to top on homepage */}
             <Link
-  href="/"
-  className="flex items-center gap-4"
-  onClick={(e) => {
-    if (window.location.pathname === "/") {
-      e.preventDefault();
-
-      const el = document.getElementById("home-top");
-      if (!el) return;
-
-      const navOffset = 88;
-
-      const y =
-        el.getBoundingClientRect().top +
-        window.scrollY -
-        navOffset;
-
-      window.scrollTo({
-        top: Math.max(0, y),
-        behavior: "smooth",
-      });
-    }
-  }}
->
-  <div className="relative h-12 w-12 overflow-hidden rounded-xl">
-    <Image
-      src="/tcs-logo.png"
-      alt="The Capital Steward"
-      fill
-      className="object-contain"
-      priority
-    />
-  </div>
-
-  <div className="tcs-heading text-2xl font-semibold tracking-tight text-[#0A1F3D] md:text-3xl">
-    The Capital Steward
-  </div>
-</Link>
+              href="/"
+              className="flex items-center gap-4"
+              onClick={(e) => {
+                if (window.location.pathname === "/") {
+                  e.preventDefault();
+                  const el = document.getElementById("home-top");
+                  if (!el) return;
+                  const navOffset = 88;
+                  const y = el.getBoundingClientRect().top + window.scrollY - navOffset;
+                  window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+                }
+              }}
+            >
+              <div className="relative h-12 w-12 overflow-hidden rounded-xl">
+                <Image
+                  src="/tcs-logo.png"
+                  alt="The Capital Steward"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="tcs-heading text-2xl font-semibold tracking-tight text-[#0A1F3D] md:text-3xl">
+                The Capital Steward
+              </div>
+            </Link>
 
             <nav className="hidden items-center gap-5 text-sm font-medium text-[#5C6472] md:flex">
               <Link href="/why-this-exists" className="transition hover:text-[#0A1F3D]">
                 Why This Exists
               </Link>
-              <Link href="/how-we-see-markets" className="transition hover:text-[#0A1F3D]">
-                How We See Markets
+              <Link href="/osmr-methodology" className="transition hover:text-[#0A1F3D]">
+                Methodology
               </Link>
               <Link
                 href="/platform"
@@ -85,6 +76,7 @@ export default function RootLayout({
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </nav>
+
           </div>
         </header>
 

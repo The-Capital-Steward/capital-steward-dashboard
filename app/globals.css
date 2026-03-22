@@ -289,9 +289,6 @@ html {
    HOMEPAGE SCROLL + SECTION CONTAINMENT (FINAL)
    ============================================================ */
 
-html {
-  scroll-behavior: smooth;
-}
 
 @media (min-width: 768px) {
   body {
