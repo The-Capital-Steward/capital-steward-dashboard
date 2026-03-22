@@ -434,26 +434,27 @@ export default function HomePage() {
 
           <div className="mt-6 max-w-2xl space-y-4 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
             <p>
-              The principles behind OSMR were not invented for this platform.
-              They were developed over a decade of evaluating real capital
-              decisions inside a financial publishing environment — and then
-              constrained by it.
+              Rigorous structural analysis requires one thing: that conclusions
+              follow the evidence, not the incentive structure of the organization
+              publishing them.
             </p>
             <p>
-              That environment has an editorial logic. Research exists to
-              support a product. Analytical frameworks exist to generate
-              recommendations. The more rigorous the framework, the harder it
-              is to compress into that structure without distorting what it
-              actually measures.
+              Most financial publishing does not meet that requirement. Research
+              exists to support a product. The more rigorous the analysis, the
+              harder it becomes to compress into a format optimized for
+              subscriptions rather than truth.
             </p>
             <p>
-              The Capital Steward exists because that distortion has a cost —
-              and because the framework required a context where that cost did
-              not have to be paid.
+              The work behind this platform was developed inside that environment
+              — and tested against real capital decisions throughout. A framework
+              that measures how much narrative a company requires to justify its
+              valuation cannot be published honestly by an organization whose
+              business model depends on narrative.
             </p>
             <p>
-              What's here is not a rebrand or a retrofit. It is the same
-              framework, expressed without compression.
+              The Capital Steward exists because that structural incompatibility
+              left no other option. What's here is the same framework, expressed
+              without distortion.
             </p>
           </div>
 
