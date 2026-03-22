@@ -1166,10 +1166,8 @@ export default function PlatformPage() {
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
-  // Non-passive wheel listener on the map chart div — prevents page scroll
-  // while the user is scrolling through cube depth panels.
-  // Must be attached imperatively; React's onWheel is passive by default
-  // and cannot call preventDefault() to suppress page scroll.
+  // Non-passive wheel listener on the map chart div — prevents page scroll.
+  // Depends on `loading` so it attaches after the chart renders and the ref is populated.
   useEffect(() => {
     const el = mapChartRef.current;
     if (!el) return;
@@ -1184,7 +1182,7 @@ export default function PlatformPage() {
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
-  }, []);
+  }, [loading]);
 
   const filtered = useMemo(() => {
     return snapshotData.filter(row => {
@@ -1645,17 +1643,20 @@ export default function PlatformPage() {
                                 const { cx, cy, payload } = props;
                                 if (cx == null || cy == null) return null;
                                 const dist = Math.abs(payload.axis3_decile - mapDecile);
-                                const r    = dist === 0 ? 5 : dist === 1 ? 3 : 1;
-                                const opacity = dist === 0 ? 0.92 : dist === 1 ? 0.45 : 0.12;
-                                const clickable = dist <= 1;
+                                const targetR       = dist === 0 ? 5 : dist === 1 ? 3 : 1;
+                                const targetOpacity = dist === 0 ? 0.92 : dist === 1 ? 0.45 : 0.12;
+                                const clickable     = dist <= 1;
                                 return (
-                                  <circle
+                                  <motion.circle
                                     cx={cx}
                                     cy={cy}
-                                    r={r}
                                     fill={compositeColor(payload.composite_bucket)}
-                                    opacity={opacity}
-                                    style={{ cursor: clickable ? "pointer" : "default", pointerEvents: clickable ? "auto" : "none" }}
+                                    animate={{ r: targetR, opacity: targetOpacity }}
+                                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                                    style={{
+                                      cursor: clickable ? "pointer" : "default",
+                                      pointerEvents: clickable ? "auto" : "none",
+                                    }}
                                   />
                                 );
                               }}
