@@ -1141,8 +1141,10 @@ export default function PlatformPage() {
   const [search, setSearch] = useState("");
   const [cohortMetric, setCohortMetric] = useState<CohortMetric>("median_return");
   const [selectedCompany, setSelectedCompany] = useState<SnapshotRow | null>(null);
-  const [selectedAxis3, setSelectedAxis3] = useState("Moderate");
+  const [selectedAxis3, setSelectedAxis3] = useState("Very High");
   const axis3Direction = React.useRef<"forward" | "back">("forward");
+  const [mapDecile, setMapDecile] = useState(1);
+  const mapScrollLocked = React.useRef(false);
 
   useEffect(() => {
     Promise.all([
@@ -1191,27 +1193,21 @@ export default function PlatformPage() {
 
   const scatterData = useMemo(() => {
     const scorable = filtered.filter(row => row.axis1_pct != null && row.axis2_pct != null);
-    const scores = scorable.map(r => r.composite_score ?? 0).sort((a, b) => b - a);
-    const threshold = scores[Math.floor(scores.length * 0.2)] ?? 0;
 
     return scorable.map(row => {
       const a3 = row.axis3_pct ?? 0.5;
-      let axis3_bucket: string;
-      if (a3 < 0.2)      axis3_bucket = "Very Low";
-      else if (a3 < 0.4) axis3_bucket = "Low";
-      else if (a3 < 0.6) axis3_bucket = "Moderate";
-      else if (a3 < 0.8) axis3_bucket = "High";
-      else               axis3_bucket = "Very High";
+      // Decile 1 = highest Axis III risk (0.9–1.0), decile 10 = lowest (0.0–0.1)
+      const axis3_decile = Math.min(10, Math.max(1, 10 - Math.floor(a3 * 10)));
 
       return {
-        x: row.axis1_pct as number,
-        y: row.axis2_pct as number,
-        axis3_bucket,
+        x: row.axis2_pct as number,   // Trajectory Risk — horizontal (time-based)
+        y: row.axis1_pct as number,   // Anchor Risk — vertical (valuation height)
+        axis3_decile,
+        axis3_pct: a3,
         symbol: row.symbol,
         oal_label: row.oal_label,
         composite_bucket: row.composite_bucket,
         composite_score: row.composite_score,
-        isTopRisk: (row.composite_score ?? 0) >= threshold,
       };
     });
   }, [filtered]);
@@ -1492,136 +1488,216 @@ export default function PlatformPage() {
               </div>
             </div>
 
-            {/* Scatter plot */}
+            {/* ── Cube Map ── */}
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader>
                 <CardTitle className="text-white">Three-Axis Structural Map</CardTitle>
                 <CardDescription className="text-[#B8C3CC]">
-                  <span className="text-[#EAF0F2]">X-axis</span> = Operational Anchor Risk ·{" "}
-                  <span className="text-[#EAF0F2]">Y-axis</span> = Operational Trajectory Risk (higher = worse) ·{" "}
-                  <span className="text-[#EAF0F2]">Dot size</span> = Operational Financing Risk ·{" "}
+                  <span className="text-[#EAF0F2]">X-axis</span> = Trajectory Risk (left = improving · right = deteriorating) ·{" "}
+                  <span className="text-[#EAF0F2]">Y-axis</span> = Anchor Risk (bottom = supported · top = stretched) ·{" "}
+                  <span className="text-[#EAF0F2]">Z-axis</span> = Financing Risk (scroll through 10 depth panels) ·{" "}
                   <span className="text-[#EAF0F2]">Color</span> = Composite Risk.
-                  Top 20% by composite score are highlighted; the rest are faded.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Entry orientation line — tells user where to look first */}
-                <p className="mb-3 text-[13px] text-[#B8C3CC]">
-                  Each point is a company. Start with the top-right — where valuation stretch and deteriorating trajectory are highest.
-                </p>
-                <p className="mb-1 text-[11px] text-[#7E8A96]">
-                  Hover for detail.
+                <p className="mb-1 text-[13px] text-[#B8C3CC]">
+                  Each point is a company. Top-right = most fragile: maximum valuation stretch, worst trajectory. Scroll to move through financing risk depth panels.
                 </p>
                 <p className="mb-4 text-[12px] font-medium" style={{ color: "#BC6464" }}>
-                  Top-right = most fragile: highest anchor risk + worst trajectory. Large dots in that zone also carry high financing strain — compound risk across all three axes.
+                  Front panel (decile 1) = highest financing strain. Scroll down to move deeper — toward lower financing risk.
                 </p>
+
+                {/* Color legend */}
+                <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#B8C3CC]">
+                  <span className="text-[#7E8A96]">Composite Risk (color):</span>
+                  {["Very Low", "Low", "Moderate", "High", "Very High"].map(bucket => (
+                    <span key={bucket} className="inline-flex items-center gap-1 text-[11px]">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: compositeColor(bucket) }} />
+                      {bucket}
+                    </span>
+                  ))}
+                  <span className="text-[#7E8A96] ml-2">Dot size = depth proximity to active panel</span>
+                </div>
 
                 {loading ? (
                   <div className="flex h-[600px] items-center justify-center text-[#7E8A96]">
                     Loading current snapshot...
                   </div>
-                ) : (
-                  <div className="h-[600px] w-full">
-                    {/* Legend strip */}
-                    <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#B8C3CC]">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-[#7E8A96]">Composite Risk (color):</span>
-                        {["Very Low", "Low", "Moderate", "High", "Very High"].map(bucket => (
-                          <span key={bucket} className="inline-flex items-center gap-1 text-[11px]">
-                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: compositeColor(bucket) }} />
-                            {bucket}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-3 text-[#7E8A96]">
-                        <span className="text-[#B8C3CC]">Financing Risk (size):</span>
-                        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-[#7E8A96]" />Low</span>
-                        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full bg-[#7E8A96]" />Moderate</span>
-                        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-4 w-4 rounded-full bg-[#7E8A96]" />High</span>
-                      </div>
-                    </div>
+                ) : (() => {
+                  // ── Dot rendering logic ──────────────────────────────────────
+                  // Active decile: r=5, opacity=0.92
+                  // Adjacent (±1): r=3, opacity=0.45
+                  // All others: r=1, opacity=0.12
+                  const getDotProps = (decile: number) => {
+                    const dist = Math.abs(decile - mapDecile);
+                    if (dist === 0) return { r: 5,   opacity: 0.92 };
+                    if (dist === 1) return { r: 3,   opacity: 0.45 };
+                    return              { r: 1,   opacity: 0.12 };
+                  };
 
-                    <div className="relative h-[550px]">
-                      {/* Quadrant labels */}
-                      <div className="pointer-events-none absolute inset-0 z-10">
-                        <div className="absolute left-[48px] top-[4px] text-[9px] text-[#7E8A96]">Low anchor · High trajectory risk</div>
-                        <div className="absolute right-[8px] top-[4px] text-right text-[9px] font-medium" style={{ color: "#BC6464" }}>Most fragile zone ↗</div>
-                        <div className="absolute bottom-[28px] left-[48px] text-[9px] text-[#6DAE8B]">Lowest risk zone</div>
-                        <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#7E8A96]">High anchor · Low trajectory risk</div>
-                      </div>
+                  return (
+                    <div className="flex gap-3">
 
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 40 }}>
-                          <CartesianGrid stroke={COLORS.border} />
-                          <XAxis
-                            type="number" dataKey="x" domain={[0, 1]}
-                            label={{ value: "Anchor Risk →", position: "insideBottomRight", offset: -4, fill: COLORS.textMuted, fontSize: 11 }}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                            axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
-                          />
-                          <YAxis
-                            type="number" dataKey="y" domain={[0, 1]}
-                            label={{ value: "Trajectory Risk ↑", angle: -90, position: "insideLeft", offset: 10, fill: COLORS.textMuted, fontSize: 11 }}
-                            tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                            axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
-                          />
-                          <Tooltip
-                            cursor={{ strokeDasharray: "3 3" }}
-                            content={({ active, payload }) => {
-                              if (!active || !payload?.length) return null;
-                              const d = payload[0].payload;
-                              return (
-                                <div
-                                  className="rounded-2xl px-3 py-2.5 text-xs"
-                                  style={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                                >
-                                  <div className="font-semibold text-white">{d.symbol}</div>
-                                  <div className="mt-0.5 text-[11px]" style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
-                                  <div className="mt-2 flex flex-col gap-0.5 text-[11px]">
-                                    <span style={{ color: COLORS.textMuted }}>Anchor Risk: <span className="text-[#EAF0F2]">{d.x != null ? `${(d.x * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                    <span style={{ color: COLORS.textMuted }}>Trajectory Risk: <span className="text-[#EAF0F2]">{d.y != null ? `${(d.y * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                    <span style={{ color: COLORS.textMuted }}>Financing Risk: <span className="text-[#EAF0F2]">{d.axis3_bucket ?? "—"}</span></span>
-                                    <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
-                                  </div>
-                                  <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
-                                    Click to open company detail.
-                                  </div>
-                                </div>
-                              );
-                            }}
-                          />
-                          <Scatter
-                            data={scatterData}
-                            onClick={(data) => {
-                              if (data && data.symbol) {
-                                const row = filtered.find(r => r.symbol === data.symbol)
-                                  ?? snapshotData.find(r => r.symbol === data.symbol);
-                                if (row) setSelectedCompany(row);
-                              }
-                            }}
+                      {/* ── Chart area ── */}
+                      <div
+                        className="relative flex-1"
+                        style={{ height: 580 }}
+                        onWheel={e => {
+                          e.preventDefault();
+                          if (mapScrollLocked.current) return;
+                          const dir = e.deltaY > 0 ? 1 : -1; // scroll down = deeper = higher decile number
+                          setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
+                          mapScrollLocked.current = true;
+                          setTimeout(() => { mapScrollLocked.current = false; }, 420);
+                        }}
+                        onTouchStart={e => {
+                          const startY = e.touches[0].clientY;
+                          const handleMove = (me: TouchEvent) => {
+                            if (mapScrollLocked.current) return;
+                            const dy = me.touches[0].clientY - startY;
+                            if (Math.abs(dy) < 12) return;
+                            const dir = dy < 0 ? 1 : -1;
+                            setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
+                            mapScrollLocked.current = true;
+                            setTimeout(() => { mapScrollLocked.current = false; }, 420);
+                            document.removeEventListener("touchmove", handleMove);
+                          };
+                          document.addEventListener("touchmove", handleMove, { passive: true });
+                        }}
+                      >
+                        {/* Quadrant labels */}
+                        <div className="pointer-events-none absolute inset-0 z-10">
+                          <div className="absolute left-[48px] top-[4px] text-[9px] text-[#7E8A96]">Improving · High anchor</div>
+                          <div className="absolute right-[8px] top-[4px] text-right text-[9px] font-medium" style={{ color: "#BC6464" }}>Most fragile zone ↗</div>
+                          <div className="absolute bottom-[28px] left-[48px] text-[9px] text-[#6DAE8B]">Improving · Supported</div>
+                          <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#7E8A96]">Deteriorating · Supported</div>
+                        </div>
+
+                        {/* Active panel label — fades with transition */}
+                        <div className="pointer-events-none absolute left-[52px] top-[24px] z-10">
+                          <div
+                            className="rounded-lg border border-[#203754] bg-[#0A1F3D]/80 px-2.5 py-1 text-[10px] font-medium backdrop-blur-sm"
+                            style={{ color: "#B8C3CC" }}
                           >
-                            {scatterData.map((entry, idx) => {
-                              const sizeMap: Record<string, number> = {
-                                "Very Low": 2, "Low": 3, "Moderate": 5, "High": 7, "Very High": 8,
-                              };
-                              const r = sizeMap[entry.axis3_bucket] ?? 4;
-                              return (
-                                <Cell
-                                  key={idx}
-                                  fill={compositeColor(entry.composite_bucket)}
-                                  opacity={entry.isTopRisk ? 0.9 : 0.2}
-                                  r={entry.isTopRisk ? r : Math.max(1.5, r * 0.6)}
-                                  // cursor-pointer once drilldown is wired
-                                  style={{ cursor: "pointer" }}
-                                />
-                              );
-                            })}
-                          </Scatter>
-                        </ScatterChart>
-                      </ResponsiveContainer>
+                            Financing Risk Decile {mapDecile} of 10
+                            <span className="ml-2 text-[#7E8A96]">
+                              {mapDecile <= 2 ? "· Highest strain" : mapDecile >= 9 ? "· Lowest strain" : ""}
+                            </span>
+                          </div>
+                        </div>
+
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ScatterChart margin={{ top: 36, right: 12, bottom: 24, left: 40 }}>
+                            <CartesianGrid stroke={COLORS.border} strokeOpacity={0.5} />
+                            <XAxis
+                              type="number" dataKey="x" domain={[0, 1]}
+                              label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fill: COLORS.textMuted, fontSize: 11 }}
+                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
+                              axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
+                            />
+                            <YAxis
+                              type="number" dataKey="y" domain={[0, 1]}
+                              label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fill: COLORS.textMuted, fontSize: 11 }}
+                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
+                              axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
+                            />
+                            <Tooltip
+                              cursor={{ strokeDasharray: "3 3" }}
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0].payload;
+                                return (
+                                  <div
+                                    className="rounded-2xl px-3 py-2.5 text-xs"
+                                    style={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                                  >
+                                    <div className="font-semibold text-white">{d.symbol}</div>
+                                    <div className="mt-0.5 text-[11px]" style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
+                                    <div className="mt-2 flex flex-col gap-0.5 text-[11px]">
+                                      <span style={{ color: COLORS.textMuted }}>Trajectory Risk: <span className="text-[#EAF0F2]">{d.x != null ? `${(d.x * 100).toFixed(0)}th pct` : "—"}</span></span>
+                                      <span style={{ color: COLORS.textMuted }}>Anchor Risk: <span className="text-[#EAF0F2]">{d.y != null ? `${(d.y * 100).toFixed(0)}th pct` : "—"}</span></span>
+                                      <span style={{ color: COLORS.textMuted }}>Financing Decile: <span className="text-[#EAF0F2]">{d.axis3_decile} of 10</span></span>
+                                      <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
+                                    </div>
+                                    <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
+                                      Click to open company detail.
+                                    </div>
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Scatter
+                              data={scatterData}
+                              onClick={(data: any) => {
+                                if (data && data.symbol) {
+                                  const row = filtered.find(r => r.symbol === data.symbol)
+                                    ?? snapshotData.find(r => r.symbol === data.symbol);
+                                  if (row) setSelectedCompany(row);
+                                }
+                              }}
+                            >
+                              {scatterData.map((entry, idx) => {
+                                const { r, opacity } = getDotProps(entry.axis3_decile);
+                                return (
+                                  <Cell
+                                    key={idx}
+                                    fill={compositeColor(entry.composite_bucket)}
+                                    opacity={opacity}
+                                    r={r}
+                                    style={{ cursor: "pointer" }}
+                                  />
+                                );
+                              })}
+                            </Scatter>
+                          </ScatterChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* ── Vertical depth scrollbar ── */}
+                      <div className="flex flex-col items-center gap-1 py-8 shrink-0" style={{ width: 28 }}>
+                        {/* Label top */}
+                        <div className="mb-1 text-[8px] text-[#7E8A96] rotate-0 text-center leading-tight">HIGH<br/>RISK</div>
+
+                        {/* Ten tick marks */}
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const decile = i + 1;
+                          const isActive = decile === mapDecile;
+                          const dist = Math.abs(decile - mapDecile);
+                          const opacity = dist === 0 ? 1 : dist === 1 ? 0.5 : 0.2;
+                          return (
+                            <button
+                              key={decile}
+                              onClick={() => setMapDecile(decile)}
+                              className="flex items-center justify-center transition-all duration-200"
+                              style={{ width: 28, height: 28 }}
+                              title={`Decile ${decile} — ${decile <= 2 ? "Highest" : decile >= 9 ? "Lowest" : "Moderate"} financing risk`}
+                            >
+                              <div
+                                className="rounded-full transition-all duration-200"
+                                style={{
+                                  width:  isActive ? 10 : dist === 1 ? 6 : 4,
+                                  height: isActive ? 10 : dist === 1 ? 6 : 4,
+                                  backgroundColor: isActive
+                                    ? compositeColor(mapDecile <= 2 ? "Very High" : mapDecile >= 9 ? "Very Low" : mapDecile <= 4 ? "High" : mapDecile <= 6 ? "Moderate" : "Low")
+                                    : "#7E8A96",
+                                  opacity,
+                                  boxShadow: isActive ? `0 0 6px 2px ${compositeColor(mapDecile <= 2 ? "Very High" : mapDecile >= 9 ? "Very Low" : mapDecile <= 4 ? "High" : mapDecile <= 6 ? "Moderate" : "Low")}40` : "none",
+                                }}
+                              />
+                            </button>
+                          );
+                        })}
+
+                        {/* Label bottom */}
+                        <div className="mt-1 text-[8px] text-[#7E8A96] text-center leading-tight">LOW<br/>RISK</div>
+
+                        {/* Scroll hint */}
+                        <div className="mt-3 text-[8px] text-[#7E8A96] text-center leading-tight">scroll<br/>↕</div>
+                      </div>
+
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </CardContent>
             </Card>
 
@@ -1778,7 +1854,7 @@ export default function PlatformPage() {
 
             {/* ── Cube Navigator — Five-Panel Financing Risk Selector ── */}
             {cohortGrid && (() => {
-              const axis3Order = ["Very Low", "Low", "Moderate", "High", "Very High"];
+              const axis3Order = ["Very High", "High", "Moderate", "Low", "Very Low"];
               const activePanel = cohortGrid.panels.find(p => p.panel === selectedAxis3);
 
               // Directional animation variants — depth metaphor
@@ -1795,6 +1871,7 @@ export default function PlatformPage() {
               const handleSelectAxis3 = (bucket: string) => {
                 const currentIdx = axis3Order.indexOf(selectedAxis3);
                 const nextIdx    = axis3Order.indexOf(bucket);
+                // Higher index = lower risk = deeper into the cube = forward
                 axis3Direction.current = nextIdx > currentIdx ? "forward" : "back";
                 setSelectedAxis3(bucket);
               };
