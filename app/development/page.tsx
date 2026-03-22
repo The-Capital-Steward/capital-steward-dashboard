@@ -1192,7 +1192,7 @@ export default function PlatformPage() {
       const dir = e.deltaY > 0 ? 1 : -1;
       setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
       mapScrollLocked.current = true;
-      setTimeout(() => { mapScrollLocked.current = false; }, 420);
+      setTimeout(() => { mapScrollLocked.current = false; }, 260);
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
@@ -1237,7 +1237,7 @@ export default function PlatformPage() {
       // Direction is meaningful: high composite score nudges right (toward deteriorating),
       // low composite score nudges left (toward improving). Max displacement ±0.012.
       const composite = row.composite_score ?? 0.5;
-      const jitter = (composite - 0.5) * 0.024; // range: -0.012 to +0.012
+      const jitter = (composite - 0.5) * 0.08; // range: -0.04 to +0.04
 
       return {
         x: Math.min(1, Math.max(0, (row.axis2_pct as number) + jitter)),
@@ -1589,7 +1589,7 @@ export default function PlatformPage() {
                             const dir = dy < 0 ? 1 : -1;
                             setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
                             mapScrollLocked.current = true;
-                            setTimeout(() => { mapScrollLocked.current = false; }, 420);
+                            setTimeout(() => { mapScrollLocked.current = false; }, 260);
                             document.removeEventListener("touchmove", handleMove);
                           };
                           document.addEventListener("touchmove", handleMove, { passive: true });
