@@ -285,14 +285,17 @@ html {
    homepage section in homepage.tsx.
    ============================================================ */
 
-@media (min-width: 768px) {
-  html {
-    scroll-behavior: smooth;
-  }
+/* ============================================================
+   HOMEPAGE SCROLL + SECTION CONTAINMENT (FINAL)
+   ============================================================ */
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
   body {
-    scroll-snap-type: y mandatory;
-    overflow-y: scroll;
+    scroll-snap-type: y proximity;
   }
 
   .tcs-snap-section {
@@ -300,8 +303,10 @@ html {
     display: flex;
     align-items: center;
     scroll-snap-align: start;
-    scroll-snap-stop: always;
-    overflow-y: auto;
+  }
+
+  .tcs-snap-section--hero {
+    scroll-margin-top: 0;
   }
 }
 
@@ -314,5 +319,11 @@ html {
     min-height: auto;
     display: block;
     scroll-snap-align: none;
+  }
+
+  .tcs-snap-section--hero {
+    min-height: calc(100svh - 88px);
+    display: flex;
+    align-items: center;
   }
 }

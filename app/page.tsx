@@ -120,6 +120,18 @@ export default function HomePage() {
   const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                  : "10.2%"
   const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`     : "100%"
 
+    useEffect(() => {
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+    });
+  }, []);
+  
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
@@ -130,63 +142,78 @@ export default function HomePage() {
             align-items: center;
             scroll-snap-align: start;
       ──────────────────────────────────────────────────────────────────── */}
-      <section className="tcs-snap-section border-b border-[#DDE0DC]">
-        <div className="mx-auto w-full max-w-7xl px-6 py-10">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:items-center">
+            {/* ── HERO ────────────────────────────────────────────────────────── */}
+      <section className="tcs-snap-section tcs-snap-section--hero border-b border-[#DDE0DC]">
+        <div className="mx-auto flex min-h-full w-full max-w-7xl items-center px-6 py-4 md:py-6">
+          <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-[1.08fr_0.92fr] md:gap-10 md:items-center">
 
             {/* Left */}
-            <div>
-              <h1 className="tcs-heading text-3xl font-semibold leading-[1.08] tracking-tight text-[#0A1F3D] md:text-[2.75rem] md:leading-[1.05] lg:text-[3.25rem]">
+            <div className="max-w-[720px] self-center">
+              <h1 className="tcs-heading text-4xl font-semibold leading-[1.02] tracking-tight text-[#0A1F3D] md:text-[3.5rem] md:leading-[0.98] lg:text-[4.25rem]">
                 Markets price narratives. We measure what's underneath them.
               </h1>
 
-              <p className="mt-4 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+              <p className="mt-4 text-sm leading-6 text-[#5C6472] md:text-[1.02rem] md:leading-7">
                 OSMR measures three things: how far a company's valuation extends
                 beyond its demonstrated operational output, whether that operational
                 foundation is improving or deteriorating, and whether the firm can
                 service its obligations from what it actually produces.
               </p>
 
-              <p className="mt-2 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+              <p className="mt-2 text-sm leading-6 text-[#5C6472] md:text-[1.02rem] md:leading-7">
                 Those measurements are computed from reported financials across the
                 U.S.-listed equity universe, then ranked and scored on a common
                 structural basis.
               </p>
 
-              <div className="mt-4 space-y-3">
-                <div>
-                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
-                    <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
-                    sits in the elevated structural risk zone across all three axes simultaneously.
-                  </p>
-                  <p className="mt-0.5 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
-                    {revAnchorPct} of those companies are revenue-anchored.
-                  </p>
+              <div className="mt-5">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
+                      <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
+                      sits in the elevated structural risk zone across all three axes simultaneously.
+                    </p>
+                    <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+                      {revAnchorPct} of those companies are revenue-anchored.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
+                      <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
+                      across all three axes.
+                    </p>
+                    <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+                      {fcfAnchorPct} of those companies are FCF-anchored.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
-                    <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
-                    across all three axes.
-                  </p>
-                  <p className="mt-0.5 text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
-                    {fcfAnchorPct} of those companies are FCF-anchored.
-                  </p>
-                </div>
+
+                <p className="mt-5 text-sm font-medium leading-6 text-[#0A1F3D] md:text-base md:leading-7">
+                  The distribution is not a ranking artifact. It is a structural separation.
+                </p>
               </div>
 
-              <p className="mt-4 text-sm font-medium leading-6 text-[#0A1F3D] md:text-base md:leading-7">
-                The distribution is not a ranking artifact. It is a structural separation.
-              </p>
-
-              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#153761]">
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link
+                  href="/platform"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#153761]"
+                >
                   Open Platform <ArrowRight className="h-4 w-4" />
                 </Link>
+
                 <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <Link href="/how-we-see-markets" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
+                  <Link
+                    href="/how-we-see-markets"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
+                  >
                     How We See Markets <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
-                  <Link href="/how-to-use-osmr" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
+
+                  <Link
+                    href="/how-to-use-osmr"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
+                  >
                     How to Use OSMR <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                 </span>
@@ -194,10 +221,13 @@ export default function HomePage() {
             </div>
 
             {/* Right — OSMR card, desktop only */}
-            <div className="hidden md:block" style={{ animation: 'card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both' }}>
+            <div
+              className="hidden self-center md:block"
+              style={{ animation: "card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both" }}
+            >
               <div
-                className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 overflow-hidden"
-                style={{ maxHeight: 'min(720px, 72vh)' }}
+                className="w-full overflow-hidden rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)]"
+                style={{ maxHeight: "min(720px, 72vh)" }}
               >
                 <div className="mb-4 flex items-start justify-between gap-4">
                   <div>
