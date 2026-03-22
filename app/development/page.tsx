@@ -1232,12 +1232,11 @@ export default function PlatformPage() {
       // Decile 1 = highest Axis III risk (0.9–1.0), decile 10 = lowest (0.0–0.1)
       const axis3_decile = Math.min(10, Math.max(1, 10 - Math.floor(a3 * 10)));
 
-      // Composite-score-proportionate jitter on X axis.
-      // Breaks up vertical stripe artifact from discrete axis2_adjusted_pressure values.
-      // Direction is meaningful: high composite score nudges right (toward deteriorating),
-      // low composite score nudges left (toward improving). Max displacement ±0.012.
-      const composite = row.composite_score ?? 0.5;
-      const jitter = (composite - 0.5) * 0.08; // range: -0.04 to +0.04
+      // Axis III jitter on X axis — encodes Z depth as a subtle horizontal shadow.
+      // High financing risk (surface, decile 1) nudges right.
+      // Low financing risk (deep interior, decile 10) nudges left.
+      // Loose correlation with Axis II breaks vertical stripes without being pure noise.
+      const jitter = (a3 - 0.5) * 0.08; // range: -0.04 to +0.04
 
       return {
         x: Math.min(1, Math.max(0, (row.axis2_pct as number) + jitter)),
@@ -1247,7 +1246,7 @@ export default function PlatformPage() {
         symbol: row.symbol,
         oal_label: row.oal_label,
         composite_bucket: row.composite_bucket,
-        composite_score: composite,
+        composite_score: row.composite_score ?? 0.5,
       };
     });
   }, [filtered]);
