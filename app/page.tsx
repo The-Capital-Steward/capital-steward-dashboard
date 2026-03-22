@@ -71,8 +71,10 @@ function RiskCards() {
 function StatusDot() {
   return (
     <span className="relative flex h-2 w-2 shrink-0">
-      <span className="absolute inline-flex h-full w-full rounded-full bg-[#4CAF7D]"
-        style={{ animation: 'pulse-dot 2.1s cubic-bezier(0.4,0,0.6,1) infinite' }} />
+      <span
+        className="absolute inline-flex h-full w-full rounded-full bg-[#4CAF7D]"
+        style={{ animation: 'pulse-dot 2.1s cubic-bezier(0.4,0,0.6,1) infinite' }}
+      />
       <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4CAF7D]" />
       <style>{`
         @keyframes pulse-dot {
@@ -108,42 +110,47 @@ type SiteStats = {
 function useSystemStats(): SiteStats {
   const [stats, setStats] = useState<SiteStats>(null)
   useEffect(() => {
-    fetch("/data/key_system_stats.json").then(r => r.json()).then(setStats).catch(() => null)
+    fetch("/data/key_system_stats.json")
+      .then(r => r.json())
+      .then(setStats)
+      .catch(() => null)
   }, [])
   return stats
 }
 
 export default function HomePage() {
   const stats = useSystemStats()
-  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%`                 : "17.2%"
+  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%` : "17.2%"
   const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "62%"
-  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                  : "10.2%"
-  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`     : "100%"
+  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%` : "10.2%"
+  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%` : "100%"
 
-    useEffect(() => {
+  useEffect(() => {
     if ("scrollRestoration" in history) {
-      history.scrollRestoration = "manual";
+      history.scrollRestoration = "manual"
     }
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        window.scrollTo(0, 0);
-      });
-    });
-  }, []);
-  
+        const el = document.getElementById("home-top")
+        if (!el) return
+
+        const navOffset = 88
+        const y = el.getBoundingClientRect().top + window.scrollY - navOffset
+
+        window.scrollTo(0, Math.max(0, y))
+      })
+    })
+  }, [])
+
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
-      {/* ── HERO ──────────────────────────────────────────────────────────
-          .tcs-snap-section defined in globals.css:
-            min-height: calc(100svh - 88px);
-            display: flex;
-            align-items: center;
-            scroll-snap-align: start;
-      ──────────────────────────────────────────────────────────────────── */}
-            {/* ── HERO ────────────────────────────────────────────────────────── */}
-      <section className="tcs-snap-section tcs-snap-section--hero border-b border-[#DDE0DC]">
+      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      <section
+  id="home-top"
+  className="tcs-snap-section tcs-snap-section--hero border-b border-[#DDE0DC]"
+>
         <div className="mx-auto flex min-h-full w-full max-w-7xl items-center px-6 py-4 md:py-6">
           <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-[1.08fr_0.92fr] md:gap-10 md:items-center">
 
@@ -309,15 +316,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CORE FRAMEWORK — DARK BAND ────────────────────────────────────
-          Diagram box removed. Accordion cards retained.
-          OSMR full name introduced in body copy.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── CORE FRAMEWORK ──────────────────────────────────────────────── */}
       <section className="tcs-snap-section border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
 
-            {/* Left — headline + body, full column width, no max-w constraint */}
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">Core Framework</p>
               <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
@@ -348,7 +351,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — accordion cards */}
             <div>
               <RiskCards />
             </div>
@@ -357,7 +359,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── PLATFORM ──────────────────────────────────────────────────────── */}
+      {/* ── PLATFORM ────────────────────────────────────────────────────── */}
       <section className="tcs-snap-section border-b border-[#DDE0DC]">
         <div className="mx-auto w-full max-w-7xl px-6 py-12">
           <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:items-center">
@@ -374,7 +376,10 @@ export default function HomePage() {
                 weekly for snapshot refreshes.
               </p>
               <div className="mt-7">
-                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
+                <Link
+                  href="/platform"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+                >
                   View Platform <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -418,7 +423,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WHY THIS EXISTS ───────────────────────────────────────────────── */}
+      {/* ── WHY THIS EXISTS ─────────────────────────────────────────────── */}
       <section className="tcs-snap-section">
         <div className="mx-auto w-full max-w-5xl px-6 py-12">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Why This Exists</p>
@@ -453,20 +458,29 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/why-this-exists" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
+            <Link
+              href="/why-this-exists"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
+            >
               Why This Exists <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/how-we-see-markets" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
+            <Link
+              href="/how-we-see-markets"
+              className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+            >
               How We See Markets <ChevronRight className="h-4 w-4" />
             </Link>
-            <Link href="/how-to-use-osmr" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
+            <Link
+              href="/how-to-use-osmr"
+              className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+            >
               How to Use OSMR <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
+      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
       <div className="border-t border-[#DDE0DC] py-6 text-center">
         <p className="text-[12px] leading-[1.8] text-[#aaa]">
           The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
