@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Shield,
@@ -97,7 +97,7 @@ type CohortGridCell = {
   suppressed: boolean;
   axis1_bucket: string;
   axis2_bucket: string;
-  axis3_panel: string;
+  axis3_bucket: string;
 };
 
 type CohortGridRow = {
@@ -356,23 +356,27 @@ type DrilldownProps = {
   onClose: () => void;
 };
 
-// Map axis3_pct to the financing fragility panel label used in cohort grid.
-// Accepts the actual panel list from metadata when available — derives order from it
-// rather than assuming label strings. Falls back to hardcoded labels if not provided.
+// Map axis3_pct to the financing risk bucket label used in cohort grid.
+// Uses the actual panel list from metadata when available (positional quintiles).
+// Falls back to quintile breakpoints if not provided.
 function axis3Panel(axis3_pct: number | null, panels?: string[]): string {
   const v = axis3_pct ?? 0.5;
 
-  // If we have the actual panel list, use positional thirds regardless of label strings
-  if (panels && panels.length === 3) {
-    if (v < 0.4) return panels[0];   // lowest fragility panel
-    if (v < 0.7) return panels[1];   // middle panel
-    return panels[2];                 // highest fragility panel
+  // If we have the actual panel list (5 quintile buckets), use positional mapping
+  if (panels && panels.length === 5) {
+    if (v < 0.20) return panels[0];
+    if (v < 0.40) return panels[1];
+    if (v < 0.60) return panels[2];
+    if (v < 0.80) return panels[3];
+    return panels[4];
   }
 
-  // Fallback: hardcoded labels matching expected pipeline output
-  if (v < 0.4) return "Low Fragility";
-  if (v < 0.7) return "Moderate Fragility";
-  return "High Fragility";
+  // Fallback: standard quintile labels
+  if (v < 0.20) return "Very Low";
+  if (v < 0.40) return "Low";
+  if (v < 0.60) return "Moderate";
+  if (v < 0.80) return "High";
+  return "Very High";
 }
 
 // Map a percentile score to a bucket label
@@ -696,7 +700,8 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: DrilldownPr
                 <p className="mb-4 text-[12px] text-[#7E8A96]">
                   Matched to cohort: <span className="text-[#B8C3CC]">{panel}</span> ·{" "}
                   Anchor Risk <span className="text-[#B8C3CC]">{axis1Bucket}</span> ·{" "}
-                  Trajectory Risk <span className="text-[#B8C3CC]">{axis2Bucket}</span>
+                  Trajectory Risk <span className="text-[#B8C3CC]">{axis2Bucket}</span> ·{" "}
+                  Financing Risk <span className="text-[#B8C3CC]">{axis3Bucket}</span>
                 </p>
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {[
@@ -1136,6 +1141,8 @@ export default function PlatformPage() {
   const [search, setSearch] = useState("");
   const [cohortMetric, setCohortMetric] = useState<CohortMetric>("median_return");
   const [selectedCompany, setSelectedCompany] = useState<SnapshotRow | null>(null);
+  const [selectedAxis3, setSelectedAxis3] = useState("Moderate");
+  const axis3Direction = React.useRef<"forward" | "back">("forward");
 
   useEffect(() => {
     Promise.all([
@@ -1769,79 +1776,196 @@ export default function PlatformPage() {
               </div>
             </div>
 
-            {/* Cohort panels */}
-            <div className="grid gap-6 xl:grid-cols-3">
-              {cohortGrid?.panels.map(panel => (
-                <Card key={panel.panel} className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                  <CardHeader>
-                    <CardTitle className="text-white">{panel.panel}</CardTitle>
-                    <CardDescription className="text-[#B8C3CC]">
-                      {cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M.
-                      Cells outlined in white have |return| &gt; 15% — strong signal zones.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-[80px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
-                      <div>
-                        <div className="text-[9px] text-[#7E8A96]">Trajectory ↓</div>
-                        <div className="text-[9px] text-[#7E8A96]">Anchor →</div>
-                      </div>
-                      {cohortGrid.metadata.x_axis_labels.map(c => (
-                        <div key={c} className="text-center"><div className="text-[#7E8A96]">{c}</div></div>
-                      ))}
-                      {panel.rows.map(row => (
-                        <React.Fragment key={`${panel.panel}-${row.axis2_bucket}`}>
-                          <div className="flex items-center text-[#7E8A96]" style={{ minWidth: 80 }}>{row.axis2_bucket}</div>
-                          {row.cells.map(cell => {
-                            const visibleValue = getCohortMetricValue(cell, cohortMetric);
-                            const colorValue = cohortMetric === "hit_rate" ? ((visibleValue ?? 0) - 0.5) * 2 : visibleValue;
-                            const isStrongSignal = !cell.suppressed && cohortMetric !== "hit_rate" && visibleValue != null && Math.abs(visibleValue) > 0.15;
-                            return (
-                              <div
-                                key={`${panel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
-                                className="flex h-16 flex-col items-center justify-center rounded-2xl px-1 text-white transition-all"
-                                style={{
-                                  backgroundColor: returnHeatColor(colorValue, cell.suppressed),
-                                  border: isStrongSignal ? "1.5px solid rgba(255,255,255,0.5)" : "1px solid #203754",
-                                }}
-                                title={[
-                                  `Panel: ${cell.axis3_panel}`,
-                                  `Trajectory Risk: ${cell.axis2_bucket}`,
-                                  `Anchor Risk: ${cell.axis1_bucket}`,
-                                  `Mean Return: ${formatPctSigned(cell.mean_return)}`,
-                                  `Median Return: ${formatPctSigned(cell.median_return)}`,
-                                  `Hit Rate: ${formatPct(cell.hit_rate)}`,
-                                  `Count: ${formatNum(cell.count)}`,
-                                  cell.suppressed ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}` : null,
-                                  cohortMetric === "mean_return" && skewSignal(cell) === "right"
-                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean inflated by high-return outliers`
-                                    : null,
-                                  cohortMetric === "mean_return" && skewSignal(cell) === "left"
-                                    ? `Median: ${formatPctSigned(cell.median_return)} — mean dragged down by large losses`
-                                    : null,
-                                ].filter(Boolean).join(" | ")}
-                              >
-                                <div className="text-[11px] font-medium">{formatCohortMetric(visibleValue, cohortMetric)}</div>
-                                {cohortMetric === "mean_return" && (() => {
-                                  const skew = skewSignal(cell);
-                                  if (skew === "none") return null;
-                                  return (
-                                    <div className="mt-0.5 text-[9px] font-medium" style={{ color: skew === "right" ? COLORS.positiveSoft : COLORS.negativeSoft }}>
-                                      {skew === "right" ? "▲ skewed" : "▼ skewed"}
-                                    </div>
-                                  );
-                                })()}
-                                <div className="mt-0.5 text-[10px] text-[#EAF0F2]/80">N={formatNum(cell.count)}</div>
-                              </div>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
+            {/* ── Cube Navigator — Five-Panel Financing Risk Selector ── */}
+            {cohortGrid && (() => {
+              const axis3Order = ["Very Low", "Low", "Moderate", "High", "Very High"];
+              const activePanel = cohortGrid.panels.find(p => p.panel === selectedAxis3);
+
+              // Directional animation variants — depth metaphor
+              // forward = moving toward higher risk (going "deeper")
+              // back = moving toward lower risk (coming "shallower")
+              const variants = {
+                enterForward:  { opacity: 0, scale: 0.96, z: -20 },
+                enterBack:     { opacity: 0, scale: 1.04, z: 20 },
+                center:        { opacity: 1, scale: 1,    z: 0 },
+                exitForward:   { opacity: 0, scale: 1.04, z: 20 },
+                exitBack:      { opacity: 0, scale: 0.96, z: -20 },
+              };
+
+              const handleSelectAxis3 = (bucket: string) => {
+                const currentIdx = axis3Order.indexOf(selectedAxis3);
+                const nextIdx    = axis3Order.indexOf(bucket);
+                axis3Direction.current = nextIdx > currentIdx ? "forward" : "back";
+                setSelectedAxis3(bucket);
+              };
+
+              return (
+                <div className="space-y-4">
+
+                  {/* Selector + depth indicator */}
+                  <div className="flex items-center gap-4">
+
+                    {/* Depth indicator — five stacked lines */}
+                    <div className="flex flex-col gap-[3px] shrink-0">
+                      {axis3Order.map((b, i) => {
+                        const activeIdx = axis3Order.indexOf(selectedAxis3);
+                        const dist = Math.abs(i - activeIdx);
+                        const opacity = dist === 0 ? 1 : dist === 1 ? 0.45 : 0.2;
+                        return (
+                          <div
+                            key={b}
+                            className="h-[3px] w-5 rounded-full transition-all duration-300"
+                            style={{
+                              backgroundColor: "#6DAE8B",
+                              opacity,
+                              transform: dist === 0 ? "scaleX(1)" : `scaleX(${1 - dist * 0.15})`,
+                              transformOrigin: "left",
+                            }}
+                          />
+                        );
+                      })}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+
+                    {/* Quintile selector buttons */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] text-[#7E8A96] mr-1">Financing Risk:</span>
+                      {axis3Order.map(bucket => {
+                        const active = selectedAxis3 === bucket;
+                        return (
+                          <button
+                            key={bucket}
+                            onClick={() => handleSelectAxis3(bucket)}
+                            className="rounded-xl border px-3 py-1.5 text-[12px] font-medium transition-all duration-200"
+                            style={{
+                              borderColor: active ? compositeColor(bucket) : "#203754",
+                              backgroundColor: active ? `${compositeColor(bucket)}18` : "#0D2138",
+                              color: active ? compositeColor(bucket) : "#7E8A96",
+                            }}
+                          >
+                            {bucket}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Single 5×5 panel with directional depth transition */}
+                  <div style={{ perspective: "1200px" }}>
+                    <AnimatePresence
+                      mode="wait"
+                      custom={axis3Direction.current}
+                    >
+                      {activePanel && (
+                        <motion.div
+                          key={selectedAxis3}
+                          custom={axis3Direction.current}
+                          variants={{
+                            initial: (dir: string) => dir === "forward"
+                              ? { opacity: 0, scale: 0.96 }
+                              : { opacity: 0, scale: 1.04 },
+                            animate: { opacity: 1, scale: 1 },
+                            exit: (dir: string) => dir === "forward"
+                              ? { opacity: 0, scale: 1.04 }
+                              : { opacity: 0, scale: 0.96 },
+                          }}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="text-white">
+                                    Financing Risk — {activePanel.panel}
+                                  </CardTitle>
+                                  <CardDescription className="text-[#B8C3CC]">
+                                    {cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M.
+                                    Cells outlined in white have |return| &gt; 15%.
+                                  </CardDescription>
+                                </div>
+                                {/* Position in cube */}
+                                <div className="text-right shrink-0">
+                                  <div className="text-[10px] text-[#7E8A96] uppercase tracking-[0.15em]">Depth</div>
+                                  <div className="text-sm font-semibold" style={{ color: compositeColor(selectedAxis3) }}>
+                                    {axis3Order.indexOf(selectedAxis3) + 1} of {axis3Order.length}
+                                  </div>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-[90px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
+                                <div>
+                                  <div className="text-[9px] text-[#7E8A96]">Trajectory ↓</div>
+                                  <div className="text-[9px] text-[#7E8A96]">Anchor →</div>
+                                </div>
+                                {cohortGrid.metadata.x_axis_labels.map(c => (
+                                  <div key={c} className="text-center">
+                                    <div className="text-[10px] text-[#7E8A96]">{c}</div>
+                                  </div>
+                                ))}
+                                {activePanel.rows.map(row => (
+                                  <React.Fragment key={`${activePanel.panel}-${row.axis2_bucket}`}>
+                                    <div className="flex items-center text-[10px] text-[#7E8A96]" style={{ minWidth: 90 }}>
+                                      {row.axis2_bucket}
+                                    </div>
+                                    {row.cells.map(cell => {
+                                      const visibleValue = getCohortMetricValue(cell, cohortMetric);
+                                      const colorValue = cohortMetric === "hit_rate" ? ((visibleValue ?? 0) - 0.5) * 2 : visibleValue;
+                                      const isStrongSignal = !cell.suppressed && cohortMetric !== "hit_rate" && visibleValue != null && Math.abs(visibleValue) > 0.15;
+                                      return (
+                                        <div
+                                          key={`${activePanel.panel}-${row.axis2_bucket}-${cell.axis1_bucket}`}
+                                          className="flex h-20 flex-col items-center justify-center rounded-2xl px-1 text-white transition-all"
+                                          style={{
+                                            backgroundColor: returnHeatColor(colorValue, cell.suppressed),
+                                            border: isStrongSignal ? "1.5px solid rgba(255,255,255,0.5)" : "1px solid #203754",
+                                          }}
+                                          title={[
+                                            `Financing Risk: ${cell.axis3_bucket}`,
+                                            `Trajectory Risk: ${cell.axis2_bucket}`,
+                                            `Anchor Risk: ${cell.axis1_bucket}`,
+                                            `Mean Return: ${formatPctSigned(cell.mean_return)}`,
+                                            `Median Return: ${formatPctSigned(cell.median_return)}`,
+                                            `Hit Rate: ${formatPct(cell.hit_rate)}`,
+                                            `Count: ${formatNum(cell.count)}`,
+                                            cell.suppressed ? `Suppressed: count < ${cohortGrid.metadata.min_count_for_display}` : null,
+                                            cohortMetric === "mean_return" && skewSignal(cell) === "right"
+                                              ? `Median: ${formatPctSigned(cell.median_return)} — mean inflated by high-return outliers`
+                                              : null,
+                                            cohortMetric === "mean_return" && skewSignal(cell) === "left"
+                                              ? `Median: ${formatPctSigned(cell.median_return)} — mean dragged down by large losses`
+                                              : null,
+                                          ].filter(Boolean).join(" | ")}
+                                        >
+                                          <div className="text-[12px] font-medium">{formatCohortMetric(visibleValue, cohortMetric)}</div>
+                                          {cohortMetric === "mean_return" && (() => {
+                                            const skew = skewSignal(cell);
+                                            if (skew === "none") return null;
+                                            return (
+                                              <div className="mt-0.5 text-[9px] font-medium" style={{ color: skew === "right" ? COLORS.positiveSoft : COLORS.negativeSoft }}>
+                                                {skew === "right" ? "▲ skewed" : "▼ skewed"}
+                                              </div>
+                                            );
+                                          })()}
+                                          <div className="mt-0.5 text-[10px] text-[#EAF0F2]/80">N={formatNum(cell.count)}</div>
+                                        </div>
+                                      );
+                                    })}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                </div>
+              );
+            })()}
 
             {/* Cohort Insight Layer — planned analytical module */}
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
