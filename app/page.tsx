@@ -104,17 +104,11 @@ function UpdatedAgo() {
   return <p className="mt-0.5 text-[11px] text-[#8A92A0]">{label}</p>
 }
 
-// ── System stats pulled from key_system_stats.json ──────────────────────────
+// ── System stats ─────────────────────────────────────────────────────────────
 type SiteStats = {
   universe: { total: number }
-  high_risk_cluster: {
-    pct_of_universe: number
-    revenue_anchored_pct: number
-  }
-  low_risk_cluster: {
-    pct_of_universe: number
-    fcf_anchored_pct: number
-  }
+  high_risk_cluster: { pct_of_universe: number; revenue_anchored_pct: number }
+  low_risk_cluster:  { pct_of_universe: number; fcf_anchored_pct: number }
 } | null
 
 function useSystemStats(): SiteStats {
@@ -131,26 +125,29 @@ function useSystemStats(): SiteStats {
 export default function HomePage() {
   const stats = useSystemStats()
 
-  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%` : "17.2%"
-  const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "62%"
-  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%` : "10.2%"
-  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%` : "100%"
+  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%`                        : "17.2%"
+  const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%`        : "62%"
+  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                         : "10.2%"
+  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`            : "100%"
 
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
-      {/* ── Hero ── */}
+      {/* ── Hero ─────────────────────────────────────────────────────────────
+          Reduced vertical padding so stats appear near fold.
+          Desktop: py-14 md:py-20. Mobile: tighter top, headline at text-4xl.
+      ──────────────────────────────────────────────────────────────────────── */}
       <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 md:grid-cols-[1.15fr_0.85fr] md:py-28">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:py-20">
           <div className="max-w-3xl">
 
-            {/* Headline — locked */}
-            <h1 className="tcs-heading text-5xl font-semibold leading-[1.02] tracking-tight text-[#0A1F3D] md:text-7xl">
+            {/* Headline — locked copy, mobile size reduced */}
+            <h1 className="tcs-heading text-4xl font-semibold leading-[1.05] tracking-tight text-[#0A1F3D] md:text-7xl md:leading-[1.02]">
               Markets price narratives. We measure what's underneath them.
             </h1>
 
-            {/* Measurement paragraph */}
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
+            {/* Measurement paragraph — tighter mt on mobile */}
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#5C6472] md:mt-7 md:text-xl md:leading-8">
               OSMR measures three things: how far a company's valuation extends
               beyond its demonstrated operational output, whether that operational
               foundation is improving or deteriorating, and whether the firm can
@@ -158,41 +155,45 @@ export default function HomePage() {
             </p>
 
             {/* Source paragraph */}
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-[#5C6472] md:text-xl md:leading-8">
               Those measurements are computed from reported financials across the
               U.S.-listed equity universe, then ranked and scored on a common
               structural basis.
             </p>
 
-            {/* Fix 1 — empirical block broken out of paragraph flow */}
-            <div className="mt-8 max-w-2xl space-y-3">
-              <div className="rounded-xl border border-[#DDE0DC] bg-white px-5 py-4">
-                <p className="text-base leading-7 text-[#1E2228]">
+            {/* Stat block — de-componentized, elevated text, no card border/bg.
+                Tight spacing within pairs, larger gap between pairs. */}
+            <div className="mt-7 max-w-2xl space-y-5">
+              {/* Pair 1 */}
+              <div>
+                <p className="text-base leading-7 text-[#1E2228] md:text-lg md:leading-8">
                   <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
                   sits in the elevated structural risk zone across all three axes simultaneously.
                 </p>
-                <p className="mt-1 text-base leading-7 text-[#5C6472]">
+                <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
                   {revAnchorPct} of those companies are revenue-anchored.
                 </p>
               </div>
-              <div className="rounded-xl border border-[#DDE0DC] bg-white px-5 py-4">
-                <p className="text-base leading-7 text-[#1E2228]">
-                  <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally
-                  sound zone</span> across all three axes.
+              {/* Pair 2 */}
+              <div>
+                <p className="text-base leading-7 text-[#1E2228] md:text-lg md:leading-8">
+                  <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the
+                  structurally sound zone</span> across all three axes.
                 </p>
-                <p className="mt-1 text-base leading-7 text-[#5C6472]">
+                <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
                   {fcfAnchorPct} of those companies are FCF-anchored.
                 </p>
               </div>
             </div>
 
-            {/* Conclusion line — breathing room above */}
-            <p className="mt-7 max-w-2xl text-lg font-medium leading-8 text-[#0A1F3D] md:text-xl">
+            {/* Conclusion — breathing room above */}
+            <p className="mt-6 max-w-2xl text-base font-medium leading-7 text-[#0A1F3D] md:text-lg md:leading-8">
               The distribution is not a ranking artifact. It is a structural separation.
             </p>
 
-            {/* Fix 2 — CTA hierarchy: Open Platform dominant, others secondary text links */}
-            <div className="mt-10 flex flex-wrap items-center gap-5">
+            {/* CTA row — primary button dominant, secondary as text links.
+                Mobile: secondary links wrap below on their own line. */}
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link
                 href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
@@ -201,34 +202,35 @@ export default function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
 
-              <Link
-                href="/how-we-see-markets"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
-              >
-                How We See Markets
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-
-              <Link
-                href="/how-to-use-osmr"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
-              >
-                How to Use OSMR
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+              <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <Link
+                  href="/how-we-see-markets"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
+                >
+                  How We See Markets
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+                <Link
+                  href="/how-to-use-osmr"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
+                >
+                  How to Use OSMR
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </span>
             </div>
           </div>
 
-          {/* OSMR preview card */}
-          <div className="flex items-center">
+          {/* OSMR preview card — reduced internal padding on mobile */}
+          <div className="flex items-start pt-2 md:items-center md:pt-0">
             <div
-              className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 md:p-8"
+              className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-5 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 md:p-8"
               style={{ animation: 'card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both' }}
             >
-              <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="mb-4 flex items-start justify-between gap-4 md:mb-6">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">OSMR</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-[#0A1F3D]">Structural Market Map</h2>
+                  <h2 className="mt-1 text-xl font-semibold text-[#0A1F3D] md:text-2xl">Structural Market Map</h2>
                   <UpdatedAgo />
                 </div>
                 <div
@@ -240,7 +242,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="grid gap-4">
+              <div className="grid gap-3 md:gap-4">
                 {[
                   {
                     label: "Operational Anchor Risk",
@@ -255,16 +257,16 @@ export default function HomePage() {
                     desc: "Whether the firm can service its obligations from its operational output",
                   },
                 ].map(({ label, desc }) => (
-                  <div key={label} className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
+                  <div key={label} className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-3 md:p-4">
                     <div className="text-sm font-medium text-[#0A1F3D]">{label}</div>
                     <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 rounded-2xl bg-[#0A1F3D] p-5 text-white">
+              <div className="mt-4 rounded-2xl bg-[#0A1F3D] p-4 text-white md:mt-6 md:p-5">
                 <div className="text-xs uppercase tracking-[0.18em] text-[#A9BEDF]">Core Output</div>
-                <div className="mt-2 text-lg font-medium">
+                <div className="mt-1.5 text-base font-medium md:mt-2 md:text-lg">
                   A structural map of where valuation is credibly anchored — and where it isn't.
                 </div>
               </div>
@@ -273,11 +275,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Research Lens ── */}
-      {/* Fix 4 — increased padding for section separation */}
+      {/* ── Research Lens ────────────────────────────────────────────────────
+          Standardized section padding: py-20 md:py-24.
+      ──────────────────────────────────────────────────────────────────────── */}
       <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-7xl px-6 py-24 md:py-28">
-          <div className="mb-12 max-w-2xl">
+        <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
+          <div className="mb-10 max-w-2xl">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
               Research Lens
             </p>
@@ -286,7 +289,7 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
 
             {/* Focus */}
             <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
@@ -314,13 +317,12 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Fix 3 — Method: axes as unified system block, no new conceptual label */}
+            {/* Method — axes as unified system block */}
             <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
               <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
                 <Workflow className="h-5 w-5" />
               </div>
               <h3 className="text-2xl font-semibold text-[#0A1F3D]">Method</h3>
-              {/* Axes grouped as one model — visual unity without a new headline */}
               <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC] bg-[#F7F8F6] divide-y divide-[#DDE0DC]">
                 {[
                   "Operational Anchor Risk",
@@ -342,9 +344,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Core Framework — DARK BAND ── */}
+      {/* ── Core Framework — DARK BAND ───────────────────────────────────────
+          Slightly larger padding than other sections for visual weight.
+          Line-height raised, paragraph width narrowed for legibility.
+      ──────────────────────────────────────────────────────────────────────── */}
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
-        <div className="mx-auto max-w-5xl px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
 
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
             Core Framework
@@ -354,8 +359,7 @@ export default function HomePage() {
             If narrative sustains a valuation, the question is what sustains the narrative.
           </h2>
 
-          {/* Slightly increased line spacing for dark band legibility */}
-          <div className="mt-8 max-w-2xl space-y-6 text-lg leading-[1.9] text-[#A9BEDF]">
+          <div className="mt-7 max-w-xl space-y-5 text-base leading-[1.9] text-[#A9BEDF] md:text-lg">
             <p>
               The strongest valuations rest on demonstrated cash generation — the
               gap between price and operational reality is short, and the narrative
@@ -371,12 +375,12 @@ export default function HomePage() {
           </div>
 
           {/* Framework diagram */}
-          <div className="mt-14 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-8">
+          <div className="mt-12 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-6 md:p-8">
             <div className="mb-6 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
               OSMR Framework
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
               {[
                 {
                   title: "Operational Anchor Risk",
@@ -401,7 +405,8 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="my-4 flex justify-around px-[16.5%]">
+            {/* Connector — hidden on mobile where cards stack */}
+            <div className="my-4 hidden justify-around px-[16.5%] md:flex">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
@@ -411,7 +416,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="rounded-xl border border-[#3E6A9F] bg-[#0D2847] px-6 py-4">
+            <div className="mt-3 rounded-xl border border-[#3E6A9F] bg-[#0D2847] px-6 py-4 md:mt-0">
               <div className="flex items-center justify-center gap-4">
                 <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-4 py-1.5 text-sm font-medium text-[#244636]">
                   OSMR
@@ -427,7 +432,7 @@ export default function HomePage() {
           </div>
 
           {/* CTA */}
-          <div className="mt-14 flex justify-center">
+          <div className="mt-12 flex justify-center">
             <Link
               href="/the-osmr-framework"
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
@@ -440,23 +445,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Platform ── */}
-      {/* Fix 4 — increased padding for section separation */}
+      {/* ── Platform ─────────────────────────────────────────────────────────
+          Standardized: py-20 md:py-24. Title semibold for scan efficiency.
+      ──────────────────────────────────────────────────────────────────────── */}
       <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-[1.05fr_0.95fr] md:py-28">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:py-24">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
             <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
               The framework, made usable.
             </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
               The platform converts company-level financial data into a structural
               map of the equity market. Identify risk clusters before they reprice.
               Compare companies on a common structural basis. Track anchor
               deterioration over time. Updated monthly for structural changes and
               weekly for snapshot refreshes.
             </p>
-            <div className="mt-8">
+            <div className="mt-7">
               <Link
                 href="/platform"
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
@@ -467,7 +473,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+          <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-7">
             <div className="mb-5 flex items-center gap-3">
               <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
                 <Database className="h-5 w-5" />
@@ -477,8 +483,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Fix 5 — platform items: title semibold, increased mt between title and desc */}
-            <div className="grid gap-4">
+            <div className="grid gap-3 md:gap-4">
               {[
                 {
                   title: "Structural market map",
@@ -495,7 +500,7 @@ export default function HomePage() {
               ].map(({ title, desc }) => (
                 <div
                   key={title}
-                  className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-5"
+                  className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4 md:p-5"
                 >
                   <div>
                     <div className="text-sm font-semibold text-[#0A1F3D]">{title}</div>
@@ -509,8 +514,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Coming next — market structure analytics only */}
-            <div className="mt-6 border-t border-[#DDE0DC] pt-6">
+            <div className="mt-5 border-t border-[#DDE0DC] pt-5">
               <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">
                 Coming next
               </div>
@@ -525,10 +529,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why This Exists ── */}
-      {/* Fix 4 — increased padding signals mode change from platform to origin */}
+      {/* ── Why This Exists ───────────────────────────────────────────────────
+          Increased padding signals mode change. Header stacking: secondary
+          bridge line is sm + muted, headline unmistakably primary.
+      ──────────────────────────────────────────────────────────────────────── */}
       <section>
-        <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-10">
             <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
               <div>
@@ -536,18 +542,17 @@ export default function HomePage() {
                   Why This Exists
                 </p>
 
-                {/* Fix 6 — bridge line clearly secondary: smaller, muted */}
+                {/* Bridge line — clearly secondary */}
                 <p className="mt-3 text-sm text-[#8A92A0]">
                   This system did not originate here.
                 </p>
 
-                {/* Primary headline — unmistakably dominant */}
+                {/* Primary headline */}
                 <h2 className="tcs-heading mt-2 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
                   Built where rigorous analysis could not be expressed fully.
                 </h2>
 
-                {/* Approved body */}
-                <div className="mt-6 max-w-2xl space-y-4 text-lg leading-8 text-[#5C6472]">
+                <div className="mt-6 max-w-2xl space-y-4 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
                   <p>
                     The principles behind OSMR were not invented for this platform.
                     They were developed over a decade of evaluating real capital
@@ -573,7 +578,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* CTA block */}
               <div className="flex flex-wrap gap-4 md:justify-end md:self-end">
                 <Link
                   href="/why-this-exists"
@@ -591,7 +595,6 @@ export default function HomePage() {
                   <ChevronRight className="h-4 w-4" />
                 </Link>
 
-                {/* Secondary How to Use OSMR CTA */}
                 <Link
                   href="/how-to-use-osmr"
                   className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
@@ -606,8 +609,8 @@ export default function HomePage() {
       </section>
 
       {/* ── Footer ── */}
-      <div className="pt-6 border-t border-[#DDE0DC] text-center">
-        <p className="text-[12px] text-[#aaa] leading-[1.8]">
+      <div className="border-t border-[#DDE0DC] py-6 text-center">
+        <p className="text-[12px] leading-[1.8] text-[#aaa]">
           The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
           <br />
           © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
