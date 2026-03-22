@@ -153,7 +153,7 @@ export default function PlatformPage() {
           style={{ animation: "fadeUp 0.6s ease 0.45s both" }}
         >
           <Link
-            href="/the-osmr-framework"
+            href="/osmr-methodology"
             className="inline-flex items-center gap-2 rounded-2xl border border-[#203754] bg-[#0D2847] px-6 py-3.5 text-sm font-medium text-[#E8EDF5] transition hover:border-[#C9D8CD] hover:bg-[#0A1F3D]"
           >
             View Framework

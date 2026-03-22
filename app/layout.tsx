@@ -31,7 +31,7 @@ export default function RootLayout({
       <body>
         <header className="sticky top-0 z-50 border-b border-[#DDE0DC] bg-[#F1F3F0]/90 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-4" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="relative h-12 w-12 overflow-hidden rounded-xl">
                 <Image
                   src="/tcs-logo.png"

@@ -310,7 +310,7 @@ export default function HomePage() {
               </div>
               <div className="mt-8">
                 <Link
-                  href="/the-osmr-framework"
+                  href="/osmr-methodology"
                   className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
                 >
                   Methodology <ArrowRight className="h-4 w-4" />
