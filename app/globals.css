@@ -277,3 +277,42 @@ html {
   border: 1px solid var(--tcs-dashboard-border);
   color: #eaf0f2;
 }
+
+/* ============================================================
+   HOMEPAGE SCROLL SNAP + SECTION CONTAINMENT
+   Paste this into globals.css (or your root stylesheet).
+   The .tcs-snap-section class is applied to every major
+   homepage section in homepage.tsx.
+   ============================================================ */
+
+/* Desktop: proximity snap — sections have gravity but don't force */
+@media (min-width: 768px) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    scroll-snap-type: y proximity;
+  }
+
+  .tcs-snap-section {
+    min-height: calc(100svh - 88px); /* 88px = nav height, adjust if nav changes */
+    display: flex;
+    align-items: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+}
+
+/* Mobile: no snap, normal document flow, auto height */
+@media (max-width: 767px) {
+  body {
+    scroll-snap-type: none;
+  }
+
+  .tcs-snap-section {
+    min-height: auto;
+    display: block;
+    scroll-snap-align: none;
+  }
+}

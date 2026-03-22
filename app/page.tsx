@@ -92,8 +92,7 @@ function UpdatedAgo() {
   const [label, setLabel] = useState("Updated 2m ago")
   useEffect(() => {
     const id = setInterval(() => {
-      const mins = Math.floor(Math.random() * 4) + 1
-      setLabel(`Updated ${mins}m ago`)
+      setLabel(`Updated ${Math.floor(Math.random() * 4) + 1}m ago`)
     }, 60_000)
     return () => clearInterval(id)
   }, [])
@@ -122,378 +121,325 @@ export default function HomePage() {
   const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`     : "100%"
 
   return (
-    <>
-      {/* Global scroll snap — proximity so it guides without forcing */}
-      <style>{`
-        html { scroll-behavior: smooth; }
-        body { scroll-snap-type: y proximity; }
-        .snap-section {
-          scroll-snap-align: start;
-          scroll-snap-stop: normal;
-        }
-        @media (max-width: 767px) {
-          body { scroll-snap-type: none; }
-          .snap-section { scroll-snap-align: none; }
-        }
-      `}</style>
+    <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
-      <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
+      {/* ── HERO ──────────────────────────────────────────────────────────
+          .tcs-snap-section defined in globals.css:
+            min-height: calc(100svh - 88px);
+            display: flex;
+            align-items: center;
+            scroll-snap-align: start;
+      ──────────────────────────────────────────────────────────────────── */}
+      <section className="tcs-snap-section border-b border-[#DDE0DC]">
+        <div className="mx-auto w-full max-w-7xl px-6 py-10">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:items-center">
 
-        {/* ── HERO ─────────────────────────────────────────────────────────
-            Full viewport height. Two-column grid, content vertically
-            centered. OSMR card capped at 72vh so it never overflows.
-        ──────────────────────────────────────────────────────────────────── */}
-        <section
-          className="snap-section border-b border-[#DDE0DC]"
-          style={{ minHeight: 'calc(100svh - 88px)', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="mx-auto w-full max-w-7xl px-6 py-10">
-            <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14 md:items-center">
+            {/* Left */}
+            <div>
+              <h1 className="tcs-heading text-4xl font-semibold leading-[1.05] tracking-tight text-[#0A1F3D] md:text-[4rem] md:leading-[1.02] lg:text-[4.5rem]">
+                Markets price narratives. We measure what's underneath them.
+              </h1>
 
-              {/* Left — copy */}
-              <div>
-                <h1 className="tcs-heading text-4xl font-semibold leading-[1.05] tracking-tight text-[#0A1F3D] md:text-[4rem] md:leading-[1.02] lg:text-[4.5rem]">
-                  Markets price narratives. We measure what's underneath them.
-                </h1>
+              <p className="mt-5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+                OSMR measures three things: how far a company's valuation extends
+                beyond its demonstrated operational output, whether that operational
+                foundation is improving or deteriorating, and whether the firm can
+                service its obligations from what it actually produces.
+              </p>
 
-                <p className="mt-5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
-                  OSMR measures three things: how far a company's valuation extends
-                  beyond its demonstrated operational output, whether that operational
-                  foundation is improving or deteriorating, and whether the firm can
-                  service its obligations from what it actually produces.
-                </p>
+              <p className="mt-3 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+                Those measurements are computed from reported financials across the
+                U.S.-listed equity universe, then ranked and scored on a common
+                structural basis.
+              </p>
 
-                <p className="mt-3 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
-                  Those measurements are computed from reported financials across the
-                  U.S.-listed equity universe, then ranked and scored on a common
-                  structural basis.
-                </p>
-
-                {/* Stat pairs — plain elevated text, no card component */}
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <p className="text-base leading-7 text-[#1E2228] md:text-lg">
-                      <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
-                      sits in the elevated structural risk zone across all three axes simultaneously.
-                    </p>
-                    <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
-                      {revAnchorPct} of those companies are revenue-anchored.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-base leading-7 text-[#1E2228] md:text-lg">
-                      <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
-                      across all three axes.
-                    </p>
-                    <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
-                      {fcfAnchorPct} of those companies are FCF-anchored.
-                    </p>
-                  </div>
+              <div className="mt-6 space-y-4">
+                <div>
+                  <p className="text-base leading-7 text-[#1E2228] md:text-lg">
+                    <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
+                    sits in the elevated structural risk zone across all three axes simultaneously.
+                  </p>
+                  <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
+                    {revAnchorPct} of those companies are revenue-anchored.
+                  </p>
                 </div>
-
-                {/* Conclusion */}
-                <p className="mt-5 text-base font-medium leading-7 text-[#0A1F3D] md:text-lg">
-                  The distribution is not a ranking artifact. It is a structural separation.
-                </p>
-
-                {/* CTA row */}
-                <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-                  <Link
-                    href="/platform"
-                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]"
-                  >
-                    Open Platform
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <Link href="/how-we-see-markets" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
-                      How We See Markets <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
-                    <Link href="/how-to-use-osmr" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
-                      How to Use OSMR <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </span>
+                <div>
+                  <p className="text-base leading-7 text-[#1E2228] md:text-lg">
+                    <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
+                    across all three axes.
+                  </p>
+                  <p className="mt-0.5 text-base leading-7 text-[#5C6472] md:text-lg">
+                    {fcfAnchorPct} of those companies are FCF-anchored.
+                  </p>
                 </div>
               </div>
 
-              {/* Right — OSMR card, capped height so it never overflows section */}
+              <p className="mt-5 text-base font-medium leading-7 text-[#0A1F3D] md:text-lg">
+                The distribution is not a ranking artifact. It is a structural separation.
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#153761]">
+                  Open Platform <ArrowRight className="h-4 w-4" />
+                </Link>
+                <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <Link href="/how-we-see-markets" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
+                    How We See Markets <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                  <Link href="/how-to-use-osmr" className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]">
+                    How to Use OSMR <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </span>
+              </div>
+            </div>
+
+            {/* Right — OSMR card, desktop only */}
+            <div className="hidden md:block" style={{ animation: 'card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both' }}>
               <div
-                className="hidden md:block"
-                style={{ animation: 'card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both' }}
+                className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 overflow-hidden"
+                style={{ maxHeight: 'min(720px, 72vh)' }}
               >
-                <div
-                  className="w-full rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] transition-all duration-200 hover:shadow-[0_28px_72px_rgba(10,35,66,0.12)] hover:-translate-y-1 overflow-hidden"
-                  style={{ maxHeight: 'min(720px, 72vh)' }}
-                >
-                  <div className="mb-4 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">OSMR</p>
-                      <h2 className="mt-1 text-xl font-semibold text-[#0A1F3D]">Structural Market Map</h2>
-                      <UpdatedAgo />
-                    </div>
-                    <div className="flex shrink-0 cursor-default items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1.5 text-xs font-medium text-[#244636]">
-                      <StatusDot />
-                      Live System
-                    </div>
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">OSMR</p>
+                    <h2 className="mt-1 text-xl font-semibold text-[#0A1F3D]">Structural Market Map</h2>
+                    <UpdatedAgo />
                   </div>
-
-                  <div className="grid gap-3">
-                    {[
-                      { label: "Operational Anchor Risk", desc: "How much narrative bridges this valuation to real operational output" },
-                      { label: "Operational Trajectory Risk", desc: "Whether the firm's operational anchor is improving or deteriorating" },
-                      { label: "Operational Financing Risk", desc: "Whether the firm can service its obligations from its operational output" },
-                    ].map(({ label, desc }) => (
-                      <div key={label} className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
-                        <div className="text-sm font-medium text-[#0A1F3D]">{label}</div>
-                        <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 rounded-2xl bg-[#0A1F3D] p-4 text-white">
-                    <div className="text-xs uppercase tracking-[0.18em] text-[#A9BEDF]">Core Output</div>
-                    <div className="mt-1.5 text-base font-medium">
-                      A structural map of where valuation is credibly anchored — and where it isn't.
-                    </div>
+                  <div className="flex shrink-0 cursor-default items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1.5 text-xs font-medium text-[#244636]">
+                    <StatusDot /> Live System
                   </div>
                 </div>
-              </div>
 
-            </div>
-          </div>
-        </section>
-
-        {/* ── RESEARCH LENS ────────────────────────────────────────────────
-            Viewport-contained. Three cards. Method card shows axes as
-            a unified system block.
-        ──────────────────────────────────────────────────────────────────── */}
-        <section
-          className="snap-section border-b border-[#DDE0DC]"
-          style={{ minHeight: 'calc(100svh - 88px)', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="mx-auto w-full max-w-7xl px-6 py-12">
-            <div className="mb-10 max-w-2xl">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Research Lens</p>
-              <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
-                How structural risk is defined.
-              </h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
-                <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Shield className="h-5 w-5" /></div>
-                <h3 className="text-2xl font-semibold text-[#0A1F3D]">Focus</h3>
-                <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                  The depth and credibility of the operational anchors underlying market valuations — and where narrative dependence has outpaced financial reality before that gap closes in price.
-                </p>
-              </div>
-
-              <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
-                <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Radar className="h-5 w-5" /></div>
-                <h3 className="text-2xl font-semibold text-[#0A1F3D]">Scope</h3>
-                <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                  Cross-sectional by design. Every company in the public equity universe evaluated on the same structural basis — so narrative fragility can be ranked, segmented, and monitored over time.
-                </p>
-              </div>
-
-              <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
-                <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Workflow className="h-5 w-5" /></div>
-                <h3 className="text-2xl font-semibold text-[#0A1F3D]">Method</h3>
-                <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC] bg-[#F7F8F6] divide-y divide-[#DDE0DC]">
-                  {["Operational Anchor Risk", "Operational Trajectory Risk", "Operational Financing Risk"].map(axis => (
-                    <div key={axis} className="px-4 py-3 text-sm font-medium text-[#0A1F3D]">{axis}</div>
-                  ))}
-                </div>
-                <p className="mt-4 text-base leading-7 text-[#5C6472]">
-                  Those axes answer a single question: what sustains the valuation in the first place.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── CORE FRAMEWORK — DARK BAND ───────────────────────────────────
-            Viewport-contained. Paragraph width constrained for legibility.
-            Framework cards stack on mobile.
-        ──────────────────────────────────────────────────────────────────── */}
-        <section
-          className="snap-section border-b border-[#0D2440] bg-[#0A1F3D]"
-          style={{ minHeight: 'calc(100svh - 88px)', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="mx-auto w-full max-w-5xl px-6 py-12">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">Core Framework</p>
-            <h2 className="tcs-heading mt-3 max-w-2xl text-3xl font-semibold leading-tight text-white md:text-5xl">
-              If narrative sustains a valuation, the question is what sustains the narrative.
-            </h2>
-
-            <div className="mt-6 max-w-xl space-y-5 text-base leading-[1.9] text-[#A9BEDF] md:text-lg">
-              <p>
-                The strongest valuations rest on demonstrated cash generation — the gap between price and operational reality is short, and the narrative required to bridge it is minimal. The weakest rest on what a company might become — the bridge is long, the narrative load is heavy, and the valuation is exposed as that narrative weakens.
-              </p>
-              <p>
-                OSMR maps where that load is concentrated across the market. It does not predict which narratives will fail. It measures how much structural weight each one is already carrying.
-              </p>
-            </div>
-
-            {/* Framework diagram */}
-            <div className="mt-10 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-6 md:p-8">
-              <div className="mb-5 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">OSMR Framework</div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-                {[
-                  { title: "Operational Anchor Risk", desc: "Valuation vs. credible operational output" },
-                  { title: "Operational Trajectory Risk", desc: "Whether the anchor is improving or deteriorating" },
-                  { title: "Operational Financing Risk", desc: "Obligation coverage from operational output" },
-                ].map(({ title, desc }) => (
-                  <div key={title} className="rounded-xl border border-[#1E3A5F] bg-[#0A1F3D] p-5">
-                    <div className="text-sm font-medium leading-snug text-white">{title}</div>
-                    <div className="mt-2 text-sm leading-6 text-[#7A9FCA]">{desc}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="my-4 hidden justify-around px-[16.5%] md:flex">
-                {[0,1,2].map(i => (
-                  <div key={i} className="h-5 w-px" style={{ background: 'linear-gradient(to bottom, #2E5A8F, transparent)' }} />
-                ))}
-              </div>
-              <div className="mt-3 rounded-xl border border-[#3E6A9F] bg-[#0D2847] px-6 py-4 md:mt-0">
-                <div className="flex items-center justify-center gap-4">
-                  <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-4 py-1.5 text-sm font-medium text-[#244636]">OSMR</span>
-                  <span className="text-sm text-[#A9BEDF]">Composite — three-axis structural output</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <RiskCards />
-            </div>
-
-            <div className="mt-10 flex justify-center">
-              <Link href="/the-osmr-framework" className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]">
-                Methodology <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── PLATFORM ─────────────────────────────────────────────────────
-            Viewport-contained. Feature titles semibold for scan hierarchy.
-        ──────────────────────────────────────────────────────────────────── */}
-        <section
-          className="snap-section border-b border-[#DDE0DC]"
-          style={{ minHeight: 'calc(100svh - 88px)', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="mx-auto w-full max-w-7xl px-6 py-12">
-            <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:items-center">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
-                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-                  The framework, made usable.
-                </h2>
-                <p className="mt-5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
-                  The platform converts company-level financial data into a structural map of the equity market. Identify risk clusters before they reprice. Compare companies on a common structural basis. Track anchor deterioration over time. Updated monthly for structural changes and weekly for snapshot refreshes.
-                </p>
-                <div className="mt-7">
-                  <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
-                    View Platform <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-
-              <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-7">
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Database className="h-5 w-5" /></div>
-                  <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">What's live now</div>
-                </div>
-
-                <div className="grid gap-3 md:gap-4">
+                <div className="grid gap-3">
                   {[
-                    { title: "Structural market map", desc: "Full-universe OSMR scoring across all three axes." },
-                    { title: "Historical cohort analysis", desc: "Forward return outcomes across structural regimes, 12M horizon." },
-                    { title: "Company-level drilldowns", desc: "Individual ticker structural profiles, regime context, and trajectory history." },
-                  ].map(({ title, desc }) => (
-                    <div key={title} className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4 md:p-5">
-                      <div>
-                        <div className="text-sm font-semibold text-[#0A1F3D]">{title}</div>
-                        <div className="mt-1.5 text-sm leading-6 text-[#5C6472]">{desc}</div>
-                      </div>
-                      <div className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-semibold text-[#1B6B3A]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#4CAF7D]" />&nbsp;Live
-                      </div>
+                    { label: "Operational Anchor Risk", desc: "How much narrative bridges this valuation to real operational output" },
+                    { label: "Operational Trajectory Risk", desc: "Whether the firm's operational anchor is improving or deteriorating" },
+                    { label: "Operational Financing Risk", desc: "Whether the firm can service its obligations from its operational output" },
+                  ].map(({ label, desc }) => (
+                    <div key={label} className="rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4">
+                      <div className="text-sm font-medium text-[#0A1F3D]">{label}</div>
+                      <div className="mt-1 text-sm text-[#5C6472]">{desc}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-5 border-t border-[#DDE0DC] pt-5">
-                  <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">Coming next</div>
-                  <div className="rounded-2xl border border-[#EAECE8] bg-[#FAFAF8] p-4 opacity-60">
-                    <div className="text-sm font-semibold text-[#6B7280]">Market structure analytics</div>
-                    <div className="mt-1.5 text-sm leading-6 text-[#9CA3AF]">Options and spread microstructure signals layered on structural scores.</div>
+                <div className="mt-4 rounded-2xl bg-[#0A1F3D] p-4 text-white">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[#A9BEDF]">Core Output</div>
+                  <div className="mt-1.5 text-base font-medium">
+                    A structural map of where valuation is credibly anchored — and where it isn't.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── RESEARCH LENS ─────────────────────────────────────────────────── */}
+      <section className="tcs-snap-section border-b border-[#DDE0DC]">
+        <div className="mx-auto w-full max-w-7xl px-6 py-12">
+          <div className="mb-10 max-w-2xl">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Research Lens</p>
+            <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
+              How structural risk is defined.
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Shield className="h-5 w-5" /></div>
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Focus</h3>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                The depth and credibility of the operational anchors underlying market valuations — and where narrative dependence has outpaced financial reality before that gap closes in price.
+              </p>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Radar className="h-5 w-5" /></div>
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Scope</h3>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                Cross-sectional by design. Every company in the public equity universe evaluated on the same structural basis — so narrative fragility can be ranked, segmented, and monitored over time.
+              </p>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-[#DDE0DC] bg-white p-7 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5">
+              <div className="mb-5 inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Workflow className="h-5 w-5" /></div>
+              <h3 className="text-2xl font-semibold text-[#0A1F3D]">Method</h3>
+              <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC] bg-[#F7F8F6] divide-y divide-[#DDE0DC]">
+                {["Operational Anchor Risk", "Operational Trajectory Risk", "Operational Financing Risk"].map(axis => (
+                  <div key={axis} className="px-4 py-3 text-sm font-medium text-[#0A1F3D]">{axis}</div>
+                ))}
+              </div>
+              <p className="mt-4 text-base leading-7 text-[#5C6472]">
+                Those axes answer a single question: what sustains the valuation in the first place.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CORE FRAMEWORK — DARK BAND ────────────────────────────────────
+          Diagram box removed. Accordion cards retained.
+          OSMR full name introduced in body copy.
+      ──────────────────────────────────────────────────────────────────── */}
+      <section className="tcs-snap-section border-b border-[#0D2440] bg-[#0A1F3D]">
+        <div className="mx-auto w-full max-w-5xl px-6 py-12">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">Core Framework</p>
+          <h2 className="tcs-heading mt-3 max-w-2xl text-3xl font-semibold leading-tight text-white md:text-5xl">
+            If narrative sustains a valuation, the question is what sustains the narrative.
+          </h2>
+
+          <div className="mt-6 max-w-xl space-y-5 text-base leading-[1.9] text-[#A9BEDF] md:text-lg">
+            <p>
+              The strongest valuations rest on demonstrated cash generation — the
+              gap between price and operational reality is short, and the narrative
+              required to bridge it is minimal. The weakest rest on what a company
+              might become — the bridge is long, the narrative load is heavy, and
+              the valuation is exposed as that narrative weakens.
+            </p>
+            <p>
+              The Operational Structure Mispricing Risk (OSMR) framework maps where
+              that load is concentrated across the market. It does not predict which
+              narratives will fail. It measures how much structural weight each one
+              is already carrying.
+            </p>
+          </div>
+
+          {/* Accordion — retained, diagram removed */}
+          <div className="mt-8">
+            <RiskCards />
+          </div>
+
+          <div className="mt-10 flex justify-start">
+            <Link
+              href="/the-osmr-framework"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
+            >
+              Methodology <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PLATFORM ──────────────────────────────────────────────────────── */}
+      <section className="tcs-snap-section border-b border-[#DDE0DC]">
+        <div className="mx-auto w-full max-w-7xl px-6 py-12">
+          <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:items-center">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Platform</p>
+              <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+                The framework, made usable.
+              </h2>
+              <p className="mt-5 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+                The platform converts company-level financial data into a structural
+                map of the equity market. Identify risk clusters before they reprice.
+                Compare companies on a common structural basis. Track anchor
+                deterioration over time. Updated monthly for structural changes and
+                weekly for snapshot refreshes.
+              </p>
+              <div className="mt-7">
+                <Link href="/platform" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
+                  View Platform <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-7">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]"><Database className="h-5 w-5" /></div>
+                <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">What's live now</div>
+              </div>
+
+              <div className="grid gap-3 md:gap-4">
+                {[
+                  { title: "Structural market map", desc: "Full-universe OSMR scoring across all three axes." },
+                  { title: "Historical cohort analysis", desc: "Forward return outcomes across structural regimes, 12M horizon." },
+                  { title: "Company-level drilldowns", desc: "Individual ticker structural profiles, regime context, and trajectory history." },
+                ].map(({ title, desc }) => (
+                  <div key={title} className="flex items-start justify-between rounded-2xl border border-[#DDE0DC] bg-[#F7F8F6] p-4 md:p-5">
+                    <div>
+                      <div className="text-sm font-semibold text-[#0A1F3D]">{title}</div>
+                      <div className="mt-1.5 text-sm leading-6 text-[#5C6472]">{desc}</div>
+                    </div>
+                    <div className="ml-4 flex shrink-0 items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1 text-xs font-semibold text-[#1B6B3A]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#4CAF7D]" />&nbsp;Live
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 border-t border-[#DDE0DC] pt-5">
+                <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">Coming next</div>
+                <div className="rounded-2xl border border-[#EAECE8] bg-[#FAFAF8] p-4 opacity-60">
+                  <div className="text-sm font-semibold text-[#6B7280]">Market structure analytics</div>
+                  <div className="mt-1.5 text-sm leading-6 text-[#9CA3AF]">
+                    Options and spread microstructure signals layered on structural scores.
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-
-        {/* ── WHY THIS EXISTS ───────────────────────────────────────────────
-            Viewport-contained. Single-column layout — CTAs sit below text,
-            not beside it. Eliminates the empty-right-column problem.
-        ──────────────────────────────────────────────────────────────────── */}
-        <section
-          className="snap-section"
-          style={{ minHeight: 'calc(100svh - 88px)', display: 'flex', alignItems: 'center' }}
-        >
-          <div className="mx-auto w-full max-w-7xl px-6 py-12">
-            <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] md:p-12">
-
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Why This Exists</p>
-              <p className="mt-3 text-sm text-[#8A92A0]">This system did not originate here.</p>
-              <h2 className="tcs-heading mt-2 max-w-2xl text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-                Built where rigorous analysis could not be expressed fully.
-              </h2>
-
-              <div className="mt-6 max-w-2xl space-y-4 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
-                <p>
-                  The principles behind OSMR were not invented for this platform. They were developed over a decade of evaluating real capital decisions inside a financial publishing environment — and then constrained by it.
-                </p>
-                <p>
-                  That environment has an editorial logic. Research exists to support a product. Analytical frameworks exist to generate recommendations. The more rigorous the framework, the harder it is to compress into that structure without distorting what it actually measures.
-                </p>
-                <p>
-                  The Capital Steward exists because that distortion has a cost — and because the framework required a context where that cost did not have to be paid.
-                </p>
-                <p>
-                  What's here is not a rebrand or a retrofit. It is the same framework, expressed without compression.
-                </p>
-              </div>
-
-              {/* CTAs below text — no grid column splitting */}
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/why-this-exists" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
-                  Why This Exists <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/how-we-see-markets" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
-                  How We See Markets <ChevronRight className="h-4 w-4" />
-                </Link>
-                <Link href="/how-to-use-osmr" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
-                  How to Use OSMR <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ── Footer ── */}
-        <div className="border-t border-[#DDE0DC] py-6 text-center">
-          <p className="text-[12px] leading-[1.8] text-[#aaa]">
-            The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
-            <br />
-            © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.
-          </p>
         </div>
+      </section>
 
-      </main>
-    </>
+      {/* ── WHY THIS EXISTS ───────────────────────────────────────────────── */}
+      <section className="tcs-snap-section">
+        <div className="mx-auto w-full max-w-5xl px-6 py-12">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Why This Exists</p>
+
+          <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+            Built for investors who want structure, not stories.
+          </h2>
+
+          <div className="mt-6 max-w-2xl space-y-4 text-base leading-7 text-[#5C6472] md:text-lg md:leading-8">
+            <p>
+              The principles behind OSMR were not invented for this platform.
+              They were developed over a decade of evaluating real capital
+              decisions inside a financial publishing environment — and then
+              constrained by it.
+            </p>
+            <p>
+              That environment has an editorial logic. Research exists to
+              support a product. Analytical frameworks exist to generate
+              recommendations. The more rigorous the framework, the harder it
+              is to compress into that structure without distorting what it
+              actually measures.
+            </p>
+            <p>
+              The Capital Steward exists because that distortion has a cost —
+              and because the framework required a context where that cost did
+              not have to be paid.
+            </p>
+            <p>
+              What's here is not a rebrand or a retrofit. It is the same
+              framework, expressed without compression.
+            </p>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/why-this-exists" className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]">
+              Why This Exists <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/how-we-see-markets" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
+              How We See Markets <ChevronRight className="h-4 w-4" />
+            </Link>
+            <Link href="/how-to-use-osmr" className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]">
+              How to Use OSMR <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <div className="border-t border-[#DDE0DC] py-6 text-center">
+        <p className="text-[12px] leading-[1.8] text-[#aaa]">
+          The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
+          <br />
+          © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.
+        </p>
+      </div>
+
+    </main>
   )
 }
