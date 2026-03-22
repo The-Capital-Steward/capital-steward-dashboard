@@ -104,7 +104,38 @@ function UpdatedAgo() {
   return <p className="mt-0.5 text-[11px] text-[#8A92A0]">{label}</p>
 }
 
+// ── System stats pulled from key_system_stats.json ──────────────────────────
+type SiteStats = {
+  universe: { total: number }
+  high_risk_cluster: {
+    pct_of_universe: number
+    revenue_anchored_pct: number
+  }
+  low_risk_cluster: {
+    pct_of_universe: number
+    fcf_anchored_pct: number
+  }
+} | null
+
+function useSystemStats(): SiteStats {
+  const [stats, setStats] = useState<SiteStats>(null)
+  useEffect(() => {
+    fetch("/data/key_system_stats.json")
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => null)
+  }, [])
+  return stats
+}
+
 export default function HomePage() {
+  const stats = useSystemStats()
+
+  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%` : "17.2%"
+  const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "62%"
+  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%` : "10.2%"
+  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%` : "100%"
+
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
@@ -113,21 +144,40 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-14 px-6 py-20 md:grid-cols-[1.15fr_0.85fr] md:py-28">
           <div className="max-w-3xl">
 
-            {/* Headline — canonical phrasing */}
+            {/* Headline — locked */}
             <h1 className="tcs-heading text-5xl font-semibold leading-[1.02] tracking-tight text-[#0A1F3D] md:text-7xl">
               Markets price narratives. We measure what's underneath them.
             </h1>
 
-            {/* Body — "structural" dropped from final sentence */}
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-[#5C6472] md:text-xl">
-              Most valuation frameworks measure price relative to output.
-              The Capital Steward measures something different: how much
-              narrative a company requires to justify its valuation — and
-              where that requirement has grown too large to hold. The result
-              is a map of where risk is accumulating before it
-              shows up in price.
-            </p>
+            {/* Approved hero substructure */}
+            <div className="mt-8 max-w-2xl space-y-5 text-lg leading-8 text-[#5C6472] md:text-xl">
+              <p>
+                OSMR measures three things: how far a company's valuation extends
+                beyond its demonstrated operational output, whether that operational
+                foundation is improving or deteriorating, and whether the firm can
+                service its obligations from what it actually produces.
+              </p>
+              <p>
+                Those measurements are computed from reported financials across the
+                U.S.-listed equity universe, then ranked and scored on a common
+                structural basis.
+              </p>
+              <p>
+                {highRiskPct} of the universe currently sits in the elevated
+                structural risk zone across all three axes simultaneously.{" "}
+                {revAnchorPct} of those companies are revenue-anchored.
+              </p>
+              <p>
+                {lowRiskPct} sits in the structurally sound zone across all three
+                axes. {fcfAnchorPct} of those companies are FCF-anchored.
+              </p>
+              <p className="font-medium text-[#0A1F3D]">
+                The distribution is not a ranking artifact. It is a structural
+                separation.
+              </p>
+            </div>
 
+            {/* CTA row — three links */}
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/platform"
@@ -137,7 +187,6 @@ export default function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
 
-              {/* How We See Markets — renamed from Our Philosophy */}
               <Link
                 href="/how-we-see-markets"
                 className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
@@ -145,9 +194,15 @@ export default function HomePage() {
                 How We See Markets
                 <ChevronRight className="h-4 w-4" />
               </Link>
-            </div>
 
-            {/* Upstream credential cards removed */}
+              <Link
+                href="/how-to-use-osmr"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-white px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+              >
+                How to Use OSMR
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
           {/* OSMR preview card */}
@@ -162,8 +217,6 @@ export default function HomePage() {
                   <h2 className="mt-1 text-2xl font-semibold text-[#0A1F3D]">Structural Market Map</h2>
                   <UpdatedAgo />
                 </div>
-
-                {/* Live System badge with pulse dot + tooltip */}
                 <div
                   className="flex shrink-0 cursor-default items-center gap-1.5 rounded-full bg-[#E8EFE9] px-3 py-1.5 text-xs font-medium text-[#244636]"
                   title="Updating continuously"
@@ -213,8 +266,9 @@ export default function HomePage() {
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
               Research Lens
             </p>
+            {/* Updated header — approved */}
             <h2 className="tcs-heading mt-3 text-3xl font-semibold text-[#0A1F3D] md:text-4xl">
-              What we look at — and why.
+              How structural risk is defined.
             </h2>
           </div>
 
@@ -233,8 +287,8 @@ export default function HomePage() {
               {
                 icon: <Workflow className="h-5 w-5" />,
                 title: "Method",
-                // Axis names removed — redundant with OSMR card above
-                body: "Three axes map where structural resilience and fragility are concentrated across the market.",
+                // Updated — approved bridge line added
+                body: "Three axes map where structural resilience and fragility are concentrated across the market. Those axes answer a single question: what sustains the valuation in the first place.",
               },
             ].map(({ icon, title, body }) => (
               <div
@@ -256,30 +310,37 @@ export default function HomePage() {
       <section className="border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto max-w-5xl px-6 py-18 md:py-24">
 
-          {/* 1. Headline */}
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#A9BEDF]">
             Core Framework
           </p>
+
+          {/* Updated opening — approved, no repetition of hero premise */}
           <h2 className="tcs-heading mt-3 max-w-3xl text-3xl font-semibold leading-tight text-white md:text-5xl">
-            Markets price narratives. OSMR measures the structure beneath them.
+            If narrative sustains a valuation, the question is what sustains the narrative.
           </h2>
 
-          {/* 2. Intuition */}
-          <p className="mt-8 max-w-3xl text-lg leading-8 text-[#A9BEDF]">
-            Most valuations rest on a narrative bridge between what a company
-            actually produces and what the market believes it will. The deeper
-            the operational anchor, the shorter that bridge. The shallower the
-            anchor, the more narrative is required — and the more vulnerable
-            the valuation is to deflation when that narrative weakens.
-          </p>
+          {/* Approved body — consequence, not premise restatement */}
+          <div className="mt-8 max-w-3xl space-y-5 text-lg leading-8 text-[#A9BEDF]">
+            <p>
+              The strongest valuations rest on demonstrated cash generation — the
+              gap between price and operational reality is short, and the narrative
+              required to bridge it is minimal. The weakest rest on what a company
+              might become — the bridge is long, the narrative load is heavy, and
+              the valuation is exposed as that narrative weakens.
+            </p>
+            <p>
+              OSMR maps where that load is concentrated across the market. It does
+              not predict which narratives will fail. It measures how much
+              structural weight each one is already carrying.
+            </p>
+          </div>
 
-          {/* 3. Framework diagram — centered anchor object */}
+          {/* Framework diagram */}
           <div className="mt-12 rounded-[1.75rem] border border-[#1E3A5F] bg-[#0D2847] p-8">
             <div className="mb-6 text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
               OSMR Framework
             </div>
 
-            {/* Three equal axis cards */}
             <div className="grid grid-cols-3 gap-4">
               {[
                 {
@@ -305,7 +366,6 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Connector */}
             <div className="my-4 flex justify-around px-[16.5%]">
               {[0, 1, 2].map((i) => (
                 <div
@@ -316,7 +376,6 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Composite output band — higher contrast */}
             <div className="rounded-xl border border-[#3E6A9F] bg-[#0D2847] px-6 py-4">
               <div className="flex items-center justify-center gap-4">
                 <span className="rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-4 py-1.5 text-sm font-medium text-[#244636]">
@@ -327,18 +386,18 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 4. Accordion — full width */}
+          {/* Accordion */}
           <div className="mt-6">
             <RiskCards />
           </div>
 
-          {/* 5. CTA — primary, centered */}
+          {/* CTA */}
           <div className="mt-12 flex justify-center">
             <Link
-              href="/osmr-methodology"
+              href="/the-osmr-framework"
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-sm font-medium text-[#0A1F3D] shadow-[0_0_0_1px_rgba(255,255,255,0.15)] transition hover:bg-[#F0F4FF]"
             >
-              Explore the Full Framework
+              Methodology
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -355,11 +414,11 @@ export default function HomePage() {
               The framework, made usable.
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-              The platform converts company-level financial data into a
-              structural map of the equity market. Identify risk clusters
-              before they reprice. Compare companies on a common structural
-              basis. Track anchor deterioration over time. Updated monthly
-              for structural changes and weekly for snapshot refreshes.
+              The platform converts company-level financial data into a structural
+              map of the equity market. Identify risk clusters before they reprice.
+              Compare companies on a common structural basis. Track anchor
+              deterioration over time. Updated monthly for structural changes and
+              weekly for snapshot refreshes.
             </p>
             <div className="mt-8">
               <Link
@@ -377,13 +436,12 @@ export default function HomePage() {
               <div className="inline-flex rounded-2xl bg-[#E8EFE9] p-3 text-[#244636]">
                 <Database className="h-5 w-5" />
               </div>
-              {/* Label: Roadmap → What's live now */}
               <div className="text-sm font-medium uppercase tracking-[0.14em] text-[#8A92A0]">
                 What's live now
               </div>
             </div>
 
-            {/* Primary block — live features */}
+            {/* Live features — drilldowns now included */}
             <div className="grid gap-4">
               {[
                 {
@@ -393,6 +451,10 @@ export default function HomePage() {
                 {
                   title: "Historical cohort analysis",
                   desc: "Forward return outcomes across structural regimes, 12M horizon.",
+                },
+                {
+                  title: "Company-level drilldowns",
+                  desc: "Individual ticker structural profiles, regime context, and trajectory history.",
                 },
               ].map(({ title, desc }) => (
                 <div
@@ -411,17 +473,13 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Secondary block — future features, de-emphasized */}
+            {/* Coming next — market structure analytics only */}
             <div className="mt-5 border-t border-[#DDE0DC] pt-5">
               <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-[#B0B8C4]">
                 Coming next
               </div>
               <div className="grid gap-3">
                 {[
-                  {
-                    title: "Company-level drilldowns",
-                    desc: "Individual ticker structural profiles, regime context, trajectory history.",
-                  },
                   {
                     title: "Market structure analytics",
                     desc: "Options and spread microstructure signals layered on structural scores.",
@@ -441,7 +499,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why This Exists (formerly Our Story) ── */}
+      {/* ── Why This Exists ── */}
       <section>
         <div className="mx-auto max-w-7xl px-6 py-18 md:py-22">
           <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] transition-all duration-200 hover:shadow-[0_20px_48px_rgba(10,35,66,0.10)] hover:-translate-y-0.5 md:p-10">
@@ -450,18 +508,46 @@ export default function HomePage() {
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
                   Why This Exists
                 </p>
-                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
-                  Built where rigorous analysis couldn't be published.
-                </h2>
-                {/* Single sentence, incentive framing, second sentence removed */}
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5C6472]">
-                  The Capital Steward was built by someone who spent a decade
-                  doing real analytical work inside a system not designed to
-                  reward rigorous analysis.
+
+                {/* Approved opening bridge line */}
+                <p className="mt-3 text-sm font-medium text-[#5C6472]">
+                  This system did not originate here.
                 </p>
+
+                {/* Approved headline */}
+                <h2 className="tcs-heading mt-3 text-3xl font-semibold leading-tight text-[#0A1F3D] md:text-5xl">
+                  Built where rigorous analysis could not be expressed fully.
+                </h2>
+
+                {/* Approved body — full rewrite */}
+                <div className="mt-6 max-w-2xl space-y-4 text-lg leading-8 text-[#5C6472]">
+                  <p>
+                    The principles behind OSMR were not invented for this platform.
+                    They were developed over a decade of evaluating real capital
+                    decisions inside a financial publishing environment — and then
+                    constrained by it.
+                  </p>
+                  <p>
+                    That environment has an editorial logic. Research exists to
+                    support a product. Analytical frameworks exist to generate
+                    recommendations. The more rigorous the framework, the harder it
+                    is to compress into that structure without distorting what it
+                    actually measures.
+                  </p>
+                  <p>
+                    The Capital Steward exists because that distortion has a cost —
+                    and because the framework required a context where that cost did
+                    not have to be paid.
+                  </p>
+                  <p>
+                    What's here is not a rebrand or a retrofit. It is the same
+                    framework, expressed without compression.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-4 md:justify-end">
+              {/* CTA block — primary + secondary How to Use OSMR */}
+              <div className="flex flex-wrap gap-4 md:justify-end md:self-end">
                 <Link
                   href="/why-this-exists"
                   className="inline-flex items-center gap-2 rounded-2xl bg-[#0A1F3D] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-[#153761]"
@@ -477,20 +563,31 @@ export default function HomePage() {
                   How We See Markets
                   <ChevronRight className="h-4 w-4" />
                 </Link>
+
+                {/* Secondary How to Use OSMR CTA — approved placement */}
+                <Link
+                  href="/how-to-use-osmr"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
+                >
+                  How to Use OSMR
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
-{/* ── Footer ── */}
-            <div className="pt-6 border-t border-[#DDE0DC] text-center">
-              <p className="text-[12px] text-[#aaa] leading-[1.8]">
-                The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
-                <br />
-                © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
-                investment advice.
-              </p>
-            </div>
+
+      {/* ── Footer ── */}
+      <div className="pt-6 border-t border-[#DDE0DC] text-center">
+        <p className="text-[12px] text-[#aaa] leading-[1.8]">
+          The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
+          <br />
+          © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not
+          investment advice.
+        </p>
+      </div>
+
     </main>
   );
 }

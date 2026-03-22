@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-03-22T15:30:14.997175+00:00",
+  "universe": {
+    "total": 5168
+  },
+  "high_risk_cluster": {
+    "label": "High or Very High on all three axes",
+    "count": 887,
+    "pct_of_universe": 17.2,
+    "acute_count": 225,
+    "acute_pct_of_universe": 4.4,
+    "revenue_anchored_count": 548,
+    "revenue_anchored_pct": 61.8,
+    "anchor_breakdown": {
+      "Revenue": 548,
+      "Net Income": 224,
+      "EBIT": 95,
+      "FCF": 20
+    }
+  },
+  "low_risk_cluster": {
+    "label": "Low or Very Low on all three axes",
+    "count": 527,
+    "pct_of_universe": 10.2,
+    "acute_count": 48,
+    "acute_pct_of_universe": 0.9,
+    "fcf_anchored_count": 527,
+    "fcf_anchored_pct": 100.0,
+    "anchor_breakdown": {
+      "FCF": 527
+    }
+  },
+  "cohort_returns": {
+    "axis1_very_high_median_return": -0.048,
+    "axis1_very_low_median_return": -0.0014,
+    "axis2_very_high_median_return": 0.0181,
+    "axis2_very_low_median_return": -0.115,
+    "axis3_very_high_median_return": -0.0409,
+    "axis3_very_low_median_return": -0.0195,
+    "total_observations": 270618,
+    "cohort_source": "live"
+  }
+}
