@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -1146,6 +1146,8 @@ export default function PlatformPage() {
   const [mapDecile, setMapDecile] = useState(1);
   const mapScrollLocked = React.useRef(false);
   const mapChartRef = React.useRef<HTMLDivElement>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [mapDims, setMapDims] = useState({ width: 800, height: 580 });
 
   useEffect(() => {
     Promise.all([
@@ -1165,6 +1167,18 @@ export default function PlatformPage() {
       })
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
+
+  // Track map container dimensions for dot overlay coordinate mapping
+  useEffect(() => {
+    const el = mapContainerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setMapDims({ width, height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [loading]);
 
   // Non-passive wheel listener on the map chart div — prevents page scroll.
   // Depends on `loading` so it attaches after the chart renders and the ref is populated.
@@ -1218,15 +1232,22 @@ export default function PlatformPage() {
       // Decile 1 = highest Axis III risk (0.9–1.0), decile 10 = lowest (0.0–0.1)
       const axis3_decile = Math.min(10, Math.max(1, 10 - Math.floor(a3 * 10)));
 
+      // Composite-score-proportionate jitter on X axis.
+      // Breaks up vertical stripe artifact from discrete axis2_adjusted_pressure values.
+      // Direction is meaningful: high composite score nudges right (toward deteriorating),
+      // low composite score nudges left (toward improving). Max displacement ±0.012.
+      const composite = row.composite_score ?? 0.5;
+      const jitter = (composite - 0.5) * 0.024; // range: -0.012 to +0.012
+
       return {
-        x: row.axis2_pct as number,   // Trajectory Risk — horizontal (time-based)
-        y: row.axis1_pct as number,   // Anchor Risk — vertical (valuation height)
+        x: Math.min(1, Math.max(0, (row.axis2_pct as number) + jitter)),
+        y: row.axis1_pct as number,
         axis3_decile,
         axis3_pct: a3,
         symbol: row.symbol,
         oal_label: row.oal_label,
         composite_bucket: row.composite_bucket,
-        composite_score: row.composite_score,
+        composite_score: composite,
       };
     });
   }, [filtered]);
@@ -1583,7 +1604,7 @@ export default function PlatformPage() {
                         </div>
 
                         {/* Active panel label */}
-                        <div className="pointer-events-none absolute left-[52px] top-[24px] z-10">
+                        <div className="pointer-events-none absolute left-[52px] top-[24px] z-20">
                           <div
                             className="rounded-lg border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium backdrop-blur-sm"
                             style={{ color: "#B8C3CC" }}
@@ -1595,92 +1616,106 @@ export default function PlatformPage() {
                           </div>
                         </div>
 
-                        <ResponsiveContainer width="100%" height="100%">
-                          <ScatterChart margin={{ top: 36, right: 12, bottom: 24, left: 40 }}>
-                            <CartesianGrid stroke={COLORS.border} strokeOpacity={0.5} />
-                            <XAxis
-                              type="number" dataKey="x" domain={[0, 1]}
-                              label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fill: COLORS.textMuted, fontSize: 11 }}
-                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                              axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
-                            />
-                            <YAxis
-                              type="number" dataKey="y" domain={[0, 1]}
-                              label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fill: COLORS.textMuted, fontSize: 11 }}
-                              tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
-                              axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
-                            />
-                            <Tooltip
-                              cursor={{ strokeDasharray: "3 3" }}
-                              content={({ active, payload }) => {
-                                if (!active || !payload?.length) return null;
-                                const d = payload[0].payload;
-                                const dist = Math.abs(d.axis3_decile - mapDecile);
-                                if (dist > 1) return null; // suppress tooltip on inert dots
-                                return (
-                                  <div
-                                    className="rounded-2xl px-3 py-2.5 text-xs"
-                                    style={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                                  >
-                                    <div className="font-semibold text-white">{d.symbol}</div>
-                                    <div className="mt-0.5 text-[11px]" style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
-                                    <div className="mt-2 flex flex-col gap-0.5 text-[11px]">
-                                      <span style={{ color: COLORS.textMuted }}>Trajectory Risk: <span className="text-[#EAF0F2]">{d.x != null ? `${(d.x * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                      <span style={{ color: COLORS.textMuted }}>Anchor Risk: <span className="text-[#EAF0F2]">{d.y != null ? `${(d.y * 100).toFixed(0)}th pct` : "—"}</span></span>
-                                      <span style={{ color: COLORS.textMuted }}>Financing Decile: <span className="text-[#EAF0F2]">{d.axis3_decile} of 10</span></span>
-                                      <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
+                        {/* Recharts — axes, grid, tooltip only. No dots in Scatter. */}
+                        <div ref={mapContainerRef} className="absolute inset-0">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <ScatterChart margin={{ top: 36, right: 12, bottom: 24, left: 40 }}>
+                              <CartesianGrid stroke={COLORS.border} strokeOpacity={0.5} />
+                              <XAxis
+                                type="number" dataKey="x" domain={[0, 1]}
+                                label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fill: COLORS.textMuted, fontSize: 11 }}
+                                tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
+                                axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
+                              />
+                              <YAxis
+                                type="number" dataKey="y" domain={[0, 1]}
+                                label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fill: COLORS.textMuted, fontSize: 11 }}
+                                tick={{ fill: COLORS.textSecondary, fontSize: 11 }}
+                                axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }}
+                              />
+                              <Tooltip
+                                cursor={{ strokeDasharray: "3 3" }}
+                                content={({ active, payload }) => {
+                                  if (!active || !payload?.length) return null;
+                                  const d = payload[0].payload;
+                                  const dist = Math.abs(d.axis3_decile - mapDecile);
+                                  if (dist > 1) return null;
+                                  return (
+                                    <div
+                                      className="rounded-2xl px-3 py-2.5 text-xs"
+                                      style={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                                    >
+                                      <div className="font-semibold text-white">{d.symbol}</div>
+                                      <div className="mt-0.5 text-[11px]" style={{ color: COLORS.textSecondary }}>{d.oal_label}</div>
+                                      <div className="mt-2 flex flex-col gap-0.5 text-[11px]">
+                                        <span style={{ color: COLORS.textMuted }}>Trajectory Risk: <span className="text-[#EAF0F2]">{d.x != null ? `${(d.x * 100).toFixed(0)}th pct` : "—"}</span></span>
+                                        <span style={{ color: COLORS.textMuted }}>Anchor Risk: <span className="text-[#EAF0F2]">{d.y != null ? `${(d.y * 100).toFixed(0)}th pct` : "—"}</span></span>
+                                        <span style={{ color: COLORS.textMuted }}>Financing Decile: <span className="text-[#EAF0F2]">{d.axis3_decile} of 10</span></span>
+                                        <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
+                                      </div>
+                                      <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
+                                        {dist === 0 ? "Click to open company detail." : "Click to jump to this depth panel."}
+                                      </div>
                                     </div>
-                                    <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
-                                      {dist === 0 ? "Click to open company detail." : "Click to jump to this depth panel."}
-                                    </div>
-                                  </div>
-                                );
-                              }}
-                            />
-                            <Scatter
-                              data={scatterData}
-                              shape={(props: any) => {
-                                const { cx, cy, payload } = props;
-                                if (cx == null || cy == null) return null;
-                                const dist = Math.abs(payload.axis3_decile - mapDecile);
-                                const targetR       = dist === 0 ? 5 : dist === 1 ? 3 : 1;
-                                const targetOpacity = dist === 0 ? 0.92 : dist === 1 ? 0.45 : 0.12;
-                                const clickable     = dist <= 1;
-                                return (
-                                  <motion.circle
-                                    cx={cx}
-                                    cy={cy}
-                                    fill={compositeColor(payload.composite_bucket)}
-                                    animate={{ r: targetR, opacity: targetOpacity }}
-                                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                                    style={{
-                                      cursor: clickable ? "pointer" : "default",
-                                      pointerEvents: clickable ? "auto" : "none",
-                                    }}
-                                  />
-                                );
-                              }}
-                              onClick={(data: any) => {
-                                if (!data) return;
-                                const dist = Math.abs(data.axis3_decile - mapDecile);
-                                if (dist > 1) return;
-                                if (dist === 1) {
-                                  setMapDecile(data.axis3_decile);
-                                  return;
-                                }
-                                if (data.symbol) {
-                                  const row = filtered.find(r => r.symbol === data.symbol)
-                                    ?? snapshotData.find(r => r.symbol === data.symbol);
-                                  if (row) setSelectedCompany(row);
-                                }
-                              }}
-                            >
-                              {scatterData.map((_, idx) => (
-                                <Cell key={idx} />
-                              ))}
-                            </Scatter>
-                          </ScatterChart>
-                        </ResponsiveContainer>
+                                  );
+                                }}
+                              />
+                              {/* Empty scatter — keeps tooltip hit detection working */}
+                              <Scatter data={scatterData} fill="transparent" opacity={0}>
+                                {scatterData.map((_, idx) => <Cell key={idx} />)}
+                              </Scatter>
+                            </ScatterChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        {/* ── Animated dot overlay ──────────────────────────────
+                            Positioned absolutely over the chart.
+                            Chart margins: top=36 right=12 bottom=24 left=40
+                            Plot area = container minus margins.
+                            Data domain [0,1] maps linearly to plot area pixels.
+                            Each circle has a stable key so framer-motion tracks
+                            identity across mapDecile changes and springs r/opacity.
+                        ─────────────────────────────────────────────────────── */}
+                        <svg
+                          className="pointer-events-none absolute inset-0 z-10"
+                          width={mapDims.width}
+                          height={mapDims.height}
+                        >
+                          {(() => {
+                            const margin = { top: 36, right: 12, bottom: 24, left: 40 };
+                            const plotW = mapDims.width  - margin.left - margin.right;
+                            const plotH = mapDims.height - margin.top  - margin.bottom;
+                            return scatterData.map(entry => {
+                              const cx = margin.left + entry.x * plotW;
+                              const cy = margin.top  + (1 - entry.y) * plotH;
+                              const dist = Math.abs(entry.axis3_decile - mapDecile);
+                              const targetR       = dist === 0 ? 5 : dist === 1 ? 3 : 1;
+                              const targetOpacity = dist === 0 ? 0.92 : dist === 1 ? 0.45 : 0.12;
+                              const clickable     = dist <= 1;
+                              return (
+                                <motion.circle
+                                  key={entry.symbol}
+                                  cx={cx}
+                                  cy={cy}
+                                  fill={compositeColor(entry.composite_bucket)}
+                                  animate={{ r: targetR, opacity: targetOpacity }}
+                                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                                  style={{
+                                    cursor: clickable ? "pointer" : "default",
+                                    pointerEvents: clickable ? "auto" : "none",
+                                  }}
+                                  onClick={() => {
+                                    if (dist > 1) return;
+                                    if (dist === 1) { setMapDecile(entry.axis3_decile); return; }
+                                    const row = filtered.find(r => r.symbol === entry.symbol)
+                                      ?? snapshotData.find(r => r.symbol === entry.symbol);
+                                    if (row) setSelectedCompany(row);
+                                  }}
+                                />
+                              );
+                            });
+                          })()}
+                        </svg>
                       </div>
 
                       {/* ── Vertical depth scrollbar — heavier pips ── */}
