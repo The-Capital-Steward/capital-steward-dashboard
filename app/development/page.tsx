@@ -1145,6 +1145,7 @@ export default function PlatformPage() {
   const axis3Direction = React.useRef<"forward" | "back">("forward");
   const [mapDecile, setMapDecile] = useState(1);
   const mapScrollLocked = React.useRef(false);
+  const mapChartRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Promise.all([
@@ -1163,6 +1164,26 @@ export default function PlatformPage() {
         setLoading(false);
       })
       .catch(err => { console.error(err); setLoading(false); });
+  }, []);
+
+  // Non-passive wheel listener on the map chart div — prevents page scroll
+  // while the user is scrolling through cube depth panels.
+  // Must be attached imperatively; React's onWheel is passive by default
+  // and cannot call preventDefault() to suppress page scroll.
+  useEffect(() => {
+    const el = mapChartRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (mapScrollLocked.current) return;
+      const dir = e.deltaY > 0 ? 1 : -1;
+      setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
+      mapScrollLocked.current = true;
+      setTimeout(() => { mapScrollLocked.current = false; }, 420);
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
   }, []);
 
   const filtered = useMemo(() => {
@@ -1524,32 +1545,22 @@ export default function PlatformPage() {
                     Loading current snapshot...
                   </div>
                 ) : (() => {
-                  // ── Dot rendering logic ──────────────────────────────────────
-                  // Active decile: r=5, opacity=0.92
-                  // Adjacent (±1): r=3, opacity=0.45
-                  // All others: r=1, opacity=0.12
-                  const getDotProps = (decile: number) => {
-                    const dist = Math.abs(decile - mapDecile);
-                    if (dist === 0) return { r: 5,   opacity: 0.92 };
-                    if (dist === 1) return { r: 3,   opacity: 0.45 };
-                    return              { r: 1,   opacity: 0.12 };
-                  };
+                  // Scrollbar pip color by decile position
+                  const pipColor = (decile: number) =>
+                    decile <= 2 ? COLORS.negative :
+                    decile <= 4 ? COLORS.negativeSoft :
+                    decile <= 6 ? "#B8C3CC" :
+                    decile <= 8 ? COLORS.positiveSoft :
+                    COLORS.positive;
 
                   return (
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
 
-                      {/* ── Chart area ── */}
+                      {/* ── Chart area — ref attached for non-passive wheel ── */}
                       <div
+                        ref={mapChartRef}
                         className="relative flex-1"
-                        style={{ height: 580 }}
-                        onWheel={e => {
-                          e.preventDefault();
-                          if (mapScrollLocked.current) return;
-                          const dir = e.deltaY > 0 ? 1 : -1; // scroll down = deeper = higher decile number
-                          setMapDecile(prev => Math.min(10, Math.max(1, prev + dir)));
-                          mapScrollLocked.current = true;
-                          setTimeout(() => { mapScrollLocked.current = false; }, 420);
-                        }}
+                        style={{ height: 580, cursor: "default" }}
                         onTouchStart={e => {
                           const startY = e.touches[0].clientY;
                           const handleMove = (me: TouchEvent) => {
@@ -1573,15 +1584,15 @@ export default function PlatformPage() {
                           <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#7E8A96]">Deteriorating · Supported</div>
                         </div>
 
-                        {/* Active panel label — fades with transition */}
+                        {/* Active panel label */}
                         <div className="pointer-events-none absolute left-[52px] top-[24px] z-10">
                           <div
-                            className="rounded-lg border border-[#203754] bg-[#0A1F3D]/80 px-2.5 py-1 text-[10px] font-medium backdrop-blur-sm"
+                            className="rounded-lg border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium backdrop-blur-sm"
                             style={{ color: "#B8C3CC" }}
                           >
-                            Financing Risk Decile {mapDecile} of 10
-                            <span className="ml-2 text-[#7E8A96]">
-                              {mapDecile <= 2 ? "· Highest strain" : mapDecile >= 9 ? "· Lowest strain" : ""}
+                            Financing Risk · Decile {mapDecile} of 10
+                            <span className="ml-2" style={{ color: pipColor(mapDecile) }}>
+                              {mapDecile <= 2 ? "Highest strain" : mapDecile >= 9 ? "Lowest strain" : ""}
                             </span>
                           </div>
                         </div>
@@ -1606,6 +1617,8 @@ export default function PlatformPage() {
                               content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
                                 const d = payload[0].payload;
+                                const dist = Math.abs(d.axis3_decile - mapDecile);
+                                if (dist > 1) return null; // suppress tooltip on inert dots
                                 return (
                                   <div
                                     className="rounded-2xl px-3 py-2.5 text-xs"
@@ -1620,7 +1633,7 @@ export default function PlatformPage() {
                                       <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
                                     </div>
                                     <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">
-                                      Click to open company detail.
+                                      {dist === 0 ? "Click to open company detail." : "Click to jump to this depth panel."}
                                     </div>
                                   </div>
                                 );
@@ -1628,71 +1641,108 @@ export default function PlatformPage() {
                             />
                             <Scatter
                               data={scatterData}
+                              shape={(props: any) => {
+                                const { cx, cy, payload } = props;
+                                if (cx == null || cy == null) return null;
+                                const dist = Math.abs(payload.axis3_decile - mapDecile);
+                                const r    = dist === 0 ? 5 : dist === 1 ? 3 : 1;
+                                const opacity = dist === 0 ? 0.92 : dist === 1 ? 0.45 : 0.12;
+                                const clickable = dist <= 1;
+                                return (
+                                  <circle
+                                    cx={cx}
+                                    cy={cy}
+                                    r={r}
+                                    fill={compositeColor(payload.composite_bucket)}
+                                    opacity={opacity}
+                                    style={{ cursor: clickable ? "pointer" : "default", pointerEvents: clickable ? "auto" : "none" }}
+                                  />
+                                );
+                              }}
                               onClick={(data: any) => {
-                                if (data && data.symbol) {
+                                if (!data) return;
+                                const dist = Math.abs(data.axis3_decile - mapDecile);
+                                if (dist > 1) return;
+                                if (dist === 1) {
+                                  setMapDecile(data.axis3_decile);
+                                  return;
+                                }
+                                if (data.symbol) {
                                   const row = filtered.find(r => r.symbol === data.symbol)
                                     ?? snapshotData.find(r => r.symbol === data.symbol);
                                   if (row) setSelectedCompany(row);
                                 }
                               }}
                             >
-                              {scatterData.map((entry, idx) => {
-                                const { r, opacity } = getDotProps(entry.axis3_decile);
-                                return (
-                                  <Cell
-                                    key={idx}
-                                    fill={compositeColor(entry.composite_bucket)}
-                                    opacity={opacity}
-                                    r={r}
-                                    style={{ cursor: "pointer" }}
-                                  />
-                                );
-                              })}
+                              {scatterData.map((_, idx) => (
+                                <Cell key={idx} />
+                              ))}
                             </Scatter>
                           </ScatterChart>
                         </ResponsiveContainer>
                       </div>
 
-                      {/* ── Vertical depth scrollbar ── */}
-                      <div className="flex flex-col items-center gap-1 py-8 shrink-0" style={{ width: 28 }}>
+                      {/* ── Vertical depth scrollbar — heavier pips ── */}
+                      <div
+                        className="flex flex-col items-center shrink-0 rounded-2xl border border-[#203754] bg-[#0D2138] py-4 px-1"
+                        style={{ width: 40, gap: 0 }}
+                      >
                         {/* Label top */}
-                        <div className="mb-1 text-[8px] text-[#7E8A96] rotate-0 text-center leading-tight">HIGH<br/>RISK</div>
+                        <div className="mb-2 text-[8px] font-semibold uppercase tracking-wide text-center leading-tight" style={{ color: COLORS.negative }}>
+                          HI
+                        </div>
 
-                        {/* Ten tick marks */}
-                        {Array.from({ length: 10 }, (_, i) => {
-                          const decile = i + 1;
-                          const isActive = decile === mapDecile;
-                          const dist = Math.abs(decile - mapDecile);
-                          const opacity = dist === 0 ? 1 : dist === 1 ? 0.5 : 0.2;
-                          return (
-                            <button
-                              key={decile}
-                              onClick={() => setMapDecile(decile)}
-                              className="flex items-center justify-center transition-all duration-200"
-                              style={{ width: 28, height: 28 }}
-                              title={`Decile ${decile} — ${decile <= 2 ? "Highest" : decile >= 9 ? "Lowest" : "Moderate"} financing risk`}
-                            >
-                              <div
-                                className="rounded-full transition-all duration-200"
-                                style={{
-                                  width:  isActive ? 10 : dist === 1 ? 6 : 4,
-                                  height: isActive ? 10 : dist === 1 ? 6 : 4,
-                                  backgroundColor: isActive
-                                    ? compositeColor(mapDecile <= 2 ? "Very High" : mapDecile >= 9 ? "Very Low" : mapDecile <= 4 ? "High" : mapDecile <= 6 ? "Moderate" : "Low")
-                                    : "#7E8A96",
-                                  opacity,
-                                  boxShadow: isActive ? `0 0 6px 2px ${compositeColor(mapDecile <= 2 ? "Very High" : mapDecile >= 9 ? "Very Low" : mapDecile <= 4 ? "High" : mapDecile <= 6 ? "Moderate" : "Low")}40` : "none",
-                                }}
-                              />
-                            </button>
-                          );
-                        })}
+                        {/* Connecting track line */}
+                        <div className="relative flex flex-col items-center" style={{ gap: 0 }}>
+                          {/* Background track */}
+                          <div
+                            className="absolute inset-x-0 mx-auto rounded-full"
+                            style={{
+                              width: 2,
+                              top: 8,
+                              bottom: 8,
+                              backgroundColor: "#203754",
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                            }}
+                          />
+
+                          {Array.from({ length: 10 }, (_, i) => {
+                            const decile = i + 1;
+                            const isActive = decile === mapDecile;
+                            const dist = Math.abs(decile - mapDecile);
+                            const color = pipColor(decile);
+
+                            return (
+                              <button
+                                key={decile}
+                                onClick={() => setMapDecile(decile)}
+                                className="relative flex items-center justify-center transition-all duration-200 z-10"
+                                style={{ width: 40, height: 36 }}
+                                title={`Decile ${decile}`}
+                              >
+                                <div
+                                  className="rounded-full transition-all duration-200"
+                                  style={{
+                                    width:  isActive ? 16 : dist === 1 ? 10 : 6,
+                                    height: isActive ? 16 : dist === 1 ? 10 : 6,
+                                    backgroundColor: isActive ? color : dist === 1 ? color : "#344860",
+                                    opacity: isActive ? 1 : dist === 1 ? 0.75 : 0.5,
+                                    boxShadow: isActive
+                                      ? `0 0 10px 3px ${color}60, 0 0 0 3px ${color}25`
+                                      : "none",
+                                    border: isActive ? `2px solid ${color}` : "none",
+                                  }}
+                                />
+                              </button>
+                            );
+                          })}
+                        </div>
 
                         {/* Label bottom */}
-                        <div className="mt-1 text-[8px] text-[#7E8A96] text-center leading-tight">LOW<br/>RISK</div>
-
-                        {/* Scroll hint */}
-                        <div className="mt-3 text-[8px] text-[#7E8A96] text-center leading-tight">scroll<br/>↕</div>
+                        <div className="mt-2 text-[8px] font-semibold uppercase tracking-wide text-center leading-tight" style={{ color: COLORS.positive }}>
+                          LO
+                        </div>
                       </div>
 
                     </div>
