@@ -120,24 +120,22 @@ function useSystemStats(): SiteStats {
 
 export default function HomePage() {
   const stats = useSystemStats()
-  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%` : "17.2%"
+  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%`                 : "17.2%"
   const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "62%"
-  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%` : "10.2%"
-  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%` : "100%"
+  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                  : "10.2%"
+  const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`     : "100%"
 
+  // Scroll restoration fix — from your version
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual"
     }
-
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.getElementById("home-top")
         if (!el) return
-
         const navOffset = 88
         const y = el.getBoundingClientRect().top + window.scrollY - navOffset
-
         window.scrollTo(0, Math.max(0, y))
       })
     })
@@ -146,11 +144,14 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
-      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      {/* ── HERO ──────────────────────────────────────────────────────────
+          id="home-top" + tcs-snap-section--hero from your version.
+          Scroll fix targets this element on mount.
+      ──────────────────────────────────────────────────────────────────── */}
       <section
-  id="home-top"
-  className="tcs-snap-section tcs-snap-section--hero border-b border-[#DDE0DC]"
->
+        id="home-top"
+        className="tcs-snap-section tcs-snap-section--hero border-b border-[#DDE0DC]"
+      >
         <div className="mx-auto flex min-h-full w-full max-w-7xl items-center px-6 py-4 md:py-6">
           <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-[1.08fr_0.92fr] md:gap-10 md:items-center">
 
@@ -173,34 +174,32 @@ export default function HomePage() {
                 structural basis.
               </p>
 
-              <div className="mt-5">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
-                      <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
-                      sits in the elevated structural risk zone across all three axes simultaneously.
-                    </p>
-                    <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
-                      {revAnchorPct} of those companies are revenue-anchored.
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
-                      <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
-                      across all three axes.
-                    </p>
-                    <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
-                      {fcfAnchorPct} of those companies are FCF-anchored.
-                    </p>
-                  </div>
+              <div className="mt-5 space-y-4">
+                <div>
+                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
+                    <span className="font-semibold text-[#0A1F3D]">{highRiskPct} of the universe</span>{" "}
+                    sits in the elevated structural risk zone across all three axes simultaneously.
+                  </p>
+                  <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+                    {revAnchorPct} of those companies are revenue-anchored.
+                  </p>
                 </div>
-
-                <p className="mt-5 text-sm font-medium leading-6 text-[#0A1F3D] md:text-base md:leading-7">
-                  The distribution is not a ranking artifact. It is a structural separation.
-                </p>
+                <div>
+                  <p className="text-sm leading-6 text-[#1E2228] md:text-base md:leading-7">
+                    <span className="font-semibold text-[#0A1F3D]">{lowRiskPct} sits in the structurally sound zone</span>{" "}
+                    across all three axes.
+                  </p>
+                  <p className="text-sm leading-6 text-[#5C6472] md:text-base md:leading-7">
+                    {fcfAnchorPct} of those companies are FCF-anchored.
+                  </p>
+                </div>
               </div>
 
+              <p className="mt-5 text-sm font-medium leading-6 text-[#0A1F3D] md:text-base md:leading-7">
+                The distribution is not a ranking artifact. It is a structural separation.
+              </p>
+
+              {/* CTA row — no how-we-see-markets, Methodology replaces it */}
               <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
                 <Link
                   href="/platform"
@@ -208,15 +207,13 @@ export default function HomePage() {
                 >
                   Open Platform <ArrowRight className="h-4 w-4" />
                 </Link>
-
                 <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
                   <Link
-                    href="/how-we-see-markets"
+                    href="/osmr-methodology"
                     className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
                   >
-                    How We See Markets <ChevronRight className="h-3.5 w-3.5" />
+                    Methodology <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
-
                   <Link
                     href="/how-to-use-osmr"
                     className="inline-flex items-center gap-1 text-sm font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
@@ -227,7 +224,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — OSMR card, desktop only */}
+            {/* Right — OSMR card, desktop only, height capped */}
             <div
               className="hidden self-center md:block"
               style={{ animation: "card-entry 0.3s cubic-bezier(0.2,0.8,0.2,1) both" }}
@@ -316,7 +313,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CORE FRAMEWORK ──────────────────────────────────────────────── */}
+      {/* ── CORE FRAMEWORK — DARK BAND ────────────────────────────────────
+          Two-column: text + Methodology CTA left, accordion right.
+          No diagram box. OSMR full name in body copy.
+      ──────────────────────────────────────────────────────────────────── */}
       <section className="tcs-snap-section border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
@@ -359,7 +359,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── PLATFORM ────────────────────────────────────────────────────── */}
+      {/* ── PLATFORM ──────────────────────────────────────────────────────── */}
       <section className="tcs-snap-section border-b border-[#DDE0DC]">
         <div className="mx-auto w-full max-w-7xl px-6 py-12">
           <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:items-center">
@@ -423,7 +423,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WHY THIS EXISTS ─────────────────────────────────────────────── */}
+      {/* ── WHY THIS EXISTS ───────────────────────────────────────────────── */}
       <section className="tcs-snap-section">
         <div className="mx-auto w-full max-w-5xl px-6 py-12">
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">Why This Exists</p>
@@ -457,6 +457,7 @@ export default function HomePage() {
             </p>
           </div>
 
+          {/* CTAs — no how-we-see-markets */}
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/why-this-exists"
@@ -465,10 +466,10 @@ export default function HomePage() {
               Why This Exists <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/how-we-see-markets"
+              href="/osmr-methodology"
               className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
             >
-              How We See Markets <ChevronRight className="h-4 w-4" />
+              Methodology <ChevronRight className="h-4 w-4" />
             </Link>
             <Link
               href="/how-to-use-osmr"
@@ -480,7 +481,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
+      {/* ── Footer ── */}
       <div className="border-t border-[#DDE0DC] py-6 text-center">
         <p className="text-[12px] leading-[1.8] text-[#aaa]">
           The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
