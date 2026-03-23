@@ -1,43 +1,43 @@
 {
-  "generated_at": "2026-03-22T22:56:26.072215+00:00",
+  "generated_at": "2026-03-23T01:48:52.966373+00:00",
   "universe": {
     "total": 5168
   },
   "high_risk_cluster": {
     "label": "High or Very High on all three axes",
-    "count": 887,
-    "pct_of_universe": 17.2,
-    "acute_count": 225,
-    "acute_pct_of_universe": 4.4,
-    "revenue_anchored_count": 548,
-    "revenue_anchored_pct": 61.8,
+    "count": 832,
+    "pct_of_universe": 16.1,
+    "acute_count": 208,
+    "acute_pct_of_universe": 4.0,
+    "revenue_anchored_count": 510,
+    "revenue_anchored_pct": 61.3,
     "anchor_breakdown": {
-      "Revenue": 548,
-      "Net Income": 224,
-      "EBIT": 95,
-      "FCF": 20
+      "Revenue": 510,
+      "Net Income": 212,
+      "EBIT": 93,
+      "FCF": 17
     }
   },
   "low_risk_cluster": {
     "label": "Low or Very Low on all three axes",
-    "count": 527,
-    "pct_of_universe": 10.2,
-    "acute_count": 48,
-    "acute_pct_of_universe": 0.9,
-    "fcf_anchored_count": 527,
+    "count": 590,
+    "pct_of_universe": 11.4,
+    "acute_count": 110,
+    "acute_pct_of_universe": 2.1,
+    "fcf_anchored_count": 590,
     "fcf_anchored_pct": 100.0,
     "anchor_breakdown": {
-      "FCF": 527
+      "FCF": 590
     }
   },
   "cohort_returns": {
-    "axis1_very_high_median_return": -0.0979,
-    "axis1_very_low_median_return": -0.0055,
-    "axis2_very_high_median_return": -0.162,
+    "axis1_very_high_median_return": -0.1146,
+    "axis1_very_low_median_return": 0.0131,
+    "axis2_very_high_median_return": -0.1659,
     "axis2_very_low_median_return": 0.0313,
-    "axis3_very_high_median_return": null,
-    "axis3_very_low_median_return": null,
-    "total_observations": 304236,
+    "axis3_very_high_median_return": 0.006,
+    "axis3_very_low_median_return": -0.0449,
+    "total_observations": 260549,
     "cohort_source": "live"
   }
 }

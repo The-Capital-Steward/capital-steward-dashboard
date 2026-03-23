@@ -162,10 +162,11 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-4 text-sm leading-6 text-[#5C6472] md:text-[1.02rem] md:leading-7">
-                OSMR measures three things: how far a company's valuation extends
-                beyond its demonstrated operational output, whether that operational
-                foundation is improving or deteriorating, and whether the firm can
-                service its obligations from what it actually produces.
+                The Operational Structure Mispricing Risk (OSMR) framework measures
+                three things: how far a company's valuation extends beyond its
+                demonstrated operational output, whether that operational foundation
+                is improving or deteriorating, and whether the firm can service its
+                obligations from what it actually produces.
               </p>
 
               <p className="mt-2 text-sm leading-6 text-[#5C6472] md:text-[1.02rem] md:leading-7">

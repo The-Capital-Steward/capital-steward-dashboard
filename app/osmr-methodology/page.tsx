@@ -89,9 +89,13 @@ Design note: YoY consistency outperformed tanh transformation and R-squared tren
     question: "Can the firm meet its obligations from actual operational output?",
     body: `Axis 3 assesses whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.
 
-Debt is not inherently fragile. A mature firm running significant debt with strong operational coverage is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it. Axis 3 measures that gap directly.
+Axis 3 is evaluated only for firms with non-zero interest obligations. Firms without interest expense are not assigned an Axis 3 score — financing risk is undefined in the absence of a financing structure. This is a domain restriction, not a data quality decision. These firms are labeled "No Financing Structure" wherever Axis 3 would normally appear. Their composite score is the normalized mean of Axis 1 and Axis 2, scaled to maintain comparability with three-axis firms.
 
-Three-tier financing risk assessment based on interest obligation coverage relative to operational output. No OAL shallowness penalty is applied to Axis 3 — financing fragility is assessed on its own terms.`,
+In practice, the absence of Axis 3 should be read as higher uncertainty, not lower risk. No-interest firms carry no current financing obligation but are correspondingly more dependent on equity markets and narrative. Their Axis 1 and Axis 2 scores remain fully interpretable.
+
+Debt is not inherently fragile. A mature firm running significant debt with strong operational coverage is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it. Axis 3 measures that gap directly — within the interest-bearing universe only.
+
+The shallowness penalty is applied before ranking: a revenue-anchored firm's apparent coverage signal is discounted proportionally before it enters the global pool. This prevents shallow anchors from overstating financing resilience.`,
   },
 ]
 
@@ -168,7 +172,7 @@ export default function OsmrMethodology() {
           </p>
           <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#8A92A0]">
             <span>~5,200 companies · current universe snapshot</span>
-            <span>304,000+ historical observations</span>
+            <span>260,000+ historical observations</span>
           </div>
 
           {/* Section index */}
@@ -455,11 +459,41 @@ export default function OsmrMethodology() {
               reality. All three axes speak to the same OAL anchor throughout.
             </p>
             <p>
-              The Composite Structural Risk score is the mean of all available
-              axis scores, expressed as a percentile rank across the universe.
-              Bucket labels are consistent across all axes: Very Low / Low /
-              Moderate / High / Very High — where Very High always means more
-              structural risk.
+              The Composite Structural Risk score is a weighted mean of all
+              available axis scores, expressed as a percentile rank across the
+              universe. Axis 1 and Axis 2 each carry 37.5% weight; Axis 3
+              carries 25%. This weighting reflects the empirically observed
+              signal strength of each axis against historical return
+              distributions. Bucket labels are consistent across all axes:
+              Very Low / Low / Moderate / High / Very High — where Very High
+              always means more structural risk.
+            </p>
+            <p>
+              The composite formula is fully generalized: <code className="text-xs bg-[#F1F3F0] px-1.5 py-0.5 rounded">composite = Σ(wᵢ × axisᵢ) / Σ(wᵢ for available axes)</code>, where weights are Axis 1 = 0.375, Axis 2 = 0.375, Axis 3 = 0.250.
+              For interest-bearing firms with all three axes: <code className="text-xs bg-[#F1F3F0] px-1.5 py-0.5 rounded">(axis1 × 0.375 + axis2 × 0.375 + axis3 × 0.250) / 1.000</code>.
+              For no-interest firms with null axis3: <code className="text-xs bg-[#F1F3F0] px-1.5 py-0.5 rounded">(axis1 × 0.375 + axis2 × 0.375) / 0.750</code>.
+              The denominator always equals the sum of weights for axes that
+              exist, preserving the 0–1 scale regardless of which axes are
+              present. A no-interest firm with axis1 = 0.5 and axis2 = 0.5
+              receives composite = 0.5 — identical to a three-axis firm with
+              the same axis1 and axis2 scores and a neutral axis3 of 0.5.
+            </p>
+            <p>
+              This is a long-run static model, not a regime-adaptive one. The
+              weights do not shift based on current market conditions or
+              detected regime. The full-period Spearman correlations are used
+              as stable approximations of signal strength across cycles. This
+              stability is a deliberate design choice: adaptive weighting
+              would require regime detection, introduce lookback dependencies,
+              and reduce comparability of scores across time. A composite that
+              changes its weights silently is harder to interpret, harder to
+              audit, and more susceptible to overfitting. The tradeoff is
+              accepted — in any specific regime, the weights may be suboptimal.
+              That cost is paid in exchange for a system that is interpretable,
+              consistent, and comparable month to month. Users operating in a
+              specific regime should understand that axis-level signal strength
+              varies materially — as the regime disclosure in the Design
+              Principles section documents — and apply judgment accordingly.
             </p>
           </div>
 
@@ -479,7 +513,7 @@ export default function OsmrMethodology() {
           <div className="mt-5 space-y-4 text-base leading-7 text-[#5C6472]">
             <p>
               A scoring framework without empirical grounding is a hypothesis.
-              OSMR has been validated against 304,000+ historical observations
+              OSMR has been validated against 260,000+ historical observations
               spanning multiple market cycles, testing whether structural risk
               classifications have any measurable relationship with subsequent
               return distributions.
@@ -510,16 +544,16 @@ export default function OsmrMethodology() {
                 Key finding — Highest structural risk
               </p>
               <p className="mt-1 text-sm text-[#5C6472]">
-                Very High across all three axes simultaneously (N=20,262)
+                Very High across all three axes simultaneously · interest-bearing universe · N=19,079
               </p>
             </div>
             <div className="divide-y divide-[#DDE0DC]">
               {[
-                { metric: "Mean 12-month return",   value: "+13.8%",  note: "Pulled upward by a subset of large positive outcomes" },
-                { metric: "Median 12-month return",  value: "−25.2%", note: "Typical outcome for the majority of observations" },
-                { metric: "Mean − Median gap",       value: "39.0 pp", note: "Positive skew; mean overstates the central tendency" },
-                { metric: "Hit rate",                value: "34.7%",  note: "Nearly two-thirds of observations had negative 12-month returns" },
-                { metric: "Observations (N)",        value: "20,262",  note: "Statistically robust sample" },
+                { metric: "Mean 12-month return",   value: "+12.6%",  note: "Pulled upward by a subset of large positive outcomes" },
+                { metric: "Median 12-month return",  value: "−25.3%", note: "Typical outcome for the majority of observations" },
+                { metric: "Mean − Median gap",       value: "37.9 pp", note: "Positive skew; mean overstates the central tendency" },
+                { metric: "Hit rate",                value: "34.5%",  note: "Nearly two-thirds of observations had negative 12-month returns" },
+                { metric: "Observations (N)",        value: "19,079",  note: "Statistically robust sample — interest-bearing universe" },
               ].map(({ metric, value, note }) => (
                 <div key={metric} className="grid grid-cols-[1fr_auto_2fr] items-center gap-4 px-6 py-3 text-sm">
                   <span className="text-[#5C6472]">{metric}</span>
@@ -536,15 +570,15 @@ export default function OsmrMethodology() {
                 Contrast — Lowest structural risk
               </p>
               <p className="mt-1 text-sm text-[#5C6472]">
-                Very Low across all three axes simultaneously (N=3,913)
+                Very Low across all three axes simultaneously · interest-bearing universe · N=7,546
               </p>
             </div>
             <div className="divide-y divide-[#DDE0DC]">
               {[
-                { metric: "Mean 12-month return",   value: "+11.9%",  note: "Consistent with broad market participation" },
-                { metric: "Median 12-month return",  value: "+1.6%",  note: "Typical outcome for the majority of observations" },
-                { metric: "Hit rate",                value: "52.1%",  note: "Slight majority of observations had positive 12-month returns" },
-                { metric: "Observations (N)",        value: "3,913",   note: "Smaller cohort — FCF-anchored, low-fragility companies" },
+                { metric: "Mean 12-month return",   value: "+12.6%",  note: "Consistent with broad market participation" },
+                { metric: "Median 12-month return",  value: "+4.4%",  note: "Typical outcome for the majority of observations" },
+                { metric: "Hit rate",                value: "55.2%",  note: "Majority of observations had positive 12-month returns" },
+                { metric: "Observations (N)",        value: "7,546",   note: "Robust sample — interest-bearing universe" },
               ].map(({ metric, value, note }) => (
                 <div key={metric} className="grid grid-cols-[1fr_auto_2fr] items-center gap-4 px-6 py-3 text-sm">
                   <span className="text-[#5C6472]">{metric}</span>
@@ -561,13 +595,15 @@ export default function OsmrMethodology() {
             </p>
             <p className="text-sm leading-6 text-[#5C6472]">
               The highest-risk cohort — Very High across all three axes
-              simultaneously — produced a median 12-month return of −25.2% across
-              20,262 observations, with only 34.7% of outcomes positive. The mean
-              of +13.8% is pulled upward by a subset of large positive outcomes.
+              simultaneously — produced a median 12-month return of −25.3% across
+              19,079 observations, with only 34.5% of outcomes positive. The mean
+              of +12.6% is pulled upward by a subset of large positive outcomes.
               Using mean as the headline figure here would be deeply misleading —
               it would make the highest-risk cohort appear attractive when nearly
               two-thirds of investors in this cohort lost money over the following
-              twelve months.
+              twelve months. All figures reflect the interest-bearing universe;
+              firms without financing obligations are excluded from Axis 3 scoring
+              and cohort analysis.
             </p>
           </div>
 
@@ -585,10 +621,10 @@ export default function OsmrMethodology() {
               In the highest-risk cohort, the mean is positive while the median is
               deeply negative. A framework that reported mean as its primary metric
               would present this cohort as worth holding. The median tells the
-              honest story: most investors in this cohort lost a quarter of their
-              capital over the following twelve months. The framework shows mean
-              with skew indicators when the gap is material, so readers can see
-              both the central tendency and the tail.
+              honest story: most investors in this cohort lost more than a quarter
+              of their capital over the following twelve months. The framework
+              shows mean with skew indicators when the gap is material, so readers
+              can see both the central tendency and the tail.
             </p>
           </div>
         </section>
@@ -610,6 +646,10 @@ export default function OsmrMethodology() {
 
           <div className="mt-8 space-y-4">
             {[
+              {
+                title: "Empirical weighting over equal weighting",
+                body: "The composite score weights Axis 1 and Axis 2 at 37.5% each and Axis 3 at 25%. This reflects measured signal strength: Axis 2 carries the strongest rank correlation with subsequent returns (Spearman r = −0.133), followed by Axis 1 (r = −0.124), with Axis 3 contributing real but weaker signal (r = −0.092). Equal weighting dilutes the stronger axes. The weights are round numbers that approximate the empirical ratios without overfitting to a specific period.\n\nThese correlations vary across market regimes. Pre-2020, Axis 3 was the strongest signal (r = −0.122) while Axis 1 was near zero (r = −0.001). During COVID-era disruption, Axis 3 weakened materially (r = −0.028) as monetary policy suppressed the normal relationship between debt load and distress. Post-COVID, all three axes strengthened, with Axis 2 becoming dominant (r = −0.180). The full-period weights are a stable long-run approximation — not a regime-specific optimization. Users should understand that in any specific market environment, the relative signal strength of each axis may differ from the long-run average.",
+              },
               {
                 title: "Empirical over mathematical sophistication",
                 body: "Where simpler measures outperform complex ones against historical data, the simpler measure is used. This applies most directly to Axis 2, where YoY consistency outperformed tanh transformation and R-squared trend fitting. Mathematical complexity is not a virtue in itself — it becomes a vice when it disconnects the measure from the economic phenomenon it is trying to capture.",
@@ -663,8 +703,12 @@ export default function OsmrMethodology() {
                 body: "Each snapshot is a static assessment based on trailing twelve-month figures and available price data. A company can move across OAL rungs and risk quintiles within a single quarter if its operational or market circumstances change materially.",
               },
               {
-                title: "Cohort validation is primarily OAL 1-anchored in its current form",
-                body: "The full cohort grid was built on FCF-anchored companies (OAL 1), which represent the largest and most historically stable cohort. Extension to OAL 2–4 companies is in progress. Until that work is complete, the empirical validation should be understood as most robust for the FCF-anchored universe.",
+                title: "Axis 3 applies to the interest-bearing universe only",
+                body: "Firms with no interest expense are not assigned an Axis 3 score. Financing risk is undefined in the absence of a financing structure — these firms are labeled 'No Financing Structure' rather than assigned a low-risk score. This improves measurement precision within the relevant domain but reduces cross-sectional coverage. Approximately 16% of the current universe falls outside Axis 3's domain. Their composite score is the normalized mean of Axis 1 and Axis 2, scaled to maintain comparability with three-axis firms.\n\nIn practice, 'No Financing Structure' should be interpreted as higher uncertainty, not lower risk. These firms carry no current financing obligation but are correspondingly more dependent on equity markets and narrative to fund operations. Their Axis 1 and Axis 2 scores remain fully interpretable — a no-interest firm scoring Very High on both axes is structurally dangerous despite the absence of debt. In practice, many users treat these firms as a distinct category requiring separate monitoring or reduced position sizing relative to comparably scored interest-bearing firms.\n\nPreliminary analysis of ~44,000 historical observations on no-interest firms shows an overall median 12-month return of −3.8% with a 45.2% hit rate — worse than the interest-bearing universe across equivalent structural positions. The Very High composite bucket within this group shows median −18.3%, consistent with the interest-bearing high-risk cohort. Full cohort analysis of this population as a distinct structural regime is planned for a future build.",
+              },
+              {
+                title: "Cohort analysis reflects the interest-bearing universe",
+                body: "All cohort grid figures — median returns, hit rates, observation counts — are computed on the interest-bearing universe only. Results should not be interpreted as full-universe statistics. The current cohort grid contains approximately 260,000 historical observations after this domain restriction is applied.",
               },
               {
                 title: "Shallowness penalties are calibrated by judgment, not optimization",
@@ -759,15 +803,15 @@ export default function OsmrMethodology() {
                   },
                   {
                     field: "Axis 3",
-                    value: "Three-tier financing risk assessment based on interest obligation coverage relative to operational output. No OAL shallowness penalty applied.",
+                    value: "Evaluated for interest-bearing companies only. Firms without interest expense are excluded from the ranking pool and labeled 'No Financing Structure' — financing risk is undefined in the absence of a financing structure. Interest-bearing companies are ranked globally by log-coverage ratio adjusted for OAL shallowness penalty.",
                   },
                   {
                     field: "Composite Score",
-                    value: "Mean of all available axis scores. Displayed as a percentile rank across the full universe.",
+                    value: "Generalized weighted mean: Σ(wᵢ × axisᵢ) / Σ(wᵢ for available axes). Weights: Axis 1 = 0.375, Axis 2 = 0.375, Axis 3 = 0.250. Denominator adjusts to sum of weights for axes that exist, preserving the 0–1 scale. This is a long-run static model — weights do not shift across market regimes. Displayed as a percentile rank across the full universe.",
                   },
                   {
                     field: "Cohort Grid",
-                    value: "304,236 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
+                    value: "260,549 historical observations. 12-month forward horizon. 3 panels × 5 Axis 1 × 5 Axis 2 = 75 cells per panel. Rebuilt monthly; values reflect latest completed cycle. Default metric: median return.",
                   },
                 ].map(({ field, value }) => (
                   <tr key={field} className="bg-white even:bg-[#F7F8F6]">
