@@ -120,9 +120,9 @@ function useSystemStats(): SiteStats {
 
 export default function HomePage() {
   const stats = useSystemStats()
-  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%`                 : "17.2%"
-  const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "62%"
-  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                  : "10.2%"
+  const highRiskPct  = stats ? `${stats.high_risk_cluster.pct_of_universe}%`                 : "16.1%"
+  const revAnchorPct = stats ? `${Math.round(stats.high_risk_cluster.revenue_anchored_pct)}%` : "61%"
+  const lowRiskPct   = stats ? `${stats.low_risk_cluster.pct_of_universe}%`                  : "11.4%"
   const fcfAnchorPct = stats ? `${Math.round(stats.low_risk_cluster.fcf_anchored_pct)}%`     : "100%"
 
   // Scroll restoration fix — from your version

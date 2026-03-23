@@ -314,16 +314,16 @@ export default function HowToUseOSMR() {
               </p>
               <p className="mt-2 text-sm text-[#5C6472]">
                 Median 12-month forward returns by operational trajectory zone.
-                ~300,000 historical observations.
+                ~260,000 historical observations · interest-bearing universe.
               </p>
 
               <div className="mt-5 space-y-3">
                 {[
-                  { label: "Very Low trajectory risk",  value: "+2.9%",  color: "#4CAF7D", width: "60%",  negative: false },
-                  { label: "Low trajectory risk",       value: "+1.8%",  color: "#6DAE8B", width: "48%",  negative: false },
-                  { label: "Moderate trajectory risk",  value: "+1.3%",  color: "#8A92A0", width: "38%",  negative: false },
-                  { label: "High trajectory risk",      value: "−1.5%",  color: "#C47B5F", width: "25%",  negative: true  },
-                  { label: "Very High trajectory risk", value: "−19.5%", color: "#B85C3A", width: "5%",   negative: true  },
+                  { label: "Very Low trajectory risk",  value: "+3.1%",  color: "#4CAF7D", width: "62%",  negative: false },
+                  { label: "Low trajectory risk",       value: "+2.2%",  color: "#6DAE8B", width: "50%",  negative: false },
+                  { label: "Moderate trajectory risk",  value: "+1.8%",  color: "#8A92A0", width: "42%",  negative: false },
+                  { label: "High trajectory risk",      value: "−1.2%",  color: "#C47B5F", width: "22%",  negative: true  },
+                  { label: "Very High trajectory risk", value: "−19.9%", color: "#B85C3A", width: "5%",   negative: true  },
                 ].map(({ label, value, color, width, negative }) => (
                   <div key={label}>
                     <div className="mb-1 flex items-center justify-between text-sm">

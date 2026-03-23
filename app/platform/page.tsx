@@ -9,16 +9,16 @@ const completed = [
   "Market-wide valuation pressure based on operational support",
   "Consistency of operational performance across valuation anchors",
   "Company-level financing resilience and stress ranking",
-  "Composite Structural Risk score",
-  "Historical cohort grids — 309,000+ observations, 12M horizon",
+  "Composite Structural Risk score — empirically weighted",
+  "Historical cohort grids — 260,000+ observations, 12M horizon",
   "Three-panel cohort outcomes by financing fragility",
-  "Active Risk Cluster — top structural stress names",
+  "Active Risk Cluster — companies in the top composite risk quintile across all three axes simultaneously",
   "Weekly snapshot refresh cadence",
 ];
 
 const remaining = [
   "Company-level structural drilldowns",
-  "Interpretive signal and regime context layers",
+  "Interpretive context layers — regime classification, cohort placement, and structural narrative per company",
   "Tiered access and subscription infrastructure",
   "Downloadable monthly structural report",
   "Market structure analytics — options and spreads layer",
@@ -74,7 +74,7 @@ export default function PlatformPage() {
           Platform Access
         </div>
 
-        {/* Headline — forward motion, not status reporting */}
+        {/* Headline */}
         <h1
           className="tcs-heading max-w-3xl text-center text-5xl font-semibold leading-tight text-white md:text-6xl"
           style={{ animation: "fadeUp 0.6s ease 0.1s both" }}
@@ -82,13 +82,27 @@ export default function PlatformPage() {
           Access is opening soon.
         </h1>
 
-        {/* Body — tightened, no casual tone */}
+        {/* Body — Council-approved copy */}
         <p
           className="mt-6 max-w-2xl text-center text-lg leading-8 text-[#A9BEDF]"
           style={{ animation: "fadeUp 0.6s ease 0.2s both" }}
         >
-          The core system is built. What remains is access design,
-          interpretive layers, and company-level drilldowns.
+          The core scoring system is complete and runs across the full universe
+          on a weekly cadence. What remains is not the model itself, but the
+          layers that make it usable: company-level drilldowns, interpretive
+          context, and access infrastructure. Until those are in place, the
+          system is internally complete but externally constrained.
+        </p>
+
+        {/* Investor consequence — what changes with access */}
+        <p
+          className="mt-3 max-w-xl text-center text-sm leading-6 text-[#7A9FCA]"
+          style={{ animation: "fadeUp 0.6s ease 0.25s both" }}
+        >
+          When access opens: identify structurally fragile companies before
+          fragility becomes visible in price, monitor anchor deterioration in
+          positions under consideration, and avoid cohorts where the historical
+          return distribution has been consistently weak.
         </p>
 
         {/* Build status grid */}
@@ -116,7 +130,7 @@ export default function PlatformPage() {
               </ul>
             </div>
 
-            {/* Remaining column — progress bar removed */}
+            {/* Remaining column */}
             <div className="rounded-2xl border border-[#1E3A5F] bg-[#0D2847] p-6">
               <div className="mb-4 flex items-center gap-2">
                 <div
@@ -136,10 +150,13 @@ export default function PlatformPage() {
                 ))}
               </ul>
 
-              {/* Momentum signal — replaces progress bar */}
-              <div className="mt-6 border-t border-[#1E3A5F] pt-5">
+              <div className="mt-6 border-t border-[#1E3A5F] pt-5 space-y-2">
                 <p className="text-[12px] leading-5 text-[#7E8A96]">
                   Core system live. Expansion in progress.
+                </p>
+                <p className="text-[12px] leading-5 text-[#4A6A8A]">
+                  Each component is interdependent — expansion layers refine
+                  interpretation, not underlying scoring.
                 </p>
               </div>
             </div>
@@ -147,7 +164,7 @@ export default function PlatformPage() {
           </div>
         </div>
 
-        {/* CTAs — primary only, Back to Home removed */}
+        {/* CTAs */}
         <div
           className="mt-10 flex flex-wrap items-center justify-center gap-4"
           style={{ animation: "fadeUp 0.6s ease 0.45s both" }}
