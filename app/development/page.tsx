@@ -127,6 +127,15 @@ function formatPct(v: number | null) {
   if (v == null || Number.isNaN(v)) return "—";
   return `${(v * 100).toFixed(1)}%`;
 }
+// Rounded to nearest whole number — model resolution does not justify decimal precision
+function formatRiskPct(v: number | null): string {
+  if (v == null || Number.isNaN(v)) return "—";
+  return `${Math.round(v * 100)}th percentile`;
+}
+function formatAxisPct(v: number | null): string {
+  if (v == null || Number.isNaN(v)) return "—";
+  return `${Math.round(v * 100)}th pct`;
+}
 function formatPctSigned(v: number | null) {
   if (v == null || Number.isNaN(v)) return "—";
   const pct = v * 100;
@@ -301,7 +310,7 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-2">Structural Profile</div>
             <div className="flex items-start justify-between gap-4">
               <div><h2 className="text-3xl font-semibold text-white">{company.symbol}</h2><p className="mt-1 text-sm text-[#7E8A96]">{company.oal_label ?? "—"}</p></div>
-              <div className="text-right shrink-0"><div className="text-lg font-semibold" style={{ color: compositeColor(company.composite_bucket) }}>{company.composite_bucket}</div><div className="text-xs text-[#7E8A96]">{company.composite_score != null ? company.composite_score.toFixed(3) : "—"}</div></div>
+              <div className="text-right shrink-0"><div className="text-lg font-semibold" style={{ color: compositeColor(company.composite_bucket) }}>{company.composite_bucket}</div><div className="text-xs text-[#7E8A96]">{company.composite_score != null ? formatRiskPct(company.composite_score) : "—"}</div></div>
             </div>
             <div className="mt-4 rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-3"><p className="text-[13px] leading-[1.7] text-[#B8C3CC]">{narrative.headerRead}</p></div>
           </div>
@@ -321,7 +330,7 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
                   </div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-1.5 flex-1 rounded-full bg-[#203754] overflow-hidden"><div className="h-full rounded-full" style={{ width: `${((pct ?? 0) * 100).toFixed(0)}%`, backgroundColor: compositeColor(bucket) }} /></div>
-                    <span className="text-xs text-[#7E8A96] shrink-0">{pct != null ? `${(pct * 100).toFixed(0)}th pct` : "—"}</span>
+                    <span className="text-xs text-[#7E8A96] shrink-0">{pct != null ? formatAxisPct(pct) : "—"}</span>
                   </div>
                   <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">{interp}</p>
                 </div>
@@ -690,14 +699,13 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
   const trajectory = useMemo(() => interpretTrajectory(data, distribution.tone), [data, distribution.tone]);
   const toneColor = { elevated: "#BC6464", moderate: "#B8C3CC", subdued: "#6DAE8B" };
   const directionColor = { deteriorating: "#BC6464", improving: "#6DAE8B", mixed: "#B8C3CC" };
-  const regimeBadge: Record<string, { label: string; color: string }> = { escalation: { label: "Escalation", color: "#BC6464" }, stabilization: { label: "Stabilization", color: "#6DAE8B" }, accumulation: { label: "Accumulation", color: "#E8A87C" }, health: { label: "Structural Health", color: "#6DAE8B" }, mixed: { label: "Mixed", color: "#7E8A96" } };
+
   if (loading) return (
     <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
       <CardHeader><CardTitle className="text-white">Current Market Interpretation</CardTitle><CardDescription className="text-[#B8C3CC]">Computing structural signals...</CardDescription></CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-3">{[1, 2, 3].map(i => <div key={i} className="h-36 animate-pulse rounded-2xl border border-[#203754] bg-[#0D2138]" />)}</CardContent>
     </Card>
   );
-  const regime = regimeBadge[trajectory.regime];
   return (
     <Card className="rounded-3xl shadow-xl shadow-black/40" style={{ borderLeft: "2px solid #3E8E6A", border: "1px solid #2E4D6A", background: "#061425", boxShadow: "0 0 0 1px rgba(62,142,106,0.15), 0 20px 40px rgba(0,0,0,0.4)" }}>
       <CardHeader className="pb-2">
@@ -707,20 +715,20 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
             <CardDescription className="mt-1 text-[#B8C3CC]">The system's current read of market structure under the active filters. These describe current structural conditions. They do not forecast outcomes.</CardDescription>
             <p className="mt-2 text-[12px] font-medium text-[#6DAE8B]">Start here. This is the system's current read before you inspect the map or any company.</p>
           </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">Current Regime</div>
-            <div className="rounded-full border px-5 py-2 text-base font-semibold" style={{ borderColor: `${regime.color}60`, color: regime.color, backgroundColor: `${regime.color}20` }}>{regime.label}</div>
-          </div>
+
         </div>
       </CardHeader>
       <CardContent className="grid gap-4 pt-2 md:grid-cols-3">
         {[
-          { key: "dist", label: "Distribution", color: toneColor[distribution.tone], headline: distribution.tone === "elevated" ? "Risk is broadly elevated" : distribution.tone === "subdued" ? "Risk is currently contained" : "Risk is present but mixed", body: distribution.headline.toLowerCase().startsWith("—") ? distribution.body : `${distribution.headline}. ${distribution.body}`, consequence: distribution.consequence, delay: 0 },
-          { key: "conc", label: "Concentration", color: "#EAF0F2", headline: concentration.clusterType === "compound" ? "Compound risk — valuation and financing both strained" : concentration.clusterType === "valuation-stretch" ? "Valuation-stretch cluster dominant" : concentration.clusterType === "financing-fragility" ? "Financing-fragility cluster dominant" : "No elevated concentration", body: concentration.body, consequence: concentration.consequence, delay: 0.08 },
-          { key: "traj", label: "Trajectory", color: directionColor[trajectory.direction], headline: trajectory.direction === "deteriorating" ? "Universe is deteriorating in aggregate" : trajectory.direction === "improving" ? "Universe is improving in aggregate" : "Trajectory is mixed", body: trajectory.body, consequence: trajectory.consequence, delay: 0.16 },
-        ].map(({ key, label, color, headline, body, consequence, delay }) => (
+          { key: "dist", label: "Distribution", sublabel: "System State", color: toneColor[distribution.tone], headline: distribution.tone === "elevated" ? "Risk is broadly elevated" : distribution.tone === "subdued" ? "Risk is currently contained" : "Risk is present but mixed", body: distribution.headline.toLowerCase().startsWith("—") ? distribution.body : `${distribution.headline}. ${distribution.body}`, consequence: distribution.consequence, delay: 0 },
+          { key: "conc", label: "Concentration", sublabel: "Interpretive Summary", color: "#EAF0F2", headline: concentration.clusterType === "compound" ? "Compound risk — valuation and financing both strained" : concentration.clusterType === "valuation-stretch" ? "Valuation-stretch cluster dominant" : concentration.clusterType === "financing-fragility" ? "Financing-fragility cluster dominant" : "No elevated concentration", body: concentration.body, consequence: concentration.consequence, delay: 0.08 },
+          { key: "traj", label: "Trajectory", sublabel: "System State", color: directionColor[trajectory.direction], headline: trajectory.direction === "deteriorating" ? "Universe is deteriorating in aggregate" : trajectory.direction === "improving" ? "Universe is improving in aggregate" : "Trajectory is mixed", body: trajectory.body, consequence: trajectory.consequence, delay: 0.16 },
+        ].map(({ key, label, sublabel, color, headline, body, consequence, delay }: { key: string; label: string; sublabel?: string; color: string; headline: string; body: string; consequence: string; delay: number }) => (
           <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay, ease: "easeOut" }} className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
-            <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">{label}</div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">{label}</div>
+              {sublabel && <div className="text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ color: sublabel === "System State" ? "#6DAE8B" : "#7E8A96", backgroundColor: sublabel === "System State" ? "#6DAE8B18" : "#41506A30" }}>{sublabel}</div>}
+            </div>
             <div className="mb-2 text-sm font-semibold leading-snug" style={{ color }}>{headline}</div>
             <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">{body}</div>
             {consequence && <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">{consequence}</div>}
@@ -1065,7 +1073,7 @@ export default function PlatformPage() {
                     return (
                       <div key={row.symbol} onClick={() => setSelectedCompany(row)} className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 hover:opacity-90 hover:scale-[1.02]" style={{ background: isVeryHigh ? "rgba(139,56,56,0.15)" : "#0D2138", border: isVeryHigh ? "1px solid rgba(188,100,100,0.4)" : "1px solid #203754" }} title={`${row.symbol} · ${row.oal_label} · ${row.composite_bucket}`}>
                         <span className="font-mono text-sm font-semibold text-white">{row.symbol}</span>
-                        <span className="font-mono text-xs" style={{ color: isVeryHigh ? "#BC6464" : COLORS.textMuted }}>{row.composite_score?.toFixed(3)}</span>
+                        <span className="text-xs" style={{ color: isVeryHigh ? "#BC6464" : COLORS.textMuted }}>{row.composite_bucket}</span>
                       </div>
                     );
                   })}
@@ -1213,10 +1221,10 @@ export default function PlatformPage() {
                         <TableRow key={row.symbol} onClick={() => setSelectedCompany(row)} className="cursor-pointer border-[#203754] hover:bg-[#0D2138]/70">
                           <TableCell className="font-medium text-white">{row.symbol}</TableCell>
                           <TableCell className="text-[#EAF0F2]">{row.oal_label}</TableCell>
-                          <TableCell className="text-[#EAF0F2]">{row.axis1_pct?.toFixed(3) ?? "—"}</TableCell>
-                          <TableCell className="text-[#EAF0F2]">{row.axis2_pct == null ? "—" : row.axis2_pct.toFixed(3)}</TableCell>
-                          <TableCell className="text-[#EAF0F2]">{row.axis3_pct?.toFixed(3) ?? "—"}</TableCell>
-                          <TableCell><div className="flex items-center gap-2"><span className="font-semibold text-white">{row.composite_score?.toFixed(3) ?? "—"}</span><Badge variant="outline" className="border-[#203754] text-[#B8C3CC]" style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}>{row.composite_bucket}</Badge></div></TableCell>
+                          <TableCell className="text-[#EAF0F2]">{formatAxisPct(row.axis1_pct)}</TableCell>
+                          <TableCell className="text-[#EAF0F2]">{formatAxisPct(row.axis2_pct)}</TableCell>
+                          <TableCell className="text-[#EAF0F2]">{row.axis3_pct == null ? "—" : formatAxisPct(row.axis3_pct)}</TableCell>
+                          <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="border-[#203754] text-[#B8C3CC]" style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}>{row.composite_bucket}</Badge><span className="text-xs text-[#7E8A96]">{formatRiskPct(row.composite_score)}</span></div></TableCell>
                           <TableCell className="text-[#EAF0F2]">{row.risk_bucket_within_oal ?? "—"}</TableCell>
                         </TableRow>
                       ))}
@@ -1242,7 +1250,7 @@ export default function PlatformPage() {
                 <CardHeader><CardTitle className="text-white">Operational Anchor Summary</CardTitle><CardDescription className="text-[#B8C3CC]">Median axis scores by anchor level — showing how structural risk varies across the OAL.</CardDescription></CardHeader>
                 <CardContent>
                   <p className="mb-4 text-sm text-[#7E8A96]">Compare median anchor, financing, and composite scores across OAL levels to see where structural pressure is deepest.</p>
-                  <div className="overflow-hidden rounded-2xl border border-[#203754]"><Table><TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">OAL</TableHead><TableHead className="text-[#B8C3CC]">Count</TableHead><TableHead className="text-[#B8C3CC]">Median Anchor Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Financing Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Composite</TableHead></TableRow></TableHeader><TableBody>{oalSummary.map(row => (<TableRow key={row.oal_label} className="border-[#203754]"><TableCell className="font-medium text-white">{row.oal_label}</TableCell><TableCell className="text-[#EAF0F2]">{formatNum(row.n)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis1 == null ? "—" : row.median_axis1.toFixed(3)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis3 == null ? "—" : row.median_axis3.toFixed(3)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_composite == null ? "—" : row.median_composite.toFixed(3)}</TableCell></TableRow>))}</TableBody></Table></div>
+                  <div className="overflow-hidden rounded-2xl border border-[#203754]"><Table><TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">OAL</TableHead><TableHead className="text-[#B8C3CC]">Count</TableHead><TableHead className="text-[#B8C3CC]">Median Anchor Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Financing Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Composite</TableHead></TableRow></TableHeader><TableBody>{oalSummary.map(row => (<TableRow key={row.oal_label} className="border-[#203754]"><TableCell className="font-medium text-white">{row.oal_label}</TableCell><TableCell className="text-[#EAF0F2]">{formatNum(row.n)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis1 == null ? "—" : formatAxisPct(row.median_axis1)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis3 == null ? "—" : formatAxisPct(row.median_axis3)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_composite == null ? "—" : formatRiskPct(row.median_composite)}</TableCell></TableRow>))}</TableBody></Table></div>
                 </CardContent>
               </Card>
             </div>
