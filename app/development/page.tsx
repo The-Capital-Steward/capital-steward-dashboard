@@ -727,10 +727,10 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
 
         </div>
       </CardHeader>
-      <CardContent className="grid gap-4 pt-2 md:grid-cols-3">
+      <CardContent className="grid gap-4 pt-2 md:grid-cols-2">
         {[
           { key: "dist", label: "Distribution", sublabel: "System State", color: toneColor[distribution.tone], headline: distribution.tone === "elevated" ? "Risk is broadly elevated" : distribution.tone === "subdued" ? "Risk is currently contained" : "Risk is present but mixed", body: distribution.headline.toLowerCase().startsWith("—") ? distribution.body : `${distribution.headline}. ${distribution.body}`, consequence: distribution.consequence, delay: 0 },
-          { key: "conc", label: "Concentration", sublabel: "Interpretive Summary", color: "#EAF0F2", headline: concentration.clusterType === "compound" ? "Compound risk — valuation and financing both strained" : concentration.clusterType === "valuation-stretch" ? "Valuation-stretch cluster dominant" : concentration.clusterType === "financing-fragility" ? "Financing-fragility cluster dominant" : "No elevated concentration", body: concentration.body, consequence: concentration.consequence, delay: 0.08 },
+          // Concentration panel hidden — cluster type taxonomy not yet systematically defined
           { key: "traj", label: "Trajectory", sublabel: "System State", color: directionColor[trajectory.direction], headline: trajectory.direction === "deteriorating" ? "Universe is deteriorating in aggregate" : trajectory.direction === "improving" ? "Universe is improving in aggregate" : "Trajectory is mixed", body: trajectory.body, consequence: trajectory.consequence, delay: 0.16 },
         ].map(({ key, label, sublabel, color, headline, body, consequence, delay }: { key: string; label: string; sublabel?: string; color: string; headline: string; body: string; consequence: string; delay: number }) => (
           <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay, ease: "easeOut" }} className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
@@ -918,11 +918,11 @@ export default function PlatformPage() {
         </Card>
 
         {/* KPI Strip */}
-        <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Structural Stress</CardDescription><CardTitle className="text-4xl text-white">{loading ? "…" : formatNum(stats.veryHigh)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies in the Very High composite bucket under active filters.<KPIDelta current={stats.veryHigh} previous={null} higherIsBad={true} /></CardContent></Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Financing Stress (Top Quintile)</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.fragile)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies with Axis 3 at or above the 80th percentile — high obligation strain.<KPIDelta current={stats.fragile} previous={null} higherIsBad={true} /></CardContent></Card>
           <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Active Universe</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.total)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies currently scored under active filters.<KPIDelta current={stats.total} previous={null} higherIsBad={false} /></CardContent></Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Average Risk Level</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatPct(stats.avgComposite)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Mean composite structural risk score across the filtered universe.<KPIDelta current={stats.avgComposite} previous={null} higherIsBad={true} isDecimal={true} /></CardContent></Card>
+          {/* Average Risk Level KPI hidden — mean composite percentile not yet clearly defined for users */}
         </div>
 
         {/* Tabs */}
@@ -1207,16 +1207,7 @@ export default function PlatformPage() {
             {/* Validation Panels */}
             <ValidationPanels data={quintileBacktest} loading={loading} />
 
-            {/* Cohort Insight Layer */}
-            <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div><CardTitle className="text-white">Cohort Insight Layer</CardTitle><CardDescription className="mt-1 max-w-2xl text-[#B8C3CC]">Automatically surfaces the strongest return zones, widest mean/median gaps, highest hit-rate concentrations, and most unstable structural configurations across the active cohort surface.</CardDescription></div>
-                  <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#94A3B8]">In Development</Badge>
-                </div>
-              </CardHeader>
-              <CardContent><div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-2.5 text-[12.5px] text-[#94A3B8]">Pattern extraction layer is in development. This will surface 2–4 key structural signals under the active filters rather than requiring manual grid scanning.</div></CardContent>
-            </Card>
+            {/* Cohort Insight Layer hidden — not yet built or reasoned through */}
           </TabsContent>
 
           {/* Snapshot Tab */}
@@ -1271,7 +1262,7 @@ export default function PlatformPage() {
 
           {/* Financing Context Tab */}
           <TabsContent value="liquidity" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+            <div className="grid gap-6">
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader><div className="flex items-center gap-2"><Activity className="h-5 w-5 text-[#B8C3CC]" /><CardTitle className="text-white">Financing Context</CardTitle></div><CardDescription className="text-[#B8C3CC]">Balance sheet flexibility and financing strain across the current filtered universe.</CardDescription></CardHeader>
                 <CardContent>
@@ -1280,21 +1271,13 @@ export default function PlatformPage() {
                   <div className="h-[320px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={liquiditySummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}><CartesianGrid stroke={COLORS.border} vertical={false} /><XAxis dataKey="bucket" tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><YAxis tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><Tooltip contentStyle={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, borderRadius: 16, color: COLORS.text }} /><Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} /></BarChart></ResponsiveContainer></div>
                 </CardContent>
               </Card>
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader><CardTitle className="text-white">What This View Adds</CardTitle><CardDescription className="text-[#B8C3CC]">How the financing context extends structural analysis beyond risk scores alone.</CardDescription></CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
-                  <p><span className="font-medium text-white">1.</span> The core structural layers — market map, anchor structure, financing context, and cohort outcomes — are fully active.</p>
-                  <p><span className="font-medium text-white">2.</span> Global filters apply consistently across all tabs.</p>
-                  <p><span className="font-medium text-white">3.</span> The cohort grid metric toggle lets you compare mean, median, and hit-rate surfaces for cross-validation.</p>
-                  <p><span className="font-medium text-white">4.</span> Company drilldowns, regime history views, and advanced filtering extend this system further.</p>
-                </CardContent>
-              </Card>
+              {/* "What This View Adds" card hidden — generic placeholder, not reasoned financing-specific content */}
             </div>
           </TabsContent>
 
           {/* History Tab */}
           <TabsContent value="history" className="space-y-6">
-            <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+            <div className="grid gap-6">
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader><div className="flex items-center gap-2"><Clock3 className="h-5 w-5 text-[#B8C3CC]" /><CardTitle className="text-white">Historical Coverage</CardTitle></div><CardDescription className="text-[#B8C3CC]">Archived monthly structural snapshots available in the system.</CardDescription></CardHeader>
                 <CardContent>
@@ -1303,15 +1286,7 @@ export default function PlatformPage() {
                   <div className="overflow-hidden rounded-2xl border border-[#203754]"><Table><TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">Month</TableHead><TableHead className="text-[#B8C3CC]">OAL Scores</TableHead><TableHead className="text-[#B8C3CC]">OAL Summary</TableHead><TableHead className="text-[#B8C3CC]">Structural Snapshot</TableHead></TableRow></TableHeader><TableBody>{historyManifest.map(row => (<TableRow key={row.month} className="border-[#203754]"><TableCell className="font-medium text-white">{row.month}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_oal_scores === false ? "—" : formatNum(row.oal_scores_rows)}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_oal_summary === false ? "—" : formatNum(row.oal_summary_rows)}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_structural_snapshot === false ? "—" : formatNum(row.structural_rows)}</TableCell></TableRow>))}</TableBody></Table></div>
                 </CardContent>
               </Card>
-              <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader><CardTitle className="text-white">Why Historical Coverage Matters</CardTitle><CardDescription className="text-[#B8C3CC]">What the historical layer enables — and how it connects to current structural analysis.</CardDescription><p className="mt-1.5 text-xs text-[#94A3B8]">This is the empirical foundation behind the cohort outcomes and regime interpretation.</p></CardHeader>
-                <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
-                  <p><span className="font-medium text-white">1.</span> Archived monthly structural states define the platform's historical coverage window.</p>
-                  <p><span className="font-medium text-white">2.</span> Cohort outcomes are calculated from real formation-month states and forward returns — not backtested with hindsight.</p>
-                  <p><span className="font-medium text-white">3.</span> This historical layer supports regime comparison across valuation, trajectory, and financing fragility.</p>
-                  <p><span className="font-medium text-white">4.</span> Regime history views extend this layer to show how structure evolves over time.</p>
-                </CardContent>
-              </Card>
+              {/* "Why Historical Coverage Matters" card hidden — generic placeholder, not reasoned content */}
             </div>
           </TabsContent>
 
