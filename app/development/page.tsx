@@ -105,10 +105,13 @@ type QuintileBacktest = {
   formation_series: { month: string; bottom_return: number; middle_return: number; top_return: number; structural_spread: number }[];
 };
 
+type IndexCurveEntry = { month: string; value: number };
+type IndexFrequency  = { curve: IndexCurveEntry[]; stats: { annualized_return: number; hit_rate: number; terminal_value: number } };
 type IndexBacktest = {
   results: {
-    tcs150:     { name: string; frequencies: { monthly: { curve: { month: string; value: number }[]; stats: { annualized_return: number; hit_rate: number; terminal_value: number } } } };
-    sapphire50: { name: string; frequencies: { monthly: { curve: { month: string; value: number }[]; stats: { annualized_return: number; hit_rate: number; terminal_value: number } } } };
+    tcs150:       { name: string; frequencies: { monthly: IndexFrequency } };
+    sapphire50:   { name: string; frequencies: { monthly: IndexFrequency } };
+    total_market: { name: string; frequencies: { monthly: IndexFrequency } };
   };
 };
 
@@ -371,72 +374,155 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
 
 // ─── Index Performance Chart ───────────────────────────────────────────────────
 function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; loading: boolean }) {
-  const tcs150Curve = data?.results.tcs150.frequencies.monthly.curve ?? [];
+  const tcs150Curve    = data?.results.tcs150.frequencies.monthly.curve ?? [];
   const sapphire50Curve = data?.results.sapphire50.frequencies.monthly.curve ?? [];
-  const tcs150Stats = data?.results.tcs150.frequencies.monthly.stats;
-  const W = 780; const H = 260; const PAD = 40;
+  const totalMktCurve  = data?.results.total_market?.frequencies.monthly.curve ?? [];
+  const tcs150Stats    = data?.results.tcs150.frequencies.monthly.stats;
+  const totalMktStats  = data?.results.total_market?.frequencies.monthly.stats;
+
+  const W = 780; const H = 280; const PAD = 40;
+
+  // All three curves share the same Y scale — critical for honest comparison
+  const allVals = [
+    ...tcs150Curve.map(d => d.value),
+    ...sapphire50Curve.map(d => d.value),
+    ...totalMktCurve.map(d => d.value),
+  ];
+  const globalMin = allVals.length > 0 ? Math.min(...allVals) * 0.97 : 70;
+  const globalMax = allVals.length > 0 ? Math.max(...allVals) * 1.03 : 220;
+
   const buildPath = (curve: { month: string; value: number }[]) => {
     if (curve.length === 0) return "";
-    const vals = curve.map(d => d.value);
-    const min = Math.min(...vals) * 0.97;
-    const max = Math.max(...vals) * 1.03;
-    const xS = (i: number) => PAD + (i / (curve.length - 1)) * (W - PAD * 2);
-    const yS = (v: number) => PAD + (1 - (v - min) / (max - min)) * (H - PAD * 2);
+    // X scale based on TCS-150 length (longest, most complete series)
+    const n = Math.max(tcs150Curve.length, curve.length);
+    const xS = (i: number) => PAD + (i / (n - 1)) * (W - PAD * 2);
+    const yS = (v: number) => PAD + (1 - (v - globalMin) / (globalMax - globalMin)) * (H - PAD * 2);
     return curve.map((d, i) => `${i === 0 ? "M" : "L"} ${xS(i).toFixed(1)} ${yS(d.value).toFixed(1)}`).join(" ");
   };
-  const tcsPath = buildPath(tcs150Curve);
-  const sapPath = buildPath(sapphire50Curve);
-  const step = Math.floor(tcs150Curve.length / 5);
-  const xLabels = tcs150Curve.filter((_, i) => i % step === 0 || i === tcs150Curve.length - 1).map(d => {
-    const idx = tcs150Curve.indexOf(d);
-    return { x: PAD + (idx / (tcs150Curve.length - 1)) * (W - PAD * 2), label: d.month.slice(0, 7) };
+
+  const tcsPath      = buildPath(tcs150Curve);
+  const sapPath      = buildPath(sapphire50Curve);
+  const totalMktPath = buildPath(totalMktCurve);
+
+  // X-axis labels from TCS-150 (reference series)
+  const step = Math.floor(tcs150Curve.length / 6);
+  const xLabels = tcs150Curve
+    .filter((_, i) => i % step === 0 || i === tcs150Curve.length - 1)
+    .map(d => {
+      const idx = tcs150Curve.indexOf(d);
+      const n = tcs150Curve.length;
+      return { x: PAD + (idx / (n - 1)) * (W - PAD * 2), label: d.month.slice(0, 7) };
+    });
+
+  // Baseline 100 on shared scale
+  const y100 = PAD + (1 - (100 - globalMin) / (globalMax - globalMin)) * (H - PAD * 2);
+
+  // Y-axis labels
+  const yTicks = [globalMin, 100, 150, 200, globalMax].filter((v, i, arr) => {
+    const rounded = Math.round(v / 25) * 25;
+    return arr.indexOf(v) === i && rounded >= Math.ceil(globalMin) && rounded <= Math.floor(globalMax);
   });
-  const y100 = tcs150Curve.length > 0 ? (() => {
-    const vals = tcs150Curve.map(d => d.value);
-    const min = Math.min(...vals) * 0.97; const max = Math.max(...vals) * 1.03;
-    return PAD + (1 - (100 - min) / (max - min)) * (H - PAD * 2);
-  })() : null;
+  const roundedYTicks = [80, 100, 125, 150, 175, 200].filter(v => v >= globalMin && v <= globalMax);
+
   return (
     <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><CardTitle className="text-white">Structural Index Performance</CardTitle><CardDescription className="mt-1 text-[#B8C3CC]">Rules-based indexes built from the system's highest-conviction structural positions. Monthly rebalance. Equal-weighted median return per period. Indexed to 100.</CardDescription></div>
+          <div>
+            <CardTitle className="text-white">Structural Index Performance</CardTitle>
+            <CardDescription className="mt-1 text-[#B8C3CC]">
+              Rules-based indexes vs. the full eligible universe. Monthly rebalance. Equal-weighted median return. Indexed to 100. All three series drawn on the same scale.
+            </CardDescription>
+          </div>
           <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#7E8A96]">2018–2025 · Monthly rebalance</Badge>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 ann. return</div><div className="text-lg font-semibold text-[#6DAE8B]">{tcs150Stats ? `+${(tcs150Stats.annualized_return * 100).toFixed(1)}%` : "+9.6%"}</div></div>
-          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 hit rate</div><div className="text-lg font-semibold text-[#B8C3CC]">{tcs150Stats ? `${(tcs150Stats.hit_rate * 100).toFixed(1)}%` : "56.5%"}</div></div>
-          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden"><div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 ann. return</div><div className="text-lg font-semibold text-[#6DAE8B] blur-sm select-none">+10.5%</div><div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div></div>
-          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden"><div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 hit rate</div><div className="text-lg font-semibold text-[#B8C3CC] blur-sm select-none">61.2%</div><div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div></div>
-        </div>
-        {loading ? (
-          <div className="flex h-[260px] items-center justify-center text-[#7E8A96]">Loading index data...</div>
-        ) : (
-          <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "33.3%" }}>
-            <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-              {[0.25, 0.5, 0.75].map(t => <line key={t} x1={PAD} y1={PAD + t * (H - PAD * 2)} x2={W - PAD} y2={PAD + t * (H - PAD * 2)} stroke="#203754" strokeWidth="0.5" />)}
-              {y100 != null && <line x1={PAD} y1={y100} x2={W - PAD} y2={y100} stroke="#41506A" strokeWidth="0.75" strokeDasharray="4 4" />}
-              {sapPath && <g style={{ filter: "blur(3px)", opacity: 0.5 }}><path d={sapPath} fill="none" stroke="#1D9E75" strokeWidth="2" /></g>}
-              {tcsPath && <path d={tcsPath} fill="none" stroke="#378ADD" strokeWidth="2" />}
-              {xLabels.map(({ x, label }) => <text key={label} x={x} y={H - 8} textAnchor="middle" fill="#7E8A96" fontSize="9">{label}</text>)}
-            </svg>
-            <div className="absolute inset-0 flex items-start justify-end p-4 pointer-events-none">
-              <div className="rounded-2xl border border-[#1D9E75]/40 bg-[#0A1F3D]/90 px-4 py-3 text-left max-w-[200px]">
-                <div className="flex items-center gap-2 mb-1"><div className="h-2 w-4 rounded-full" style={{ backgroundColor: "#1D9E75" }} /><span className="text-[11px] font-medium text-[#6DAE8B]">TCS Sapphire 50</span></div>
-                <p className="text-[10px] leading-[1.5] text-[#7E8A96]">The highest-conviction structural zone. Available to paid subscribers.</p>
-              </div>
+        {/* KPI strip — 3 visible + 2 paid-locked */}
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Total Market ann. return</div>
+            <div className="text-lg font-semibold text-[#BC6464]">
+              {totalMktStats ? `${(totalMktStats.annualized_return * 100).toFixed(1)}%` : "−0.9%"}
             </div>
+          </div>
+          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 ann. return</div>
+            <div className="text-lg font-semibold text-[#6DAE8B]">
+              {tcs150Stats ? `+${(tcs150Stats.annualized_return * 100).toFixed(1)}%` : "+9.6%"}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Selection premium</div>
+            <div className="text-lg font-semibold text-[#6DAE8B]">
+              {tcs150Stats && totalMktStats
+                ? `+${((tcs150Stats.annualized_return - totalMktStats.annualized_return) * 100).toFixed(1)}pp`
+                : "+10.5pp"}
+            </div>
+          </div>
+          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 ann. return</div>
+            <div className="text-lg font-semibold text-[#6DAE8B] blur-sm select-none">+10.5%</div>
+            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div>
+          </div>
+          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 hit rate</div>
+            <div className="text-lg font-semibold text-[#B8C3CC] blur-sm select-none">61.2%</div>
+            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex h-[280px] items-center justify-center text-[#7E8A96]">Loading index data...</div>
+        ) : (
+          <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "36%" }}>
+            <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+              {/* Grid lines */}
+              {[0.25, 0.5, 0.75].map(t => (
+                <line key={t} x1={PAD} y1={PAD + t * (H - PAD * 2)} x2={W - PAD} y2={PAD + t * (H - PAD * 2)} stroke="#203754" strokeWidth="0.5" />
+              ))}
+              {/* Baseline = 100 */}
+              <line x1={PAD} y1={y100} x2={W - PAD} y2={y100} stroke="#41506A" strokeWidth="0.75" strokeDasharray="4 4" />
+              {/* Y-axis value labels */}
+              {roundedYTicks.map(v => {
+                const y = PAD + (1 - (v - globalMin) / (globalMax - globalMin)) * (H - PAD * 2);
+                return <text key={v} x={PAD - 4} y={y + 3} textAnchor="end" fill="#47566B" fontSize="8">{v}</text>;
+              })}
+              {/* Total Market — gray, drawn first (bottom layer) */}
+              {totalMktPath && <path d={totalMktPath} fill="none" stroke="#47566B" strokeWidth="1.5" strokeDasharray="5 3" />}
+              {/* Sapphire 50 — green, blurred */}
+              {sapPath && <g style={{ filter: "blur(3px)", opacity: 0.5 }}><path d={sapPath} fill="none" stroke="#1D9E75" strokeWidth="2" /></g>}
+              {/* TCS-150 — blue, top layer */}
+              {tcsPath && <path d={tcsPath} fill="none" stroke="#378ADD" strokeWidth="2" />}
+              {/* X-axis labels */}
+              {xLabels.map(({ x, label }) => (
+                <text key={label} x={x} y={H - 6} textAnchor="middle" fill="#7E8A96" fontSize="9">{label}</text>
+              ))}
+            </svg>
+
+            {/* Legend — stacked top-left */}
             <div className="absolute inset-0 flex items-start justify-start p-4 pointer-events-none">
-              <div className="rounded-2xl border border-[#378ADD]/40 bg-[#0A1F3D]/90 px-4 py-3">
-                <div className="flex items-center gap-2 mb-1"><div className="h-2 w-4 rounded-full" style={{ backgroundColor: "#378ADD" }} /><span className="text-[11px] font-medium text-[#B8C3CC]">TCS-150 Composite Index</span></div>
-                <p className="text-[10px] leading-[1.5] text-[#7E8A96]">Top 150 lowest structural risk · 100% FCF-anchored</p>
+              <div className="rounded-2xl border border-[#203754] bg-[#0A1F3D]/95 px-4 py-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-0 w-5 border-t-2 border-dashed" style={{ borderColor: "#47566B" }} />
+                  <span className="text-[10px] text-[#7E8A96]">TCS Total Market Index</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-0.5 w-5 rounded-full" style={{ backgroundColor: "#378ADD" }} />
+                  <span className="text-[10px] text-[#B8C3CC]">TCS-150 Composite Index</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-0.5 w-5 rounded-full" style={{ backgroundColor: "#1D9E75" }} />
+                  <span className="text-[10px] text-[#6DAE8B]">TCS Sapphire 50 — Paid</span>
+                </div>
               </div>
             </div>
           </div>
         )}
-        <p className="mt-3 text-[11px] leading-5 text-[#7E8A96]">Historical rules-based simulation. Monthly rebalance at each formation date. Equal-weighted median return per period. Does not account for transaction costs or liquidity constraints. 100% FCF-anchored constituents by construction. Not investment advice.</p>
+
+        <p className="mt-3 text-[11px] leading-5 text-[#7E8A96]">
+          TCS Total Market Index: equal-weighted median return of all interest-bearing companies with valid structural scores — no selection filter applied. Includes all OAL levels. TCS-150 and Sapphire 50 are drawn from the same eligible population. Historical rules-based simulation. Does not account for transaction costs or liquidity. Not investment advice.
+        </p>
       </CardContent>
     </Card>
   );
