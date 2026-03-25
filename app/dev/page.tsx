@@ -156,10 +156,10 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       const bucket = r.composite_bucket ?? "Moderate";
       const pulseMap: Record<string, number | null> = {
         "Very Low":  null,
-        "Low":       4800,
+        "Low":       3883,
         "Moderate":  2400,
-        "High":      1600,
-        "Very High": 1200,
+        "High":      1483,
+        "Very High": 917,
       };
       return {
         x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
@@ -173,10 +173,10 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
 
   // One keyframe block per pulse duration — injected once
   const keyframes = `
-    @keyframes p4800 { 0%,100%{opacity:0.80} 50%{opacity:0.30} }
+    @keyframes p3883 { 0%,100%{opacity:0.80} 50%{opacity:0.30} }
     @keyframes p2400 { 0%,100%{opacity:0.82} 50%{opacity:0.25} }
-    @keyframes p1600 { 0%,100%{opacity:0.85} 50%{opacity:0.20} }
-    @keyframes p1200 { 0%,100%{opacity:0.90} 50%{opacity:0.15} }
+    @keyframes p1483 { 0%,100%{opacity:0.85} 50%{opacity:0.20} }
+    @keyframes p917 { 0%,100%{opacity:0.90} 50%{opacity:0.15} }
   `;
 
   const CustomDot = (props: any) => {
