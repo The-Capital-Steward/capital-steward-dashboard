@@ -625,7 +625,7 @@ export default function DevPage() {
         </div>
 
         {/* Section 1 — Scatter Map */}
-        <Section title="Three-Axis Structural Map" layer="MEASURED"
+        <Section title="Three-Axis OSMR Structural Map" layer="MEASURED"
           note="Each point is a company. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Z = Financing Risk (Axis 3 percentile, navigated via depth panel). Color = Composite bucket. Dot position is a direct read of model output — no interpretation applied.">
           <ScatterMap data={snapshot} />
         </Section>
