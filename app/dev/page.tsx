@@ -237,14 +237,12 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
               label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -10, fontSize: 11, fill: "#222" }}
               tick={{ fontSize: 10, fill: "#444" }}
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
-              isAnimationActive={false}
             />
             <YAxis
               type="number" dataKey="y" domain={[0, 1]}
               label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 12, fontSize: 11, fill: "#222" }}
               tick={{ fontSize: 10, fill: "#444" }}
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
-              isAnimationActive={false}
             />
             <Scatter data={points} shape={(props: CustomDotProps) => <CustomDot {...props} />} isAnimationActive={false}>
               {points.map((_, i) => <Cell key={i} fill="transparent" />)}
