@@ -149,6 +149,14 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
+// CSS keyframes at module level — injected once into <head> via global style tag in page
+const PULSE_KEYFRAMES = `
+  @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
+  @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
+  @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
+  @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
+`;
+
 // Defined outside ScatterMap so React never recreates it — stable ref preserves CSS animations
 function CustomDot(props: any) {
   const { cx, cy, payload } = props;
@@ -186,17 +194,8 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       };
     }), [data]);
 
-  // One keyframe block per pulse duration — injected once
-  const keyframes = `
-    @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
-    @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
-    @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
-    @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
-  `;
-
   return (
     <div>
-      <style>{keyframes}</style>
       {/* Legend */}
       <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         {[
@@ -597,6 +596,7 @@ export default function DevPage() {
 
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", backgroundColor: "#fff", color: "#111", minHeight: "100vh" }}>
+      <style>{PULSE_KEYFRAMES}</style>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}>
 
         {/* Header */}
@@ -625,7 +625,7 @@ export default function DevPage() {
         </div>
 
         {/* Section 1 — Scatter Map */}
-        <Section title="Three-Axis OSMR Structural Map" layer="MEASURED"
+        <Section title="Three-Axis Structural Map" layer="MEASURED"
           note="Each point is a company. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Z = Financing Risk (Axis 3 percentile, navigated via depth panel). Color = Composite bucket. Dot position is a direct read of model output — no interpretation applied.">
           <ScatterMap data={snapshot} />
         </Section>
