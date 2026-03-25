@@ -158,10 +158,18 @@ const PULSE_KEYFRAMES = `
 `;
 
 // Defined outside ScatterMap so React never recreates it — stable ref preserves CSS animations
-function CustomDot(props: any) {
-  const { cx, cy, payload } = props;
-  const color = bucketColor(payload.composite_bucket);
-  const dur = payload.pulse;
+interface CustomDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: {
+    composite_bucket: string | null;
+    pulse: number | null;
+  };
+}
+
+function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
+  const color = bucketColor(payload?.composite_bucket);
+  const dur = payload?.pulse ?? null;
   const anim = dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none";
   return (
     <circle
