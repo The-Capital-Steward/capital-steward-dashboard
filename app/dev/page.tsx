@@ -644,7 +644,7 @@ export default function DevPage() {
         {/* Section 1 — Scatter Map */}
         <Section title="OSMR Structural Map of U.S.-Listed Equities" layer="MEASURED"
           note="Each point is a U.S.-listed equity. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Pulse rate = Financing Risk (Axis 3). Color = Composite structural risk bucket. All positions are direct model output — no interpretation applied.">
-          <ScatterMap data={snapshot} />
+          {snapshot.length > 0 && <ScatterMap data={snapshot} />}
         </Section>
 
         {/* Section 2 — Snapshot Table */}
