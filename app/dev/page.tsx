@@ -155,36 +155,37 @@ const PULSE_MAP: Record<string, number | null> = {
   "Very High":  917,
 };
 
-const MARGIN = { top: 20, right: 12, bottom: 40, left: 52 };
+// Fixed viewBox dimensions — dots use these coordinates always
+// SVG scales to container via preserveAspectRatio, dots never re-render
+const VB_W = 1000;
+const VB_H = 600;
+const VB_PAD = { top: 20, right: 10, bottom: 30, left: 40 };
+const VB_PLOT_W = VB_W - VB_PAD.left - VB_PAD.right;
+const VB_PLOT_H = VB_H - VB_PAD.top - VB_PAD.bottom;
 
-// Dots separated into their own memoized component so dims changes
-// in the parent do NOT cause dot re-renders — preserving CSS animation state
-const ScatterDots = React.memo(function ScatterDots({
-  data, plotW, plotH,
-}: {
-  data: SnapshotRow[];
-  plotW: number;
-  plotH: number;
-}) {
-  const points = data
+// Memoized dots — use fixed viewBox coords, no dependency on container dims
+const ScatterDots = React.memo(function ScatterDots({ data }: { data: SnapshotRow[] }) {
+  const points = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
     .map(r => {
       const bucket = r.composite_bucket ?? "Moderate";
       const x = Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08));
       const y = r.axis1_pct as number;
-      const cx = MARGIN.left + x * plotW;
-      const cy = MARGIN.top + (1 - y) * plotH;
-      const color = bucketColor(bucket);
-      const dur = PULSE_MAP[bucket];
-      return { symbol: r.symbol, cx, cy, color, dur };
-    });
+      return {
+        symbol: r.symbol,
+        cx: VB_PAD.left + x * VB_PLOT_W,
+        cy: VB_PAD.top + (1 - y) * VB_PLOT_H,
+        color: bucketColor(bucket),
+        dur: PULSE_MAP[bucket],
+      };
+    }), [data]);
 
   return (
-    <g clipPath="url(#scatter-clip)">
+    <>
       {points.map(pt => (
         <circle
           key={pt.symbol}
-          cx={pt.cx} cy={pt.cy} r={2}
+          cx={pt.cx} cy={pt.cy} r={3}
           fill={pt.color}
           style={{
             animation: pt.dur ? `p${pt.dur} ${pt.dur}ms ease-in-out infinite` : "none",
@@ -192,27 +193,11 @@ const ScatterDots = React.memo(function ScatterDots({
           }}
         />
       ))}
-    </g>
+    </>
   );
 });
 
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dims, setDims] = useState({ width: 800, height: 520 });
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(entries => {
-      const { width, height } = entries[0].contentRect;
-      setDims({ width, height });
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const plotW = dims.width - MARGIN.left - MARGIN.right;
-  const plotH = dims.height - MARGIN.top - MARGIN.bottom;
   const gridTicks = [0, 0.25, 0.5, 0.75, 1.0];
 
   return (
@@ -235,26 +220,38 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
         ))}
       </div>
 
-      <div ref={containerRef} style={{ width: "100%", height: 520, position: "relative" }}>
-        <svg width={dims.width} height={dims.height} style={{ position: "absolute", inset: 0 }}>
-          {/* Grid lines */}
-          {gridTicks.map(t => (
-            <g key={t}>
-              <line x1={MARGIN.left + t * plotW} y1={MARGIN.top} x2={MARGIN.left + t * plotW} y2={MARGIN.top + plotH} stroke="#ebebeb" strokeWidth={1} />
-              <line x1={MARGIN.left} y1={MARGIN.top + (1 - t) * plotH} x2={MARGIN.left + plotW} y2={MARGIN.top + (1 - t) * plotH} stroke="#ebebeb" strokeWidth={1} />
-              <text x={MARGIN.left + t * plotW} y={MARGIN.top + plotH + 14} textAnchor="middle" fontSize={9} fill="#666">{t.toFixed(2)}</text>
-              <text x={MARGIN.left - 6} y={MARGIN.top + (1 - t) * plotH + 3} textAnchor="end" fontSize={9} fill="#666">{t.toFixed(2)}</text>
-            </g>
-          ))}
-          <rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} fill="none" stroke="#ccc" strokeWidth={1} />
-          <text x={MARGIN.left + plotW / 2} y={dims.height - 4} textAnchor="middle" fontSize={11} fill="#222">Trajectory Risk →</text>
-          <text x={14} y={MARGIN.top + plotH / 2} textAnchor="middle" fontSize={11} fill="#222" transform={`rotate(-90, 14, ${MARGIN.top + plotH / 2})`}>Anchor Risk ↑</text>
-          <defs><clipPath id="scatter-clip"><rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} /></clipPath></defs>
+      {/* viewBox SVG — scales to container, dots never re-render due to resize */}
+      <svg
+        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: "100%", height: 520, display: "block" }}
+      >
+        {/* Grid */}
+        {gridTicks.map(t => (
+          <g key={t}>
+            <line
+              x1={VB_PAD.left + t * VB_PLOT_W} y1={VB_PAD.top}
+              x2={VB_PAD.left + t * VB_PLOT_W} y2={VB_PAD.top + VB_PLOT_H}
+              stroke="#ebebeb" strokeWidth={1}
+            />
+            <line
+              x1={VB_PAD.left} y1={VB_PAD.top + (1 - t) * VB_PLOT_H}
+              x2={VB_PAD.left + VB_PLOT_W} y2={VB_PAD.top + (1 - t) * VB_PLOT_H}
+              stroke="#ebebeb" strokeWidth={1}
+            />
+            <text x={VB_PAD.left + t * VB_PLOT_W} y={VB_PAD.top + VB_PLOT_H + 18} textAnchor="middle" fontSize={12} fill="#666">{t.toFixed(2)}</text>
+            <text x={VB_PAD.left - 6} y={VB_PAD.top + (1 - t) * VB_PLOT_H + 4} textAnchor="end" fontSize={12} fill="#666">{t.toFixed(2)}</text>
+          </g>
+        ))}
+        <rect x={VB_PAD.left} y={VB_PAD.top} width={VB_PLOT_W} height={VB_PLOT_H} fill="none" stroke="#ccc" strokeWidth={1} />
+        <text x={VB_PAD.left + VB_PLOT_W / 2} y={VB_H - 4} textAnchor="middle" fontSize={14} fill="#222">Trajectory Risk →</text>
+        <text x={16} y={VB_PAD.top + VB_PLOT_H / 2} textAnchor="middle" fontSize={14} fill="#222" transform={`rotate(-90, 16, ${VB_PAD.top + VB_PLOT_H / 2})`}>Anchor Risk ↑</text>
 
-          {/* Memoized dots — isolated from dims re-renders */}
-          <ScatterDots data={data} plotW={plotW} plotH={plotH} />
-        </svg>
-      </div>
+        <defs><clipPath id="scatter-clip"><rect x={VB_PAD.left} y={VB_PAD.top} width={VB_PLOT_W} height={VB_PLOT_H} /></clipPath></defs>
+        <g clipPath="url(#scatter-clip)">
+          <ScatterDots data={data} />
+        </g>
+      </svg>
     </div>
   );
 }
@@ -643,7 +640,7 @@ export default function DevPage() {
         </div>
 
         {/* Section 1 — Scatter Map */}
-        <Section title="Structural Map of U.S. Exchange-Listed Equities" layer="MEASURED"
+        <Section title="OSMR Structural Map of U.S.-Listed Equities" layer="MEASURED"
           note="Each point is a U.S.-listed equity. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Pulse rate = Financing Risk (Axis 3). Color = Composite structural risk bucket. All positions are direct model output — no interpretation applied.">
           <ScatterMap data={snapshot} />
         </Section>
