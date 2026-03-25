@@ -141,10 +141,10 @@ function returnColor(v: number | null, suppressed: boolean): string {
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
 const PULSE_KEYFRAMES = `
-  @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
-  @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
-  @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
-  @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
+  @keyframes p3883 { 0%,100%{opacity:0.6} 50%{opacity:0.15} }
+  @keyframes p2400 { 0%,100%{opacity:0.7} 50%{opacity:0.15} }
+  @keyframes p1483 { 0%,100%{opacity:0.85} 50%{opacity:0.15} }
+  @keyframes p917  { 0%,100%{opacity:1.0} 50%{opacity:0.1} }
 `;
 
 const PULSE_MAP: Record<string, number | null> = {
