@@ -165,8 +165,10 @@ const VB_PLOT_H = VB_H - VB_PAD.top - VB_PAD.bottom;
 
 // Memoized dots — use fixed viewBox coords, no dependency on container dims
 const ScatterDots = React.memo(function ScatterDots({ data }: { data: SnapshotRow[] }) {
-  const points = useMemo(() => data
-    .filter(r => r.axis1_pct != null && r.axis2_pct != null)
+  const points = useMemo(() => [...data]
+    .filter(r => r.axis1_pct != null && r.axis2_pct != null && r.composite_score != null)
+    .sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0))
+    .slice(0, 50)
     .map(r => {
       const bucket = r.composite_bucket ?? "Moderate";
       const x = Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08));
