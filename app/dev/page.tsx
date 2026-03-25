@@ -150,105 +150,89 @@ function returnColor(v: number | null, suppressed: boolean): string {
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
-  const [decile, setDecile] = useState(1);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Smooth scroll — accumulate delta, no lock, step every 40px
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    let acc = 0;
-    const handler = (e: WheelEvent) => {
-      e.preventDefault();
-      acc += e.deltaY;
-      const steps = Math.trunc(acc / 40);
-      if (steps === 0) return;
-      acc -= steps * 40;
-      setDecile(p => Math.min(10, Math.max(1, p + (steps > 0 ? 1 : -1))));
-    };
-    el.addEventListener("wheel", handler, { passive: false });
-    return () => el.removeEventListener("wheel", handler);
-  }, []);
-
-  const allPoints = useMemo(() => data
+  const points = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
     .map(r => {
-      const a3 = r.axis3_pct ?? 0.5;
-      const axis3_decile = Math.min(10, Math.max(1, 10 - Math.floor(a3 * 10)));
+      const a3bucket = (() => {
+        const v = r.axis3_pct ?? 0.5;
+        if (v < 0.2) return "Very Low";
+        if (v < 0.4) return "Low";
+        if (v < 0.6) return "Moderate";
+        if (v < 0.8) return "High";
+        return "Very High";
+      })();
+      const pulseDuration: Record<string, number> = {
+        "Very Low": 2000,
+        "Low":      1236,
+        "Moderate":  734,
+        "High":      472,
+        "Very High": 292,
+      };
       return {
-        x: Math.min(1, Math.max(0, (r.axis2_pct as number) + (a3 - 0.5) * 0.08)),
+        x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
         y: r.axis1_pct as number,
-        axis3_decile,
         symbol: r.symbol,
         oal_label: r.oal_label,
         composite_bucket: r.composite_bucket,
+        axis3_pct: r.axis3_pct,
+        a3bucket,
+        pulseDuration: pulseDuration[a3bucket],
       };
     }), [data]);
 
-  // Only render active decile's points — clean swap on decile change
-  const visiblePoints = useMemo(() =>
-    allPoints.filter(p => p.axis3_decile === decile),
-    [allPoints, decile]);
-
   const CustomDot = (props: any) => {
     const { cx, cy, payload } = props;
+    const color = bucketColor(payload.composite_bucket);
+    const dur = payload.pulseDuration;
+    // Unique animation name per duration bucket to avoid conflicts
+    const animName = `pulse${dur}`;
     return (
-      <circle
-        cx={cx} cy={cy} r={2.5}
-        fill={bucketColor(payload.composite_bucket)}
-        opacity={0.82}
-      />
+      <g>
+        <style>{`
+          @keyframes ${animName} {
+            0%, 100% { opacity: 0.9; r: 2.5px; }
+            50%       { opacity: 0.2; r: 1.5px; }
+          }
+        `}</style>
+        <circle
+          cx={cx} cy={cy} r={2.5}
+          fill={color}
+          style={{
+            animation: `${animName} ${dur}ms ease-in-out infinite`,
+          }}
+        />
+      </g>
     );
   };
 
-  const MAP_H = 520;
-
   return (
-    <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
-
-      {/* Scrollbar — left side, full map height */}
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center",
-        justifyContent: "space-between",
-        width: 32, height: MAP_H, padding: "12px 0", flexShrink: 0,
-        borderRight: "1px solid #e0e0e0",
-      }}>
-        <span style={{ fontSize: 9, fontWeight: 600, color: "#c0392b", letterSpacing: "0.1em" }}>HI</span>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flex: 1, justifyContent: "center" }}>
-          {Array.from({ length: 10 }, (_, i) => {
-            const d = i + 1;
-            const active = d === decile;
-            return (
-              <button key={d} onClick={() => setDecile(d)}
-                title={`Decile ${d}`}
-                style={{
-                  width: active ? 14 : 8,
-                  height: active ? 14 : 8,
-                  borderRadius: "50%",
-                  border: active ? "2px solid #333" : "none",
-                  cursor: "pointer",
-                  backgroundColor: active ? "#333" : "#bbb",
-                  transition: "all 0.12s",
-                  flexShrink: 0,
-                }}
-              />
-            );
-          })}
-        </div>
-        <span style={{ fontSize: 9, fontWeight: 600, color: "#1a7a4a", letterSpacing: "0.1em" }}>LO</span>
+    <div style={{ position: "relative" }}>
+      {/* Legend */}
+      <div style={{ display: "flex", gap: 20, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <span style={{ fontSize: 11, color: "#444", fontWeight: 600 }}>Financing Risk (pulse rate):</span>
+        {[
+          { label: "Very Low",  dur: "2000ms", color: "#2471A3" },
+          { label: "Low",       dur: "1236ms", color: "#5B9BD5" },
+          { label: "Moderate",  dur: "734ms",  color: "#888" },
+          { label: "High",      dur: "472ms",  color: "#E07040" },
+          { label: "Very High", dur: "292ms",  color: "#C0392B" },
+        ].map(({ label, dur, color }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <svg width={10} height={10}>
+              <circle cx={5} cy={5} r={3} fill={color} opacity={0.85} />
+            </svg>
+            <span style={{ fontSize: 11, color: "#333" }}>{label} <span style={{ color: "#888" }}>({dur})</span></span>
+          </div>
+        ))}
+        <span style={{ fontSize: 11, color: "#666", marginLeft: 8 }}>· Dot color = Composite bucket (blue → red)</span>
       </div>
-
-      {/* Chart — full width, axis labels at edges */}
-      <div ref={containerRef} style={{ flex: 1, height: MAP_H, position: "relative" }}>
-        <div style={{ position: "absolute", top: 4, left: 8, fontSize: 10, color: "#555", zIndex: 1 }}>
-          Financing Risk · Decile {decile} of 10 · scroll to navigate
-        </div>
+      <div style={{ height: 520 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 28, right: 8, bottom: 28, left: 48 }}>
-            <CartesianGrid stroke="#ebebeb" strokeDasharray="" />
+          <ScatterChart margin={{ top: 20, right: 12, bottom: 28, left: 48 }}>
+            <CartesianGrid stroke="#ebebeb" />
             <XAxis
               type="number" dataKey="x" domain={[0, 1]}
-              label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -8, fontSize: 11, fill: "#222" }}
+              label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -10, fontSize: 11, fill: "#222" }}
               tick={{ fontSize: 10, fill: "#444" }}
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
             />
@@ -264,24 +248,26 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload;
                 return (
-                  <div style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 6, padding: "8px 12px", fontSize: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                  <div style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 6, padding: "8px 12px", fontSize: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
                     <div style={{ fontWeight: 700 }}>{d.symbol}</div>
                     <div style={{ color: "#444", marginBottom: 4 }}>{d.oal_label}</div>
-                    <div style={{ color: bucketColor(d.composite_bucket), fontWeight: 600 }}>{d.composite_bucket}</div>
-                    <div style={{ fontSize: 10, color: "#666", marginTop: 6, borderTop: "1px solid #eee", paddingTop: 4 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 11 }}>
+                      <span>Composite: <span style={{ color: bucketColor(d.composite_bucket), fontWeight: 600 }}>{d.composite_bucket}</span></span>
+                      <span>Financing Risk: <span style={{ fontWeight: 600 }}>{d.a3bucket}</span> ({d.pulseDuration}ms)</span>
+                    </div>
+                    <div style={{ fontSize: 10, color: "#888", marginTop: 6, borderTop: "1px solid #eee", paddingTop: 4 }}>
                       Position reflects structural metrics only.
                     </div>
                   </div>
                 );
               }}
             />
-            <Scatter data={visiblePoints} shape={<CustomDot />} isAnimationActive={false}>
-              {visiblePoints.map((_, i) => <Cell key={i} fill="transparent" />)}
+            <Scatter data={points} shape={<CustomDot />} isAnimationActive={false}>
+              {points.map((_, i) => <Cell key={i} fill="transparent" />)}
             </Scatter>
           </ScatterChart>
         </ResponsiveContainer>
       </div>
-
     </div>
   );
 }
