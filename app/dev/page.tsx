@@ -159,7 +159,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
         "Low":       3883,
         "Moderate":  2400,
         "High":      1483,
-        "Very High": 917,
+        "Very High":  917,
       };
       return {
         x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
@@ -173,10 +173,10 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
 
   // One keyframe block per pulse duration — injected once
   const keyframes = `
-    @keyframes p3883 { 0%,100%{opacity:0.80} 50%{opacity:0.30} }
-    @keyframes p2400 { 0%,100%{opacity:0.82} 50%{opacity:0.25} }
-    @keyframes p1483 { 0%,100%{opacity:0.85} 50%{opacity:0.20} }
-    @keyframes p917 { 0%,100%{opacity:0.90} 50%{opacity:0.15} }
+    @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
+    @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
+    @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
+    @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
   `;
 
   const CustomDot = (props: any) => {
@@ -199,11 +199,11 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       {/* Legend */}
       <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         {[
-          { bucket: "Very Low",  pulse: "static",        color: "#2471A3" },
-          { bucket: "Low",       pulse: "slow pulse",    color: "#5B9BD5" },
-          { bucket: "Moderate",  pulse: "gentle pulse",  color: "#888" },
-          { bucket: "High",      pulse: "steady pulse",  color: "#E07040" },
-          { bucket: "Very High", pulse: "urgent pulse",  color: "#C0392B" },
+          { bucket: "Very Low",  pulse: "stable",      color: "#2471A3" },
+          { bucket: "Low",       pulse: "steady",      color: "#5B9BD5" },
+          { bucket: "Moderate",  pulse: "active",      color: "#888888" },
+          { bucket: "High",      pulse: "strained",    color: "#E07040" },
+          { bucket: "Very High", pulse: "critical",    color: "#C0392B" },
         ].map(({ bucket, pulse, color }) => (
           <div key={bucket} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <svg width={10} height={10}>
