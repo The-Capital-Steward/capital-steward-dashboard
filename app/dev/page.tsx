@@ -153,7 +153,6 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 700, height: 500 });
   const [decile, setDecile] = useState(1);
-  const scrollLocked = useRef(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -170,12 +169,14 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
   useEffect(() => {
     const el = chartRef.current;
     if (!el) return;
+    let accumulated = 0;
     const handler = (e: WheelEvent) => {
       e.preventDefault();
-      if (scrollLocked.current) return;
-      setDecile(p => Math.min(10, Math.max(1, p + (e.deltaY > 0 ? 1 : -1))));
-      scrollLocked.current = true;
-      setTimeout(() => { scrollLocked.current = false; }, 260);
+      accumulated += e.deltaY;
+      if (Math.abs(accumulated) < 30) return;
+      const dir = accumulated > 0 ? 1 : -1;
+      accumulated = 0;
+      setDecile(p => Math.min(10, Math.max(1, p + dir)));
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
