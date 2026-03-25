@@ -140,6 +140,62 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
+const PULSE_KEYFRAMES = `
+  @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
+  @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
+  @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
+  @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
+`;
+
+const PULSE_MAP: Record<string, number | null> = {
+  "Very Low":  null,
+  "Low":       3883,
+  "Moderate":  2400,
+  "High":      1483,
+  "Very High":  917,
+};
+
+const MARGIN = { top: 20, right: 12, bottom: 40, left: 52 };
+
+// Dots separated into their own memoized component so dims changes
+// in the parent do NOT cause dot re-renders — preserving CSS animation state
+const ScatterDots = React.memo(function ScatterDots({
+  data, plotW, plotH,
+}: {
+  data: SnapshotRow[];
+  plotW: number;
+  plotH: number;
+}) {
+  const points = data
+    .filter(r => r.axis1_pct != null && r.axis2_pct != null)
+    .map(r => {
+      const bucket = r.composite_bucket ?? "Moderate";
+      const x = Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08));
+      const y = r.axis1_pct as number;
+      const cx = MARGIN.left + x * plotW;
+      const cy = MARGIN.top + (1 - y) * plotH;
+      const color = bucketColor(bucket);
+      const dur = PULSE_MAP[bucket];
+      return { symbol: r.symbol, cx, cy, color, dur };
+    });
+
+  return (
+    <g clipPath="url(#scatter-clip)">
+      {points.map(pt => (
+        <circle
+          key={pt.symbol}
+          cx={pt.cx} cy={pt.cy} r={2}
+          fill={pt.color}
+          style={{
+            animation: pt.dur ? `p${pt.dur} ${pt.dur}ms ease-in-out infinite` : "none",
+            opacity: pt.dur ? undefined : 0.5,
+          }}
+        />
+      ))}
+    </g>
+  );
+});
+
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 800, height: 520 });
@@ -155,43 +211,13 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
     return () => ro.disconnect();
   }, []);
 
-  const MARGIN = { top: 20, right: 12, bottom: 40, left: 52 };
   const plotW = dims.width - MARGIN.left - MARGIN.right;
   const plotH = dims.height - MARGIN.top - MARGIN.bottom;
-
-  const points = useMemo(() => data
-    .filter(r => r.axis1_pct != null && r.axis2_pct != null)
-    .map(r => {
-      const bucket = r.composite_bucket ?? "Moderate";
-      const pulseMap: Record<string, number | null> = {
-        "Very Low":  null,
-        "Low":       3883,
-        "Moderate":  2400,
-        "High":      1483,
-        "Very High":  917,
-      };
-      return {
-        x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
-        y: r.axis1_pct as number,
-        bucket,
-        pulse: pulseMap[bucket],
-        symbol: r.symbol,
-      };
-    }), [data]);
-
-  // CSS keyframes — defined inside component, injected via <style> tag
-  const keyframes = `
-    @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
-    @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
-    @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
-    @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
-  `;
-
   const gridTicks = [0, 0.25, 0.5, 0.75, 1.0];
 
   return (
     <div>
-      <style>{keyframes}</style>
+      <style>{PULSE_KEYFRAMES}</style>
       {/* Legend */}
       <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         {[
@@ -209,10 +235,9 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
         ))}
       </div>
 
-      {/* Pure SVG — dots rendered directly, CSS animation unobstructed */}
       <div ref={containerRef} style={{ width: "100%", height: 520, position: "relative" }}>
         <svg width={dims.width} height={dims.height} style={{ position: "absolute", inset: 0 }}>
-          {/* Grid */}
+          {/* Grid lines */}
           {gridTicks.map(t => (
             <g key={t}>
               <line x1={MARGIN.left + t * plotW} y1={MARGIN.top} x2={MARGIN.left + t * plotW} y2={MARGIN.top + plotH} stroke="#ebebeb" strokeWidth={1} />
@@ -224,28 +249,10 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
           <rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} fill="none" stroke="#ccc" strokeWidth={1} />
           <text x={MARGIN.left + plotW / 2} y={dims.height - 4} textAnchor="middle" fontSize={11} fill="#222">Trajectory Risk →</text>
           <text x={14} y={MARGIN.top + plotH / 2} textAnchor="middle" fontSize={11} fill="#222" transform={`rotate(-90, 14, ${MARGIN.top + plotH / 2})`}>Anchor Risk ↑</text>
-
-          {/* Dots — plain <circle> with CSS animation property */}
           <defs><clipPath id="scatter-clip"><rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} /></clipPath></defs>
-          <g clipPath="url(#scatter-clip)">
-            {points.map(pt => {
-              const cx = MARGIN.left + pt.x * plotW;
-              const cy = MARGIN.top + (1 - pt.y) * plotH;
-              const color = bucketColor(pt.bucket);
-              const dur = pt.pulse;
-              return (
-                <circle
-                  key={pt.symbol}
-                  cx={cx} cy={cy} r={2}
-                  fill={color}
-                  style={{
-                    animation: dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none",
-                    opacity: dur ? undefined : 0.5,
-                  }}
-                />
-              );
-            })}
-          </g>
+
+          {/* Memoized dots — isolated from dims re-renders */}
+          <ScatterDots data={data} plotW={plotW} plotH={plotH} />
         </svg>
       </div>
     </div>
