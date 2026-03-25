@@ -11,10 +11,15 @@
         "name": "TCS Sapphire 50 Cohort Index",
         "description": "Very Low on all three axes simultaneously. Top 50 by composite score. Interest-bearing, 100% FCF-anchored by construction.",
         "selection": "Very Low axis1 + axis2 + axis3, top 50 composite, interest-bearing, 12-month price history minimum"
+      },
+      "total_market": {
+        "name": "TCS Total Market Index",
+        "description": "Equal-weighted median return of all interest-bearing companies with valid composite scores and 12-month price history minimum. No structural selection applied. Excludes non-viable (OAL 0) and negative EV companies. This is the honest baseline for the same population from which TCS-150 and Sapphire 50 are selected.",
+        "selection": "All interest-bearing, valid composite score, OAL 1-4, 12-month price history minimum"
       }
     },
     "methodology": "At each rebalance date, constituents selected per index rules from that month's structural snapshot. Equal-weighted median return computed to next rebalance date. Period returns chained to cumulative growth curve indexed to 100.",
-    "generated_at": "2026-03-25T15:37:15.072733+00:00",
+    "generated_at": "2026-03-25T16:45:42.342867+00:00",
     "disclaimer": "Historical rules-based simulation. Does not account for transaction costs, liquidity, or position sizing. Not investment advice."
   },
   "results": {
@@ -3137,6 +3142,534 @@
               "value": 1138.5758,
               "period_return": -0.021335,
               "n_constituents": 50
+            }
+          ]
+        }
+      }
+    },
+    "total_market": {
+      "name": "TCS Total Market Index",
+      "frequencies": {
+        "monthly": {
+          "rebalance_months": 1,
+          "stats": {
+            "total_return": -0.058736,
+            "annualized_return": -0.008509,
+            "annualized_vol": 0.18993,
+            "hit_rate": 0.5294,
+            "n_periods": 85,
+            "terminal_value": 94.13
+          },
+          "curve": [
+            {
+              "month": "2019-01",
+              "value": 103.9504,
+              "period_return": 0.039504,
+              "n_constituents": 2521
+            },
+            {
+              "month": "2019-02",
+              "value": 102.5522,
+              "period_return": -0.013451,
+              "n_constituents": 2528
+            },
+            {
+              "month": "2019-03",
+              "value": 104.3294,
+              "period_return": 0.017331,
+              "n_constituents": 2552
+            },
+            {
+              "month": "2019-04",
+              "value": 99.3085,
+              "period_return": -0.048126,
+              "n_constituents": 2558
+            },
+            {
+              "month": "2019-05",
+              "value": 105.2009,
+              "period_return": 0.059334,
+              "n_constituents": 2565
+            },
+            {
+              "month": "2019-06",
+              "value": 106.2122,
+              "period_return": 0.009612,
+              "n_constituents": 2597
+            },
+            {
+              "month": "2019-07",
+              "value": 100.5421,
+              "period_return": -0.053384,
+              "n_constituents": 2604
+            },
+            {
+              "month": "2019-08",
+              "value": 103.9183,
+              "period_return": 0.033579,
+              "n_constituents": 2616
+            },
+            {
+              "month": "2019-09",
+              "value": 105.3406,
+              "period_return": 0.013687,
+              "n_constituents": 2632
+            },
+            {
+              "month": "2019-10",
+              "value": 106.4738,
+              "period_return": 0.010757,
+              "n_constituents": 2642
+            },
+            {
+              "month": "2019-11",
+              "value": 109.3009,
+              "period_return": 0.026552,
+              "n_constituents": 2654
+            },
+            {
+              "month": "2019-12",
+              "value": 106.2886,
+              "period_return": -0.027559,
+              "n_constituents": 2657
+            },
+            {
+              "month": "2020-01",
+              "value": 99.396,
+              "period_return": -0.064848,
+              "n_constituents": 2663
+            },
+            {
+              "month": "2020-02",
+              "value": 75.971,
+              "period_return": -0.235673,
+              "n_constituents": 2671
+            },
+            {
+              "month": "2020-03",
+              "value": 85.4037,
+              "period_return": 0.124161,
+              "n_constituents": 2667
+            },
+            {
+              "month": "2020-04",
+              "value": 89.4867,
+              "period_return": 0.047809,
+              "n_constituents": 2675
+            },
+            {
+              "month": "2020-05",
+              "value": 90.4138,
+              "period_return": 0.01036,
+              "n_constituents": 2695
+            },
+            {
+              "month": "2020-06",
+              "value": 93.0111,
+              "period_return": 0.028727,
+              "n_constituents": 2699
+            },
+            {
+              "month": "2020-07",
+              "value": 96.0305,
+              "period_return": 0.032463,
+              "n_constituents": 2714
+            },
+            {
+              "month": "2020-08",
+              "value": 91.9611,
+              "period_return": -0.042376,
+              "n_constituents": 2723
+            },
+            {
+              "month": "2020-09",
+              "value": 91.4522,
+              "period_return": -0.005533,
+              "n_constituents": 2733
+            },
+            {
+              "month": "2020-10",
+              "value": 103.3711,
+              "period_return": 0.130328,
+              "n_constituents": 2748
+            },
+            {
+              "month": "2020-11",
+              "value": 108.3451,
+              "period_return": 0.048118,
+              "n_constituents": 2765
+            },
+            {
+              "month": "2020-12",
+              "value": 111.4433,
+              "period_return": 0.028596,
+              "n_constituents": 2786
+            },
+            {
+              "month": "2021-01",
+              "value": 120.3058,
+              "period_return": 0.079524,
+              "n_constituents": 2796
+            },
+            {
+              "month": "2021-02",
+              "value": 120.1896,
+              "period_return": -0.000966,
+              "n_constituents": 2809
+            },
+            {
+              "month": "2021-03",
+              "value": 123.1136,
+              "period_return": 0.024328,
+              "n_constituents": 2811
+            },
+            {
+              "month": "2021-04",
+              "value": 125.8922,
+              "period_return": 0.022569,
+              "n_constituents": 2813
+            },
+            {
+              "month": "2021-05",
+              "value": 124.19,
+              "period_return": -0.013521,
+              "n_constituents": 2819
+            },
+            {
+              "month": "2021-06",
+              "value": 121.9773,
+              "period_return": -0.017817,
+              "n_constituents": 2826
+            },
+            {
+              "month": "2021-07",
+              "value": 123.9101,
+              "period_return": 0.015845,
+              "n_constituents": 2842
+            },
+            {
+              "month": "2021-08",
+              "value": 119.3032,
+              "period_return": -0.037179,
+              "n_constituents": 2856
+            },
+            {
+              "month": "2021-09",
+              "value": 125.1439,
+              "period_return": 0.048956,
+              "n_constituents": 2868
+            },
+            {
+              "month": "2021-10",
+              "value": 117.9226,
+              "period_return": -0.057703,
+              "n_constituents": 2877
+            },
+            {
+              "month": "2021-11",
+              "value": 121.3849,
+              "period_return": 0.029361,
+              "n_constituents": 2884
+            },
+            {
+              "month": "2021-12",
+              "value": 113.5207,
+              "period_return": -0.064787,
+              "n_constituents": 2936
+            },
+            {
+              "month": "2022-01",
+              "value": 112.9018,
+              "period_return": -0.005452,
+              "n_constituents": 2962
+            },
+            {
+              "month": "2022-02",
+              "value": 113.9124,
+              "period_return": 0.008951,
+              "n_constituents": 2977
+            },
+            {
+              "month": "2022-03",
+              "value": 104.8171,
+              "period_return": -0.079845,
+              "n_constituents": 3018
+            },
+            {
+              "month": "2022-04",
+              "value": 104.4391,
+              "period_return": -0.003606,
+              "n_constituents": 3033
+            },
+            {
+              "month": "2022-05",
+              "value": 95.1529,
+              "period_return": -0.088915,
+              "n_constituents": 3047
+            },
+            {
+              "month": "2022-06",
+              "value": 102.6232,
+              "period_return": 0.078509,
+              "n_constituents": 3110
+            },
+            {
+              "month": "2022-07",
+              "value": 99.3938,
+              "period_return": -0.031469,
+              "n_constituents": 3152
+            },
+            {
+              "month": "2022-08",
+              "value": 88.6653,
+              "period_return": -0.107939,
+              "n_constituents": 3153
+            },
+            {
+              "month": "2022-09",
+              "value": 96.2548,
+              "period_return": 0.085597,
+              "n_constituents": 3206
+            },
+            {
+              "month": "2022-10",
+              "value": 99.9048,
+              "period_return": 0.03792,
+              "n_constituents": 3247
+            },
+            {
+              "month": "2022-11",
+              "value": 94.0431,
+              "period_return": -0.058673,
+              "n_constituents": 3277
+            },
+            {
+              "month": "2022-12",
+              "value": 103.0609,
+              "period_return": 0.09589,
+              "n_constituents": 3283
+            },
+            {
+              "month": "2023-01",
+              "value": 99.8298,
+              "period_return": -0.031351,
+              "n_constituents": 3319
+            },
+            {
+              "month": "2023-02",
+              "value": 92.9699,
+              "period_return": -0.068716,
+              "n_constituents": 3315
+            },
+            {
+              "month": "2023-03",
+              "value": 91.0751,
+              "period_return": -0.020381,
+              "n_constituents": 3330
+            },
+            {
+              "month": "2023-04",
+              "value": 88.8905,
+              "period_return": -0.023986,
+              "n_constituents": 3343
+            },
+            {
+              "month": "2023-05",
+              "value": 94.1251,
+              "period_return": 0.058889,
+              "n_constituents": 3349
+            },
+            {
+              "month": "2023-06",
+              "value": 97.6991,
+              "period_return": 0.03797,
+              "n_constituents": 3341
+            },
+            {
+              "month": "2023-07",
+              "value": 93.1513,
+              "period_return": -0.046549,
+              "n_constituents": 3349
+            },
+            {
+              "month": "2023-08",
+              "value": 86.6553,
+              "period_return": -0.069736,
+              "n_constituents": 3357
+            },
+            {
+              "month": "2023-09",
+              "value": 82.1983,
+              "period_return": -0.051433,
+              "n_constituents": 3350
+            },
+            {
+              "month": "2023-10",
+              "value": 88.5686,
+              "period_return": 0.077498,
+              "n_constituents": 3348
+            },
+            {
+              "month": "2023-11",
+              "value": 95.1176,
+              "period_return": 0.073943,
+              "n_constituents": 3356
+            },
+            {
+              "month": "2023-12",
+              "value": 92.6115,
+              "period_return": -0.026348,
+              "n_constituents": 3384
+            },
+            {
+              "month": "2024-01",
+              "value": 93.7075,
+              "period_return": 0.011834,
+              "n_constituents": 3396
+            },
+            {
+              "month": "2024-02",
+              "value": 95.1903,
+              "period_return": 0.015824,
+              "n_constituents": 3388
+            },
+            {
+              "month": "2024-03",
+              "value": 90.5342,
+              "period_return": -0.048914,
+              "n_constituents": 3414
+            },
+            {
+              "month": "2024-04",
+              "value": 92.0455,
+              "period_return": 0.016693,
+              "n_constituents": 3415
+            },
+            {
+              "month": "2024-05",
+              "value": 89.2742,
+              "period_return": -0.030108,
+              "n_constituents": 3415
+            },
+            {
+              "month": "2024-06",
+              "value": 95.0304,
+              "period_return": 0.064477,
+              "n_constituents": 3434
+            },
+            {
+              "month": "2024-07",
+              "value": 92.5348,
+              "period_return": -0.026261,
+              "n_constituents": 3437
+            },
+            {
+              "month": "2024-08",
+              "value": 94.8005,
+              "period_return": 0.024485,
+              "n_constituents": 3444
+            },
+            {
+              "month": "2024-09",
+              "value": 93.9166,
+              "period_return": -0.009323,
+              "n_constituents": 3443
+            },
+            {
+              "month": "2024-10",
+              "value": 100.0987,
+              "period_return": 0.065826,
+              "n_constituents": 3458
+            },
+            {
+              "month": "2024-11",
+              "value": 93.2908,
+              "period_return": -0.068012,
+              "n_constituents": 3476
+            },
+            {
+              "month": "2024-12",
+              "value": 95.0014,
+              "period_return": 0.018337,
+              "n_constituents": 3456
+            },
+            {
+              "month": "2025-01",
+              "value": 92.0885,
+              "period_return": -0.030662,
+              "n_constituents": 3462
+            },
+            {
+              "month": "2025-02",
+              "value": 86.741,
+              "period_return": -0.058069,
+              "n_constituents": 3465
+            },
+            {
+              "month": "2025-03",
+              "value": 84.355,
+              "period_return": -0.027507,
+              "n_constituents": 3491
+            },
+            {
+              "month": "2025-04",
+              "value": 87.33,
+              "period_return": 0.035267,
+              "n_constituents": 3507
+            },
+            {
+              "month": "2025-05",
+              "value": 89.9924,
+              "period_return": 0.030487,
+              "n_constituents": 3516
+            },
+            {
+              "month": "2025-06",
+              "value": 90.8162,
+              "period_return": 0.009154,
+              "n_constituents": 3548
+            },
+            {
+              "month": "2025-07",
+              "value": 93.8843,
+              "period_return": 0.033784,
+              "n_constituents": 3567
+            },
+            {
+              "month": "2025-08",
+              "value": 93.9717,
+              "period_return": 0.000931,
+              "n_constituents": 3586
+            },
+            {
+              "month": "2025-09",
+              "value": 91.592,
+              "period_return": -0.025323,
+              "n_constituents": 3626
+            },
+            {
+              "month": "2025-10",
+              "value": 91.3677,
+              "period_return": -0.00245,
+              "n_constituents": 3646
+            },
+            {
+              "month": "2025-11",
+              "value": 91.7639,
+              "period_return": 0.004337,
+              "n_constituents": 3654
+            },
+            {
+              "month": "2025-12",
+              "value": 94.7943,
+              "period_return": 0.033024,
+              "n_constituents": 3642
+            },
+            {
+              "month": "2026-01",
+              "value": 94.1264,
+              "period_return": -0.007046,
+              "n_constituents": 3647
             }
           ]
         }
