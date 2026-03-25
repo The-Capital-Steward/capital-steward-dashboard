@@ -140,52 +140,6 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
-// ── Pulsing dot — pure JS interval, no animation library ─────────────────────
-// Each dot manages its own opacity via useEffect + setInterval.
-// This is the most reliable approach across all Next.js/Turbopack configurations.
-
-interface CustomDotProps {
-  cx?: number;
-  cy?: number;
-  payload?: {
-    composite_bucket: string | null;
-    pulse: number | null;
-  };
-}
-
-function PulsingDot({ cx, cy, color, dur }: { cx: number; cy: number; color: string; dur: number }) {
-  const [phase, setPhase] = useState(0); // 0..1 sine wave position
-
-  useEffect(() => {
-    const steps = 60; // updates per cycle
-    const interval = dur / steps;
-    let step = 0;
-    const id = setInterval(() => {
-      step = (step + 1) % steps;
-      setPhase(step / steps);
-    }, interval);
-    return () => clearInterval(id);
-  }, [dur]);
-
-  // Sine wave between high and low opacity values
-  const HIGH = 0.9;
-  const LOW  = 0.2;
-  const opacity = LOW + (HIGH - LOW) * (0.5 + 0.5 * Math.sin(phase * Math.PI * 2));
-
-  return <circle cx={cx} cy={cy} r={2} fill={color} opacity={opacity} />;
-}
-
-function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
-  const color = bucketColor(payload?.composite_bucket);
-  const dur = payload?.pulse ?? null;
-
-  if (!dur) {
-    return <circle cx={cx} cy={cy} r={2} fill={color} opacity={0.5} />;
-  }
-
-  return <PulsingDot cx={cx} cy={cy} color={color} dur={dur} />;
-}
-
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 800, height: 520 });
@@ -202,6 +156,8 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
   }, []);
 
   const MARGIN = { top: 20, right: 12, bottom: 40, left: 52 };
+  const plotW = dims.width - MARGIN.left - MARGIN.right;
+  const plotH = dims.height - MARGIN.top - MARGIN.bottom;
 
   const points = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
@@ -223,17 +179,15 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       };
     }), [data]);
 
-  const plotW = dims.width - MARGIN.left - MARGIN.right;
-  const plotH = dims.height - MARGIN.top - MARGIN.bottom;
-  const gridTicks = [0, 0.25, 0.5, 0.75, 1.0];
-
-  // CSS keyframes inside the component — exactly as it worked before
+  // CSS keyframes — defined inside component, injected via <style> tag
   const keyframes = `
     @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
     @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
     @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
     @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
   `;
+
+  const gridTicks = [0, 0.25, 0.5, 0.75, 1.0];
 
   return (
     <div>
@@ -255,7 +209,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
         ))}
       </div>
 
-      {/* Pure SVG — no Recharts, dots render freely */}
+      {/* Pure SVG — dots rendered directly, CSS animation unobstructed */}
       <div ref={containerRef} style={{ width: "100%", height: 520, position: "relative" }}>
         <svg width={dims.width} height={dims.height} style={{ position: "absolute", inset: 0 }}>
           {/* Grid */}
@@ -271,7 +225,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
           <text x={MARGIN.left + plotW / 2} y={dims.height - 4} textAnchor="middle" fontSize={11} fill="#222">Trajectory Risk →</text>
           <text x={14} y={MARGIN.top + plotH / 2} textAnchor="middle" fontSize={11} fill="#222" transform={`rotate(-90, 14, ${MARGIN.top + plotH / 2})`}>Anchor Risk ↑</text>
 
-          {/* Dots — plain circles with CSS animation */}
+          {/* Dots — plain <circle> with CSS animation property */}
           <defs><clipPath id="scatter-clip"><rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} /></clipPath></defs>
           <g clipPath="url(#scatter-clip)">
             {points.map(pt => {
