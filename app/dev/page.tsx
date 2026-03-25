@@ -140,15 +140,7 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
-// CSS keyframes at module level — injected once into <head> via global style tag in page
-const PULSE_KEYFRAMES = `
-  @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
-  @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
-  @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
-  @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
-`;
-
-// Defined outside ScatterMap so React never recreates it — stable ref preserves CSS animations
+// Defined outside ScatterMap — stable module-level ref required for Framer Motion to persist animation
 interface CustomDotProps {
   cx?: number;
   cy?: number;
@@ -158,15 +150,31 @@ interface CustomDotProps {
   };
 }
 
+// Pulse durations map to opacity transitions via Framer Motion
+// Framer Motion animates independently of React render cycle — survives remounts
+const OPACITY_MAP: Record<number, [number, number]> = {
+  3883: [0.500, 0.357],
+  2400: [0.578, 0.435],
+  1483: [0.704, 0.562],
+   917: [0.908, 0.765],
+};
+
 function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
   const color = bucketColor(payload?.composite_bucket);
   const dur = payload?.pulse ?? null;
-  const anim = dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none";
+  const opacities = dur ? OPACITY_MAP[dur] : null;
+
+  if (!dur || !opacities) {
+    // Very Low — static, no animation
+    return <circle cx={cx} cy={cy} r={2} fill={color} opacity={0.50} />;
+  }
+
   return (
-    <circle
+    <motion.circle
       cx={cx} cy={cy} r={2}
       fill={color}
-      style={{ animation: anim, opacity: dur ? undefined : 0.75 }}
+      animate={{ opacity: [opacities[0], opacities[1], opacities[0]] }}
+      transition={{ duration: dur / 1000, repeat: Infinity, ease: "easeInOut" }}
     />
   );
 }
@@ -587,17 +595,6 @@ export default function DevPage() {
         setLoading(false);
       })
       .catch(err => { console.error(err); setLoading(false); });
-  }, []);
-
-  // Inject pulse keyframes into document.head once — persists across component remounts
-  useEffect(() => {
-    const id = "osmr-pulse-keyframes";
-    if (!document.getElementById(id)) {
-      const style = document.createElement("style");
-      style.id = id;
-      style.textContent = PULSE_KEYFRAMES;
-      document.head.appendChild(style);
-    }
   }, []);
 
   if (loading) return (
