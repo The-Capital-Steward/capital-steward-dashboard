@@ -155,11 +155,11 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
     .map(r => {
       const bucket = r.composite_bucket ?? "Moderate";
       const pulseMap: Record<string, number | null> = {
-        "Very Low":  2000,
-        "Low":       1400,
-        "Moderate":  null,
-        "High":       600,
-        "Very High":  292,
+        "Very Low":  null,
+        "Low":       4800,
+        "Moderate":  2400,
+        "High":      1600,
+        "Very High": 1200,
       };
       return {
         x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
@@ -173,10 +173,10 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
 
   // One keyframe block per pulse duration — injected once
   const keyframes = `
-    @keyframes p2000 { 0%,100%{opacity:0.85} 50%{opacity:0.2} }
-    @keyframes p1400 { 0%,100%{opacity:0.80} 50%{opacity:0.25} }
-    @keyframes p600  { 0%,100%{opacity:0.85} 50%{opacity:0.2} }
-    @keyframes p292  { 0%,100%{opacity:0.90} 50%{opacity:0.15} }
+    @keyframes p4800 { 0%,100%{opacity:0.80} 50%{opacity:0.30} }
+    @keyframes p2400 { 0%,100%{opacity:0.82} 50%{opacity:0.25} }
+    @keyframes p1600 { 0%,100%{opacity:0.85} 50%{opacity:0.20} }
+    @keyframes p1200 { 0%,100%{opacity:0.90} 50%{opacity:0.15} }
   `;
 
   const CustomDot = (props: any) => {
@@ -199,11 +199,11 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       {/* Legend */}
       <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         {[
-          { bucket: "Very Low",  pulse: "slow pulse",   color: "#2471A3" },
-          { bucket: "Low",       pulse: "gentle pulse", color: "#5B9BD5" },
-          { bucket: "Moderate",  pulse: "static",       color: "#888" },
-          { bucket: "High",      pulse: "fast pulse",   color: "#E07040" },
-          { bucket: "Very High", pulse: "rapid pulse",  color: "#C0392B" },
+          { bucket: "Very Low",  pulse: "static",        color: "#2471A3" },
+          { bucket: "Low",       pulse: "slow pulse",    color: "#5B9BD5" },
+          { bucket: "Moderate",  pulse: "gentle pulse",  color: "#888" },
+          { bucket: "High",      pulse: "steady pulse",  color: "#E07040" },
+          { bucket: "Very High", pulse: "urgent pulse",  color: "#C0392B" },
         ].map(({ bucket, pulse, color }) => (
           <div key={bucket} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <svg width={10} height={10}>
