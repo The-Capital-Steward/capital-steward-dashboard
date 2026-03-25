@@ -701,7 +701,7 @@ function interpretTrajectory(data: SnapshotRow[], distributionTone: "elevated" |
 }
 function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: boolean }) {
   const distribution = useMemo(() => interpretDistribution(data), [data]);
-  const concentration = useMemo(() => interpretConcentration(data), [data]);
+  // concentration hidden — taxonomy not yet systematically defined
   const trajectory = useMemo(() => interpretTrajectory(data, distribution.tone), [data, distribution.tone]);
   const toneColor = { elevated: "#D67C7C", moderate: "#B8C3CC", subdued: "#7CC89D" };
   const directionColor = { deteriorating: "#D67C7C", improving: "#7CC89D", mixed: "#B8C3CC" };
