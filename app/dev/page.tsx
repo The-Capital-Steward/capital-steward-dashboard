@@ -97,7 +97,7 @@ function Section({ title, layer, children, note }: {
         <LayerTag type={layer} />
       </div>
       {note && (
-        <p style={{ fontSize: 12, color: "#666", marginBottom: 12, lineHeight: 1.6 }}>{note}</p>
+        <p style={{ fontSize: 12, color: "#111", marginBottom: 12, lineHeight: 1.6 }}>{note}</p>
       )}
       {children}
     </div>
@@ -124,7 +124,7 @@ function bucketColor(bucket: string | null | undefined): string {
     "High":      "#E07040",
     "Very High": "#C0392B",
   };
-  return m[bucket ?? ""] ?? "#888";
+  return m[bucket ?? ""] ?? "#222";
 }
 
 function fmtPct(v: number | null, signed = false): string {
@@ -203,11 +203,11 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
             <ScatterChart margin={{ top: 30, right: 10, bottom: 20, left: 50 }}>
               <CartesianGrid stroke="#e0e0e0" />
               <XAxis type="number" dataKey="x" domain={[0, 1]}
-                label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fontSize: 11, fill: "#666" }}
-                tick={{ fontSize: 10, fill: "#666" }} />
+                label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fontSize: 11, fill: "#333" }}
+                tick={{ fontSize: 10, fill: "#333" }} />
               <YAxis type="number" dataKey="y" domain={[0, 1]}
-                label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fontSize: 11, fill: "#666" }}
-                tick={{ fontSize: 10, fill: "#666" }} />
+                label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fontSize: 11, fill: "#333" }}
+                tick={{ fontSize: 10, fill: "#333" }} />
               <Tooltip content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload;
@@ -216,9 +216,9 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
                 return (
                   <div style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 6, padding: "8px 12px", fontSize: 12 }}>
                     <div style={{ fontWeight: 600 }}>{d.symbol}</div>
-                    <div style={{ color: "#666" }}>{d.oal_label}</div>
+                    <div style={{ color: "#111" }}>{d.oal_label}</div>
                     <div style={{ color: bucketColor(d.composite_bucket), marginTop: 4 }}>{d.composite_bucket}</div>
-                    <div style={{ fontSize: 10, color: "#999", marginTop: 4 }}>Position reflects structural metrics only.</div>
+                    <div style={{ fontSize: 10, color: "#222", marginTop: 4 }}>Position reflects structural metrics only.</div>
                   </div>
                 );
               }} />
@@ -229,16 +229,24 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
           </ResponsiveContainer>
         </div>
         <svg style={{ position: "absolute", inset: 0, pointerEvents: "none" }} width={dims.width} height={dims.height}>
-          <defs><clipPath id="dev-clip"><rect x={50} y={30} width={Math.max(0, dims.width - 60)} height={Math.max(0, dims.height - 50)} /></clipPath></defs>
+          <defs><clipPath id="dev-clip">
+            {/* Match Recharts internal plot area exactly:
+                margin={{ top:30, right:10, bottom:20, left:50 }}
+                Plus Recharts adds ~15px for axis tick labels on left, ~10px top
+                Empirically: left edge ~65px, top edge ~30px */}
+            <rect x={65} y={30} width={Math.max(0, dims.width - 65 - 10)} height={Math.max(0, dims.height - 30 - 20)} />
+          </defs>
           <g clipPath="url(#dev-clip)">
             {(() => {
-              const plotW = dims.width - 60;
-              const plotH = dims.height - 50;
+              const LEFT = 65;
+              const TOP = 30;
+              const plotW = dims.width - LEFT - 10;
+              const plotH = dims.height - TOP - 20;
               return points
                 .filter(pt => Math.abs(pt.axis3_decile - decile) === 0)
                 .map(pt => {
-                  const cx = 50 + pt.x * plotW;
-                  const cy = 30 + (1 - pt.y) * plotH;
+                  const cx = LEFT + pt.x * plotW;
+                  const cy = TOP + (1 - pt.y) * plotH;
                   return (
                     <circle key={pt.symbol} cx={cx} cy={cy} r={2}
                       fill={bucketColor(pt.composite_bucket)}
@@ -249,7 +257,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
             })()}
           </g>
         </svg>
-        <div style={{ position: "absolute", top: 8, left: 58, fontSize: 10, color: "#888" }}>
+        <div style={{ position: "absolute", top: 8, left: 58, fontSize: 10, color: "#222" }}>
           Financing Risk depth: decile {decile} of 10 · scroll to navigate
         </div>
       </div>
@@ -301,7 +309,7 @@ function CohortGrid({ cohortGrid }: { cohortGrid: CohortGridPayload }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-        <span style={{ fontSize: 12, color: "#666" }}>Financing Risk panel:</span>
+        <span style={{ fontSize: 12, color: "#111" }}>Financing Risk panel:</span>
         {AXIS3_ORDER.map(p => (
           <button key={p} onClick={() => handlePanel(p)} style={{
             fontSize: 11, padding: "3px 10px", borderRadius: 4, cursor: "pointer",
@@ -322,7 +330,7 @@ function CohortGrid({ cohortGrid }: { cohortGrid: CohortGridPayload }) {
         </span>
       </div>
 
-      <div style={{ fontSize: 11, color: "#666", marginBottom: 8 }}>
+      <div style={{ fontSize: 11, color: "#111", marginBottom: 8 }}>
         {cohortGrid.metadata.observation_count.toLocaleString()} observations ·{" "}
         {cohortGrid.metadata.formation_month_min} – {cohortGrid.metadata.formation_month_max} ·{" "}
         {cohortGrid.metadata.horizon_months}M forward horizon · Interest-bearing universe only
@@ -338,16 +346,16 @@ function CohortGrid({ cohortGrid }: { cohortGrid: CohortGridPayload }) {
               <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: "6px 8px", textAlign: "left", color: "#666", fontWeight: 500, borderBottom: "1px solid #ddd" }}>Trajectory ↓ / Anchor →</th>
+                    <th style={{ padding: "6px 8px", textAlign: "left", color: "#111", fontWeight: 500, borderBottom: "1px solid #ddd" }}>Trajectory ↓ / Anchor →</th>
                     {cohortGrid.metadata.x_axis_labels.map(l => (
-                      <th key={l} style={{ padding: "6px 8px", textAlign: "center", color: "#666", fontWeight: 500, borderBottom: "1px solid #ddd" }}>{l}</th>
+                      <th key={l} style={{ padding: "6px 8px", textAlign: "center", color: "#111", fontWeight: 500, borderBottom: "1px solid #ddd" }}>{l}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {activePanel.rows.map(row => (
                     <tr key={row.axis2_bucket}>
-                      <td style={{ padding: "6px 8px", color: "#444", fontWeight: 500, borderBottom: "1px solid #f0f0f0", whiteSpace: "nowrap" }}>{row.axis2_bucket}</td>
+                      <td style={{ padding: "6px 8px", color: "#222", fontWeight: 500, borderBottom: "1px solid #f0f0f0", whiteSpace: "nowrap" }}>{row.axis2_bucket}</td>
                       {row.cells.map(cell => {
                         const v = cell.suppressed ? null : cell[metric];
                         const colorVal = metric === "hit_rate" ? ((v as number ?? 0) - 0.5) * 2 : v as number;
@@ -372,7 +380,7 @@ function CohortGrid({ cohortGrid }: { cohortGrid: CohortGridPayload }) {
           )}
         </AnimatePresence>
       </div>
-      <p style={{ fontSize: 11, color: "#888", marginTop: 8 }}>
+      <p style={{ fontSize: 11, color: "#222", marginTop: 8 }}>
         Dataset boundary: excludes ~16% of universe (no-interest firms). Structural risk for those firms is undefined, not low.
       </p>
     </div>
@@ -413,13 +421,13 @@ function IndexChart({ data }: { data: IndexBacktest }) {
     <div>
       <div style={{ display: "flex", gap: 24, marginBottom: 12, flexWrap: "wrap" }}>
         {[
-          { label: "TCS Total Market", ret: total.stats.annualized_return, color: "#888" },
+          { label: "TCS Total Market", ret: total.stats.annualized_return, color: "#222" },
           { label: "TCS-150 Composite", ret: tcs150.stats.annualized_return, color: "#2471A3" },
           { label: "TCS Sapphire 50 (paid)", ret: sap50.stats.annualized_return, color: "#1a7a4a" },
         ].map(({ label, ret, color }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 24, height: 2, backgroundColor: color }} />
-            <span style={{ fontSize: 12, color: "#333" }}>{label}</span>
+            <span style={{ fontSize: 12, color: "#111" }}>{label}</span>
             <span style={{ fontSize: 12, fontWeight: 600, color: ret >= 0 ? "#1a7a4a" : "#c0392b" }}>
               {ret >= 0 ? "+" : ""}{(ret * 100).toFixed(1)}% ann.
             </span>
@@ -432,16 +440,16 @@ function IndexChart({ data }: { data: IndexBacktest }) {
             <line key={t} x1={PAD} y1={PAD + t * (H - PAD * 2)} x2={W - PAD} y2={PAD + t * (H - PAD * 2)} stroke="#e8e8e8" strokeWidth="0.5" />
           ))}
           <line x1={PAD} y1={y100} x2={W - PAD} y2={y100} stroke="#ccc" strokeWidth="0.75" strokeDasharray="4 4" />
-          <text x={PAD - 4} y={y100 + 3} textAnchor="end" fontSize="8" fill="#aaa">100</text>
-          <path d={buildPath(total.curve)} fill="none" stroke="#aaa" strokeWidth="1.5" strokeDasharray="5 3" />
+          <text x={PAD - 4} y={y100 + 3} textAnchor="end" fontSize="8" fill="#555">100</text>
+          <path d={buildPath(total.curve)} fill="none" stroke="#555" strokeWidth="1.5" strokeDasharray="5 3" />
           <path d={buildPath(sap50.curve)} fill="none" stroke="#1a7a4a" strokeWidth="1.5" strokeOpacity="0.4" />
           <path d={buildPath(tcs150.curve)} fill="none" stroke="#2471A3" strokeWidth="2" />
           {xLabels.map(({ x, label }) => (
-            <text key={label} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill="#999">{label}</text>
+            <text key={label} x={x} y={H - 4} textAnchor="middle" fontSize="8" fill="#222">{label}</text>
           ))}
         </svg>
       </div>
-      <p style={{ fontSize: 11, color: "#888", marginTop: 8 }}>
+      <p style={{ fontSize: 11, color: "#222", marginTop: 8 }}>
         Historical rules-based simulation. Monthly rebalance. Equal-weighted median return per period. Indexed to 100. Does not account for transaction costs. Not investment advice.
       </p>
     </div>
@@ -454,7 +462,7 @@ function ValidationPanels({ data }: { data: QuintileBacktest }) {
   const { bottom, middle, top } = data.summary;
   const zones = [
     { label: "Low risk",  color: "#1a7a4a", stats: bottom },
-    { label: "Moderate",  color: "#888",    stats: middle },
+    { label: "Moderate",  color: "#222",    stats: middle },
     { label: "High risk", color: "#c0392b", stats: top    },
   ];
 
@@ -472,7 +480,7 @@ function ValidationPanels({ data }: { data: QuintileBacktest }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
       {/* Hit rate */}
       <div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#333", marginBottom: 8 }}>Hit rate — share of formation windows with positive 12-month returns</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#111", marginBottom: 8 }}>Hit rate — share of formation windows with positive 12-month returns</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {zones.map(({ label, color, stats }) => (
             <div key={label}>
@@ -486,12 +494,12 @@ function ValidationPanels({ data }: { data: QuintileBacktest }) {
             </div>
           ))}
         </div>
-        <p style={{ fontSize: 11, color: "#888", marginTop: 6 }}>86 independent 12-month formation windows · interest-bearing universe · 2018–2025</p>
+        <p style={{ fontSize: 11, color: "#222", marginTop: 6 }}>86 independent 12-month formation windows · interest-bearing universe · 2018–2025</p>
       </div>
 
       {/* Return distribution */}
       <div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#333", marginBottom: 8 }}>Return distribution — P10 / P25 / median / P75 / P90</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#111", marginBottom: 8 }}>Return distribution — P10 / P25 / median / P75 / P90</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {zones.map(({ label, color, stats }) => {
             const { p10, p25, p50, p75, p90 } = stats.percentiles;
@@ -502,13 +510,13 @@ function ValidationPanels({ data }: { data: QuintileBacktest }) {
               <div key={label}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
                   <span style={{ color }}>{label}</span>
-                  <span style={{ color: "#888" }}>P10 {(p10 * 100).toFixed(0)}% · median {p50 >= 0 ? "+" : ""}{(p50 * 100).toFixed(1)}% · P90 +{(p90 * 100).toFixed(0)}%</span>
+                  <span style={{ color: "#222" }}>P10 {(p10 * 100).toFixed(0)}% · median {p50 >= 0 ? "+" : ""}{(p50 * 100).toFixed(1)}% · P90 +{(p90 * 100).toFixed(0)}%</span>
                 </div>
                 <div style={{ position: "relative", height: 18, backgroundColor: "#f0f0f0", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 0, height: "100%", left: `${toX(p10)}%`, width: `${toX(p90) - toX(p10)}%`, backgroundColor: color, opacity: 0.15 }} />
                   <div style={{ position: "absolute", top: 0, height: "100%", left: `${toX(p25)}%`, width: `${toX(p75) - toX(p25)}%`, backgroundColor: color, opacity: 0.4 }} />
                   <div style={{ position: "absolute", top: 0, height: "100%", width: 2, left: `${toX(p50)}%`, backgroundColor: color }} />
-                  <div style={{ position: "absolute", top: 0, height: "100%", width: 1, left: `${zX}%`, backgroundColor: "#aaa" }} />
+                  <div style={{ position: "absolute", top: 0, height: "100%", width: 1, left: `${zX}%`, backgroundColor: "#555" }} />
                 </div>
               </div>
             );
@@ -518,7 +526,7 @@ function ValidationPanels({ data }: { data: QuintileBacktest }) {
 
       {/* Spread over time */}
       <div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#333", marginBottom: 8 }}>Structural spread over time — Low minus High risk median return</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#111", marginBottom: 8 }}>Structural spread over time — Low minus High risk median return</div>
         <div style={{ border: "1px solid #e0e0e0", borderRadius: 4, backgroundColor: "#fafafa", padding: 8 }}>
           <svg viewBox={`0 0 ${SW} ${SH}`} style={{ width: "100%", height: "auto" }}>
             <line x1={SP} y1={zeroY} x2={SW - SP} y2={zeroY} stroke="#ccc" strokeWidth="0.75" strokeDasharray="4 3" />
@@ -563,14 +571,14 @@ function SnapshotTable({ data }: { data: SnapshotRow[] }) {
           style={{ padding: "4px 8px", fontSize: 12, border: "1px solid #ccc", borderRadius: 4 }}>
           {bucketOptions.map(b => <option key={b}>{b}</option>)}
         </select>
-        <span style={{ fontSize: 11, color: "#888", alignSelf: "center" }}>{filtered.length.toLocaleString()} companies</span>
+        <span style={{ fontSize: 11, color: "#222", alignSelf: "center" }}>{filtered.length.toLocaleString()} companies</span>
       </div>
       <div style={{ overflowX: "auto", maxHeight: 480, overflowY: "auto" }}>
         <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
           <thead style={{ position: "sticky", top: 0, backgroundColor: "#f8f8f8" }}>
             <tr>
               {["Symbol", "OAL", "Anchor Risk", "Trajectory Risk", "Financing Risk", "Composite Bucket"].map(h => (
-                <th key={h} style={{ padding: "6px 10px", textAlign: "left", borderBottom: "1px solid #ddd", fontWeight: 600, color: "#444", whiteSpace: "nowrap" }}>{h}</th>
+                <th key={h} style={{ padding: "6px 10px", textAlign: "left", borderBottom: "1px solid #ddd", fontWeight: 600, color: "#222", whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -578,13 +586,13 @@ function SnapshotTable({ data }: { data: SnapshotRow[] }) {
             {filtered.map(row => (
               <tr key={row.symbol} style={{ borderBottom: "1px solid #f5f5f5" }}>
                 <td style={{ padding: "5px 10px", fontWeight: 600 }}>{row.symbol}</td>
-                <td style={{ padding: "5px 10px", color: "#555" }}>{row.oal_label}</td>
-                <td style={{ padding: "5px 10px", color: "#555" }}>{fmtRisk(row.axis1_pct)}</td>
-                <td style={{ padding: "5px 10px", color: "#555" }}>{fmtRisk(row.axis2_pct)}</td>
-                <td style={{ padding: "5px 10px", color: "#555" }}>{row.axis3_pct == null ? "—" : fmtRisk(row.axis3_pct)}</td>
+                <td style={{ padding: "5px 10px", color: "#333" }}>{row.oal_label}</td>
+                <td style={{ padding: "5px 10px", color: "#333" }}>{fmtRisk(row.axis1_pct)}</td>
+                <td style={{ padding: "5px 10px", color: "#333" }}>{fmtRisk(row.axis2_pct)}</td>
+                <td style={{ padding: "5px 10px", color: "#333" }}>{row.axis3_pct == null ? "—" : fmtRisk(row.axis3_pct)}</td>
                 <td style={{ padding: "5px 10px" }}>
                   <span style={{ color: bucketColor(row.composite_bucket), fontWeight: 600 }}>{row.composite_bucket}</span>
-                  <span style={{ color: "#aaa", fontSize: 11, marginLeft: 6 }}>{fmtRisk(row.composite_score)}</span>
+                  <span style={{ color: "#333", fontSize: 11, marginLeft: 6 }}>{fmtRisk(row.composite_score)}</span>
                 </td>
               </tr>
             ))}
@@ -622,7 +630,7 @@ export default function DevPage() {
   }, []);
 
   if (loading) return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: 40, color: "#333" }}>
+    <div style={{ fontFamily: "system-ui, sans-serif", padding: 40, color: "#111" }}>
       Loading...
     </div>
   );
@@ -633,11 +641,11 @@ export default function DevPage() {
 
         {/* Header */}
         <div style={{ marginBottom: 48, borderBottom: "2px solid #111", paddingBottom: 20 }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.15em", color: "#888", textTransform: "uppercase", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.15em", color: "#222", textTransform: "uppercase", marginBottom: 8 }}>
             The Capital Steward · OSMR Framework · Audit Surface
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 12px" }}>Platform Audit — Dev Build</h1>
-          <p style={{ fontSize: 14, color: "#444", lineHeight: 1.7, maxWidth: 720, margin: "0 0 16px" }}>
+          <p style={{ fontSize: 14, color: "#222", lineHeight: 1.7, maxWidth: 720, margin: "0 0 16px" }}>
             OSMR applies first-principle structural reasoning to equity analysis. It tests the hypothesis that companies grounded in operational reality outperform those whose valuations rest on narrative. Multiple years of data confirm this. The framework is now a validated theory of structural fragility.
           </p>
           {/* Layer key */}
@@ -645,7 +653,7 @@ export default function DevPage() {
             {(["MEASURED", "DERIVED", "HEURISTIC", "NARRATIVE"] as const).map(t => (
               <div key={t} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <LayerTag type={t} />
-                <span style={{ fontSize: 11, color: "#666" }}>
+                <span style={{ fontSize: 11, color: "#111" }}>
                   {t === "MEASURED"  && "Raw axes, percentiles, cohort stats"}
                   {t === "DERIVED"   && "Bucket assignments, rankings, thresholds"}
                   {t === "HEURISTIC" && "Interpretive classifications"}
@@ -692,7 +700,7 @@ export default function DevPage() {
           </Section>
         )}
 
-        <div style={{ marginTop: 48, paddingTop: 20, borderTop: "1px solid #ddd", fontSize: 11, color: "#999" }}>
+        <div style={{ marginTop: 48, paddingTop: 20, borderTop: "1px solid #ddd", fontSize: 11, color: "#222" }}>
           The Capital Steward, LLC · thecapitalsteward.com · For informational purposes only. Not investment advice.
         </div>
 
