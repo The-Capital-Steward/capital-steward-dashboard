@@ -639,6 +639,35 @@ export default function DevPage() {
           </div>
         </div>
 
+        {/* Animation smoke test — remove once confirmed working */}
+        <div style={{ marginBottom: 32, padding: 16, border: "1px solid #ddd", borderRadius: 4 }}>
+          <div style={{ fontSize: 11, color: "#888", marginBottom: 8 }}>Animation smoke test — if these pulse, Framer Motion works in this environment</div>
+          <svg width={300} height={40}>
+            {[
+              { cx: 30,  dur: 3883, color: "#2471A3", label: "3883ms" },
+              { cx: 90,  dur: 2400, color: "#5B9BD5", label: "2400ms" },
+              { cx: 150, dur: 1483, color: "#E07040", label: "1483ms" },
+              { cx: 210, dur: 917,  color: "#C0392B", label: "917ms"  },
+              { cx: 270, dur: null, color: "#888",    label: "static" },
+            ].map(({ cx, dur, color, label }) => (
+              <g key={cx}>
+                {dur ? (
+                  <motion.circle
+                    cx={cx} cy={20} r={6}
+                    fill={color}
+                    initial={false}
+                    animate={{ opacity: [0.9, 0.1, 0.9] }}
+                    transition={{ duration: dur / 1000, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+                  />
+                ) : (
+                  <circle cx={cx} cy={20} r={6} fill={color} opacity={0.5} />
+                )}
+                <text x={cx} y={36} textAnchor="middle" fontSize={8} fill="#888">{label}</text>
+              </g>
+            ))}
+          </svg>
+        </div>
+
         {/* Section 1 — Scatter Map */}
         <Section title="OSMR Structural Map of U.S.-Listed Equities" layer="MEASURED"
           note="Each point is a U.S.-listed equity. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Pulse rate = Financing Risk (Axis 3). Color = Composite structural risk bucket. All positions are direct model output — no interpretation applied.">
