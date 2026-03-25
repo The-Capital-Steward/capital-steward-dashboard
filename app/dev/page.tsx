@@ -213,7 +213,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
           </div>
         ))}
       </div>
-      <div style={{ height: 520 }}>
+      <div style={{ height: 520, contain: "layout" }}>
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 12, bottom: 28, left: 48 }}>
             <CartesianGrid stroke="#ebebeb" />
@@ -222,12 +222,14 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
               label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -10, fontSize: 11, fill: "#222" }}
               tick={{ fontSize: 10, fill: "#444" }}
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
+              isAnimationActive={false}
             />
             <YAxis
               type="number" dataKey="y" domain={[0, 1]}
               label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 12, fontSize: 11, fill: "#222" }}
               tick={{ fontSize: 10, fill: "#444" }}
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
+              isAnimationActive={false}
             />
             <Scatter data={points} shape={<CustomDot />} isAnimationActive={false}>
               {points.map((_, i) => <Cell key={i} fill="transparent" />)}
@@ -587,6 +589,17 @@ export default function DevPage() {
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
+  // Inject pulse keyframes into document.head once — persists across component remounts
+  useEffect(() => {
+    const id = "osmr-pulse-keyframes";
+    if (!document.getElementById(id)) {
+      const style = document.createElement("style");
+      style.id = id;
+      style.textContent = PULSE_KEYFRAMES;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   if (loading) return (
     <div style={{ fontFamily: "system-ui, sans-serif", padding: 40, color: "#111" }}>
       Loading...
@@ -595,7 +608,6 @@ export default function DevPage() {
 
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", backgroundColor: "#fff", color: "#111", minHeight: "100vh" }}>
-      <style>{PULSE_KEYFRAMES}</style>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}>
 
         {/* Header */}
