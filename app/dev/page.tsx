@@ -140,7 +140,10 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
-// Defined outside ScatterMap — stable module-level ref required for Framer Motion to persist animation
+// ── Pulsing dot — pure JS interval, no animation library ─────────────────────
+// Each dot manages its own opacity via useEffect + setInterval.
+// This is the most reliable approach across all Next.js/Turbopack configurations.
+
 interface CustomDotProps {
   cx?: number;
   cy?: number;
@@ -150,43 +153,56 @@ interface CustomDotProps {
   };
 }
 
-// Pulse durations map to opacity transitions via Framer Motion
-// Framer Motion animates independently of React render cycle — survives remounts
-const OPACITY_MAP: Record<number, [number, number]> = {
-  3883: [0.9, 0.2],
-  2400: [0.9, 0.2],
-  1483: [0.9, 0.2],
-   917: [0.9, 0.2],
-};
+function PulsingDot({ cx, cy, color, dur }: { cx: number; cy: number; color: string; dur: number }) {
+  const [phase, setPhase] = useState(0); // 0..1 sine wave position
+
+  useEffect(() => {
+    const steps = 60; // updates per cycle
+    const interval = dur / steps;
+    let step = 0;
+    const id = setInterval(() => {
+      step = (step + 1) % steps;
+      setPhase(step / steps);
+    }, interval);
+    return () => clearInterval(id);
+  }, [dur]);
+
+  // Sine wave between high and low opacity values
+  const HIGH = 0.9;
+  const LOW  = 0.2;
+  const opacity = LOW + (HIGH - LOW) * (0.5 + 0.5 * Math.sin(phase * Math.PI * 2));
+
+  return <circle cx={cx} cy={cy} r={2} fill={color} opacity={opacity} />;
+}
 
 function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
   const color = bucketColor(payload?.composite_bucket);
   const dur = payload?.pulse ?? null;
-  const opacities = dur ? OPACITY_MAP[dur] : null;
 
-  if (!dur || !opacities) {
+  if (!dur) {
     return <circle cx={cx} cy={cy} r={2} fill={color} opacity={0.5} />;
   }
 
-  return (
-    <g>
-      <motion.circle
-        cx={cx} cy={cy} r={2}
-        fill={color}
-        initial={false}
-        animate={{ opacity: [opacities[0], opacities[1], opacities[0]] }}
-        transition={{
-          duration: dur / 1000,
-          repeat: Infinity,
-          repeatType: "loop",
-          ease: "easeInOut",
-        }}
-      />
-    </g>
-  );
+  return <PulsingDot cx={cx} cy={cy} color={color} dur={dur} />;
 }
 
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dims, setDims] = useState({ width: 800, height: 520 });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setDims({ width, height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const MARGIN = { top: 20, right: 12, bottom: 40, left: 52 };
+
   const points = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
     .map(r => {
@@ -201,54 +217,82 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       return {
         x: Math.min(1, Math.max(0, (r.axis2_pct as number) + ((r.axis3_pct ?? 0.5) - 0.5) * 0.08)),
         y: r.axis1_pct as number,
-        symbol: r.symbol,
-        oal_label: r.oal_label,
-        composite_bucket: bucket,
+        bucket,
         pulse: pulseMap[bucket],
+        symbol: r.symbol,
       };
     }), [data]);
 
+  const plotW = dims.width - MARGIN.left - MARGIN.right;
+  const plotH = dims.height - MARGIN.top - MARGIN.bottom;
+  const gridTicks = [0, 0.25, 0.5, 0.75, 1.0];
+
+  // CSS keyframes inside the component — exactly as it worked before
+  const keyframes = `
+    @keyframes p3883 { 0%,100%{opacity:0.500} 50%{opacity:0.357} }
+    @keyframes p2400 { 0%,100%{opacity:0.578} 50%{opacity:0.435} }
+    @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
+    @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
+  `;
+
   return (
     <div>
+      <style>{keyframes}</style>
       {/* Legend */}
       <div style={{ display: "flex", gap: 16, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
         {[
-          { bucket: "Very Low",  pulse: "stable",      color: "#2471A3" },
-          { bucket: "Low",       pulse: "steady",      color: "#5B9BD5" },
-          { bucket: "Moderate",  pulse: "active",      color: "#888888" },
-          { bucket: "High",      pulse: "strained",    color: "#E07040" },
-          { bucket: "Very High", pulse: "critical",    color: "#C0392B" },
+          { bucket: "Very Low",  pulse: "stable",   color: "#2471A3" },
+          { bucket: "Low",       pulse: "steady",   color: "#5B9BD5" },
+          { bucket: "Moderate",  pulse: "active",   color: "#888888" },
+          { bucket: "High",      pulse: "strained", color: "#E07040" },
+          { bucket: "Very High", pulse: "critical", color: "#C0392B" },
         ].map(({ bucket, pulse, color }) => (
           <div key={bucket} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <svg width={10} height={10}>
-              <circle cx={5} cy={5} r={3} fill={color} opacity={0.8} />
-            </svg>
+            <svg width={10} height={10}><circle cx={5} cy={5} r={3} fill={color} opacity={0.8} /></svg>
             <span style={{ fontSize: 11, color: "#222" }}>{bucket}</span>
             <span style={{ fontSize: 10, color: "#888" }}>({pulse})</span>
           </div>
         ))}
       </div>
-      <div style={{ height: 520, contain: "layout" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 20, right: 12, bottom: 28, left: 48 }}>
-            <CartesianGrid stroke="#ebebeb" />
-            <XAxis
-              type="number" dataKey="x" domain={[0, 1]}
-              label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -10, fontSize: 11, fill: "#222" }}
-              tick={{ fontSize: 10, fill: "#444" }}
-              axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
-            />
-            <YAxis
-              type="number" dataKey="y" domain={[0, 1]}
-              label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 12, fontSize: 11, fill: "#222" }}
-              tick={{ fontSize: 10, fill: "#444" }}
-              axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
-            />
-            <Scatter data={points} shape={(props: CustomDotProps) => <CustomDot {...props} />} isAnimationActive={false}>
-              {points.map((_, i) => <Cell key={i} fill="transparent" />)}
-            </Scatter>
-          </ScatterChart>
-        </ResponsiveContainer>
+
+      {/* Pure SVG — no Recharts, dots render freely */}
+      <div ref={containerRef} style={{ width: "100%", height: 520, position: "relative" }}>
+        <svg width={dims.width} height={dims.height} style={{ position: "absolute", inset: 0 }}>
+          {/* Grid */}
+          {gridTicks.map(t => (
+            <g key={t}>
+              <line x1={MARGIN.left + t * plotW} y1={MARGIN.top} x2={MARGIN.left + t * plotW} y2={MARGIN.top + plotH} stroke="#ebebeb" strokeWidth={1} />
+              <line x1={MARGIN.left} y1={MARGIN.top + (1 - t) * plotH} x2={MARGIN.left + plotW} y2={MARGIN.top + (1 - t) * plotH} stroke="#ebebeb" strokeWidth={1} />
+              <text x={MARGIN.left + t * plotW} y={MARGIN.top + plotH + 14} textAnchor="middle" fontSize={9} fill="#666">{t.toFixed(2)}</text>
+              <text x={MARGIN.left - 6} y={MARGIN.top + (1 - t) * plotH + 3} textAnchor="end" fontSize={9} fill="#666">{t.toFixed(2)}</text>
+            </g>
+          ))}
+          <rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} fill="none" stroke="#ccc" strokeWidth={1} />
+          <text x={MARGIN.left + plotW / 2} y={dims.height - 4} textAnchor="middle" fontSize={11} fill="#222">Trajectory Risk →</text>
+          <text x={14} y={MARGIN.top + plotH / 2} textAnchor="middle" fontSize={11} fill="#222" transform={`rotate(-90, 14, ${MARGIN.top + plotH / 2})`}>Anchor Risk ↑</text>
+
+          {/* Dots — plain circles with CSS animation */}
+          <defs><clipPath id="scatter-clip"><rect x={MARGIN.left} y={MARGIN.top} width={plotW} height={plotH} /></clipPath></defs>
+          <g clipPath="url(#scatter-clip)">
+            {points.map(pt => {
+              const cx = MARGIN.left + pt.x * plotW;
+              const cy = MARGIN.top + (1 - pt.y) * plotH;
+              const color = bucketColor(pt.bucket);
+              const dur = pt.pulse;
+              return (
+                <circle
+                  key={pt.symbol}
+                  cx={cx} cy={cy} r={2}
+                  fill={color}
+                  style={{
+                    animation: dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none",
+                    opacity: dur ? undefined : 0.5,
+                  }}
+                />
+              );
+            })}
+          </g>
+        </svg>
       </div>
     </div>
   );
@@ -635,35 +679,6 @@ export default function DevPage() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Animation smoke test — remove once confirmed working */}
-        <div style={{ marginBottom: 32, padding: 16, border: "1px solid #ddd", borderRadius: 4 }}>
-          <div style={{ fontSize: 11, color: "#888", marginBottom: 8 }}>Animation smoke test — if these pulse, Framer Motion works in this environment</div>
-          <svg width={300} height={40}>
-            {[
-              { cx: 30,  dur: 3883, color: "#2471A3", label: "3883ms" },
-              { cx: 90,  dur: 2400, color: "#5B9BD5", label: "2400ms" },
-              { cx: 150, dur: 1483, color: "#E07040", label: "1483ms" },
-              { cx: 210, dur: 917,  color: "#C0392B", label: "917ms"  },
-              { cx: 270, dur: null, color: "#888",    label: "static" },
-            ].map(({ cx, dur, color, label }) => (
-              <g key={cx}>
-                {dur ? (
-                  <motion.circle
-                    cx={cx} cy={20} r={6}
-                    fill={color}
-                    initial={false}
-                    animate={{ opacity: [0.9, 0.1, 0.9] }}
-                    transition={{ duration: dur / 1000, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
-                  />
-                ) : (
-                  <circle cx={cx} cy={20} r={6} fill={color} opacity={0.5} />
-                )}
-                <text x={cx} y={36} textAnchor="middle" fontSize={8} fill="#888">{label}</text>
-              </g>
-            ))}
-          </svg>
         </div>
 
         {/* Section 1 — Scatter Map */}
