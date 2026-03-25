@@ -643,7 +643,7 @@ export default function DevPage() {
         </div>
 
         {/* Section 1 — Scatter Map */}
-        <Section title="OSMR Structural Map of U.S.-Listed Equities" layer="MEASURED"
+        <Section title="Structural Map of U.S. Exchange-Listed Equities" layer="MEASURED"
           note="Each point is a U.S.-listed equity. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Pulse rate = Financing Risk (Axis 3). Color = Composite structural risk bucket. All positions are direct model output — no interpretation applied.">
           <ScatterMap data={snapshot} />
         </Section>
