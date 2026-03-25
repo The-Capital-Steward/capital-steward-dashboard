@@ -150,39 +150,27 @@ function returnColor(v: number | null, suppressed: boolean): string {
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [dims, setDims] = useState({ width: 700, height: 500 });
   const [decile, setDecile] = useState(1);
-  const chartRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Smooth scroll — accumulate delta, no lock, step every 40px
   useEffect(() => {
-    const el = mapRef.current;
+    const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(e => {
-      const { width, height } = e[0].contentRect;
-      setDims({ width, height });
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const el = chartRef.current;
-    if (!el) return;
-    let accumulated = 0;
+    let acc = 0;
     const handler = (e: WheelEvent) => {
       e.preventDefault();
-      accumulated += e.deltaY;
-      if (Math.abs(accumulated) < 30) return;
-      const dir = accumulated > 0 ? 1 : -1;
-      accumulated = 0;
-      setDecile(p => Math.min(10, Math.max(1, p + dir)));
+      acc += e.deltaY;
+      const steps = Math.trunc(acc / 40);
+      if (steps === 0) return;
+      acc -= steps * 40;
+      setDecile(p => Math.min(10, Math.max(1, p + (steps > 0 ? 1 : -1))));
     };
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
   }, []);
 
-  const points = useMemo(() => data
+  const allPoints = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
     .map(r => {
       const a3 = r.axis3_pct ?? 0.5;
@@ -190,97 +178,114 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
       return {
         x: Math.min(1, Math.max(0, (r.axis2_pct as number) + (a3 - 0.5) * 0.08)),
         y: r.axis1_pct as number,
-        axis3_decile, symbol: r.symbol, oal_label: r.oal_label,
+        axis3_decile,
+        symbol: r.symbol,
+        oal_label: r.oal_label,
         composite_bucket: r.composite_bucket,
       };
     }), [data]);
 
+  // Only render active decile's points — clean swap on decile change
+  const visiblePoints = useMemo(() =>
+    allPoints.filter(p => p.axis3_decile === decile),
+    [allPoints, decile]);
+
+  const CustomDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    return (
+      <circle
+        cx={cx} cy={cy} r={2.5}
+        fill={bucketColor(payload.composite_bucket)}
+        opacity={0.82}
+      />
+    );
+  };
+
+  const MAP_H = 520;
+
   return (
-    <div style={{ display: "flex", gap: 12 }}>
-      <div ref={chartRef} style={{ flex: 1, height: 480, position: "relative" }}>
-        <div ref={mapRef} style={{ position: "absolute", inset: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 30, right: 10, bottom: 20, left: 50 }}>
-              <CartesianGrid stroke="#e0e0e0" />
-              <XAxis type="number" dataKey="x" domain={[0, 1]}
-                label={{ value: "Trajectory Risk →", position: "insideBottomRight", offset: -4, fontSize: 11, fill: "#333" }}
-                tick={{ fontSize: 10, fill: "#333" }} />
-              <YAxis type="number" dataKey="y" domain={[0, 1]}
-                label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 10, fontSize: 11, fill: "#333" }}
-                tick={{ fontSize: 10, fill: "#333" }} />
-              <Tooltip content={({ active, payload }) => {
+    <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
+
+      {/* Scrollbar — left side, full map height */}
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "space-between",
+        width: 32, height: MAP_H, padding: "12px 0", flexShrink: 0,
+        borderRight: "1px solid #e0e0e0",
+      }}>
+        <span style={{ fontSize: 9, fontWeight: 600, color: "#c0392b", letterSpacing: "0.1em" }}>HI</span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flex: 1, justifyContent: "center" }}>
+          {Array.from({ length: 10 }, (_, i) => {
+            const d = i + 1;
+            const active = d === decile;
+            return (
+              <button key={d} onClick={() => setDecile(d)}
+                title={`Decile ${d}`}
+                style={{
+                  width: active ? 14 : 8,
+                  height: active ? 14 : 8,
+                  borderRadius: "50%",
+                  border: active ? "2px solid #333" : "none",
+                  cursor: "pointer",
+                  backgroundColor: active ? "#333" : "#bbb",
+                  transition: "all 0.12s",
+                  flexShrink: 0,
+                }}
+              />
+            );
+          })}
+        </div>
+        <span style={{ fontSize: 9, fontWeight: 600, color: "#1a7a4a", letterSpacing: "0.1em" }}>LO</span>
+      </div>
+
+      {/* Chart — full width, axis labels at edges */}
+      <div ref={containerRef} style={{ flex: 1, height: MAP_H, position: "relative" }}>
+        <div style={{ position: "absolute", top: 4, left: 8, fontSize: 10, color: "#555", zIndex: 1 }}>
+          Financing Risk · Decile {decile} of 10 · scroll to navigate
+        </div>
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart margin={{ top: 28, right: 8, bottom: 28, left: 48 }}>
+            <CartesianGrid stroke="#ebebeb" strokeDasharray="" />
+            <XAxis
+              type="number" dataKey="x" domain={[0, 1]}
+              label={{ value: "Trajectory Risk →", position: "insideBottom", offset: -8, fontSize: 11, fill: "#222" }}
+              tick={{ fontSize: 10, fill: "#444" }}
+              axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
+            />
+            <YAxis
+              type="number" dataKey="y" domain={[0, 1]}
+              label={{ value: "Anchor Risk ↑", angle: -90, position: "insideLeft", offset: 12, fontSize: 11, fill: "#222" }}
+              tick={{ fontSize: 10, fill: "#444" }}
+              axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
+            />
+            <Tooltip
+              cursor={{ strokeDasharray: "3 3", stroke: "#aaa" }}
+              content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload;
-                const dist = Math.abs(d.axis3_decile - decile);
-                if (dist > 1) return null;
                 return (
-                  <div style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 6, padding: "8px 12px", fontSize: 12 }}>
-                    <div style={{ fontWeight: 600 }}>{d.symbol}</div>
-                    <div style={{ color: "#111" }}>{d.oal_label}</div>
-                    <div style={{ color: bucketColor(d.composite_bucket), marginTop: 4 }}>{d.composite_bucket}</div>
-                    <div style={{ fontSize: 10, color: "#222", marginTop: 4 }}>Position reflects structural metrics only.</div>
+                  <div style={{ background: "#fff", border: "1px solid #ccc", borderRadius: 6, padding: "8px 12px", fontSize: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                    <div style={{ fontWeight: 700 }}>{d.symbol}</div>
+                    <div style={{ color: "#444", marginBottom: 4 }}>{d.oal_label}</div>
+                    <div style={{ color: bucketColor(d.composite_bucket), fontWeight: 600 }}>{d.composite_bucket}</div>
+                    <div style={{ fontSize: 10, color: "#666", marginTop: 6, borderTop: "1px solid #eee", paddingTop: 4 }}>
+                      Position reflects structural metrics only.
+                    </div>
                   </div>
                 );
-              }} />
-              <Scatter data={points} fill="transparent" opacity={0}>
-                {points.map((_, i) => <Cell key={i} />)}
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
-        </div>
-        <svg style={{ position: "absolute", inset: 0, pointerEvents: "none" }} width={dims.width} height={dims.height}>
-          <defs><clipPath id="dev-clip">
-            {/* Match Recharts internal plot area exactly:
-                margin={{ top:30, right:10, bottom:20, left:50 }}
-                Plus Recharts adds ~15px for axis tick labels on left, ~10px top
-                Empirically: left edge ~65px, top edge ~30px */}
-            <rect x={65} y={30} width={Math.max(0, dims.width - 65 - 10)} height={Math.max(0, dims.height - 30 - 20)} />
-          </defs>
-          <g clipPath="url(#dev-clip)">
-            {(() => {
-              const LEFT = 65;
-              const TOP = 30;
-              const plotW = dims.width - LEFT - 10;
-              const plotH = dims.height - TOP - 20;
-              return points
-                .filter(pt => Math.abs(pt.axis3_decile - decile) === 0)
-                .map(pt => {
-                  const cx = LEFT + pt.x * plotW;
-                  const cy = TOP + (1 - pt.y) * plotH;
-                  return (
-                    <circle key={pt.symbol} cx={cx} cy={cy} r={2}
-                      fill={bucketColor(pt.composite_bucket)}
-                      opacity={0.85}
-                    />
-                  );
-                });
-            })()}
-          </g>
-        </svg>
-        <div style={{ position: "absolute", top: 8, left: 58, fontSize: 10, color: "#222" }}>
-          Financing Risk depth: decile {decile} of 10 · scroll to navigate
-        </div>
+              }}
+            />
+            <Scatter data={visiblePoints} shape={<CustomDot />} isAnimationActive={false}>
+              {visiblePoints.map((_, i) => <Cell key={i} fill="transparent" />)}
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
       </div>
-      {/* Depth scrollbar */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "8px 0", width: 28 }}>
-        <span style={{ fontSize: 9, color: "#c0392b", marginBottom: 4 }}>HI</span>
-        {Array.from({ length: 10 }, (_, i) => {
-          const d = i + 1;
-          const active = d === decile;
-          return (
-            <button key={d} onClick={() => setDecile(d)} style={{
-              width: 16, height: 16, borderRadius: "50%", border: "none", cursor: "pointer",
-              backgroundColor: active ? "#333" : "#ccc",
-              transform: active ? "scale(1.3)" : "scale(1)",
-              transition: "all 0.15s",
-            }} title={`Decile ${d}`} />
-          );
-        })}
-        <span style={{ fontSize: 9, color: "#1a7a4a", marginTop: 4 }}>LO</span>
-      </div>
+
     </div>
   );
 }
+
 
 // ─── Cohort Grid ──────────────────────────────────────────────────────────────
 
