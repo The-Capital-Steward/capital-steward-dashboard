@@ -153,10 +153,10 @@ interface CustomDotProps {
 // Pulse durations map to opacity transitions via Framer Motion
 // Framer Motion animates independently of React render cycle — survives remounts
 const OPACITY_MAP: Record<number, [number, number]> = {
-  3883: [0.500, 0.357],
-  2400: [0.578, 0.435],
-  1483: [0.704, 0.562],
-   917: [0.908, 0.765],
+  3883: [0.9, 0.2],
+  2400: [0.9, 0.2],
+  1483: [0.9, 0.2],
+   917: [0.9, 0.2],
 };
 
 function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
@@ -165,17 +165,24 @@ function CustomDot({ cx = 0, cy = 0, payload }: CustomDotProps) {
   const opacities = dur ? OPACITY_MAP[dur] : null;
 
   if (!dur || !opacities) {
-    // Very Low — static, no animation
-    return <circle cx={cx} cy={cy} r={2} fill={color} opacity={0.50} />;
+    return <circle cx={cx} cy={cy} r={2} fill={color} opacity={0.5} />;
   }
 
   return (
-    <motion.circle
-      cx={cx} cy={cy} r={2}
-      fill={color}
-      animate={{ opacity: [opacities[0], opacities[1], opacities[0]] }}
-      transition={{ duration: dur / 1000, repeat: Infinity, ease: "easeInOut" }}
-    />
+    <g>
+      <motion.circle
+        cx={cx} cy={cy} r={2}
+        fill={color}
+        initial={false}
+        animate={{ opacity: [opacities[0], opacities[1], opacities[0]] }}
+        transition={{
+          duration: dur / 1000,
+          repeat: Infinity,
+          repeatType: "loop",
+          ease: "easeInOut",
+        }}
+      />
+    </g>
   );
 }
 
@@ -239,7 +246,7 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
               axisLine={{ stroke: "#ccc" }} tickLine={{ stroke: "#ccc" }}
               isAnimationActive={false}
             />
-            <Scatter data={points} shape={<CustomDot />} isAnimationActive={false}>
+            <Scatter data={points} shape={(props: CustomDotProps) => <CustomDot {...props} />} isAnimationActive={false}>
               {points.map((_, i) => <Cell key={i} fill="transparent" />)}
             </Scatter>
           </ScatterChart>
