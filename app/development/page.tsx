@@ -19,10 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 const COLORS = {
   bg: "#0A1F3D", panel: "#102642", card: "#112A47", inset: "#0D2138",
-  border: "#203754", text: "#EAF0F2", textSecondary: "#B8C3CC", textMuted: "#7E8A96",
+  border: "#203754", text: "#EAF0F2", textSecondary: "#B8C3CC", textMuted: "#94A3B8",
   accent: "#41506A", green: "#244636", greenSoft: "#E8EFE9",
-  positive: "#3E8E6A", positiveSoft: "#6DAE8B",
-  negative: "#8B3838", negativeSoft: "#BC6464",
+  positive: "#3E8E6A", positiveSoft: "#7CC89D",
+  negative: "#8B3838", negativeSoft: "#D67C7C",
   neutral: "#47566B", suppressed: "#20314F",
 };
 
@@ -240,10 +240,10 @@ function narrateCompany(company: SnapshotRow): { headerRead: string; trajectoryP
 function KPIDelta({ current, previous, higherIsBad, isDecimal = false }: { current: number | null; previous: number | null; higherIsBad: boolean; isDecimal?: boolean }) {
   if (current == null || previous == null) return null;
   const delta = current - previous;
-  if (delta === 0) return <div className="mt-1.5 text-[11px] text-[#7E8A96]">Unchanged from last month</div>;
+  if (delta === 0) return <div className="mt-1.5 text-[11px] text-[#94A3B8]">Unchanged from last month</div>;
   const isIncrease = delta > 0;
   const isAdverse = higherIsBad ? isIncrease : !isIncrease;
-  const color = isAdverse ? "#BC6464" : "#6DAE8B";
+  const color = isAdverse ? "#D67C7C" : "#7CC89D";
   const arrow = isIncrease ? "↑" : "↓";
   const formattedDelta = isDecimal ? `${Math.abs(delta * 100).toFixed(1)}pp` : formatNum(Math.abs(Math.round(delta)));
   return <div className="mt-1.5 text-[11px]" style={{ color }}>{arrow} {formattedDelta} from last month</div>;
@@ -268,16 +268,16 @@ function computeTemporalState(historyManifest: HistoryManifestRow[]) {
 function TemporalAnchorBar({ historyManifest, loading }: { historyManifest: HistoryManifestRow[]; loading: boolean }) {
   const { formationLabel, nextRefreshLabel, daysRemaining } = useMemo(() => computeTemporalState(historyManifest), [historyManifest]);
   const approachingRefresh = daysRemaining != null && daysRemaining <= 7;
-  const textColor = approachingRefresh ? "#B8C3CC" : "#7E8A96";
+  const textColor = approachingRefresh ? "#B8C3CC" : "#94A3B8";
   const daysLabel = daysRemaining == null ? "—" : daysRemaining === 0 ? "Recalibrating today" : daysRemaining === 1 ? "1 day remaining" : `${daysRemaining} days remaining`;
   if (loading) return null;
   return (
     <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-1 rounded-xl border border-[#203754] bg-[#0D2138] px-5 py-2.5 text-[11px]" style={{ color: textColor }}>
-      <span><span className="text-[#7E8A96]">Current structural snapshot anchored to  </span><span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>{formationLabel}</span></span>
+      <span><span className="text-[#94A3B8]">Current structural snapshot anchored to  </span><span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>{formationLabel}</span></span>
       <span className="text-[#203754]">·</span>
-      <span><span className="text-[#7E8A96]">Next scheduled recalibration  </span><span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>{nextRefreshLabel}</span></span>
+      <span><span className="text-[#94A3B8]">Next scheduled recalibration  </span><span className="font-medium" style={{ color: approachingRefresh ? "#EAF0F2" : "#B8C3CC" }}>{nextRefreshLabel}</span></span>
       <span className="text-[#203754]">·</span>
-      <span style={{ color: approachingRefresh ? "#6DAE8B" : textColor }}>{daysLabel}</span>
+      <span style={{ color: approachingRefresh ? "#7CC89D" : textColor }}>{daysLabel}</span>
     </div>
   );
 }
@@ -301,22 +301,22 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end" style={{ backgroundColor: "rgba(0,0,0,0.6)" }} onClick={onClose}>
       <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="relative h-full w-full max-w-xl overflow-y-auto" style={{ background: "#071629", borderLeft: "1px solid #203754" }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute right-4 top-4 z-10 rounded-full border border-[#203754] bg-[#0D2138] p-1.5 text-[#7E8A96] transition hover:text-white">
+        <button onClick={onClose} className="absolute right-4 top-4 z-10 rounded-full border border-[#203754] bg-[#0D2138] p-1.5 text-[#94A3B8] transition hover:text-white">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </button>
         <div className="px-7 py-8 space-y-6">
-          <p className="text-[11px] text-[#7E8A96] leading-[1.6]">This is the individual structural profile behind the market positioning you observed.</p>
+          <p className="text-[11px] text-[#94A3B8] leading-[1.6]">This is the individual structural profile behind the market positioning you observed.</p>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-2">Structural Profile</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94A3B8] mb-2">Structural Profile</div>
             <div className="flex items-start justify-between gap-4">
-              <div><h2 className="text-3xl font-semibold text-white">{company.symbol}</h2><p className="mt-1 text-sm text-[#7E8A96]">{company.oal_label ?? "—"}</p></div>
-              <div className="text-right shrink-0"><div className="text-lg font-semibold" style={{ color: compositeColor(company.composite_bucket) }}>{company.composite_bucket}</div><div className="text-xs text-[#7E8A96]">{company.composite_score != null ? formatRiskPct(company.composite_score) : "—"}</div></div>
+              <div><h2 className="text-3xl font-semibold text-white">{company.symbol}</h2><p className="mt-1 text-sm text-[#94A3B8]">{company.oal_label ?? "—"}</p></div>
+              <div className="text-right shrink-0"><div className="text-lg font-semibold" style={{ color: compositeColor(company.composite_bucket) }}>{company.composite_bucket}</div><div className="text-xs text-[#94A3B8]">{company.composite_score != null ? formatRiskPct(company.composite_score) : "—"}</div></div>
             </div>
             <div className="mt-4 rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-3"><p className="text-[13px] leading-[1.7] text-[#B8C3CC]">{narrative.headerRead}</p></div>
           </div>
           <div className="border-t border-[#203754]" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">Axis Breakdown</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94A3B8] mb-3">Axis Breakdown</div>
             <div className="space-y-3">
               {[
                 { label: "Operational Anchor Risk", bucket: axis1Bucket, pct: company.axis1_pct, interp: anchorInterp, badge: axis1Bucket },
@@ -325,12 +325,12 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
               ].map(({ label, bucket, pct, interp, badge, badgeColor }) => (
                 <div key={label} className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">{label}</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">{label}</span>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: badgeColor ?? compositeColor(bucket), backgroundColor: `${badgeColor ?? compositeColor(bucket)}20` }}>{badge}</span>
                   </div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="h-1.5 flex-1 rounded-full bg-[#203754] overflow-hidden"><div className="h-full rounded-full" style={{ width: `${((pct ?? 0) * 100).toFixed(0)}%`, backgroundColor: compositeColor(bucket) }} /></div>
-                    <span className="text-xs text-[#7E8A96] shrink-0">{pct != null ? formatAxisPct(pct) : "—"}</span>
+                    <span className="text-xs text-[#94A3B8] shrink-0">{pct != null ? formatAxisPct(pct) : "—"}</span>
                   </div>
                   <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">{interp}</p>
                 </div>
@@ -339,39 +339,45 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: { company: 
           </div>
           <div className="border-t border-[#203754]" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">Position in Market</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94A3B8] mb-3">Position in Market</div>
             <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
-              {topRiskPct != null ? <p className="text-[13px] leading-[1.7] text-[#B8C3CC]">This company ranks in the top <span className="font-semibold text-white">{topRiskPct}%</span> of structural risk in the active universe ({formatNum(scorable.length)} companies scored under active filters).</p> : <p className="text-[13px] text-[#7E8A96]">Position data unavailable.</p>}
-              {company.risk_bucket_within_oal && <p className="mt-2 text-[12px] text-[#7E8A96]">Within {company.oal_label}: <span className="text-[#B8C3CC]">{company.risk_bucket_within_oal}</span> valuation bucket.</p>}
+              {topRiskPct != null ? <p className="text-[13px] leading-[1.7] text-[#B8C3CC]">This company ranks in the top <span className="font-semibold text-white">{topRiskPct}%</span> of structural risk in the active universe ({formatNum(scorable.length)} companies scored under active filters).</p> : <p className="text-[13px] text-[#94A3B8]">Position data unavailable.</p>}
+              {company.risk_bucket_within_oal && <p className="mt-2 text-[12px] text-[#94A3B8]">Within {company.oal_label}: <span className="text-[#B8C3CC]">{company.risk_bucket_within_oal}</span> valuation bucket.</p>}
             </div>
           </div>
           <div className="border-t border-[#203754]" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">Historical Cohort Context</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94A3B8] mb-3">Historical Cohort Context</div>
             {cohortCell && !cohortCell.suppressed ? (
               <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4">
-                <p className="mb-4 text-[12px] text-[#7E8A96]">Matched to cohort: <span className="text-[#B8C3CC]">{panel}</span> · Anchor Risk <span className="text-[#B8C3CC]">{axis1Bucket}</span> · Trajectory Risk <span className="text-[#B8C3CC]">{axis2Bucket}</span> · Financing Risk <span className="text-[#B8C3CC]">{axis3Bucket}</span></p>
+                <p className="mb-4 text-[12px] text-[#94A3B8]">Matched to cohort: <span className="text-[#B8C3CC]">{panel}</span> · Anchor Risk <span className="text-[#B8C3CC]">{axis1Bucket}</span> · Trajectory Risk <span className="text-[#B8C3CC]">{axis2Bucket}</span> · Financing Risk <span className="text-[#B8C3CC]">{axis3Bucket}</span></p>
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {[{ label: "Median Return", value: formatPctSigned(cohortCell.median_return) }, { label: "Hit Rate", value: formatPct(cohortCell.hit_rate) }, { label: "Observations", value: formatNum(cohortCell.count) }].map(stat => (
-                    <div key={stat.label} className="rounded-lg border border-[#203754] bg-[#071629] px-3 py-3 text-center"><div className="text-[17px] font-semibold text-white">{stat.value}</div><div className="mt-0.5 text-[9px] uppercase tracking-wide text-[#7E8A96]">{stat.label}</div></div>
+                    <div key={stat.label} className="rounded-lg border border-[#203754] bg-[#071629] px-3 py-3 text-center"><div className="text-[17px] font-semibold text-white">{stat.value}</div><div className="mt-0.5 text-[9px] uppercase tracking-wide text-[#94A3B8]">{stat.label}</div></div>
                   ))}
                 </div>
                 <p className="text-[12px] leading-[1.65] text-[#8DAFC8]">Companies in similar structural states have historically produced <span className="font-semibold text-white">{formatPctSigned(cohortCell.median_return)}</span> median returns over {cohortGrid?.metadata.horizon_months ?? 12} months, with a <span className="font-semibold text-white">{formatPct(cohortCell.hit_rate)}</span> hit rate ({formatNum(cohortCell.count)} observations).{skewSignal(cohortCell) === "right" && <> Mean is materially higher ({formatPctSigned(cohortCell.mean_return)}) — distribution is right-skewed by a small number of large winners.</>}{skewSignal(cohortCell) === "left" && <> Mean is materially lower ({formatPctSigned(cohortCell.mean_return)}) — distribution is left-skewed by outsized losses in a subset of cases.</>}</p>
               </div>
             ) : cohortCell?.suppressed ? (
-              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4"><p className="text-[12px] text-[#7E8A96]">Cohort cell suppressed — insufficient observations for this structural profile.</p></div>
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4"><p className="text-[12px] text-[#94A3B8]">Cohort cell suppressed — insufficient observations for this structural profile.</p></div>
             ) : (
-              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4"><p className="text-[12px] text-[#7E8A96]">No cohort match found for this structural profile.</p></div>
+              <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4"><p className="text-[12px] text-[#94A3B8]">No cohort match found for this structural profile.</p></div>
             )}
           </div>
           <div className="border-t border-[#203754]" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7E8A96] mb-3">Trajectory Context</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94A3B8]">Trajectory Context</div>
+              <div className="text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ color: "#94A3B8", backgroundColor: "#41506A30" }}>Interpretive Summary</div>
+            </div>
             <div className="rounded-xl border border-[#203754] bg-[#0A1F3D] px-4 py-4"><p className="text-[13px] leading-[1.7] text-[#B8C3CC]">{narrative.trajectoryProfile}</p></div>
           </div>
           <div className="border-t border-[#203754]" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6DAE8B] mb-3">Structural Takeaway</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7CC89D]">Structural Takeaway</div>
+              <div className="text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ color: "#94A3B8", backgroundColor: "#41506A30" }}>Interpretive Summary</div>
+            </div>
             <div className="rounded-xl px-5 py-5" style={{ background: "#0A1F3D", border: "1px solid #2E4D6A" }}><p className="text-[13px] leading-[1.8] text-[#B8C3CC]">{narrative.takeaway}</p></div>
           </div>
           <div className="h-6" />
@@ -443,46 +449,46 @@ function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; 
               Rules-based indexes vs. the full eligible universe. Monthly rebalance. Equal-weighted median return. Indexed to 100. All three series drawn on the same scale.
             </CardDescription>
           </div>
-          <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#7E8A96]">2018–2025 · Monthly rebalance</Badge>
+          <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#94A3B8]">2018–2025 · Monthly rebalance</Badge>
         </div>
       </CardHeader>
       <CardContent>
         {/* KPI strip — 3 visible + 2 paid-locked */}
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
           <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Total Market ann. return</div>
-            <div className="text-lg font-semibold text-[#BC6464]">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#94A3B8] mb-1">Total Market ann. return</div>
+            <div className="text-lg font-semibold text-[#D67C7C]">
               {totalMktStats ? `${(totalMktStats.annualized_return * 100).toFixed(1)}%` : "−0.9%"}
             </div>
           </div>
           <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 ann. return</div>
-            <div className="text-lg font-semibold text-[#6DAE8B]">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#94A3B8] mb-1">TCS-150 ann. return</div>
+            <div className="text-lg font-semibold text-[#7CC89D]">
               {tcs150Stats ? `+${(tcs150Stats.annualized_return * 100).toFixed(1)}%` : "+9.6%"}
             </div>
           </div>
           <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Selection premium</div>
-            <div className="text-lg font-semibold text-[#6DAE8B]">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#94A3B8] mb-1">Selection premium</div>
+            <div className="text-lg font-semibold text-[#7CC89D]">
               {tcs150Stats && totalMktStats
                 ? `+${((tcs150Stats.annualized_return - totalMktStats.annualized_return) * 100).toFixed(1)}pp`
                 : "+10.5pp"}
             </div>
           </div>
           <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 ann. return</div>
-            <div className="text-lg font-semibold text-[#6DAE8B] blur-sm select-none">+10.5%</div>
-            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#94A3B8] mb-1">Sapphire 50 ann. return</div>
+            <div className="text-lg font-semibold text-[#7CC89D] blur-sm select-none">+10.5%</div>
+            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#94A3B8]">Paid</span></div>
           </div>
           <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 hit rate</div>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#94A3B8] mb-1">Sapphire 50 hit rate</div>
             <div className="text-lg font-semibold text-[#B8C3CC] blur-sm select-none">61.2%</div>
-            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span></div>
+            <div className="absolute inset-0 flex items-center justify-center"><span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#94A3B8]">Paid</span></div>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex h-[280px] items-center justify-center text-[#7E8A96]">Loading index data...</div>
+          <div className="flex h-[280px] items-center justify-center text-[#94A3B8]">Loading index data...</div>
         ) : (
           <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "36%" }}>
             <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
@@ -505,7 +511,7 @@ function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; 
               {tcsPath && <path d={tcsPath} fill="none" stroke="#378ADD" strokeWidth="2" />}
               {/* X-axis labels */}
               {xLabels.map(({ x, label }) => (
-                <text key={label} x={x} y={H - 6} textAnchor="middle" fill="#7E8A96" fontSize="9">{label}</text>
+                <text key={label} x={x} y={H - 6} textAnchor="middle" fill="#94A3B8" fontSize="9">{label}</text>
               ))}
             </svg>
 
@@ -514,7 +520,7 @@ function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; 
               <div className="rounded-2xl border border-[#203754] bg-[#0A1F3D]/95 px-4 py-3 space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="h-0 w-5 border-t-2 border-dashed" style={{ borderColor: "#47566B" }} />
-                  <span className="text-[10px] text-[#7E8A96]">TCS Total Market Index</span>
+                  <span className="text-[10px] text-[#94A3B8]">TCS Total Market Index</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-0.5 w-5 rounded-full" style={{ backgroundColor: "#378ADD" }} />
@@ -522,14 +528,14 @@ function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; 
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-0.5 w-5 rounded-full" style={{ backgroundColor: "#1D9E75" }} />
-                  <span className="text-[10px] text-[#6DAE8B]">TCS Sapphire 50 — Paid</span>
+                  <span className="text-[10px] text-[#7CC89D]">TCS Sapphire 50 — Paid</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <p className="mt-3 text-[11px] leading-5 text-[#7E8A96]">
+        <p className="mt-3 text-[11px] leading-5 text-[#94A3B8]">
           TCS Total Market Index: equal-weighted median return of all interest-bearing companies with valid structural scores — no selection filter applied. Includes all OAL levels. TCS-150 and Sapphire 50 are drawn from the same eligible population. Historical rules-based simulation. Does not account for transaction costs or liquidity. Not investment advice.
         </p>
       </CardContent>
@@ -548,7 +554,7 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
   const { bottom, middle, top } = data.summary;
   const series = data.formation_series;
   const GREEN = "#3B6D11"; const GRAY = "#47566B"; const RED = "#8B3838";
-  const GREEN2 = "#6DAE8B"; const RED2 = "#BC6464";
+  const GREEN2 = "#7CC89D"; const RED2 = "#D67C7C";
   const zones = [{ label: "Low risk", color: GREEN, stats: bottom }, { label: "Moderate", color: GRAY, stats: middle }, { label: "High risk", color: RED, stats: top }];
   const spreadSeries = series.filter(d => d.structural_spread != null);
   const SW = 700; const SH = 120; const SP = 20;
@@ -578,12 +584,12 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
             <div key={label} className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
               <div className="text-[10px] uppercase tracking-[0.16em] mb-1" style={{ color }}>{label}</div>
               <div className="text-xl font-semibold mb-0.5" style={{ color: stats.median_12m_return >= 0 ? GREEN2 : RED2 }}>{stats.median_12m_return >= 0 ? "+" : ""}{(stats.median_12m_return * 100).toFixed(2)}%</div>
-              <div className="text-[11px] text-[#7E8A96]">{(stats.hit_rate * 100).toFixed(1)}% hit rate</div>
+              <div className="text-[11px] text-[#94A3B8]">{(stats.hit_rate * 100).toFixed(1)}% hit rate</div>
             </div>
           ))}
         </div>
         <div>
-          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Hit rate — share of formation windows with positive 12-month returns</div>
+          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Hit rate — share of formation windows with positive 12-month returns</div>
           <div className="space-y-3">
             {zones.map(({ label, color, stats }) => (
               <div key={label}>
@@ -592,10 +598,10 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-[#7E8A96]">High structural risk companies produce negative 12-month returns in 8 of 10 formation windows.</p>
+          <p className="mt-2 text-[11px] text-[#94A3B8]">High structural risk companies produce negative 12-month returns in 8 of 10 formation windows.</p>
         </div>
         <div>
-          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Return distribution — P10 / P25 / median / P75 / P90 across formation windows</div>
+          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Return distribution — P10 / P25 / median / P75 / P90 across formation windows</div>
           <div className="space-y-4">
             {zones.map(({ label, color, stats }) => {
               const { p10, p25, p50, p75, p90 } = stats.percentiles;
@@ -603,7 +609,7 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
               const toX = (v: number) => Math.max(0, Math.min(100, ((v - SMIN) / (SMAX - SMIN)) * 100));
               return (
                 <div key={label}>
-                  <div className="mb-1.5 flex items-center justify-between text-xs"><span style={{ color }}>{label}</span><span className="text-[11px] text-[#7E8A96]">P10: {(p10 * 100).toFixed(0)}% · median: {p50 >= 0 ? "+" : ""}{(p50 * 100).toFixed(1)}% · P90: +{(p90 * 100).toFixed(0)}%</span></div>
+                  <div className="mb-1.5 flex items-center justify-between text-xs"><span style={{ color }}>{label}</span><span className="text-[11px] text-[#94A3B8]">P10: {(p10 * 100).toFixed(0)}% · median: {p50 >= 0 ? "+" : ""}{(p50 * 100).toFixed(1)}% · P90: +{(p90 * 100).toFixed(0)}%</span></div>
                   <div className="relative h-5 w-full rounded-xl bg-[#0D2138] overflow-hidden">
                     <div className="absolute top-0 h-full rounded-xl" style={{ left: `${toX(p10)}%`, width: `${toX(p90) - toX(p10)}%`, backgroundColor: color, opacity: 0.18 }} />
                     <div className="absolute top-0 h-full" style={{ left: `${toX(p25)}%`, width: `${toX(p75) - toX(p25)}%`, backgroundColor: color, opacity: 0.45 }} />
@@ -613,7 +619,7 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
                 </div>
               );
             })}
-            <div className="flex items-center gap-4 text-[10px] text-[#7E8A96]">
+            <div className="flex items-center gap-4 text-[10px] text-[#94A3B8]">
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#47566B] opacity-45" />P25–P75</span>
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#47566B] opacity-18" />P10–P90</span>
               <span className="flex items-center gap-1.5"><span className="h-2 w-0.5 bg-[#41506A]" />Zero</span>
@@ -622,18 +628,18 @@ function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; lo
         </div>
         {spreadSeries.length > 0 && (
           <div>
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">Structural spread over time — low minus high risk median return per formation month</div>
+            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#94A3B8]">Structural spread over time — low minus high risk median return per formation month</div>
             <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "17%" }}>
               <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${SW} ${SH}`} preserveAspectRatio="none">
                 <line x1={SP} y1={zeroY} x2={SW - SP} y2={zeroY} stroke="#41506A" strokeWidth="0.75" strokeDasharray="4 3" />
                 {spreadPath && <><path d={`${spreadPath} L ${SW - SP} ${zeroY} L ${SP} ${zeroY} Z`} fill="#185FA5" fillOpacity="0.12" /><path d={spreadPath} fill="none" stroke="#378ADD" strokeWidth="1.5" /></>}
-                {spreadLabels.map(({ x, label }) => <text key={label} x={x} y={SH - 4} textAnchor="middle" fill="#7E8A96" fontSize="8">{label}</text>)}
+                {spreadLabels.map(({ x, label }) => <text key={label} x={x} y={SH - 4} textAnchor="middle" fill="#94A3B8" fontSize="8">{label}</text>)}
               </svg>
             </div>
-            <p className="mt-2 text-[11px] text-[#7E8A96]">Signal was strongest post-2022. Compressed during COVID-era disruption (2020–2021) when financing stress was suppressed by monetary policy.</p>
+            <p className="mt-2 text-[11px] text-[#94A3B8]">Signal was strongest post-2022. Compressed during COVID-era disruption (2020–2021) when financing stress was suppressed by monetary policy.</p>
           </div>
         )}
-        <p className="text-[11px] leading-5 text-[#7E8A96]">Historical distributional analysis. Each formation window is an independent 12-month observation. Does not predict individual company returns. Interest-bearing universe only. Not investment advice.</p>
+        <p className="text-[11px] leading-5 text-[#94A3B8]">Historical distributional analysis. Each formation window is an independent 12-month observation. Does not predict individual company returns. Interest-bearing universe only. Not investment advice.</p>
       </CardContent>
     </Card>
   );
@@ -697,8 +703,8 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
   const distribution = useMemo(() => interpretDistribution(data), [data]);
   const concentration = useMemo(() => interpretConcentration(data), [data]);
   const trajectory = useMemo(() => interpretTrajectory(data, distribution.tone), [data, distribution.tone]);
-  const toneColor = { elevated: "#BC6464", moderate: "#B8C3CC", subdued: "#6DAE8B" };
-  const directionColor = { deteriorating: "#BC6464", improving: "#6DAE8B", mixed: "#B8C3CC" };
+  const toneColor = { elevated: "#D67C7C", moderate: "#B8C3CC", subdued: "#7CC89D" };
+  const directionColor = { deteriorating: "#D67C7C", improving: "#7CC89D", mixed: "#B8C3CC" };
 
   if (loading) return (
     <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
@@ -709,11 +715,14 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
   return (
     <Card className="rounded-3xl shadow-xl shadow-black/40" style={{ borderLeft: "2px solid #3E8E6A", border: "1px solid #2E4D6A", background: "#061425", boxShadow: "0 0 0 1px rgba(62,142,106,0.15), 0 20px 40px rgba(0,0,0,0.4)" }}>
       <CardHeader className="pb-2">
+        <div className="mb-4 rounded-xl border border-[#2E4D6A] bg-[#0A1F3D] px-4 py-3">
+          <p className="text-[12px] leading-[1.7] text-[#B8C3CC]">OSMR applies first-principle structural reasoning to equity analysis. It tests the hypothesis that companies grounded in operational reality outperform those whose valuations rest on narrative. Multiple years of data confirm this. The framework is now a validated theory of structural fragility.</p>
+        </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="text-white">Current Market Interpretation</CardTitle>
             <CardDescription className="mt-1 text-[#B8C3CC]">The system's current read of market structure under the active filters. These describe current structural conditions. They do not forecast outcomes.</CardDescription>
-            <p className="mt-2 text-[12px] font-medium text-[#6DAE8B]">Start here. This is the system's current read before you inspect the map or any company.</p>
+            <p className="mt-2 text-[12px] font-medium text-[#7CC89D]">Start here. This is the system's current read before you inspect the map or any company.</p>
           </div>
 
         </div>
@@ -726,12 +735,12 @@ function InterpretiveLayer({ data, loading }: { data: SnapshotRow[]; loading: bo
         ].map(({ key, label, sublabel, color, headline, body, consequence, delay }: { key: string; label: string; sublabel?: string; color: string; headline: string; body: string; consequence: string; delay: number }) => (
           <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay, ease: "easeOut" }} className="flex flex-col rounded-2xl border border-[#203754] bg-[#0A1F3D] p-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#7E8A96]">{label}</div>
-              {sublabel && <div className="text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ color: sublabel === "System State" ? "#6DAE8B" : "#7E8A96", backgroundColor: sublabel === "System State" ? "#6DAE8B18" : "#41506A30" }}>{sublabel}</div>}
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#94A3B8]">{label}</div>
+              {sublabel && <div className="text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ color: sublabel === "System State" ? "#7CC89D" : "#94A3B8", backgroundColor: sublabel === "System State" ? "#6DAE8B18" : "#41506A30" }}>{sublabel}</div>}
             </div>
             <div className="mb-2 text-sm font-semibold leading-snug" style={{ color }}>{headline}</div>
             <div className="mb-3 text-[13px] leading-[1.7] text-[#B8C3CC]">{body}</div>
-            {consequence && <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#7E8A96]">{consequence}</div>}
+            {consequence && <div className="mt-auto border-t border-[#203754] pt-3 text-[12px] leading-[1.65] text-[#94A3B8]">{consequence}</div>}
           </motion.div>
         ))}
       </CardContent>
@@ -853,19 +862,19 @@ export default function PlatformPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-8 max-w-5xl">
           <div className="mb-5 flex flex-wrap items-center gap-3">
             <Badge className="rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[#B8C3CC] hover:bg-[#0D2138]">OSMR System</Badge>
-            <Badge className="rounded-full border border-[#3E8E6A]/50 bg-[#3E8E6A]/10 px-3 py-1 text-[#6DAE8B] hover:bg-[#3E8E6A]/10">Live System</Badge>
+            <Badge className="rounded-full border border-[#3E8E6A]/50 bg-[#3E8E6A]/10 px-3 py-1 text-[#7CC89D] hover:bg-[#3E8E6A]/10">Live System</Badge>
           </div>
           <h1 className="tcs-heading text-5xl font-semibold leading-tight text-white md:text-6xl">A structural map of the equity market.</h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-[#B8C3CC]">Use this system to identify where structural risk is concentrated, isolate the companies driving it, and see how those conditions have historically resolved.</p>
           <p className="mt-3 max-w-xl text-sm font-medium text-[#EAF0F2]">This is the live analytical surface of the system.</p>
-          <p className="mt-1.5 max-w-xl text-xs text-[#7E8A96]">Higher scores = higher structural fragility. Lower scores = stronger operating support.</p>
-          <div className="mt-5 inline-flex flex-wrap gap-x-6 gap-y-2 rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-3 text-[12px] text-[#7E8A96]">
+          <p className="mt-1.5 max-w-xl text-xs text-[#94A3B8]">Higher scores = higher structural fragility. Lower scores = stronger operating support.</p>
+          <div className="mt-5 inline-flex flex-wrap gap-x-6 gap-y-2 rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-3 text-[12px] text-[#94A3B8]">
             <span className="font-medium text-[#B8C3CC]">How to read this system:</span>
             <span><span className="text-[#EAF0F2]">Anchor Risk</span> = valuation vs real operating support</span>
             <span><span className="text-[#EAF0F2]">Trajectory Risk</span> = improving vs deteriorating</span>
             <span><span className="text-[#EAF0F2]">Financing Risk</span> = balance sheet pressure</span>
           </div>
-          <p className="mt-4 max-w-3xl text-sm text-[#7E8A96]">The market map shows current positioning. The snapshot shows individual companies. The cohort grids show how similar structural states have historically performed.</p>
+          <p className="mt-4 max-w-3xl text-sm text-[#94A3B8]">The market map shows current positioning. The snapshot shows individual companies. The cohort grids show how similar structural states have historically performed.</p>
         </motion.div>
 
         <TemporalAnchorBar historyManifest={historyManifest} loading={loading} />
@@ -894,14 +903,14 @@ export default function PlatformPage() {
               <div>
                 <div className="mb-2 flex items-center gap-2"><Filter className="h-4 w-4 text-[#B8C3CC]" /><CardTitle className="text-white">Global Filters</CardTitle></div>
                 <CardDescription className="text-[#B8C3CC]">Filters redefine the universe being analyzed. All outputs below — the map, cohort grids, snapshot, and supporting views — update accordingly.</CardDescription>
-                <div className="mt-3 text-sm text-[#7E8A96]">OAL = Operational Anchor Ladder — groups companies by the depth of their demonstrated operating support.</div>
+                <div className="mt-3 text-sm text-[#94A3B8]">OAL = Operational Anchor Ladder — groups companies by the depth of their demonstrated operating support.</div>
               </div>
               <Button variant="outline" onClick={clearFilters} className="rounded-2xl border-[#203754] bg-transparent text-[#B8C3CC] hover:bg-[#0D2138] hover:text-white">Clear Filters</Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-[#7E8A96]" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ticker" className="rounded-2xl border-[#203754] bg-[#0D2138] pl-9 text-white placeholder:text-[#7E8A96]" /></div>
+              <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-[#94A3B8]" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ticker" className="rounded-2xl border-[#203754] bg-[#0D2138] pl-9 text-white placeholder:text-[#94A3B8]" /></div>
               <Select value={selectedOAL} onValueChange={setSelectedOAL}><SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white"><SelectValue placeholder="OAL" /></SelectTrigger><SelectContent className="border-[#203754] bg-[#0D2138] text-white"><SelectItem value="All">All OALs</SelectItem>{oalOrder.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent></Select>
               <Select value={selectedBucket} onValueChange={setSelectedBucket}><SelectTrigger className="rounded-2xl border-[#203754] bg-[#0D2138] text-white"><SelectValue placeholder="Composite Bucket" /></SelectTrigger><SelectContent className="border-[#203754] bg-[#0D2138] text-white"><SelectItem value="All">All Composite Buckets</SelectItem>{bucketOrder.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
             </div>
@@ -910,10 +919,10 @@ export default function PlatformPage() {
 
         {/* KPI Strip */}
         <div className="mb-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Structural Stress</CardDescription><CardTitle className="text-4xl text-white">{loading ? "…" : formatNum(stats.veryHigh)}</CardTitle></CardHeader><CardContent className="text-sm text-[#7E8A96]">Companies in the Very High composite bucket under active filters.<KPIDelta current={stats.veryHigh} previous={null} higherIsBad={true} /></CardContent></Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Financing Stress (Top Quintile)</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.fragile)}</CardTitle></CardHeader><CardContent className="text-sm text-[#7E8A96]">Companies with Axis 3 at or above the 80th percentile — high obligation strain.<KPIDelta current={stats.fragile} previous={null} higherIsBad={true} /></CardContent></Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Active Universe</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.total)}</CardTitle></CardHeader><CardContent className="text-sm text-[#7E8A96]">Companies currently scored under active filters.<KPIDelta current={stats.total} previous={null} higherIsBad={false} /></CardContent></Card>
-          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Average Risk Level</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatPct(stats.avgComposite)}</CardTitle></CardHeader><CardContent className="text-sm text-[#7E8A96]">Mean composite structural risk score across the filtered universe.<KPIDelta current={stats.avgComposite} previous={null} higherIsBad={true} isDecimal={true} /></CardContent></Card>
+          <Card className="rounded-3xl bg-[#112A47] shadow-xl shadow-black/20" style={{ border: "1.5px solid rgba(62,142,106,0.55)" }}><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Structural Stress</CardDescription><CardTitle className="text-4xl text-white">{loading ? "…" : formatNum(stats.veryHigh)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies in the Very High composite bucket under active filters.<KPIDelta current={stats.veryHigh} previous={null} higherIsBad={true} /></CardContent></Card>
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Financing Stress (Top Quintile)</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.fragile)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies with Axis 3 at or above the 80th percentile — high obligation strain.<KPIDelta current={stats.fragile} previous={null} higherIsBad={true} /></CardContent></Card>
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Active Universe</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatNum(stats.total)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Companies currently scored under active filters.<KPIDelta current={stats.total} previous={null} higherIsBad={false} /></CardContent></Card>
+          <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20"><CardHeader className="pb-2"><CardDescription className="text-[#B8C3CC]">Average Risk Level</CardDescription><CardTitle className="text-3xl text-white">{loading ? "…" : formatPct(stats.avgComposite)}</CardTitle></CardHeader><CardContent className="text-sm text-[#94A3B8]">Mean composite structural risk score across the filtered universe.<KPIDelta current={stats.avgComposite} previous={null} higherIsBad={true} isDecimal={true} /></CardContent></Card>
         </div>
 
         {/* Tabs */}
@@ -923,12 +932,12 @@ export default function PlatformPage() {
               <TabsTrigger key={value} value={value} className="rounded-none border-b-2 border-transparent px-4 py-3 text-[#B8C3CC] data-[state=active]:border-[#41506A] data-[state=active]:bg-[#0D2138] data-[state=active]:text-white">{label}</TabsTrigger>
             ))}
           </TabsList>
-          <p className="text-[11px] text-[#7E8A96]">Every tab reflects the same structural model through a different analytical lens.</p>
+          <p className="text-[11px] text-[#94A3B8]">Every tab reflects the same structural model through a different analytical lens.</p>
 
           {/* ── Market Map Tab ── */}
           <TabsContent value="market-map" className="space-y-8">
             <div className="mb-16 mt-2"><InterpretiveLayer data={filtered} loading={loading} /></div>
-            <div className="border-t border-[#203754] pt-6"><p className="mb-5 text-sm text-[#7E8A96]">The map below shows the structural positioning behind this interpretation.</p></div>
+            <div className="border-t border-[#203754] pt-6"><p className="mb-5 text-sm text-[#94A3B8]">The map below shows the structural positioning behind this interpretation.</p></div>
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-3"><Layers3 className="h-5 w-5 text-[#B8C3CC]" /><h2 className="text-xl font-semibold text-white">Current State of the Market</h2></div>
               <div className="max-w-4xl text-sm leading-7 text-[#B8C3CC]">The market map shows where risk is concentrated, how companies are positioned across the two primary axes, and where stress is clustering under the active filters.</div>
@@ -942,14 +951,14 @@ export default function PlatformPage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-1 text-[13px] text-[#B8C3CC]">Each point is a company. Top-right = most fragile: maximum valuation stretch, worst trajectory. Scroll to move through financing risk depth panels.</p>
-                <p className="mb-4 text-[12px] font-medium" style={{ color: "#BC6464" }}>Front panel (decile 1) = highest financing strain. Scroll down to move deeper — toward lower financing risk.</p>
+                <p className="mb-4 text-[12px] font-medium" style={{ color: "#D67C7C" }}>Front panel (decile 1) = highest financing strain. Scroll down to move deeper — toward lower financing risk.</p>
                 <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#B8C3CC]">
-                  <span className="text-[#7E8A96]">Composite Risk (color):</span>
+                  <span className="text-[#94A3B8]">Composite Risk (color):</span>
                   {["Very Low","Low","Moderate","High","Very High"].map(b => <span key={b} className="inline-flex items-center gap-1 text-[11px]"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: compositeColor(b) }} />{b}</span>)}
-                  <span className="text-[#7E8A96] ml-2">Dot size = depth proximity to active panel</span>
+                  <span className="text-[#94A3B8] ml-2">Dot size = depth proximity to active panel</span>
                 </div>
                 {loading ? (
-                  <div className="flex h-[600px] items-center justify-center text-[#7E8A96]">Loading current snapshot...</div>
+                  <div className="flex h-[600px] items-center justify-center text-[#94A3B8]">Loading current snapshot...</div>
                 ) : (
                   <div className="flex gap-4">
                     <div ref={mapChartRef} className="relative flex-1" style={{ height: 580, cursor: "default" }}
@@ -968,10 +977,10 @@ export default function PlatformPage() {
                       }}
                     >
                       <div className="pointer-events-none absolute inset-0 z-10">
-                        <div className="absolute left-[48px] top-[4px] text-[9px] text-[#7E8A96]">Improving · High anchor</div>
-                        <div className="absolute right-[8px] top-[4px] text-right text-[9px] font-medium" style={{ color: "#BC6464" }}>Most fragile zone ↗</div>
-                        <div className="absolute bottom-[28px] left-[48px] text-[9px] text-[#6DAE8B]">Improving · Supported</div>
-                        <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#7E8A96]">Deteriorating · Supported</div>
+                        <div className="absolute left-[48px] top-[4px] text-[9px] text-[#94A3B8]">Improving · High anchor</div>
+                        <div className="absolute right-[8px] top-[4px] text-right text-[9px] font-medium" style={{ color: "#D67C7C" }}>Most fragile zone ↗</div>
+                        <div className="absolute bottom-[28px] left-[48px] text-[9px] text-[#7CC89D]">Improving · Supported</div>
+                        <div className="absolute bottom-[28px] right-[8px] text-right text-[9px] text-[#94A3B8]">Deteriorating · Supported</div>
                       </div>
                       <div className="pointer-events-none absolute left-[52px] top-[24px] z-20">
                         <div className="rounded-lg border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium backdrop-blur-sm" style={{ color: "#B8C3CC" }}>
@@ -999,7 +1008,8 @@ export default function PlatformPage() {
                                     <span style={{ color: COLORS.textMuted }}>Financing Decile: <span className="text-[#EAF0F2]">{d.axis3_decile} of 10</span></span>
                                     <span className="mt-1" style={{ color: compositeColor(d.composite_bucket) }}>Composite: {d.composite_bucket}</span>
                                   </div>
-                                  <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#7E8A96]">{dist === 0 ? "Click to open company detail." : "Click to jump to this depth panel."}</div>
+                                  <div className="mt-2 border-t border-[#203754] pt-1.5 text-[10px] text-[#94A3B8]">{dist === 0 ? "Click to open company detail." : "Click to jump to this depth panel."}</div>
+                                  <div className="mt-1 text-[9px] text-[#47566B]">Position reflects structural metrics. Historical return separation validates this positioning.</div>
                                 </div>
                               );
                             }} />
@@ -1061,8 +1071,8 @@ export default function PlatformPage() {
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[#BC6464]" /><CardTitle className="text-base text-white">Active Risk Cluster</CardTitle></div>
-                  <span className="text-xs text-[#7E8A96]">Top {topRisk.length} by composite score</span>
+                  <div className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[#D67C7C]" /><CardTitle className="text-base text-white">Active Risk Cluster</CardTitle></div>
+                  <span className="text-xs text-[#94A3B8]">Top {topRisk.length} by composite score</span>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1073,12 +1083,12 @@ export default function PlatformPage() {
                     return (
                       <div key={row.symbol} onClick={() => setSelectedCompany(row)} className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all duration-150 hover:opacity-90 hover:scale-[1.02]" style={{ background: isVeryHigh ? "rgba(139,56,56,0.15)" : "#0D2138", border: isVeryHigh ? "1px solid rgba(188,100,100,0.4)" : "1px solid #203754" }} title={`${row.symbol} · ${row.oal_label} · ${row.composite_bucket}`}>
                         <span className="font-mono text-sm font-semibold text-white">{row.symbol}</span>
-                        <span className="text-xs" style={{ color: isVeryHigh ? "#BC6464" : COLORS.textMuted }}>{row.composite_bucket}</span>
+                        <span className="text-xs" style={{ color: isVeryHigh ? "#D67C7C" : COLORS.textMuted }}>{row.composite_bucket}</span>
                       </div>
                     );
                   })}
                 </div>
-                <p className="mt-3 text-[11px] text-[#7E8A96]">Hover for OAL and bucket detail. Click any company to open company detail.</p>
+                <p className="mt-3 text-[11px] text-[#94A3B8]">Hover for OAL and bucket detail. Click any company to open company detail.</p>
               </CardContent>
             </Card>
 
@@ -1087,26 +1097,29 @@ export default function PlatformPage() {
 
             {/* Historical Cohort Outcomes */}
             <div className="mt-6 space-y-4">
-              <div className="flex flex-wrap items-center gap-3"><Grid3X3 className="h-5 w-5 text-[#B8C3CC]" /><h2 className="text-xl font-semibold text-white">Historical Cohort Outcomes</h2>{cohortGrid?.metadata && <Badge variant="outline" className="border-[#203754] text-[#7E8A96]">{cohortGrid.metadata.horizon_months}M Forward</Badge>}</div>
-              {cohortGrid?.metadata && <p className="text-[11px] text-[#7E8A96]">{formatNum(cohortGrid.metadata.observation_count)} observations{cohortGrid.metadata.formation_month_min && cohortGrid.metadata.formation_month_max && <> · Formation window: {cohortGrid.metadata.formation_month_min} – {cohortGrid.metadata.formation_month_max}</>} · Updated monthly</p>}
-              <div className="max-w-3xl space-y-1"><p className="text-sm leading-6 text-[#B8C3CC]">This shows how companies in similar structural states have historically performed over the forward period.</p><p className="text-sm text-[#7E8A96]">Start by scanning the bottom-right of each panel — where anchor risk and trajectory risk are both highest.</p></div>
-              <p className="text-[11px] text-[#7E8A96]">Historical cohort outcomes describe distributional tendencies across structural profiles. They do not establish causation, predict individual company returns, or account for conditions outside the formation window.</p>
+              <div className="rounded-xl border border-[#854F0B]/40 bg-[#412402]/20 px-4 py-3 text-[12px] leading-[1.65] text-[#EF9F27]">
+                <span className="font-semibold">Dataset boundary:</span> This cohort grid includes interest-bearing companies only — approximately 84% of the scored universe. The remaining ~16% carry no debt obligations. Their structural risk is undefined by this framework, not low. They are excluded from cohort analysis.
+              </div>
+              <div className="flex flex-wrap items-center gap-3"><Grid3X3 className="h-5 w-5 text-[#B8C3CC]" /><h2 className="text-xl font-semibold text-white">Historical Cohort Outcomes</h2>{cohortGrid?.metadata && <Badge variant="outline" className="border-[#203754] text-[#94A3B8]">{cohortGrid.metadata.horizon_months}M Forward</Badge>}</div>
+              {cohortGrid?.metadata && <p className="text-[11px] text-[#94A3B8]">{formatNum(cohortGrid.metadata.observation_count)} observations{cohortGrid.metadata.formation_month_min && cohortGrid.metadata.formation_month_max && <> · Formation window: {cohortGrid.metadata.formation_month_min} – {cohortGrid.metadata.formation_month_max}</>} · Updated monthly</p>}
+              <div className="max-w-3xl space-y-1"><p className="text-sm leading-6 text-[#B8C3CC]">This shows how companies in similar structural states have historically performed over the forward period.</p><p className="text-sm text-[#94A3B8]">Start by scanning the bottom-right of each panel — where anchor risk and trajectory risk are both highest.</p></div>
+              <p className="text-[11px] text-[#94A3B8]">Historical cohort outcomes describe distributional tendencies across structural profiles. They do not establish causation, predict individual company returns, or account for conditions outside the formation window.</p>
             </div>
 
             <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-4">
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#7E8A96]">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#94A3B8]">
                 <span className="font-medium text-[#B8C3CC]">How to read this:</span>
                 <span><span className="text-[#EAF0F2]">Columns</span> = Anchor Risk — Very Low → Very High</span>
                 <span><span className="text-[#EAF0F2]">Rows</span> = Trajectory Risk — Very Low → Very High</span>
                 <span><span className="text-[#EAF0F2]">Panels</span> = Financing Risk</span>
                 <span><span className="text-[#EAF0F2]">Outlined cells</span> = strongest outcome zones (|return| &gt; 15%)</span>
               </div>
-              <div className="mt-2 text-[11px] text-[#7E8A96]">Focus on the bottom-right of each panel — where high anchor risk meets deteriorating trajectory.</div>
+              <div className="mt-2 text-[11px] text-[#94A3B8]">Focus on the bottom-right of each panel — where high anchor risk meets deteriorating trajectory.</div>
             </div>
 
             <div className="space-y-3">
-              <div className="space-y-1"><div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div><div className="text-xs text-[#7E8A96]">Median is the default — it reflects the typical outcome more honestly than the mean.</div></div>
-              {cohortMetric === "mean_return" && <div className="text-xs text-[#7E8A96]">Mean returns are sensitive to outliers. Cells marked ▲ or ▼ have median returns that differ materially — hover for context.</div>}
+              <div className="space-y-1"><div className="text-sm text-[#B8C3CC]">Choose how cohort performance is measured.</div><div className="text-xs text-[#94A3B8]">Median is the default — it reflects the typical outcome more honestly than the mean.</div></div>
+              {cohortMetric === "mean_return" && <div className="text-xs text-[#94A3B8]">Mean returns are sensitive to outliers. Cells marked ▲ or ▼ have median returns that differ materially — hover for context.</div>}
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
                   {[["mean_return","Mean"],["median_return","Median"],["hit_rate","Hit Rate"]].map(([value, label]) => {
@@ -1132,14 +1145,14 @@ export default function PlatformPage() {
                       {AXIS3_ORDER.map((b, i) => {
                         const activeIdx = AXIS3_ORDER.indexOf(selectedAxis3 as typeof AXIS3_ORDER[number]);
                         const dist = Math.abs(i - activeIdx);
-                        return <div key={b} className="h-[3px] w-5 rounded-full transition-all duration-300" style={{ backgroundColor: "#6DAE8B", opacity: dist === 0 ? 1 : dist === 1 ? 0.45 : 0.2, transform: dist === 0 ? "scaleX(1)" : `scaleX(${1 - dist * 0.15})`, transformOrigin: "left" }} />;
+                        return <div key={b} className="h-[3px] w-5 rounded-full transition-all duration-300" style={{ backgroundColor: "#7CC89D", opacity: dist === 0 ? 1 : dist === 1 ? 0.45 : 0.2, transform: dist === 0 ? "scaleX(1)" : `scaleX(${1 - dist * 0.15})`, transformOrigin: "left" }} />;
                       })}
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] text-[#7E8A96] mr-1">Financing Risk:</span>
+                      <span className="text-[11px] text-[#94A3B8] mr-1">Financing Risk:</span>
                       {AXIS3_ORDER.map(bucket => {
                         const active = selectedAxis3 === bucket;
-                        return <button key={bucket} onClick={() => handleSelectAxis3(bucket)} className="rounded-xl border px-3 py-1.5 text-[12px] font-medium transition-all duration-200" style={{ borderColor: active ? compositeColor(bucket) : "#203754", backgroundColor: active ? `${compositeColor(bucket)}18` : "#0D2138", color: active ? compositeColor(bucket) : "#7E8A96" }}>{bucket}</button>;
+                        return <button key={bucket} onClick={() => handleSelectAxis3(bucket)} className="rounded-xl border px-3 py-1.5 text-[12px] font-medium transition-all duration-200" style={{ borderColor: active ? compositeColor(bucket) : "#203754", backgroundColor: active ? `${compositeColor(bucket)}18` : "#0D2138", color: active ? compositeColor(bucket) : "#94A3B8" }}>{bucket}</button>;
                       })}
                     </div>
                   </div>
@@ -1154,16 +1167,16 @@ export default function PlatformPage() {
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <div><CardTitle className="text-white">Financing Risk — {activePanel.panel}</CardTitle><CardDescription className="text-[#B8C3CC]">{cohortMetricLabel(cohortMetric)} over forward {cohortGrid.metadata.horizon_months}M. Cells outlined in white have |return| &gt; 15%.</CardDescription></div>
-                                <div className="text-right shrink-0"><div className="text-[10px] text-[#7E8A96] uppercase tracking-[0.15em]">Depth</div><div className="text-sm font-semibold" style={{ color: compositeColor(selectedAxis3) }}>{AXIS3_ORDER.indexOf(selectedAxis3 as typeof AXIS3_ORDER[number]) + 1} of {AXIS3_ORDER.length}</div></div>
+                                <div className="text-right shrink-0"><div className="text-[10px] text-[#94A3B8] uppercase tracking-[0.15em]">Depth</div><div className="text-sm font-semibold" style={{ color: compositeColor(selectedAxis3) }}>{AXIS3_ORDER.indexOf(selectedAxis3 as typeof AXIS3_ORDER[number]) + 1} of {AXIS3_ORDER.length}</div></div>
                               </div>
                             </CardHeader>
                             <CardContent>
                               <div className="grid grid-cols-[90px_repeat(5,minmax(0,1fr))] gap-2 text-xs">
-                                <div><div className="text-[9px] text-[#7E8A96]">Trajectory ↓</div><div className="text-[9px] text-[#7E8A96]">Anchor →</div></div>
-                                {cohortGrid.metadata.x_axis_labels.map(c => <div key={c} className="text-center"><div className="text-[10px] text-[#7E8A96]">{c}</div></div>)}
+                                <div><div className="text-[9px] text-[#94A3B8]">Trajectory ↓</div><div className="text-[9px] text-[#94A3B8]">Anchor →</div></div>
+                                {cohortGrid.metadata.x_axis_labels.map(c => <div key={c} className="text-center"><div className="text-[10px] text-[#94A3B8]">{c}</div></div>)}
                                 {activePanel.rows.map(row => (
                                   <React.Fragment key={`${activePanel.panel}-${row.axis2_bucket}`}>
-                                    <div className="flex items-center text-[10px] text-[#7E8A96]" style={{ minWidth: 90 }}>{row.axis2_bucket}</div>
+                                    <div className="flex items-center text-[10px] text-[#94A3B8]" style={{ minWidth: 90 }}>{row.axis2_bucket}</div>
                                     {row.cells.map(cell => {
                                       const visibleValue = getCohortMetricValue(cell, cohortMetric);
                                       const colorValue = cohortMetric === "hit_rate" ? ((visibleValue ?? 0) - 0.5) * 2 : visibleValue;
@@ -1199,10 +1212,10 @@ export default function PlatformPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between gap-3">
                   <div><CardTitle className="text-white">Cohort Insight Layer</CardTitle><CardDescription className="mt-1 max-w-2xl text-[#B8C3CC]">Automatically surfaces the strongest return zones, widest mean/median gaps, highest hit-rate concentrations, and most unstable structural configurations across the active cohort surface.</CardDescription></div>
-                  <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#7E8A96]">In Development</Badge>
+                  <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#94A3B8]">In Development</Badge>
                 </div>
               </CardHeader>
-              <CardContent><div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-2.5 text-[12.5px] text-[#7E8A96]">Pattern extraction layer is in development. This will surface 2–4 key structural signals under the active filters rather than requiring manual grid scanning.</div></CardContent>
+              <CardContent><div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-5 py-2.5 text-[12.5px] text-[#94A3B8]">Pattern extraction layer is in development. This will surface 2–4 key structural signals under the active filters rather than requiring manual grid scanning.</div></CardContent>
             </Card>
           </TabsContent>
 
@@ -1211,8 +1224,8 @@ export default function PlatformPage() {
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader><CardTitle className="text-white">Current Snapshot</CardTitle><CardDescription className="text-[#B8C3CC]">Full structural profile for each company under the active filters.</CardDescription></CardHeader>
               <CardContent>
-                <div className="mb-4 space-y-1.5"><p className="text-sm text-[#B8C3CC]">Each row shows a company's full structural profile. Use the global filters to isolate specific risk profiles before scanning individual names.</p><p className="text-sm font-medium text-[#6DAE8B]">Start by filtering to a single OAL or composite bucket before scanning individual names.</p></div>
-                <p className="mb-3 text-[11px] text-[#7E8A96]">"Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Click any row to open company detail.</p>
+                <div className="mb-4 space-y-1.5"><p className="text-sm text-[#B8C3CC]">Each row shows a company's full structural profile. Use the global filters to isolate specific risk profiles before scanning individual names.</p><p className="text-sm font-medium text-[#7CC89D]">Start by filtering to a single OAL or composite bucket before scanning individual names.</p></div>
+                <p className="mb-3 text-[11px] text-[#94A3B8]">"Valuation Bucket" = Axis I within-OAL ranking, not total composite risk. Click any row to open company detail.</p>
                 <div className="overflow-hidden rounded-2xl border border-[#203754]">
                   <Table>
                     <TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">Symbol</TableHead><TableHead className="text-[#B8C3CC]">OAL</TableHead><TableHead className="text-[#B8C3CC]">Anchor Risk</TableHead><TableHead className="text-[#B8C3CC]">Trajectory Risk</TableHead><TableHead className="text-[#B8C3CC]">Financing Risk</TableHead><TableHead className="text-[#B8C3CC]">Composite</TableHead><TableHead className="text-[#B8C3CC]">Valuation Bucket</TableHead></TableRow></TableHeader>
@@ -1224,7 +1237,7 @@ export default function PlatformPage() {
                           <TableCell className="text-[#EAF0F2]">{formatAxisPct(row.axis1_pct)}</TableCell>
                           <TableCell className="text-[#EAF0F2]">{formatAxisPct(row.axis2_pct)}</TableCell>
                           <TableCell className="text-[#EAF0F2]">{row.axis3_pct == null ? "—" : formatAxisPct(row.axis3_pct)}</TableCell>
-                          <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="border-[#203754] text-[#B8C3CC]" style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}>{row.composite_bucket}</Badge><span className="text-xs text-[#7E8A96]">{formatRiskPct(row.composite_score)}</span></div></TableCell>
+                          <TableCell><div className="flex items-center gap-2"><Badge variant="outline" className="border-[#203754] text-[#B8C3CC]" style={{ backgroundColor: `${compositeColor(row.composite_bucket)}22` }}>{row.composite_bucket}</Badge><span className="text-xs text-[#94A3B8]">{formatRiskPct(row.composite_score)}</span></div></TableCell>
                           <TableCell className="text-[#EAF0F2]">{row.risk_bucket_within_oal ?? "—"}</TableCell>
                         </TableRow>
                       ))}
@@ -1242,14 +1255,14 @@ export default function PlatformPage() {
                 <CardHeader><div className="flex items-center gap-2"><Shield className="h-5 w-5 text-[#B8C3CC]" /><CardTitle className="text-white">Operational Anchor Structure</CardTitle></div><CardDescription className="text-[#B8C3CC]">Operational Anchor Ladder distribution across the filtered snapshot.</CardDescription></CardHeader>
                 <CardContent>
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">This shows how the current universe is distributed across levels of demonstrated operating support — from FCF-anchored companies at the deepest end to revenue-only and unanchored companies at the shallowest.</p>
-                  <p className="mb-5 text-sm text-[#7E8A96]">Use this tab when you want to understand whether the current market state is being driven by deeper or shallower operating support.</p>
+                  <p className="mb-5 text-sm text-[#94A3B8]">Use this tab when you want to understand whether the current market state is being driven by deeper or shallower operating support.</p>
                   <div className="border-t border-[#203754] pt-4"><div className="h-[320px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={oalSummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}><CartesianGrid stroke={COLORS.border} vertical={false} /><XAxis dataKey="oal_label" tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><YAxis tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><Tooltip contentStyle={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, borderRadius: 16, color: COLORS.text }} /><Bar dataKey="n" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} /></BarChart></ResponsiveContainer></div></div>
                 </CardContent>
               </Card>
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
                 <CardHeader><CardTitle className="text-white">Operational Anchor Summary</CardTitle><CardDescription className="text-[#B8C3CC]">Median axis scores by anchor level — showing how structural risk varies across the OAL.</CardDescription></CardHeader>
                 <CardContent>
-                  <p className="mb-4 text-sm text-[#7E8A96]">Compare median anchor, financing, and composite scores across OAL levels to see where structural pressure is deepest.</p>
+                  <p className="mb-4 text-sm text-[#94A3B8]">Compare median anchor, financing, and composite scores across OAL levels to see where structural pressure is deepest.</p>
                   <div className="overflow-hidden rounded-2xl border border-[#203754]"><Table><TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">OAL</TableHead><TableHead className="text-[#B8C3CC]">Count</TableHead><TableHead className="text-[#B8C3CC]">Median Anchor Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Financing Risk</TableHead><TableHead className="text-[#B8C3CC]">Median Composite</TableHead></TableRow></TableHeader><TableBody>{oalSummary.map(row => (<TableRow key={row.oal_label} className="border-[#203754]"><TableCell className="font-medium text-white">{row.oal_label}</TableCell><TableCell className="text-[#EAF0F2]">{formatNum(row.n)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis1 == null ? "—" : formatAxisPct(row.median_axis1)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_axis3 == null ? "—" : formatAxisPct(row.median_axis3)}</TableCell><TableCell className="text-[#EAF0F2]">{row.median_composite == null ? "—" : formatRiskPct(row.median_composite)}</TableCell></TableRow>))}</TableBody></Table></div>
                 </CardContent>
               </Card>
@@ -1263,7 +1276,7 @@ export default function PlatformPage() {
                 <CardHeader><div className="flex items-center gap-2"><Activity className="h-5 w-5 text-[#B8C3CC]" /><CardTitle className="text-white">Financing Context</CardTitle></div><CardDescription className="text-[#B8C3CC]">Balance sheet flexibility and financing strain across the current filtered universe.</CardDescription></CardHeader>
                 <CardContent>
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">This shows how balance sheet flexibility is distributed across the current universe — context for how much financial runway companies have to allow their structural narrative to play out.</p>
-                  <p className="mb-5 text-sm text-[#7E8A96]">Use this tab when financing strain may be the limiting factor on whether current narratives can continue.</p>
+                  <p className="mb-5 text-sm text-[#94A3B8]">Use this tab when financing strain may be the limiting factor on whether current narratives can continue.</p>
                   <div className="h-[320px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={liquiditySummary} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}><CartesianGrid stroke={COLORS.border} vertical={false} /><XAxis dataKey="bucket" tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><YAxis tick={{ fill: COLORS.textSecondary, fontSize: 12 }} axisLine={{ stroke: COLORS.border }} tickLine={{ stroke: COLORS.border }} /><Tooltip contentStyle={{ backgroundColor: COLORS.inset, border: `1px solid ${COLORS.border}`, borderRadius: 16, color: COLORS.text }} /><Bar dataKey="count" radius={[12, 12, 0, 0]} fill={COLORS.positiveSoft} /></BarChart></ResponsiveContainer></div>
                 </CardContent>
               </Card>
@@ -1286,12 +1299,12 @@ export default function PlatformPage() {
                 <CardHeader><div className="flex items-center gap-2"><Clock3 className="h-5 w-5 text-[#B8C3CC]" /><CardTitle className="text-white">Historical Coverage</CardTitle></div><CardDescription className="text-[#B8C3CC]">Archived monthly structural snapshots available in the system.</CardDescription></CardHeader>
                 <CardContent>
                   <p className="mb-2 text-sm leading-6 text-[#B8C3CC]">This shows the historical coverage used to evaluate structural outcomes and regime shifts. Each month represents a formation state from which forward returns were measured.</p>
-                  <p className="mb-5 text-sm text-[#7E8A96]">Use this tab when you want to know how much historical depth is supporting the current market interpretation.</p>
+                  <p className="mb-5 text-sm text-[#94A3B8]">Use this tab when you want to know how much historical depth is supporting the current market interpretation.</p>
                   <div className="overflow-hidden rounded-2xl border border-[#203754]"><Table><TableHeader><TableRow className="border-[#203754] bg-[#0D2138]"><TableHead className="text-[#B8C3CC]">Month</TableHead><TableHead className="text-[#B8C3CC]">OAL Scores</TableHead><TableHead className="text-[#B8C3CC]">OAL Summary</TableHead><TableHead className="text-[#B8C3CC]">Structural Snapshot</TableHead></TableRow></TableHeader><TableBody>{historyManifest.map(row => (<TableRow key={row.month} className="border-[#203754]"><TableCell className="font-medium text-white">{row.month}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_oal_scores === false ? "—" : formatNum(row.oal_scores_rows)}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_oal_summary === false ? "—" : formatNum(row.oal_summary_rows)}</TableCell><TableCell className="text-[#EAF0F2]">{row.has_structural_snapshot === false ? "—" : formatNum(row.structural_rows)}</TableCell></TableRow>))}</TableBody></Table></div>
                 </CardContent>
               </Card>
               <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
-                <CardHeader><CardTitle className="text-white">Why Historical Coverage Matters</CardTitle><CardDescription className="text-[#B8C3CC]">What the historical layer enables — and how it connects to current structural analysis.</CardDescription><p className="mt-1.5 text-xs text-[#7E8A96]">This is the empirical foundation behind the cohort outcomes and regime interpretation.</p></CardHeader>
+                <CardHeader><CardTitle className="text-white">Why Historical Coverage Matters</CardTitle><CardDescription className="text-[#B8C3CC]">What the historical layer enables — and how it connects to current structural analysis.</CardDescription><p className="mt-1.5 text-xs text-[#94A3B8]">This is the empirical foundation behind the cohort outcomes and regime interpretation.</p></CardHeader>
                 <CardContent className="space-y-4 text-sm leading-7 text-[#EAF0F2]">
                   <p><span className="font-medium text-white">1.</span> Archived monthly structural states define the platform's historical coverage window.</p>
                   <p><span className="font-medium text-white">2.</span> Cohort outcomes are calculated from real formation-month states and forward returns — not backtested with hindsight.</p>
@@ -1305,7 +1318,7 @@ export default function PlatformPage() {
         </Tabs>
 
         <div className="mt-16 border-t border-[#203754] pt-8 text-center">
-          <p className="text-[12px] leading-[1.8] text-[#7E8A96]">The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com<br />© 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.</p>
+          <p className="text-[12px] leading-[1.8] text-[#94A3B8]">The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com<br />© 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.</p>
         </div>
 
       </div>
