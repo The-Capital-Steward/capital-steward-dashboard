@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ResponsiveContainer, ScatterChart, Scatter, Cell,
-  CartesianGrid, XAxis, YAxis, Tooltip,
+  CartesianGrid, XAxis, YAxis,
 } from "recharts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -105,15 +105,6 @@ function Section({ title, layer, children, note }: {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function pctToBucket(pct: number | null): string {
-  if (pct == null) return "—";
-  if (pct < 0.2) return "Very Low";
-  if (pct < 0.4) return "Low";
-  if (pct < 0.6) return "Moderate";
-  if (pct < 0.8) return "High";
-  return "Very High";
-}
 
 function bucketColor(bucket: string | null | undefined): string {
   // Pure blue → red gradient across risk spectrum
@@ -633,8 +624,8 @@ export default function DevPage() {
         </div>
 
         {/* Section 1 — Scatter Map */}
-        <Section title="Three-Axis Structural Map" layer="MEASURED"
-          note="Each point is a company. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Z = Financing Risk (Axis 3 percentile, navigated via depth panel). Color = Composite bucket. Dot position is a direct read of model output — no interpretation applied.">
+        <Section title="OSMR Structural Map of U.S.-Listed Equities" layer="MEASURED"
+          note="Each point is a U.S.-listed equity. X = Trajectory Risk (Axis 2 percentile). Y = Anchor Risk (Axis 1 percentile). Pulse rate = Financing Risk (Axis 3). Color = Composite structural risk bucket. All positions are direct model output — no interpretation applied.">
           <ScatterMap data={snapshot} />
         </Section>
 
