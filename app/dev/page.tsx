@@ -149,6 +149,21 @@ function returnColor(v: number | null, suppressed: boolean): string {
 
 // ─── Scatter Map ──────────────────────────────────────────────────────────────
 
+// Defined outside ScatterMap so React never recreates it — stable ref preserves CSS animations
+function CustomDot(props: any) {
+  const { cx, cy, payload } = props;
+  const color = bucketColor(payload.composite_bucket);
+  const dur = payload.pulse;
+  const anim = dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none";
+  return (
+    <circle
+      cx={cx} cy={cy} r={2}
+      fill={color}
+      style={{ animation: anim, opacity: dur ? undefined : 0.75 }}
+    />
+  );
+}
+
 function ScatterMap({ data }: { data: SnapshotRow[] }) {
   const points = useMemo(() => data
     .filter(r => r.axis1_pct != null && r.axis2_pct != null)
@@ -178,20 +193,6 @@ function ScatterMap({ data }: { data: SnapshotRow[] }) {
     @keyframes p1483 { 0%,100%{opacity:0.704} 50%{opacity:0.562} }
     @keyframes p917  { 0%,100%{opacity:0.908} 50%{opacity:0.765} }
   `;
-
-  const CustomDot = (props: any) => {
-    const { cx, cy, payload } = props;
-    const color = bucketColor(payload.composite_bucket);
-    const dur = payload.pulse;
-    const anim = dur ? `p${dur} ${dur}ms ease-in-out infinite` : "none";
-    return (
-      <circle
-        cx={cx} cy={cy} r={2}
-        fill={color}
-        style={{ animation: anim, opacity: 0.75 }}
-      />
-    );
-  };
 
   return (
     <div>
