@@ -133,6 +133,23 @@ type HistoricalCohortGridPayload = {
   panels: CohortGridPanel[];
 };
 
+type QuintileBacktest = {
+  metadata: { formation_window_start: string; formation_window_end: string };
+  summary: {
+    bottom: { label: string; median_12m_return: number; hit_rate: number; percentiles: { p10: number; p25: number; p50: number; p75: number; p90: number } };
+    middle: { label: string; median_12m_return: number; hit_rate: number; percentiles: { p10: number; p25: number; p50: number; p75: number; p90: number } };
+    top:    { label: string; median_12m_return: number; hit_rate: number; percentiles: { p10: number; p25: number; p50: number; p75: number; p90: number } };
+  };
+  formation_series: { month: string; bottom_return: number; middle_return: number; top_return: number; structural_spread: number }[];
+};
+
+type IndexBacktest = {
+  results: {
+    tcs150:     { name: string; frequencies: { monthly: { curve: { month: string; value: number }[]; stats: { annualized_return: number; hit_rate: number; terminal_value: number } } } };
+    sapphire50: { name: string; frequencies: { monthly: { curve: { month: string; value: number }[]; stats: { annualized_return: number; hit_rate: number; terminal_value: number } } } };
+  };
+};
+
 type CohortMetric = "mean_return" | "median_return" | "hit_rate";
 
 const bucketOrder = ["Very Low", "Low", "Moderate", "High", "Very High"];
@@ -780,6 +797,434 @@ function CompanyDrilldown({ company, allData, cohortGrid, onClose }: DrilldownPr
   );
 }
 
+// ─── IndexPerformanceChart ────────────────────────────────────────────────────
+// TCS-150 visible to all. Sapphire 50 blurred with lock overlay for paid tier.
+// Reads from /data/index_backtest.json
+
+
+function IndexPerformanceChart({ data, loading }: { data: IndexBacktest | null; loading: boolean }) {
+  const tcs150Curve   = data?.results.tcs150.frequencies.monthly.curve ?? [];
+  const sapphire50Curve = data?.results.sapphire50.frequencies.monthly.curve ?? [];
+  const tcs150Stats   = data?.results.tcs150.frequencies.monthly.stats;
+  const sap50Stats    = data?.results.sapphire50.frequencies.monthly.stats;
+
+  // Build SVG paths from curve data
+  const buildPath = (curve: { month: string; value: number }[], w: number, h: number, pad: number) => {
+    if (curve.length === 0) return "";
+    const vals = curve.map(d => d.value);
+    const min  = Math.min(...vals) * 0.97;
+    const max  = Math.max(...vals) * 1.03;
+    const xScale = (i: number) => pad + (i / (curve.length - 1)) * (w - pad * 2);
+    const yScale = (v: number) => pad + (1 - (v - min) / (max - min)) * (h - pad * 2);
+    return curve.map((d, i) =>
+      `${i === 0 ? "M" : "L"} ${xScale(i).toFixed(1)} ${yScale(d.value).toFixed(1)}`
+    ).join(" ");
+  };
+
+  // X-axis labels — every ~18 months
+  const xLabels = (curve: { month: string; value: number }[], w: number, h: number, pad: number) => {
+    if (curve.length === 0) return [];
+    const step = Math.floor(curve.length / 5);
+    return curve
+      .filter((_, i) => i % step === 0 || i === curve.length - 1)
+      .map((d, _, arr) => {
+        const idx = curve.indexOf(d);
+        const x   = pad + (idx / (curve.length - 1)) * (w - pad * 2);
+        return { x, label: d.month.slice(0, 7) };
+      });
+  };
+
+  const W = 780; const H = 260; const PAD = 40;
+
+  const tcsPath  = buildPath(tcs150Curve, W, H, PAD);
+  const sapPath  = buildPath(sapphire50Curve, W, H, PAD);
+  const tcsLabels = xLabels(tcs150Curve, W, H, PAD);
+
+  return (
+    <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+      <CardHeader>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-white">Structural Index Performance</CardTitle>
+            <CardDescription className="mt-1 text-[#B8C3CC]">
+              Rules-based indexes built from the system's highest-conviction structural positions. Monthly rebalance. Equal-weighted median return per period. Indexed to 100.
+            </CardDescription>
+          </div>
+          <Badge className="shrink-0 rounded-full border border-[#203754] bg-[#0D2138] px-3 py-1 text-[11px] text-[#7E8A96]">
+            2018–2025 · Monthly rebalance
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* KPI strip */}
+        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 ann. return</div>
+            <div className="text-lg font-semibold text-[#6DAE8B]">
+              {tcs150Stats ? `+${(tcs150Stats.annualized_return * 100).toFixed(1)}%` : "+9.6%"}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">TCS-150 hit rate</div>
+            <div className="text-lg font-semibold text-[#B8C3CC]">
+              {tcs150Stats ? `${(tcs150Stats.hit_rate * 100).toFixed(1)}%` : "56.5%"}
+            </div>
+          </div>
+          {/* Sapphire 50 — blurred for free tier */}
+          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 ann. return</div>
+            <div className="text-lg font-semibold text-[#6DAE8B] blur-sm select-none">+10.5%</div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span>
+            </div>
+          </div>
+          <div className="relative rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3 overflow-hidden">
+            <div className="text-[10px] uppercase tracking-[0.16em] text-[#7E8A96] mb-1">Sapphire 50 hit rate</div>
+            <div className="text-lg font-semibold text-[#B8C3CC] blur-sm select-none">61.2%</div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="rounded-full border border-[#203754] bg-[#0A1F3D]/90 px-2.5 py-1 text-[10px] font-medium text-[#7E8A96]">Paid</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart */}
+        {loading ? (
+          <div className="flex h-[260px] items-center justify-center text-[#7E8A96]">Loading index data...</div>
+        ) : (
+          <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "33.3%" }}>
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox={`0 0 ${W} ${H}`}
+              preserveAspectRatio="none"
+            >
+              {/* Grid lines */}
+              {[0.25, 0.5, 0.75].map(t => (
+                <line
+                  key={t}
+                  x1={PAD} y1={PAD + t * (H - PAD * 2)}
+                  x2={W - PAD} y2={PAD + t * (H - PAD * 2)}
+                  stroke="#203754" strokeWidth="0.5"
+                />
+              ))}
+              {/* Baseline = 100 */}
+              {tcs150Curve.length > 0 && (() => {
+                const vals = tcs150Curve.map(d => d.value);
+                const min  = Math.min(...vals) * 0.97;
+                const max  = Math.max(...vals) * 1.03;
+                const y100 = PAD + (1 - (100 - min) / (max - min)) * (H - PAD * 2);
+                return (
+                  <line
+                    x1={PAD} y1={y100} x2={W - PAD} y2={y100}
+                    stroke="#41506A" strokeWidth="0.75" strokeDasharray="4 4"
+                  />
+                );
+              })()}
+
+              {/* Sapphire 50 line — blurred */}
+              {sapPath && (
+                <g style={{ filter: "blur(3px)", opacity: 0.5 }}>
+                  <path d={sapPath} fill="none" stroke="#1D9E75" strokeWidth="2" />
+                </g>
+              )}
+
+              {/* TCS-150 line — fully visible */}
+              {tcsPath && (
+                <path d={tcsPath} fill="none" stroke="#378ADD" strokeWidth="2" />
+              )}
+
+              {/* X-axis labels */}
+              {tcsLabels.map(({ x, label }) => (
+                <text
+                  key={label}
+                  x={x} y={H - 8}
+                  textAnchor="middle"
+                  fill="#7E8A96"
+                  fontSize="9"
+                >
+                  {label}
+                </text>
+              ))}
+            </svg>
+
+            {/* Sapphire 50 lock overlay */}
+            <div className="absolute inset-0 flex items-start justify-end p-4 pointer-events-none">
+              <div className="rounded-2xl border border-[#1D9E75]/40 bg-[#0A1F3D]/90 px-4 py-3 text-left max-w-[200px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="h-2 w-4 rounded-full" style={{ backgroundColor: "#1D9E75" }} />
+                  <span className="text-[11px] font-medium text-[#6DAE8B]">TCS Sapphire 50</span>
+                </div>
+                <p className="text-[10px] leading-[1.5] text-[#7E8A96]">
+                  The highest-conviction structural zone. Available to paid subscribers.
+                </p>
+              </div>
+            </div>
+
+            {/* TCS-150 legend */}
+            <div className="absolute inset-0 flex items-start justify-start p-4 pointer-events-none">
+              <div className="rounded-2xl border border-[#378ADD]/40 bg-[#0A1F3D]/90 px-4 py-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="h-2 w-4 rounded-full" style={{ backgroundColor: "#378ADD" }} />
+                  <span className="text-[11px] font-medium text-[#B8C3CC]">TCS-150 Composite Index</span>
+                </div>
+                <p className="text-[10px] leading-[1.5] text-[#7E8A96]">
+                  Top 150 lowest structural risk · 100% FCF-anchored
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <p className="mt-3 text-[11px] leading-5 text-[#7E8A96]">
+          Historical rules-based simulation. Monthly rebalance at each formation date. Equal-weighted median return per period. Does not account for transaction costs or liquidity constraints. 100% FCF-anchored constituents by construction. Not investment advice.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── ValidationPanels ────────────────────────────────────────────────────────
+// Three panels: hit rate bars, return distribution, structural spread over time.
+// Reads from /data/quintile_backtest.json
+
+function ValidationPanels({ data, loading }: { data: QuintileBacktest | null; loading: boolean }) {
+  if (loading || !data) {
+    return (
+      <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+        <CardHeader>
+          <CardTitle className="text-white">Structural Zone Validation</CardTitle>
+          <CardDescription className="text-[#B8C3CC]">Loading validation data...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-48 animate-pulse rounded-2xl border border-[#203754] bg-[#0D2138]" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { bottom, middle, top } = data.summary;
+  const series = data.formation_series;
+
+  const GREEN  = "#3B6D11";
+  const GRAY   = "#47566B";
+  const RED    = "#8B3838";
+  const GREEN2 = "#6DAE8B";
+  const RED2   = "#BC6464";
+
+  // Hit rate bar widths (max = 70% = full bar)
+  const hitBarWidth = (rate: number) => `${(rate / 0.70 * 100).toFixed(0)}%`;
+
+  // Distribution: p10, p25, p50, p75, p90 for each zone
+  const zones = [
+    { label: "Low risk",   color: GREEN,  stats: bottom },
+    { label: "Moderate",   color: GRAY,   stats: middle },
+    { label: "High risk",  color: RED,    stats: top    },
+  ];
+
+  // Spread over time — build mini SVG
+  const spreadSeries = series.filter(d => d.structural_spread != null);
+  const buildSpreadPath = (W: number, H: number, pad: number) => {
+    if (spreadSeries.length < 2) return "";
+    const vals = spreadSeries.map(d => d.structural_spread);
+    const min  = Math.min(...vals, 0) - 2;
+    const max  = Math.max(...vals) + 2;
+    const xS   = (i: number) => pad + (i / (spreadSeries.length - 1)) * (W - pad * 2);
+    const yS   = (v: number) => pad + (1 - (v - min) / (max - min)) * (H - pad * 2);
+    return spreadSeries.map((d, i) =>
+      `${i === 0 ? "M" : "L"} ${xS(i).toFixed(1)} ${yS(d.structural_spread).toFixed(1)}`
+    ).join(" ");
+  };
+
+  const SW = 700; const SH = 120; const SP = 20;
+  const spreadPath = buildSpreadPath(SW, SH, SP);
+
+  // Zero line y position
+  const spreadVals = spreadSeries.map(d => d.structural_spread);
+  const sMin = Math.min(...spreadVals, 0) - 2;
+  const sMax = Math.max(...spreadVals) + 2;
+  const zeroY = SP + (1 - (0 - sMin) / (sMax - sMin)) * (SH - SP * 2);
+
+  // Spread x-axis labels
+  const spreadStep = Math.floor(spreadSeries.length / 5);
+  const spreadLabels = spreadSeries
+    .filter((_, i) => i % spreadStep === 0 || i === spreadSeries.length - 1)
+    .map(d => {
+      const idx = spreadSeries.indexOf(d);
+      const x = SP + (idx / (spreadSeries.length - 1)) * (SW - SP * 2);
+      return { x, label: d.month.slice(0, 7) };
+    });
+
+  return (
+    <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
+      <CardHeader>
+        <CardTitle className="text-white">Structural Zone Validation</CardTitle>
+        <CardDescription className="text-[#B8C3CC]">
+          Historical return outcomes across structural risk zones. 86 independent 12-month formation windows · interest-bearing universe · 2018–2025.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
+
+        {/* KPI summary */}
+        <div className="grid grid-cols-3 gap-3">
+          {zones.map(({ label, color, stats }) => (
+            <div key={label} className="rounded-2xl border border-[#203754] bg-[#0D2138] px-4 py-3">
+              <div className="text-[10px] uppercase tracking-[0.16em] mb-1" style={{ color }}>{label}</div>
+              <div className="text-xl font-semibold mb-0.5" style={{ color: stats.median_12m_return >= 0 ? GREEN2 : RED2 }}>
+                {stats.median_12m_return >= 0 ? "+" : ""}{(stats.median_12m_return * 100).toFixed(2)}%
+              </div>
+              <div className="text-[11px] text-[#7E8A96]">{(stats.hit_rate * 100).toFixed(1)}% hit rate</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Panel 1: Hit rate */}
+        <div>
+          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">
+            Hit rate — share of formation windows with positive 12-month returns
+          </div>
+          <div className="space-y-3">
+            {zones.map(({ label, color, stats }) => (
+              <div key={label}>
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span style={{ color }}>{label}</span>
+                  <span className="font-semibold text-[#B8C3CC]">{(stats.hit_rate * 100).toFixed(1)}%</span>
+                </div>
+                <div className="h-6 w-full rounded-xl overflow-hidden bg-[#0D2138]">
+                  <div
+                    className="h-full rounded-xl transition-all duration-500"
+                    style={{ width: hitBarWidth(stats.hit_rate), backgroundColor: color, opacity: 0.85 }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-[#7E8A96]">
+            High structural risk companies produce negative 12-month returns in 8 of 10 formation windows.
+          </p>
+        </div>
+
+        {/* Panel 2: Return distribution */}
+        <div>
+          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">
+            Return distribution — P10 / P25 / median / P75 / P90 across formation windows
+          </div>
+          <div className="space-y-4">
+            {zones.map(({ label, color, stats }) => {
+              const { p10, p25, p50, p75, p90 } = stats.percentiles;
+              // Normalize to a -60% to +40% scale for visual
+              const SCALE_MIN = -0.60; const SCALE_MAX = 0.40;
+              const toX = (v: number) => Math.max(0, Math.min(100, ((v - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100));
+              const p10x = toX(p10); const p25x = toX(p25); const p50x = toX(p50);
+              const p75x = toX(p75); const p90x = toX(p90);
+              const zeroX = toX(0);
+
+              return (
+                <div key={label}>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span style={{ color }}>{label}</span>
+                    <span className="text-[11px] text-[#7E8A96]">
+                      P10: {(p10 * 100).toFixed(0)}% · median: {p50 >= 0 ? "+" : ""}{(p50 * 100).toFixed(1)}% · P90: +{(p90 * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="relative h-5 w-full rounded-xl bg-[#0D2138] overflow-hidden">
+                    {/* P10–P90 band */}
+                    <div
+                      className="absolute top-0 h-full rounded-xl"
+                      style={{
+                        left: `${p10x}%`,
+                        width: `${p90x - p10x}%`,
+                        backgroundColor: color,
+                        opacity: 0.18,
+                      }}
+                    />
+                    {/* P25–P75 band */}
+                    <div
+                      className="absolute top-0 h-full"
+                      style={{
+                        left: `${p25x}%`,
+                        width: `${p75x - p25x}%`,
+                        backgroundColor: color,
+                        opacity: 0.45,
+                      }}
+                    />
+                    {/* Median line */}
+                    <div
+                      className="absolute top-0 h-full w-0.5"
+                      style={{ left: `${p50x}%`, backgroundColor: color }}
+                    />
+                    {/* Zero line */}
+                    <div
+                      className="absolute top-0 h-full w-px"
+                      style={{ left: `${zeroX}%`, backgroundColor: "#41506A" }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex items-center gap-4 text-[10px] text-[#7E8A96]">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-sm bg-[#47566B] opacity-45" />P25–P75 range
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-sm bg-[#47566B] opacity-18" />P10–P90 range
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-0.5 bg-[#41506A]" />Zero
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Panel 3: Structural spread over time */}
+        {spreadSeries.length > 0 && (
+          <div>
+            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7E8A96]">
+              Structural spread over time — low minus high risk median return per formation month
+            </div>
+            <div className="relative w-full overflow-hidden rounded-2xl border border-[#203754] bg-[#0A1F3D]" style={{ paddingBottom: "17%" }}>
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox={`0 0 ${SW} ${SH}`}
+                preserveAspectRatio="none"
+              >
+                {/* Zero line */}
+                <line
+                  x1={SP} y1={zeroY} x2={SW - SP} y2={zeroY}
+                  stroke="#41506A" strokeWidth="0.75" strokeDasharray="4 3"
+                />
+                {/* Spread fill */}
+                {spreadPath && (
+                  <>
+                    <path
+                      d={`${spreadPath} L ${SP + (spreadSeries.length - 1) / (spreadSeries.length - 1) * (SW - SP * 2) + SP} ${zeroY} L ${SP} ${zeroY} Z`}
+                      fill="#185FA5"
+                      fillOpacity="0.12"
+                    />
+                    <path d={spreadPath} fill="none" stroke="#378ADD" strokeWidth="1.5" />
+                  </>
+                )}
+                {/* X labels */}
+                {spreadLabels.map(({ x, label }) => (
+                  <text key={label} x={x} y={SH - 4} textAnchor="middle" fill="#7E8A96" fontSize="8">
+                    {label}
+                  </text>
+                ))}
+              </svg>
+            </div>
+            <p className="mt-2 text-[11px] text-[#7E8A96]">
+              Signal was strongest post-2022. Compressed during COVID-era disruption (2020–2021) when financing stress was suppressed by monetary policy.
+            </p>
+          </div>
+        )}
+
+        <p className="text-[11px] leading-5 text-[#7E8A96]">
+          Historical distributional analysis. Each formation window is an independent 12-month observation. Does not predict individual company returns. Interest-bearing universe only. Not investment advice.
+        </p>
+
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Interpretive Layer ───────────────────────────────────────────────────────
 
 type InterpretiveLayerProps = {
@@ -1134,6 +1579,8 @@ export default function PlatformPage() {
   const [liquiditySummary, setLiquiditySummary] = useState<LiquiditySummaryRow[]>([]);
   const [historyManifest, setHistoryManifest] = useState<HistoryManifestRow[]>([]);
   const [cohortGrid, setCohortGrid] = useState<HistoricalCohortGridPayload | null>(null);
+  const [quintileBacktest, setQuintileBacktest] = useState<QuintileBacktest | null>(null);
+  const [indexBacktest, setIndexBacktest]       = useState<IndexBacktest | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedOAL, setSelectedOAL] = useState("All");
@@ -1156,13 +1603,17 @@ export default function PlatformPage() {
       fetch("/data/liquidity_summary.json").then(res => { if (!res.ok) throw new Error(`liquidity: ${res.status}`); return res.json(); }),
       fetch("/data/history_manifest.json").then(res => { if (!res.ok) throw new Error(`history: ${res.status}`); return res.json(); }),
       fetch("/data/historical_cohort_grids.json").then(res => { if (!res.ok) throw new Error(`cohort grids: ${res.status}`); return res.json(); }),
+      fetch("/data/quintile_backtest.json").then(res => { if (!res.ok) throw new Error(`quintile: ${res.status}`); return res.json(); }),
+      fetch("/data/index_backtest.json").then(res => { if (!res.ok) throw new Error(`index: ${res.status}`); return res.json(); }),    
     ])
-      .then(([snapshot, oal, liquidity, history, grids]) => {
+      .then(([snapshot, oal, liquidity, history, grids, quintile, index]) => {
         setSnapshotData(snapshot);
         setOALSummary(oal);
         setLiquiditySummary(liquidity);
         setHistoryManifest(history);
         setCohortGrid(grids);
+        setQuintileBacktest(quintile);
+        setIndexBacktest(index);
         setLoading(false);
       })
       .catch(err => { console.error(err); setLoading(false); });
@@ -1839,7 +2290,8 @@ export default function PlatformPage() {
                 </p>
               </CardContent>
             </Card>
-
+            {/* ── Index Performance ── */}
+            <IndexPerformanceChart data={indexBacktest} loading={loading} />
             {/* ── Historical Cohort Outcomes ── */}
             <div className="mt-6 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
@@ -2138,7 +2590,8 @@ export default function PlatformPage() {
                 </div>
               );
             })()}
-
+            {/* ── Structural Validation ── */}
+            <ValidationPanels data={quintileBacktest} loading={loading} />
             {/* Cohort Insight Layer — planned analytical module */}
             <Card className="rounded-3xl border border-[#203754] bg-[#102642] shadow-xl shadow-black/20">
               <CardHeader className="pb-3">

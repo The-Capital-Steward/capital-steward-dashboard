@@ -1,0 +1,2752 @@
+{
+  "metadata": {
+    "description": "Independent 12-month cohort return analysis by composite structural risk quintile.",
+    "methodology": "Rolling monthly cohort formation. Each month, companies ranked by composite structural risk score and assigned to Bottom (lowest 20%), Middle (40th-60th percentile), or Top (highest 20%) quintile. Median 12-month forward return computed independently per formation month. Chart curves use expanding median \u2014 not sequential compounding.",
+    "horizon_months": 12,
+    "formation_window_start": "2018-01",
+    "formation_window_end": "2026-03",
+    "formation_months_total": 99,
+    "quintile_definitions": {
+      "bottom": "Lowest 20% composite structural risk (Very Low)",
+      "middle": "40th-60th percentile composite structural risk (Moderate)",
+      "top": "Highest 20% composite structural risk (Very High)"
+    },
+    "generated_at": "2026-03-25T13:08:43.972989+00:00",
+    "disclaimer": "Past structural patterns do not guarantee future outcomes. This describes historical distributional tendencies, not predictions."
+  },
+  "summary": {
+    "bottom": {
+      "label": "Low Structural Risk",
+      "formation_months": 86,
+      "median_12m_return": 0.005169,
+      "mean_12m_return": 0.040902,
+      "annualized_return": 0.028191,
+      "annualized_vol": 0.172855,
+      "hit_rate": 0.5116,
+      "win_loss_ratio": 1.9497,
+      "percentiles": {
+        "p10": -0.13105,
+        "p25": -0.071065,
+        "p50": 0.005169,
+        "p75": 0.095805,
+        "p90": 0.222768
+      },
+      "worst_formation": -0.269737,
+      "best_formation": 0.655562
+    },
+    "middle": {
+      "label": "Moderate Structural Risk",
+      "formation_months": 86,
+      "median_12m_return": -0.001642,
+      "mean_12m_return": 0.025962,
+      "annualized_return": 0.012235,
+      "annualized_vol": 0.179017,
+      "hit_rate": 0.4767,
+      "win_loss_ratio": 1.6679,
+      "percentiles": {
+        "p10": -0.144934,
+        "p25": -0.086779,
+        "p50": -0.001642,
+        "p75": 0.066522,
+        "p90": 0.222549
+      },
+      "worst_formation": -0.256976,
+      "best_formation": 0.675879
+    },
+    "top": {
+      "label": "High Structural Risk",
+      "formation_months": 86,
+      "median_12m_return": -0.156867,
+      "mean_12m_return": -0.124119,
+      "annualized_return": -0.162152,
+      "annualized_vol": 0.278278,
+      "hit_rate": 0.1744,
+      "win_loss_ratio": 1.5725,
+      "percentiles": {
+        "p10": -0.428276,
+        "p25": -0.25828,
+        "p50": -0.156867,
+        "p75": -0.059418,
+        "p90": 0.315689
+      },
+      "worst_formation": -0.562883,
+      "best_formation": 0.967643
+    }
+  },
+  "curves": {
+    "bottom": [
+      {
+        "month": "2018-01",
+        "value": 93.2721,
+        "formation_median": -0.067279,
+        "expanding_median": -0.067279,
+        "n": 584
+      },
+      {
+        "month": "2018-02",
+        "value": 89.804,
+        "formation_median": -0.007087,
+        "expanding_median": -0.037183,
+        "n": 589
+      },
+      {
+        "month": "2018-03",
+        "value": 89.1675,
+        "formation_median": 0.011211,
+        "expanding_median": -0.007087,
+        "n": 595
+      },
+      {
+        "month": "2018-04",
+        "value": 89.2393,
+        "formation_median": 0.008696,
+        "expanding_median": 0.000805,
+        "n": 595
+      },
+      {
+        "month": "2018-05",
+        "value": 88.6069,
+        "formation_median": -0.075357,
+        "expanding_median": -0.007087,
+        "n": 596
+      },
+      {
+        "month": "2018-06",
+        "value": 88.0788,
+        "formation_median": -0.004833,
+        "expanding_median": -0.00596,
+        "n": 602
+      },
+      {
+        "month": "2018-07",
+        "value": 87.4546,
+        "formation_median": -0.032469,
+        "expanding_median": -0.007087,
+        "n": 602
+      },
+      {
+        "month": "2018-08",
+        "value": 85.7249,
+        "formation_median": -0.091232,
+        "expanding_median": -0.019778,
+        "n": 603
+      },
+      {
+        "month": "2018-09",
+        "value": 83.5197,
+        "formation_median": -0.025724,
+        "expanding_median": -0.025724,
+        "n": 604
+      },
+      {
+        "month": "2018-10",
+        "value": 82.1495,
+        "formation_median": 0.063383,
+        "expanding_median": -0.016405,
+        "n": 604
+      },
+      {
+        "month": "2018-11",
+        "value": 81.5674,
+        "formation_median": 0.058686,
+        "expanding_median": -0.007087,
+        "n": 603
+      },
+      {
+        "month": "2018-12",
+        "value": 81.0812,
+        "formation_median": 0.185692,
+        "expanding_median": -0.00596,
+        "n": 610
+      },
+      {
+        "month": "2019-01",
+        "value": 80.6893,
+        "formation_median": 0.065144,
+        "expanding_median": -0.004833,
+        "n": 613
+      },
+      {
+        "month": "2019-02",
+        "value": 80.2084,
+        "formation_median": -0.069092,
+        "expanding_median": -0.00596,
+        "n": 614
+      },
+      {
+        "month": "2019-03",
+        "value": 79.64,
+        "formation_median": -0.269737,
+        "expanding_median": -0.007087,
+        "n": 617
+      },
+      {
+        "month": "2019-04",
+        "value": 78.3335,
+        "formation_median": -0.21218,
+        "expanding_median": -0.016405,
+        "n": 616
+      },
+      {
+        "month": "2019-05",
+        "value": 76.3184,
+        "formation_median": -0.129058,
+        "expanding_median": -0.025724,
+        "n": 615
+      },
+      {
+        "month": "2019-06",
+        "value": 74.0978,
+        "formation_median": -0.15356,
+        "expanding_median": -0.029097,
+        "n": 621
+      },
+      {
+        "month": "2019-07",
+        "value": 71.6919,
+        "formation_median": -0.148692,
+        "expanding_median": -0.032469,
+        "n": 622
+      },
+      {
+        "month": "2019-08",
+        "value": 68.1164,
+        "formation_median": -0.074421,
+        "expanding_median": -0.049874,
+        "n": 623
+      },
+      {
+        "month": "2019-09",
+        "value": 63.5336,
+        "formation_median": -0.113031,
+        "expanding_median": -0.067279,
+        "n": 627
+      },
+      {
+        "month": "2019-10",
+        "value": 59.2015,
+        "formation_median": -0.102368,
+        "expanding_median": -0.068186,
+        "n": 629
+      },
+      {
+        "month": "2019-11",
+        "value": 55.2185,
+        "formation_median": -0.026234,
+        "expanding_median": -0.067279,
+        "n": 630
+      },
+      {
+        "month": "2019-12",
+        "value": 52.4645,
+        "formation_median": -0.002058,
+        "expanding_median": -0.049874,
+        "n": 642
+      },
+      {
+        "month": "2020-01",
+        "value": 50.761,
+        "formation_median": 0.048643,
+        "expanding_median": -0.032469,
+        "n": 644
+      },
+      {
+        "month": "2020-02",
+        "value": 49.2711,
+        "formation_median": 0.230053,
+        "expanding_median": -0.029351,
+        "n": 647
+      },
+      {
+        "month": "2020-03",
+        "value": 47.9786,
+        "formation_median": 0.655562,
+        "expanding_median": -0.026234,
+        "n": 642
+      },
+      {
+        "month": "2020-04",
+        "value": 46.7321,
+        "formation_median": 0.539555,
+        "expanding_median": -0.025979,
+        "n": 642
+      },
+      {
+        "month": "2020-05",
+        "value": 45.53,
+        "formation_median": 0.483906,
+        "expanding_median": -0.025724,
+        "n": 644
+      },
+      {
+        "month": "2020-06",
+        "value": 44.783,
+        "formation_median": 0.480108,
+        "expanding_median": -0.016405,
+        "n": 643
+      },
+      {
+        "month": "2020-07",
+        "value": 44.4657,
+        "formation_median": 0.40598,
+        "expanding_median": -0.007087,
+        "n": 644
+      },
+      {
+        "month": "2020-08",
+        "value": 44.2007,
+        "formation_median": 0.378769,
+        "expanding_median": -0.00596,
+        "n": 645
+      },
+      {
+        "month": "2020-09",
+        "value": 43.987,
+        "formation_median": 0.367354,
+        "expanding_median": -0.004833,
+        "n": 646
+      },
+      {
+        "month": "2020-10",
+        "value": 43.8355,
+        "formation_median": 0.404274,
+        "expanding_median": -0.003446,
+        "n": 649
+      },
+      {
+        "month": "2020-11",
+        "value": 43.7453,
+        "formation_median": 0.205233,
+        "expanding_median": -0.002058,
+        "n": 652
+      },
+      {
+        "month": "2020-12",
+        "value": 43.8905,
+        "formation_median": 0.200772,
+        "expanding_median": 0.003319,
+        "n": 665
+      },
+      {
+        "month": "2021-01",
+        "value": 44.2721,
+        "formation_median": 0.133603,
+        "expanding_median": 0.008696,
+        "n": 670
+      },
+      {
+        "month": "2021-02",
+        "value": 44.7128,
+        "formation_median": 0.047596,
+        "expanding_median": 0.009953,
+        "n": 674
+      },
+      {
+        "month": "2021-03",
+        "value": 45.214,
+        "formation_median": 0.024816,
+        "expanding_median": 0.011211,
+        "n": 678
+      },
+      {
+        "month": "2021-04",
+        "value": 45.6641,
+        "formation_median": -0.077645,
+        "expanding_median": 0.009953,
+        "n": 680
+      },
+      {
+        "month": "2021-05",
+        "value": 46.0611,
+        "formation_median": -0.092364,
+        "expanding_median": 0.008696,
+        "n": 681
+      },
+      {
+        "month": "2021-06",
+        "value": 46.214,
+        "formation_median": -0.149293,
+        "expanding_median": 0.003319,
+        "n": 686
+      },
+      {
+        "month": "2021-07",
+        "value": 46.1189,
+        "formation_median": -0.082123,
+        "expanding_median": -0.002058,
+        "n": 687
+      },
+      {
+        "month": "2021-08",
+        "value": 45.96,
+        "formation_median": -0.133042,
+        "expanding_median": -0.003446,
+        "n": 689
+      },
+      {
+        "month": "2021-09",
+        "value": 45.7379,
+        "formation_median": -0.170468,
+        "expanding_median": -0.004833,
+        "n": 696
+      },
+      {
+        "month": "2021-10",
+        "value": 45.4653,
+        "formation_median": -0.142822,
+        "expanding_median": -0.00596,
+        "n": 700
+      },
+      {
+        "month": "2021-11",
+        "value": 45.1431,
+        "formation_median": -0.066303,
+        "expanding_median": -0.007087,
+        "n": 700
+      },
+      {
+        "month": "2021-12",
+        "value": 44.4025,
+        "formation_median": -0.137977,
+        "expanding_median": -0.016405,
+        "n": 738
+      },
+      {
+        "month": "2022-01",
+        "value": 43.2603,
+        "formation_median": -0.053167,
+        "expanding_median": -0.025724,
+        "n": 739
+      },
+      {
+        "month": "2022-02",
+        "value": 42.1364,
+        "formation_median": -0.070543,
+        "expanding_median": -0.025979,
+        "n": 740
+      },
+      {
+        "month": "2022-03",
+        "value": 41.031,
+        "formation_median": -0.12751,
+        "expanding_median": -0.026234,
+        "n": 743
+      },
+      {
+        "month": "2022-04",
+        "value": 39.8267,
+        "formation_median": -0.09219,
+        "expanding_median": -0.029351,
+        "n": 740
+      },
+      {
+        "month": "2022-05",
+        "value": 38.5336,
+        "formation_median": -0.121496,
+        "expanding_median": -0.032469,
+        "n": 740
+      },
+      {
+        "month": "2022-06",
+        "value": 37.4026,
+        "formation_median": 0.005622,
+        "expanding_median": -0.029351,
+        "n": 751
+      },
+      {
+        "month": "2022-07",
+        "value": 36.4214,
+        "formation_median": -0.00826,
+        "expanding_median": -0.026234,
+        "n": 753
+      },
+      {
+        "month": "2022-08",
+        "value": 35.4752,
+        "formation_median": -0.011279,
+        "expanding_median": -0.025979,
+        "n": 753
+      },
+      {
+        "month": "2022-09",
+        "value": 34.5626,
+        "formation_median": 0.019588,
+        "expanding_median": -0.025724,
+        "n": 764
+      },
+      {
+        "month": "2022-10",
+        "value": 33.6647,
+        "formation_median": -0.071238,
+        "expanding_median": -0.025979,
+        "n": 763
+      },
+      {
+        "month": "2022-11",
+        "value": 32.7815,
+        "formation_median": -0.060876,
+        "expanding_median": -0.026234,
+        "n": 763
+      },
+      {
+        "month": "2022-12",
+        "value": 31.9299,
+        "formation_median": 0.097729,
+        "expanding_median": -0.025979,
+        "n": 770
+      },
+      {
+        "month": "2023-01",
+        "value": 31.1085,
+        "formation_median": -0.005405,
+        "expanding_median": -0.025724,
+        "n": 781
+      },
+      {
+        "month": "2023-02",
+        "value": 30.533,
+        "formation_median": 0.025773,
+        "expanding_median": -0.018502,
+        "n": 779
+      },
+      {
+        "month": "2023-03",
+        "value": 30.1886,
+        "formation_median": 0.128638,
+        "expanding_median": -0.011279,
+        "n": 785
+      },
+      {
+        "month": "2023-04",
+        "value": 29.8936,
+        "formation_median": 0.111689,
+        "expanding_median": -0.00977,
+        "n": 788
+      },
+      {
+        "month": "2023-05",
+        "value": 29.6467,
+        "formation_median": 0.17094,
+        "expanding_median": -0.00826,
+        "n": 787
+      },
+      {
+        "month": "2023-06",
+        "value": 29.4192,
+        "formation_median": 0.090033,
+        "expanding_median": -0.007673,
+        "n": 788
+      },
+      {
+        "month": "2023-07",
+        "value": 29.2107,
+        "formation_median": 0.117935,
+        "expanding_median": -0.007087,
+        "n": 792
+      },
+      {
+        "month": "2023-08",
+        "value": 29.0283,
+        "formation_median": 0.120588,
+        "expanding_median": -0.006246,
+        "n": 791
+      },
+      {
+        "month": "2023-09",
+        "value": 28.8714,
+        "formation_median": 0.209799,
+        "expanding_median": -0.005405,
+        "n": 794
+      },
+      {
+        "month": "2023-10",
+        "value": 28.7236,
+        "formation_median": 0.215482,
+        "expanding_median": -0.005119,
+        "n": 796
+      },
+      {
+        "month": "2023-11",
+        "value": 28.5847,
+        "formation_median": 0.207708,
+        "expanding_median": -0.004833,
+        "n": 798
+      },
+      {
+        "month": "2023-12",
+        "value": 28.4863,
+        "formation_median": 0.054324,
+        "expanding_median": -0.003446,
+        "n": 808
+      },
+      {
+        "month": "2024-01",
+        "value": 28.4276,
+        "formation_median": 0.086416,
+        "expanding_median": -0.002058,
+        "n": 812
+      },
+      {
+        "month": "2024-02",
+        "value": 28.4783,
+        "formation_median": 0.038416,
+        "expanding_median": 0.001782,
+        "n": 811
+      },
+      {
+        "month": "2024-03",
+        "value": 28.4197,
+        "formation_median": -0.012474,
+        "expanding_median": -0.002058,
+        "n": 818
+      },
+      {
+        "month": "2024-04",
+        "value": 28.4575,
+        "formation_median": 0.004715,
+        "expanding_median": 0.001329,
+        "n": 817
+      },
+      {
+        "month": "2024-05",
+        "value": 28.3989,
+        "formation_median": -0.017628,
+        "expanding_median": -0.002058,
+        "n": 818
+      },
+      {
+        "month": "2024-06",
+        "value": 28.4367,
+        "formation_median": 0.052829,
+        "expanding_median": 0.001329,
+        "n": 827
+      },
+      {
+        "month": "2024-07",
+        "value": 28.3781,
+        "formation_median": -0.00939,
+        "expanding_median": -0.002058,
+        "n": 829
+      },
+      {
+        "month": "2024-08",
+        "value": 28.4158,
+        "formation_median": 0.032915,
+        "expanding_median": 0.001329,
+        "n": 830
+      },
+      {
+        "month": "2024-09",
+        "value": 28.3785,
+        "formation_median": -0.001314,
+        "expanding_median": -0.001314,
+        "n": 834
+      },
+      {
+        "month": "2024-10",
+        "value": 28.4268,
+        "formation_median": 0.010892,
+        "expanding_median": 0.001701,
+        "n": 837
+      },
+      {
+        "month": "2024-11",
+        "value": 28.3894,
+        "formation_median": -0.054789,
+        "expanding_median": -0.001314,
+        "n": 840
+      },
+      {
+        "month": "2024-12",
+        "value": 28.4377,
+        "formation_median": 0.028542,
+        "expanding_median": 0.001701,
+        "n": 848
+      },
+      {
+        "month": "2025-01",
+        "value": 28.5718,
+        "formation_median": 0.024754,
+        "expanding_median": 0.004715,
+        "n": 850
+      },
+      {
+        "month": "2025-02",
+        "value": 28.7195,
+        "formation_median": 0.03724,
+        "expanding_median": 0.005169,
+        "n": 849
+      }
+    ],
+    "middle": [
+      {
+        "month": "2018-01",
+        "value": 93.1154,
+        "formation_median": -0.068846,
+        "expanding_median": -0.068846,
+        "n": 585
+      },
+      {
+        "month": "2018-02",
+        "value": 90.8632,
+        "formation_median": 0.020471,
+        "expanding_median": -0.024187,
+        "n": 591
+      },
+      {
+        "month": "2018-03",
+        "value": 92.3045,
+        "formation_median": 0.015862,
+        "expanding_median": 0.015862,
+        "n": 596
+      },
+      {
+        "month": "2018-04",
+        "value": 93.5897,
+        "formation_median": 0.011985,
+        "expanding_median": 0.013924,
+        "n": 595
+      },
+      {
+        "month": "2018-05",
+        "value": 94.7114,
+        "formation_median": -0.092256,
+        "expanding_median": 0.011985,
+        "n": 597
+      },
+      {
+        "month": "2018-06",
+        "value": 94.7614,
+        "formation_median": -0.010929,
+        "expanding_median": 0.000528,
+        "n": 604
+      },
+      {
+        "month": "2018-07",
+        "value": 93.7257,
+        "formation_median": -0.022414,
+        "expanding_median": -0.010929,
+        "n": 603
+      },
+      {
+        "month": "2018-08",
+        "value": 92.1632,
+        "formation_median": -0.08762,
+        "expanding_median": -0.016672,
+        "n": 605
+      },
+      {
+        "month": "2018-09",
+        "value": 90.0974,
+        "formation_median": -0.037782,
+        "expanding_median": -0.022414,
+        "n": 605
+      },
+      {
+        "month": "2018-10",
+        "value": 88.5954,
+        "formation_median": 0.075749,
+        "expanding_median": -0.016672,
+        "n": 604
+      },
+      {
+        "month": "2018-11",
+        "value": 87.6271,
+        "formation_median": 0.071651,
+        "expanding_median": -0.010929,
+        "n": 604
+      },
+      {
+        "month": "2018-12",
+        "value": 87.6733,
+        "formation_median": 0.224914,
+        "expanding_median": 0.000528,
+        "n": 612
+      },
+      {
+        "month": "2019-01",
+        "value": 88.7241,
+        "formation_median": 0.09776,
+        "expanding_median": 0.011985,
+        "n": 615
+      },
+      {
+        "month": "2019-02",
+        "value": 88.7709,
+        "formation_median": -0.032662,
+        "expanding_median": 0.000528,
+        "n": 616
+      },
+      {
+        "month": "2019-03",
+        "value": 87.8007,
+        "formation_median": -0.256976,
+        "expanding_median": -0.010929,
+        "n": 618
+      },
+      {
+        "month": "2019-04",
+        "value": 86.337,
+        "formation_median": -0.175019,
+        "expanding_median": -0.016672,
+        "n": 618
+      },
+      {
+        "month": "2019-05",
+        "value": 84.4018,
+        "formation_median": -0.084256,
+        "expanding_median": -0.022414,
+        "n": 617
+      },
+      {
+        "month": "2019-06",
+        "value": 82.0776,
+        "formation_median": -0.150391,
+        "expanding_median": -0.027538,
+        "n": 623
+      },
+      {
+        "month": "2019-07",
+        "value": 79.3967,
+        "formation_median": -0.125656,
+        "expanding_median": -0.032662,
+        "n": 624
+      },
+      {
+        "month": "2019-08",
+        "value": 76.6002,
+        "formation_median": -0.045455,
+        "expanding_median": -0.035222,
+        "n": 625
+      },
+      {
+        "month": "2019-09",
+        "value": 73.7061,
+        "formation_median": -0.131787,
+        "expanding_median": -0.037782,
+        "n": 628
+      },
+      {
+        "month": "2019-10",
+        "value": 70.6386,
+        "formation_median": -0.110855,
+        "expanding_median": -0.041618,
+        "n": 629
+      },
+      {
+        "month": "2019-11",
+        "value": 67.9698,
+        "formation_median": -0.014682,
+        "expanding_median": -0.037782,
+        "n": 631
+      },
+      {
+        "month": "2019-12",
+        "value": 65.5757,
+        "formation_median": -0.002948,
+        "expanding_median": -0.035222,
+        "n": 643
+      },
+      {
+        "month": "2020-01",
+        "value": 63.4339,
+        "formation_median": 0.030543,
+        "expanding_median": -0.032662,
+        "n": 644
+      },
+      {
+        "month": "2020-02",
+        "value": 61.6871,
+        "formation_median": 0.204339,
+        "expanding_median": -0.027538,
+        "n": 647
+      },
+      {
+        "month": "2020-03",
+        "value": 60.3044,
+        "formation_median": 0.675879,
+        "expanding_median": -0.022414,
+        "n": 641
+      },
+      {
+        "month": "2020-04",
+        "value": 59.1859,
+        "formation_median": 0.534383,
+        "expanding_median": -0.018548,
+        "n": 643
+      },
+      {
+        "month": "2020-05",
+        "value": 58.3169,
+        "formation_median": 0.521086,
+        "expanding_median": -0.014682,
+        "n": 644
+      },
+      {
+        "month": "2020-06",
+        "value": 57.5702,
+        "formation_median": 0.441817,
+        "expanding_median": -0.012806,
+        "n": 642
+      },
+      {
+        "month": "2020-07",
+        "value": 56.941,
+        "formation_median": 0.39715,
+        "expanding_median": -0.010929,
+        "n": 643
+      },
+      {
+        "month": "2020-08",
+        "value": 56.5459,
+        "formation_median": 0.378066,
+        "expanding_median": -0.006938,
+        "n": 643
+      },
+      {
+        "month": "2020-09",
+        "value": 56.3792,
+        "formation_median": 0.381839,
+        "expanding_median": -0.002948,
+        "n": 646
+      },
+      {
+        "month": "2020-10",
+        "value": 56.634,
+        "formation_median": 0.435843,
+        "expanding_median": 0.004519,
+        "n": 649
+      },
+      {
+        "month": "2020-11",
+        "value": 57.3127,
+        "formation_median": 0.180445,
+        "expanding_median": 0.011985,
+        "n": 652
+      },
+      {
+        "month": "2020-12",
+        "value": 58.1107,
+        "formation_median": 0.167076,
+        "expanding_median": 0.013924,
+        "n": 665
+      },
+      {
+        "month": "2021-01",
+        "value": 59.0325,
+        "formation_median": 0.083283,
+        "expanding_median": 0.015862,
+        "n": 670
+      },
+      {
+        "month": "2021-02",
+        "value": 59.8544,
+        "formation_median": 0.0,
+        "expanding_median": 0.013924,
+        "n": 673
+      },
+      {
+        "month": "2021-03",
+        "value": 60.5718,
+        "formation_median": -0.012575,
+        "expanding_median": 0.011985,
+        "n": 678
+      },
+      {
+        "month": "2021-04",
+        "value": 60.9347,
+        "formation_median": -0.11093,
+        "expanding_median": 0.005993,
+        "n": 679
+      },
+      {
+        "month": "2021-05",
+        "value": 60.9347,
+        "formation_median": -0.134371,
+        "expanding_median": 0.0,
+        "n": 681
+      },
+      {
+        "month": "2021-06",
+        "value": 60.8449,
+        "formation_median": -0.203602,
+        "expanding_median": -0.001474,
+        "n": 686
+      },
+      {
+        "month": "2021-07",
+        "value": 60.6656,
+        "formation_median": -0.147009,
+        "expanding_median": -0.002948,
+        "n": 687
+      },
+      {
+        "month": "2021-08",
+        "value": 60.2447,
+        "formation_median": -0.192761,
+        "expanding_median": -0.006938,
+        "n": 689
+      },
+      {
+        "month": "2021-09",
+        "value": 59.5862,
+        "formation_median": -0.232049,
+        "expanding_median": -0.010929,
+        "n": 695
+      },
+      {
+        "month": "2021-10",
+        "value": 58.886,
+        "formation_median": -0.228048,
+        "expanding_median": -0.011752,
+        "n": 700
+      },
+      {
+        "month": "2021-11",
+        "value": 58.1455,
+        "formation_median": -0.138694,
+        "expanding_median": -0.012575,
+        "n": 700
+      },
+      {
+        "month": "2021-12",
+        "value": 57.353,
+        "formation_median": -0.22322,
+        "expanding_median": -0.013628,
+        "n": 739
+      },
+      {
+        "month": "2022-01",
+        "value": 56.511,
+        "formation_median": -0.093236,
+        "expanding_median": -0.014682,
+        "n": 739
+      },
+      {
+        "month": "2022-02",
+        "value": 55.4628,
+        "formation_median": -0.107664,
+        "expanding_median": -0.018548,
+        "n": 741
+      },
+      {
+        "month": "2022-03",
+        "value": 54.2197,
+        "formation_median": -0.14286,
+        "expanding_median": -0.022414,
+        "n": 742
+      },
+      {
+        "month": "2022-04",
+        "value": 52.7266,
+        "formation_median": -0.083243,
+        "expanding_median": -0.027538,
+        "n": 739
+      },
+      {
+        "month": "2022-05",
+        "value": 51.0044,
+        "formation_median": -0.11503,
+        "expanding_median": -0.032662,
+        "n": 739
+      },
+      {
+        "month": "2022-06",
+        "value": 49.5999,
+        "formation_median": 0.038667,
+        "expanding_median": -0.027538,
+        "n": 750
+      },
+      {
+        "month": "2022-07",
+        "value": 48.4882,
+        "formation_median": -0.002087,
+        "expanding_median": -0.022414,
+        "n": 751
+      },
+      {
+        "month": "2022-08",
+        "value": 47.5888,
+        "formation_median": -0.0075,
+        "expanding_median": -0.018548,
+        "n": 752
+      },
+      {
+        "month": "2022-09",
+        "value": 46.8901,
+        "formation_median": 0.042658,
+        "expanding_median": -0.014682,
+        "n": 764
+      },
+      {
+        "month": "2022-10",
+        "value": 46.0204,
+        "formation_median": -0.092838,
+        "expanding_median": -0.018548,
+        "n": 763
+      },
+      {
+        "month": "2022-11",
+        "value": 44.9889,
+        "formation_median": -0.067317,
+        "expanding_median": -0.022414,
+        "n": 763
+      },
+      {
+        "month": "2022-12",
+        "value": 44.1545,
+        "formation_median": 0.055281,
+        "expanding_median": -0.018548,
+        "n": 770
+      },
+      {
+        "month": "2023-01",
+        "value": 43.1648,
+        "formation_median": -0.052118,
+        "expanding_median": -0.022414,
+        "n": 782
+      },
+      {
+        "month": "2023-02",
+        "value": 42.2269,
+        "formation_median": -0.021041,
+        "expanding_median": -0.021727,
+        "n": 780
+      },
+      {
+        "month": "2023-03",
+        "value": 41.3384,
+        "formation_median": 0.04627,
+        "expanding_median": -0.021041,
+        "n": 786
+      },
+      {
+        "month": "2023-04",
+        "value": 40.6001,
+        "formation_median": 0.012376,
+        "expanding_median": -0.017861,
+        "n": 789
+      },
+      {
+        "month": "2023-05",
+        "value": 40.004,
+        "formation_median": 0.080661,
+        "expanding_median": -0.014682,
+        "n": 788
+      },
+      {
+        "month": "2023-06",
+        "value": 39.4588,
+        "formation_median": 0.00332,
+        "expanding_median": -0.013628,
+        "n": 788
+      },
+      {
+        "month": "2023-07",
+        "value": 38.9626,
+        "formation_median": 0.0306,
+        "expanding_median": -0.012575,
+        "n": 792
+      },
+      {
+        "month": "2023-08",
+        "value": 38.5047,
+        "formation_median": 0.067448,
+        "expanding_median": -0.011752,
+        "n": 792
+      },
+      {
+        "month": "2023-09",
+        "value": 38.0839,
+        "formation_median": 0.184309,
+        "expanding_median": -0.010929,
+        "n": 794
+      },
+      {
+        "month": "2023-10",
+        "value": 37.733,
+        "formation_median": 0.220184,
+        "expanding_median": -0.009214,
+        "n": 794
+      },
+      {
+        "month": "2023-11",
+        "value": 37.45,
+        "formation_median": 0.211665,
+        "expanding_median": -0.0075,
+        "n": 796
+      },
+      {
+        "month": "2023-12",
+        "value": 37.2543,
+        "formation_median": 0.038016,
+        "expanding_median": -0.005224,
+        "n": 808
+      },
+      {
+        "month": "2024-01",
+        "value": 37.1445,
+        "formation_median": 0.084949,
+        "expanding_median": -0.002948,
+        "n": 811
+      },
+      {
+        "month": "2024-02",
+        "value": 37.051,
+        "formation_median": 0.063745,
+        "expanding_median": -0.002517,
+        "n": 811
+      },
+      {
+        "month": "2024-03",
+        "value": 36.9418,
+        "formation_median": -0.024294,
+        "expanding_median": -0.002948,
+        "n": 819
+      },
+      {
+        "month": "2024-04",
+        "value": 36.8488,
+        "formation_median": -0.001197,
+        "expanding_median": -0.002517,
+        "n": 818
+      },
+      {
+        "month": "2024-05",
+        "value": 36.7719,
+        "formation_median": 0.002432,
+        "expanding_median": -0.002087,
+        "n": 819
+      },
+      {
+        "month": "2024-06",
+        "value": 36.7115,
+        "formation_median": 0.035959,
+        "expanding_median": -0.001642,
+        "n": 828
+      },
+      {
+        "month": "2024-07",
+        "value": 36.6349,
+        "formation_median": -0.0485,
+        "expanding_median": -0.002087,
+        "n": 829
+      },
+      {
+        "month": "2024-08",
+        "value": 36.5748,
+        "formation_median": 0.00623,
+        "expanding_median": -0.001642,
+        "n": 830
+      },
+      {
+        "month": "2024-09",
+        "value": 36.4984,
+        "formation_median": -0.006461,
+        "expanding_median": -0.002087,
+        "n": 835
+      },
+      {
+        "month": "2024-10",
+        "value": 36.4066,
+        "formation_median": -0.019553,
+        "expanding_median": -0.002517,
+        "n": 839
+      },
+      {
+        "month": "2024-11",
+        "value": 36.2992,
+        "formation_median": -0.070332,
+        "expanding_median": -0.002948,
+        "n": 840
+      },
+      {
+        "month": "2024-12",
+        "value": 36.2079,
+        "formation_median": 0.015172,
+        "expanding_median": -0.002517,
+        "n": 850
+      },
+      {
+        "month": "2025-01",
+        "value": 36.1323,
+        "formation_median": 0.022205,
+        "expanding_median": -0.002087,
+        "n": 851
+      },
+      {
+        "month": "2025-02",
+        "value": 36.073,
+        "formation_median": 0.049478,
+        "expanding_median": -0.001642,
+        "n": 850
+      }
+    ],
+    "top": [
+      {
+        "month": "2018-01",
+        "value": 87.3567,
+        "formation_median": -0.126433,
+        "expanding_median": -0.126433,
+        "n": 583
+      },
+      {
+        "month": "2018-02",
+        "value": 79.8419,
+        "formation_median": -0.045617,
+        "expanding_median": -0.086025,
+        "n": 588
+      },
+      {
+        "month": "2018-03",
+        "value": 76.1998,
+        "formation_median": -0.021658,
+        "expanding_median": -0.045617,
+        "n": 594
+      },
+      {
+        "month": "2018-04",
+        "value": 72.4112,
+        "formation_median": -0.053822,
+        "expanding_median": -0.04972,
+        "n": 594
+      },
+      {
+        "month": "2018-05",
+        "value": 68.5138,
+        "formation_median": -0.146853,
+        "expanding_median": -0.053822,
+        "n": 595
+      },
+      {
+        "month": "2018-06",
+        "value": 62.3389,
+        "formation_median": -0.149251,
+        "expanding_median": -0.090127,
+        "n": 600
+      },
+      {
+        "month": "2018-07",
+        "value": 54.4572,
+        "formation_median": -0.160865,
+        "expanding_median": -0.126433,
+        "n": 600
+      },
+      {
+        "month": "2018-08",
+        "value": 47.016,
+        "formation_median": -0.229557,
+        "expanding_median": -0.136643,
+        "n": 601
+      },
+      {
+        "month": "2018-09",
+        "value": 40.1116,
+        "formation_median": -0.196616,
+        "expanding_median": -0.146853,
+        "n": 605
+      },
+      {
+        "month": "2018-10",
+        "value": 34.6306,
+        "formation_median": -0.1,
+        "expanding_median": -0.136643,
+        "n": 603
+      },
+      {
+        "month": "2018-11",
+        "value": 30.2522,
+        "formation_median": -0.081288,
+        "expanding_median": -0.126433,
+        "n": 604
+      },
+      {
+        "month": "2018-12",
+        "value": 26.8271,
+        "formation_median": 0.075729,
+        "expanding_median": -0.113216,
+        "n": 610
+      },
+      {
+        "month": "2019-01",
+        "value": 24.1444,
+        "formation_median": -0.079867,
+        "expanding_median": -0.1,
+        "n": 613
+      },
+      {
+        "month": "2019-02",
+        "value": 21.4109,
+        "formation_median": -0.174418,
+        "expanding_median": -0.113216,
+        "n": 614
+      },
+      {
+        "month": "2019-03",
+        "value": 18.7038,
+        "formation_median": -0.368059,
+        "expanding_median": -0.126433,
+        "n": 617
+      },
+      {
+        "month": "2019-04",
+        "value": 16.1481,
+        "formation_median": -0.267074,
+        "expanding_median": -0.136643,
+        "n": 616
+      },
+      {
+        "month": "2019-05",
+        "value": 14.0011,
+        "formation_median": -0.132958,
+        "expanding_median": -0.132958,
+        "n": 616
+      },
+      {
+        "month": "2019-06",
+        "value": 12.0423,
+        "formation_median": -0.191672,
+        "expanding_median": -0.139905,
+        "n": 618
+      },
+      {
+        "month": "2019-07",
+        "value": 10.4412,
+        "formation_median": -0.12212,
+        "expanding_median": -0.132958,
+        "n": 619
+      },
+      {
+        "month": "2019-08",
+        "value": 9.087,
+        "formation_median": -0.016792,
+        "expanding_median": -0.129695,
+        "n": 620
+      },
+      {
+        "month": "2019-09",
+        "value": 7.9381,
+        "formation_median": -0.055484,
+        "expanding_median": -0.126433,
+        "n": 624
+      },
+      {
+        "month": "2019-10",
+        "value": 6.9516,
+        "formation_median": -0.02132,
+        "expanding_median": -0.124276,
+        "n": 625
+      },
+      {
+        "month": "2019-11",
+        "value": 6.1026,
+        "formation_median": 0.07169,
+        "expanding_median": -0.12212,
+        "n": 626
+      },
+      {
+        "month": "2019-12",
+        "value": 5.4249,
+        "formation_median": 0.1234,
+        "expanding_median": -0.11106,
+        "n": 640
+      },
+      {
+        "month": "2020-01",
+        "value": 4.8824,
+        "formation_median": 0.283163,
+        "expanding_median": -0.1,
+        "n": 641
+      },
+      {
+        "month": "2020-02",
+        "value": 4.4398,
+        "formation_median": 0.505572,
+        "expanding_median": -0.090644,
+        "n": 644
+      },
+      {
+        "month": "2020-03",
+        "value": 4.0789,
+        "formation_median": 0.967643,
+        "expanding_median": -0.081288,
+        "n": 638
+      },
+      {
+        "month": "2020-04",
+        "value": 3.7503,
+        "formation_median": 0.663265,
+        "expanding_median": -0.080577,
+        "n": 639
+      },
+      {
+        "month": "2020-05",
+        "value": 3.4507,
+        "formation_median": 0.54849,
+        "expanding_median": -0.079867,
+        "n": 640
+      },
+      {
+        "month": "2020-06",
+        "value": 3.2172,
+        "formation_median": 0.512976,
+        "expanding_median": -0.067675,
+        "n": 640
+      },
+      {
+        "month": "2020-07",
+        "value": 3.0387,
+        "formation_median": 0.397561,
+        "expanding_median": -0.055484,
+        "n": 641
+      },
+      {
+        "month": "2020-08",
+        "value": 2.8726,
+        "formation_median": 0.349043,
+        "expanding_median": -0.054653,
+        "n": 642
+      },
+      {
+        "month": "2020-09",
+        "value": 2.718,
+        "formation_median": 0.348214,
+        "expanding_median": -0.053822,
+        "n": 645
+      },
+      {
+        "month": "2020-10",
+        "value": 2.5829,
+        "formation_median": 0.415885,
+        "expanding_median": -0.04972,
+        "n": 648
+      },
+      {
+        "month": "2020-11",
+        "value": 2.4651,
+        "formation_median": 0.044444,
+        "expanding_median": -0.045617,
+        "n": 651
+      },
+      {
+        "month": "2020-12",
+        "value": 2.3425,
+        "formation_median": -0.092211,
+        "expanding_median": -0.04972,
+        "n": 666
+      },
+      {
+        "month": "2021-01",
+        "value": 2.2164,
+        "formation_median": -0.279131,
+        "expanding_median": -0.053822,
+        "n": 670
+      },
+      {
+        "month": "2021-02",
+        "value": 2.0953,
+        "formation_median": -0.360815,
+        "expanding_median": -0.054653,
+        "n": 674
+      },
+      {
+        "month": "2021-03",
+        "value": 1.979,
+        "formation_median": -0.344681,
+        "expanding_median": -0.055484,
+        "n": 677
+      },
+      {
+        "month": "2021-04",
+        "value": 1.8451,
+        "formation_median": -0.427887,
+        "expanding_median": -0.067675,
+        "n": 679
+      },
+      {
+        "month": "2021-05",
+        "value": 1.6977,
+        "formation_median": -0.490926,
+        "expanding_median": -0.079867,
+        "n": 680
+      },
+      {
+        "month": "2021-06",
+        "value": 1.5609,
+        "formation_median": -0.562883,
+        "expanding_median": -0.080577,
+        "n": 685
+      },
+      {
+        "month": "2021-07",
+        "value": 1.4341,
+        "formation_median": -0.475369,
+        "expanding_median": -0.081288,
+        "n": 687
+      },
+      {
+        "month": "2021-08",
+        "value": 1.3096,
+        "formation_median": -0.480005,
+        "expanding_median": -0.08675,
+        "n": 688
+      },
+      {
+        "month": "2021-09",
+        "value": 1.1889,
+        "formation_median": -0.556985,
+        "expanding_median": -0.092211,
+        "n": 695
+      },
+      {
+        "month": "2021-10",
+        "value": 1.0746,
+        "formation_median": -0.56119,
+        "expanding_median": -0.096106,
+        "n": 698
+      },
+      {
+        "month": "2021-11",
+        "value": 0.9672,
+        "formation_median": -0.490201,
+        "expanding_median": -0.1,
+        "n": 699
+      },
+      {
+        "month": "2021-12",
+        "value": 0.8598,
+        "formation_median": -0.532929,
+        "expanding_median": -0.11106,
+        "n": 737
+      },
+      {
+        "month": "2022-01",
+        "value": 0.7548,
+        "formation_median": -0.322412,
+        "expanding_median": -0.12212,
+        "n": 738
+      },
+      {
+        "month": "2022-02",
+        "value": 0.661,
+        "formation_median": -0.36875,
+        "expanding_median": -0.124276,
+        "n": 739
+      },
+      {
+        "month": "2022-03",
+        "value": 0.5774,
+        "formation_median": -0.428666,
+        "expanding_median": -0.126433,
+        "n": 744
+      },
+      {
+        "month": "2022-04",
+        "value": 0.5025,
+        "formation_median": -0.32996,
+        "expanding_median": -0.129695,
+        "n": 741
+      },
+      {
+        "month": "2022-05",
+        "value": 0.4357,
+        "formation_median": -0.237374,
+        "expanding_median": -0.132958,
+        "n": 742
+      },
+      {
+        "month": "2022-06",
+        "value": 0.3792,
+        "formation_median": -0.101278,
+        "expanding_median": -0.129695,
+        "n": 752
+      },
+      {
+        "month": "2022-07",
+        "value": 0.3288,
+        "formation_median": -0.134998,
+        "expanding_median": -0.132958,
+        "n": 754
+      },
+      {
+        "month": "2022-08",
+        "value": 0.2847,
+        "formation_median": -0.218993,
+        "expanding_median": -0.133978,
+        "n": 754
+      },
+      {
+        "month": "2022-09",
+        "value": 0.2463,
+        "formation_median": -0.213988,
+        "expanding_median": -0.134998,
+        "n": 764
+      },
+      {
+        "month": "2022-10",
+        "value": 0.2116,
+        "formation_median": -0.319624,
+        "expanding_median": -0.140925,
+        "n": 763
+      },
+      {
+        "month": "2022-11",
+        "value": 0.1805,
+        "formation_median": -0.226496,
+        "expanding_median": -0.146853,
+        "n": 763
+      },
+      {
+        "month": "2022-12",
+        "value": 0.1551,
+        "formation_median": -0.090607,
+        "expanding_median": -0.140925,
+        "n": 771
+      },
+      {
+        "month": "2023-01",
+        "value": 0.1323,
+        "formation_median": -0.240113,
+        "expanding_median": -0.146853,
+        "n": 781
+      },
+      {
+        "month": "2023-02",
+        "value": 0.1127,
+        "formation_median": -0.181499,
+        "expanding_median": -0.148052,
+        "n": 779
+      },
+      {
+        "month": "2023-03",
+        "value": 0.0962,
+        "formation_median": -0.105128,
+        "expanding_median": -0.146853,
+        "n": 783
+      },
+      {
+        "month": "2023-04",
+        "value": 0.0819,
+        "formation_median": -0.149398,
+        "expanding_median": -0.148052,
+        "n": 785
+      },
+      {
+        "month": "2023-05",
+        "value": 0.0698,
+        "formation_median": -0.14741,
+        "expanding_median": -0.14741,
+        "n": 785
+      },
+      {
+        "month": "2023-06",
+        "value": 0.0595,
+        "formation_median": -0.262857,
+        "expanding_median": -0.148331,
+        "n": 787
+      },
+      {
+        "month": "2023-07",
+        "value": 0.0506,
+        "formation_median": -0.241881,
+        "expanding_median": -0.149251,
+        "n": 791
+      },
+      {
+        "month": "2023-08",
+        "value": 0.0431,
+        "formation_median": -0.213639,
+        "expanding_median": -0.149324,
+        "n": 790
+      },
+      {
+        "month": "2023-09",
+        "value": 0.0366,
+        "formation_median": -0.071222,
+        "expanding_median": -0.149251,
+        "n": 794
+      },
+      {
+        "month": "2023-10",
+        "value": 0.0312,
+        "formation_median": 0.003509,
+        "expanding_median": -0.148331,
+        "n": 795
+      },
+      {
+        "month": "2023-11",
+        "value": 0.0266,
+        "formation_median": -0.035857,
+        "expanding_median": -0.14741,
+        "n": 797
+      },
+      {
+        "month": "2023-12",
+        "value": 0.0226,
+        "formation_median": -0.207767,
+        "expanding_median": -0.148331,
+        "n": 807
+      },
+      {
+        "month": "2024-01",
+        "value": 0.0193,
+        "formation_median": -0.152869,
+        "expanding_median": -0.149251,
+        "n": 810
+      },
+      {
+        "month": "2024-02",
+        "value": 0.0164,
+        "formation_median": -0.258712,
+        "expanding_median": -0.149324,
+        "n": 809
+      },
+      {
+        "month": "2024-03",
+        "value": 0.0139,
+        "formation_median": -0.31304,
+        "expanding_median": -0.149398,
+        "n": 816
+      },
+      {
+        "month": "2024-04",
+        "value": 0.0118,
+        "formation_median": -0.256983,
+        "expanding_median": -0.151133,
+        "n": 815
+      },
+      {
+        "month": "2024-05",
+        "value": 0.01,
+        "formation_median": -0.255293,
+        "expanding_median": -0.152869,
+        "n": 816
+      },
+      {
+        "month": "2024-06",
+        "value": 0.0085,
+        "formation_median": -0.189037,
+        "expanding_median": -0.156867,
+        "n": 826
+      },
+      {
+        "month": "2024-07",
+        "value": 0.0071,
+        "formation_median": -0.242102,
+        "expanding_median": -0.160865,
+        "n": 828
+      },
+      {
+        "month": "2024-08",
+        "value": 0.006,
+        "formation_median": -0.125,
+        "expanding_median": -0.156867,
+        "n": 829
+      },
+      {
+        "month": "2024-09",
+        "value": 0.0051,
+        "formation_median": -0.121734,
+        "expanding_median": -0.152869,
+        "n": 834
+      },
+      {
+        "month": "2024-10",
+        "value": 0.0043,
+        "formation_median": -0.099443,
+        "expanding_median": -0.151133,
+        "n": 838
+      },
+      {
+        "month": "2024-11",
+        "value": 0.0036,
+        "formation_median": -0.203219,
+        "expanding_median": -0.152869,
+        "n": 840
+      },
+      {
+        "month": "2024-12",
+        "value": 0.0031,
+        "formation_median": -0.21186,
+        "expanding_median": -0.156867,
+        "n": 849
+      },
+      {
+        "month": "2025-01",
+        "value": 0.0026,
+        "formation_median": -0.182611,
+        "expanding_median": -0.160865,
+        "n": 850
+      },
+      {
+        "month": "2025-02",
+        "value": 0.0022,
+        "formation_median": -0.126065,
+        "expanding_median": -0.156867,
+        "n": 849
+      }
+    ]
+  },
+  "formation_series": [
+    {
+      "month": "2018-01",
+      "bottom_return": -0.067279,
+      "middle_return": -0.068846,
+      "top_return": -0.126433,
+      "bottom_n": 584,
+      "middle_n": 585,
+      "top_n": 583,
+      "structural_spread": 0.059153
+    },
+    {
+      "month": "2018-02",
+      "bottom_return": -0.007087,
+      "middle_return": 0.020471,
+      "top_return": -0.045617,
+      "bottom_n": 589,
+      "middle_n": 591,
+      "top_n": 588,
+      "structural_spread": 0.03853
+    },
+    {
+      "month": "2018-03",
+      "bottom_return": 0.011211,
+      "middle_return": 0.015862,
+      "top_return": -0.021658,
+      "bottom_n": 595,
+      "middle_n": 596,
+      "top_n": 594,
+      "structural_spread": 0.032869
+    },
+    {
+      "month": "2018-04",
+      "bottom_return": 0.008696,
+      "middle_return": 0.011985,
+      "top_return": -0.053822,
+      "bottom_n": 595,
+      "middle_n": 595,
+      "top_n": 594,
+      "structural_spread": 0.062518
+    },
+    {
+      "month": "2018-05",
+      "bottom_return": -0.075357,
+      "middle_return": -0.092256,
+      "top_return": -0.146853,
+      "bottom_n": 596,
+      "middle_n": 597,
+      "top_n": 595,
+      "structural_spread": 0.071496
+    },
+    {
+      "month": "2018-06",
+      "bottom_return": -0.004833,
+      "middle_return": -0.010929,
+      "top_return": -0.149251,
+      "bottom_n": 602,
+      "middle_n": 604,
+      "top_n": 600,
+      "structural_spread": 0.144417
+    },
+    {
+      "month": "2018-07",
+      "bottom_return": -0.032469,
+      "middle_return": -0.022414,
+      "top_return": -0.160865,
+      "bottom_n": 602,
+      "middle_n": 603,
+      "top_n": 600,
+      "structural_spread": 0.128396
+    },
+    {
+      "month": "2018-08",
+      "bottom_return": -0.091232,
+      "middle_return": -0.08762,
+      "top_return": -0.229557,
+      "bottom_n": 603,
+      "middle_n": 605,
+      "top_n": 601,
+      "structural_spread": 0.138324
+    },
+    {
+      "month": "2018-09",
+      "bottom_return": -0.025724,
+      "middle_return": -0.037782,
+      "top_return": -0.196616,
+      "bottom_n": 604,
+      "middle_n": 605,
+      "top_n": 605,
+      "structural_spread": 0.170891
+    },
+    {
+      "month": "2018-10",
+      "bottom_return": 0.063383,
+      "middle_return": 0.075749,
+      "top_return": -0.1,
+      "bottom_n": 604,
+      "middle_n": 604,
+      "top_n": 603,
+      "structural_spread": 0.163383
+    },
+    {
+      "month": "2018-11",
+      "bottom_return": 0.058686,
+      "middle_return": 0.071651,
+      "top_return": -0.081288,
+      "bottom_n": 603,
+      "middle_n": 604,
+      "top_n": 604,
+      "structural_spread": 0.139974
+    },
+    {
+      "month": "2018-12",
+      "bottom_return": 0.185692,
+      "middle_return": 0.224914,
+      "top_return": 0.075729,
+      "bottom_n": 610,
+      "middle_n": 612,
+      "top_n": 610,
+      "structural_spread": 0.109963
+    },
+    {
+      "month": "2019-01",
+      "bottom_return": 0.065144,
+      "middle_return": 0.09776,
+      "top_return": -0.079867,
+      "bottom_n": 613,
+      "middle_n": 615,
+      "top_n": 613,
+      "structural_spread": 0.145011
+    },
+    {
+      "month": "2019-02",
+      "bottom_return": -0.069092,
+      "middle_return": -0.032662,
+      "top_return": -0.174418,
+      "bottom_n": 614,
+      "middle_n": 616,
+      "top_n": 614,
+      "structural_spread": 0.105326
+    },
+    {
+      "month": "2019-03",
+      "bottom_return": -0.269737,
+      "middle_return": -0.256976,
+      "top_return": -0.368059,
+      "bottom_n": 617,
+      "middle_n": 618,
+      "top_n": 617,
+      "structural_spread": 0.098322
+    },
+    {
+      "month": "2019-04",
+      "bottom_return": -0.21218,
+      "middle_return": -0.175019,
+      "top_return": -0.267074,
+      "bottom_n": 616,
+      "middle_n": 618,
+      "top_n": 616,
+      "structural_spread": 0.054894
+    },
+    {
+      "month": "2019-05",
+      "bottom_return": -0.129058,
+      "middle_return": -0.084256,
+      "top_return": -0.132958,
+      "bottom_n": 615,
+      "middle_n": 617,
+      "top_n": 616,
+      "structural_spread": 0.003899
+    },
+    {
+      "month": "2019-06",
+      "bottom_return": -0.15356,
+      "middle_return": -0.150391,
+      "top_return": -0.191672,
+      "bottom_n": 621,
+      "middle_n": 623,
+      "top_n": 618,
+      "structural_spread": 0.038112
+    },
+    {
+      "month": "2019-07",
+      "bottom_return": -0.148692,
+      "middle_return": -0.125656,
+      "top_return": -0.12212,
+      "bottom_n": 622,
+      "middle_n": 624,
+      "top_n": 619,
+      "structural_spread": -0.026572
+    },
+    {
+      "month": "2019-08",
+      "bottom_return": -0.074421,
+      "middle_return": -0.045455,
+      "top_return": -0.016792,
+      "bottom_n": 623,
+      "middle_n": 625,
+      "top_n": 620,
+      "structural_spread": -0.057629
+    },
+    {
+      "month": "2019-09",
+      "bottom_return": -0.113031,
+      "middle_return": -0.131787,
+      "top_return": -0.055484,
+      "bottom_n": 627,
+      "middle_n": 628,
+      "top_n": 624,
+      "structural_spread": -0.057547
+    },
+    {
+      "month": "2019-10",
+      "bottom_return": -0.102368,
+      "middle_return": -0.110855,
+      "top_return": -0.02132,
+      "bottom_n": 629,
+      "middle_n": 629,
+      "top_n": 625,
+      "structural_spread": -0.081049
+    },
+    {
+      "month": "2019-11",
+      "bottom_return": -0.026234,
+      "middle_return": -0.014682,
+      "top_return": 0.07169,
+      "bottom_n": 630,
+      "middle_n": 631,
+      "top_n": 626,
+      "structural_spread": -0.097924
+    },
+    {
+      "month": "2019-12",
+      "bottom_return": -0.002058,
+      "middle_return": -0.002948,
+      "top_return": 0.1234,
+      "bottom_n": 642,
+      "middle_n": 643,
+      "top_n": 640,
+      "structural_spread": -0.125458
+    },
+    {
+      "month": "2020-01",
+      "bottom_return": 0.048643,
+      "middle_return": 0.030543,
+      "top_return": 0.283163,
+      "bottom_n": 644,
+      "middle_n": 644,
+      "top_n": 641,
+      "structural_spread": -0.23452
+    },
+    {
+      "month": "2020-02",
+      "bottom_return": 0.230053,
+      "middle_return": 0.204339,
+      "top_return": 0.505572,
+      "bottom_n": 647,
+      "middle_n": 647,
+      "top_n": 644,
+      "structural_spread": -0.275519
+    },
+    {
+      "month": "2020-03",
+      "bottom_return": 0.655562,
+      "middle_return": 0.675879,
+      "top_return": 0.967643,
+      "bottom_n": 642,
+      "middle_n": 641,
+      "top_n": 638,
+      "structural_spread": -0.312081
+    },
+    {
+      "month": "2020-04",
+      "bottom_return": 0.539555,
+      "middle_return": 0.534383,
+      "top_return": 0.663265,
+      "bottom_n": 642,
+      "middle_n": 643,
+      "top_n": 639,
+      "structural_spread": -0.12371
+    },
+    {
+      "month": "2020-05",
+      "bottom_return": 0.483906,
+      "middle_return": 0.521086,
+      "top_return": 0.54849,
+      "bottom_n": 644,
+      "middle_n": 644,
+      "top_n": 640,
+      "structural_spread": -0.064584
+    },
+    {
+      "month": "2020-06",
+      "bottom_return": 0.480108,
+      "middle_return": 0.441817,
+      "top_return": 0.512976,
+      "bottom_n": 643,
+      "middle_n": 642,
+      "top_n": 640,
+      "structural_spread": -0.032868
+    },
+    {
+      "month": "2020-07",
+      "bottom_return": 0.40598,
+      "middle_return": 0.39715,
+      "top_return": 0.397561,
+      "bottom_n": 644,
+      "middle_n": 643,
+      "top_n": 641,
+      "structural_spread": 0.008419
+    },
+    {
+      "month": "2020-08",
+      "bottom_return": 0.378769,
+      "middle_return": 0.378066,
+      "top_return": 0.349043,
+      "bottom_n": 645,
+      "middle_n": 643,
+      "top_n": 642,
+      "structural_spread": 0.029725
+    },
+    {
+      "month": "2020-09",
+      "bottom_return": 0.367354,
+      "middle_return": 0.381839,
+      "top_return": 0.348214,
+      "bottom_n": 646,
+      "middle_n": 646,
+      "top_n": 645,
+      "structural_spread": 0.01914
+    },
+    {
+      "month": "2020-10",
+      "bottom_return": 0.404274,
+      "middle_return": 0.435843,
+      "top_return": 0.415885,
+      "bottom_n": 649,
+      "middle_n": 649,
+      "top_n": 648,
+      "structural_spread": -0.011611
+    },
+    {
+      "month": "2020-11",
+      "bottom_return": 0.205233,
+      "middle_return": 0.180445,
+      "top_return": 0.044444,
+      "bottom_n": 652,
+      "middle_n": 652,
+      "top_n": 651,
+      "structural_spread": 0.160789
+    },
+    {
+      "month": "2020-12",
+      "bottom_return": 0.200772,
+      "middle_return": 0.167076,
+      "top_return": -0.092211,
+      "bottom_n": 665,
+      "middle_n": 665,
+      "top_n": 666,
+      "structural_spread": 0.292983
+    },
+    {
+      "month": "2021-01",
+      "bottom_return": 0.133603,
+      "middle_return": 0.083283,
+      "top_return": -0.279131,
+      "bottom_n": 670,
+      "middle_n": 670,
+      "top_n": 670,
+      "structural_spread": 0.412734
+    },
+    {
+      "month": "2021-02",
+      "bottom_return": 0.047596,
+      "middle_return": 0.0,
+      "top_return": -0.360815,
+      "bottom_n": 674,
+      "middle_n": 673,
+      "top_n": 674,
+      "structural_spread": 0.408411
+    },
+    {
+      "month": "2021-03",
+      "bottom_return": 0.024816,
+      "middle_return": -0.012575,
+      "top_return": -0.344681,
+      "bottom_n": 678,
+      "middle_n": 678,
+      "top_n": 677,
+      "structural_spread": 0.369497
+    },
+    {
+      "month": "2021-04",
+      "bottom_return": -0.077645,
+      "middle_return": -0.11093,
+      "top_return": -0.427887,
+      "bottom_n": 680,
+      "middle_n": 679,
+      "top_n": 679,
+      "structural_spread": 0.350243
+    },
+    {
+      "month": "2021-05",
+      "bottom_return": -0.092364,
+      "middle_return": -0.134371,
+      "top_return": -0.490926,
+      "bottom_n": 681,
+      "middle_n": 681,
+      "top_n": 680,
+      "structural_spread": 0.398562
+    },
+    {
+      "month": "2021-06",
+      "bottom_return": -0.149293,
+      "middle_return": -0.203602,
+      "top_return": -0.562883,
+      "bottom_n": 686,
+      "middle_n": 686,
+      "top_n": 685,
+      "structural_spread": 0.41359
+    },
+    {
+      "month": "2021-07",
+      "bottom_return": -0.082123,
+      "middle_return": -0.147009,
+      "top_return": -0.475369,
+      "bottom_n": 687,
+      "middle_n": 687,
+      "top_n": 687,
+      "structural_spread": 0.393246
+    },
+    {
+      "month": "2021-08",
+      "bottom_return": -0.133042,
+      "middle_return": -0.192761,
+      "top_return": -0.480005,
+      "bottom_n": 689,
+      "middle_n": 689,
+      "top_n": 688,
+      "structural_spread": 0.346963
+    },
+    {
+      "month": "2021-09",
+      "bottom_return": -0.170468,
+      "middle_return": -0.232049,
+      "top_return": -0.556985,
+      "bottom_n": 696,
+      "middle_n": 695,
+      "top_n": 695,
+      "structural_spread": 0.386518
+    },
+    {
+      "month": "2021-10",
+      "bottom_return": -0.142822,
+      "middle_return": -0.228048,
+      "top_return": -0.56119,
+      "bottom_n": 700,
+      "middle_n": 700,
+      "top_n": 698,
+      "structural_spread": 0.418368
+    },
+    {
+      "month": "2021-11",
+      "bottom_return": -0.066303,
+      "middle_return": -0.138694,
+      "top_return": -0.490201,
+      "bottom_n": 700,
+      "middle_n": 700,
+      "top_n": 699,
+      "structural_spread": 0.423898
+    },
+    {
+      "month": "2021-12",
+      "bottom_return": -0.137977,
+      "middle_return": -0.22322,
+      "top_return": -0.532929,
+      "bottom_n": 738,
+      "middle_n": 739,
+      "top_n": 737,
+      "structural_spread": 0.394952
+    },
+    {
+      "month": "2022-01",
+      "bottom_return": -0.053167,
+      "middle_return": -0.093236,
+      "top_return": -0.322412,
+      "bottom_n": 739,
+      "middle_n": 739,
+      "top_n": 738,
+      "structural_spread": 0.269245
+    },
+    {
+      "month": "2022-02",
+      "bottom_return": -0.070543,
+      "middle_return": -0.107664,
+      "top_return": -0.36875,
+      "bottom_n": 740,
+      "middle_n": 741,
+      "top_n": 739,
+      "structural_spread": 0.298207
+    },
+    {
+      "month": "2022-03",
+      "bottom_return": -0.12751,
+      "middle_return": -0.14286,
+      "top_return": -0.428666,
+      "bottom_n": 743,
+      "middle_n": 742,
+      "top_n": 744,
+      "structural_spread": 0.301155
+    },
+    {
+      "month": "2022-04",
+      "bottom_return": -0.09219,
+      "middle_return": -0.083243,
+      "top_return": -0.32996,
+      "bottom_n": 740,
+      "middle_n": 739,
+      "top_n": 741,
+      "structural_spread": 0.237769
+    },
+    {
+      "month": "2022-05",
+      "bottom_return": -0.121496,
+      "middle_return": -0.11503,
+      "top_return": -0.237374,
+      "bottom_n": 740,
+      "middle_n": 739,
+      "top_n": 742,
+      "structural_spread": 0.115877
+    },
+    {
+      "month": "2022-06",
+      "bottom_return": 0.005622,
+      "middle_return": 0.038667,
+      "top_return": -0.101278,
+      "bottom_n": 751,
+      "middle_n": 750,
+      "top_n": 752,
+      "structural_spread": 0.1069
+    },
+    {
+      "month": "2022-07",
+      "bottom_return": -0.00826,
+      "middle_return": -0.002087,
+      "top_return": -0.134998,
+      "bottom_n": 753,
+      "middle_n": 751,
+      "top_n": 754,
+      "structural_spread": 0.126738
+    },
+    {
+      "month": "2022-08",
+      "bottom_return": -0.011279,
+      "middle_return": -0.0075,
+      "top_return": -0.218993,
+      "bottom_n": 753,
+      "middle_n": 752,
+      "top_n": 754,
+      "structural_spread": 0.207714
+    },
+    {
+      "month": "2022-09",
+      "bottom_return": 0.019588,
+      "middle_return": 0.042658,
+      "top_return": -0.213988,
+      "bottom_n": 764,
+      "middle_n": 764,
+      "top_n": 764,
+      "structural_spread": 0.233576
+    },
+    {
+      "month": "2022-10",
+      "bottom_return": -0.071238,
+      "middle_return": -0.092838,
+      "top_return": -0.319624,
+      "bottom_n": 763,
+      "middle_n": 763,
+      "top_n": 763,
+      "structural_spread": 0.248386
+    },
+    {
+      "month": "2022-11",
+      "bottom_return": -0.060876,
+      "middle_return": -0.067317,
+      "top_return": -0.226496,
+      "bottom_n": 763,
+      "middle_n": 763,
+      "top_n": 763,
+      "structural_spread": 0.16562
+    },
+    {
+      "month": "2022-12",
+      "bottom_return": 0.097729,
+      "middle_return": 0.055281,
+      "top_return": -0.090607,
+      "bottom_n": 770,
+      "middle_n": 770,
+      "top_n": 771,
+      "structural_spread": 0.188336
+    },
+    {
+      "month": "2023-01",
+      "bottom_return": -0.005405,
+      "middle_return": -0.052118,
+      "top_return": -0.240113,
+      "bottom_n": 781,
+      "middle_n": 782,
+      "top_n": 781,
+      "structural_spread": 0.234708
+    },
+    {
+      "month": "2023-02",
+      "bottom_return": 0.025773,
+      "middle_return": -0.021041,
+      "top_return": -0.181499,
+      "bottom_n": 779,
+      "middle_n": 780,
+      "top_n": 779,
+      "structural_spread": 0.207272
+    },
+    {
+      "month": "2023-03",
+      "bottom_return": 0.128638,
+      "middle_return": 0.04627,
+      "top_return": -0.105128,
+      "bottom_n": 785,
+      "middle_n": 786,
+      "top_n": 783,
+      "structural_spread": 0.233767
+    },
+    {
+      "month": "2023-04",
+      "bottom_return": 0.111689,
+      "middle_return": 0.012376,
+      "top_return": -0.149398,
+      "bottom_n": 788,
+      "middle_n": 789,
+      "top_n": 785,
+      "structural_spread": 0.261087
+    },
+    {
+      "month": "2023-05",
+      "bottom_return": 0.17094,
+      "middle_return": 0.080661,
+      "top_return": -0.14741,
+      "bottom_n": 787,
+      "middle_n": 788,
+      "top_n": 785,
+      "structural_spread": 0.318351
+    },
+    {
+      "month": "2023-06",
+      "bottom_return": 0.090033,
+      "middle_return": 0.00332,
+      "top_return": -0.262857,
+      "bottom_n": 788,
+      "middle_n": 788,
+      "top_n": 787,
+      "structural_spread": 0.35289
+    },
+    {
+      "month": "2023-07",
+      "bottom_return": 0.117935,
+      "middle_return": 0.0306,
+      "top_return": -0.241881,
+      "bottom_n": 792,
+      "middle_n": 792,
+      "top_n": 791,
+      "structural_spread": 0.359816
+    },
+    {
+      "month": "2023-08",
+      "bottom_return": 0.120588,
+      "middle_return": 0.067448,
+      "top_return": -0.213639,
+      "bottom_n": 791,
+      "middle_n": 792,
+      "top_n": 790,
+      "structural_spread": 0.334227
+    },
+    {
+      "month": "2023-09",
+      "bottom_return": 0.209799,
+      "middle_return": 0.184309,
+      "top_return": -0.071222,
+      "bottom_n": 794,
+      "middle_n": 794,
+      "top_n": 794,
+      "structural_spread": 0.28102
+    },
+    {
+      "month": "2023-10",
+      "bottom_return": 0.215482,
+      "middle_return": 0.220184,
+      "top_return": 0.003509,
+      "bottom_n": 796,
+      "middle_n": 794,
+      "top_n": 795,
+      "structural_spread": 0.211973
+    },
+    {
+      "month": "2023-11",
+      "bottom_return": 0.207708,
+      "middle_return": 0.211665,
+      "top_return": -0.035857,
+      "bottom_n": 798,
+      "middle_n": 796,
+      "top_n": 797,
+      "structural_spread": 0.243565
+    },
+    {
+      "month": "2023-12",
+      "bottom_return": 0.054324,
+      "middle_return": 0.038016,
+      "top_return": -0.207767,
+      "bottom_n": 808,
+      "middle_n": 808,
+      "top_n": 807,
+      "structural_spread": 0.262091
+    },
+    {
+      "month": "2024-01",
+      "bottom_return": 0.086416,
+      "middle_return": 0.084949,
+      "top_return": -0.152869,
+      "bottom_n": 812,
+      "middle_n": 811,
+      "top_n": 810,
+      "structural_spread": 0.239286
+    },
+    {
+      "month": "2024-02",
+      "bottom_return": 0.038416,
+      "middle_return": 0.063745,
+      "top_return": -0.258712,
+      "bottom_n": 811,
+      "middle_n": 811,
+      "top_n": 809,
+      "structural_spread": 0.297128
+    },
+    {
+      "month": "2024-03",
+      "bottom_return": -0.012474,
+      "middle_return": -0.024294,
+      "top_return": -0.31304,
+      "bottom_n": 818,
+      "middle_n": 819,
+      "top_n": 816,
+      "structural_spread": 0.300566
+    },
+    {
+      "month": "2024-04",
+      "bottom_return": 0.004715,
+      "middle_return": -0.001197,
+      "top_return": -0.256983,
+      "bottom_n": 817,
+      "middle_n": 818,
+      "top_n": 815,
+      "structural_spread": 0.261699
+    },
+    {
+      "month": "2024-05",
+      "bottom_return": -0.017628,
+      "middle_return": 0.002432,
+      "top_return": -0.255293,
+      "bottom_n": 818,
+      "middle_n": 819,
+      "top_n": 816,
+      "structural_spread": 0.237665
+    },
+    {
+      "month": "2024-06",
+      "bottom_return": 0.052829,
+      "middle_return": 0.035959,
+      "top_return": -0.189037,
+      "bottom_n": 827,
+      "middle_n": 828,
+      "top_n": 826,
+      "structural_spread": 0.241866
+    },
+    {
+      "month": "2024-07",
+      "bottom_return": -0.00939,
+      "middle_return": -0.0485,
+      "top_return": -0.242102,
+      "bottom_n": 829,
+      "middle_n": 829,
+      "top_n": 828,
+      "structural_spread": 0.232713
+    },
+    {
+      "month": "2024-08",
+      "bottom_return": 0.032915,
+      "middle_return": 0.00623,
+      "top_return": -0.125,
+      "bottom_n": 830,
+      "middle_n": 830,
+      "top_n": 829,
+      "structural_spread": 0.157915
+    },
+    {
+      "month": "2024-09",
+      "bottom_return": -0.001314,
+      "middle_return": -0.006461,
+      "top_return": -0.121734,
+      "bottom_n": 834,
+      "middle_n": 835,
+      "top_n": 834,
+      "structural_spread": 0.12042
+    },
+    {
+      "month": "2024-10",
+      "bottom_return": 0.010892,
+      "middle_return": -0.019553,
+      "top_return": -0.099443,
+      "bottom_n": 837,
+      "middle_n": 839,
+      "top_n": 838,
+      "structural_spread": 0.110335
+    },
+    {
+      "month": "2024-11",
+      "bottom_return": -0.054789,
+      "middle_return": -0.070332,
+      "top_return": -0.203219,
+      "bottom_n": 840,
+      "middle_n": 840,
+      "top_n": 840,
+      "structural_spread": 0.148431
+    },
+    {
+      "month": "2024-12",
+      "bottom_return": 0.028542,
+      "middle_return": 0.015172,
+      "top_return": -0.21186,
+      "bottom_n": 848,
+      "middle_n": 850,
+      "top_n": 849,
+      "structural_spread": 0.240403
+    },
+    {
+      "month": "2025-01",
+      "bottom_return": 0.024754,
+      "middle_return": 0.022205,
+      "top_return": -0.182611,
+      "bottom_n": 850,
+      "middle_n": 851,
+      "top_n": 850,
+      "structural_spread": 0.207365
+    },
+    {
+      "month": "2025-02",
+      "bottom_return": 0.03724,
+      "middle_return": 0.049478,
+      "top_return": -0.126065,
+      "bottom_n": 849,
+      "middle_n": 850,
+      "top_n": 849,
+      "structural_spread": 0.163305
+    }
+  ]
+}
