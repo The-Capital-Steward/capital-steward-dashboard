@@ -31,7 +31,7 @@ export default function SignInPage() {
 
         <div style={{ animation: "fadeUp 0.6s ease 0.1s both" }}>
           <SignIn
-            afterSignInUrl="/platform-beta"
+            forceRedirectUrl="/platform-beta"
             appearance={{
               variables: {
                 colorBackground: '#0D2847',
