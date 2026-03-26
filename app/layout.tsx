@@ -1,3 +1,4 @@
+import { UserButton } from '@clerk/nextjs'
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import Link from "next/link";
@@ -43,6 +44,7 @@ export default function RootLayout({
                 <Link href="/osmr-methodology" className="transition hover:text-[#0A1F3D]">
                   Methodology
                 </Link>
+                <UserButton afterSignOutUrl="/platform" />
                 <Link
                   href="/platform"
                   className="inline-flex items-center gap-2 rounded-[1.75rem] bg-[#0A1F3D] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#153761]"
