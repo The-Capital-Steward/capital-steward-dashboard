@@ -494,9 +494,9 @@ function AccentBox({ children, borderColor = T.green }: { children: React.ReactN
   )
 }
 
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className = "", style: cardStyle = {} }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={`rounded-xl ${className}`} style={{ border: `1px solid ${T.border}`, background: T.white, boxShadow: "0 1px 8px rgba(10,31,61,0.05)" }}>
+    <div className={`rounded-xl ${className}`} style={{ border: `1px solid ${T.border}`, background: T.white, boxShadow: "0 1px 8px rgba(10,31,61,0.05)", ...cardStyle }}>
       {children}
     </div>
   )
