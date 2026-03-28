@@ -104,7 +104,7 @@ function RegimeChart() {
           />
           <ReferenceLine y={0} stroke="#DDE0DC" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v) => [v != null ? Number(v).toFixed(4) : "—", "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[4, 4, 0, 0]}>
@@ -148,7 +148,7 @@ function YearByYearChart() {
           />
           <ReferenceLine y={0} stroke="#DDE0DC" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v) => [v != null ? Number(v).toFixed(4) : "—", "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[3, 3, 0, 0]}>
@@ -189,7 +189,7 @@ function OALReturnChart() {
           />
           <ReferenceLine y={0} stroke="#DDE0DC" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "Median return"]}
+            formatter={(v) => [v != null ? `${Number(v).toFixed(1)}%` : "—", "Median return"]}
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
           />
           <Bar dataKey="median" radius={[4, 4, 0, 0]}>
@@ -223,7 +223,7 @@ function QuintileChart() {
           />
           <Tooltip
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
-            formatter={(v: number, name: string) => [`${v.toFixed(1)}%`, name]}
+            formatter={(v, name) => [v != null ? `${Number(v).toFixed(1)}%` : "—", name]}
           />
           <Bar dataKey="composite" name="Composite" fill="#0A1F3D" radius={[4, 4, 0, 0]} />
         </BarChart>
@@ -254,7 +254,7 @@ function IndexComparisonChart() {
             domain={[0, 22]}
           />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "Ann. return"]}
+            formatter={(v) => [v != null ? `${Number(v).toFixed(1)}%` : "—", "Ann. return"]}
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
           />
           <Bar dataKey="ann" radius={[4, 4, 0, 0]}>
@@ -293,7 +293,7 @@ function BucketRiskChart() {
           />
           <ReferenceLine x={0} stroke="#DDE0DC" />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "CVaR (95%)"]}
+            formatter={(v) => [v != null ? `${Number(v).toFixed(1)}%` : "—", "CVaR (95%)"]}
             contentStyle={{ fontSize: 12, borderColor: "#DDE0DC", borderRadius: 8 }}
           />
           <Bar dataKey="cvar" radius={[0, 4, 4, 0]}>
