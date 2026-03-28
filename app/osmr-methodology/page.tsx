@@ -318,116 +318,6 @@ function BucketRiskChart() {
   )
 }
 
-// Return band distribution — Very Low vs Very High
-function DistributionChart() {
-  const bands = [
-    { range: "< −50%",        vl: 2.4,  vh: 16.7 },
-    { range: "−50 to −25%",   vl: 9.8,  vh: 14.4 },
-    { range: "−25 to 0%",     vl: 27.0, vh: 29.5 },
-    { range: "0 to +25%",     vl: 35.3, vh: 28.5 },
-    { range: "+25 to +50%",   vl: 17.7, vh: 7.1  },
-    { range: "> +50%",        vl: 7.8,  vh: 3.8  },
-  ]
-  const maxVal = 40
-
-  return (
-    <div>
-      <div className="flex gap-4 mb-3">
-        <div className="flex items-center gap-1.5 text-xs text-[#5C6472]">
-          <div className="w-3 h-3 rounded-sm bg-[#244636] opacity-80" />
-          Very Low composite
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#5C6472]">
-          <div className="w-3 h-3 rounded-sm bg-[#8B3A2A] opacity-80" />
-          Very High composite
-        </div>
-      </div>
-      <div className="space-y-2">
-        {bands.map(({ range, vl, vh }) => (
-          <div key={range} className="flex items-center gap-2">
-            <div className="w-28 text-right text-[11px] text-[#8A92A0] shrink-0">{range}</div>
-            <div className="flex-1 flex flex-col gap-0.5">
-              <div className="flex items-center gap-1">
-                <div
-                  className="h-3 rounded-sm"
-                  style={{ width: `${(vl / maxVal) * 100}%`, backgroundColor: "#244636", opacity: 0.8 }}
-                />
-                <span className="text-[10px] text-[#5C6472]">{vl}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div
-                  className="h-3 rounded-sm"
-                  style={{ width: `${(vh / maxVal) * 100}%`, backgroundColor: "#8B3A2A", opacity: 0.8 }}
-                />
-                <span className="text-[10px] text-[#5C6472]">{vh}%</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="text-[11px] text-[#8A92A0] mt-3">
-        % of observations in each return band · Very Low: N=18,481 · Very High: N=26,371
-      </p>
-    </div>
-  )
-}
-
-// Premium decomposition — three-bar visual
-function PremiumDecomposition() {
-  const bars = [
-    { label: "Full universe\n(cap-weighted)",      val: 10.2, baseline: true  },
-    { label: "OSMR-filtered\n(exclusion only, CW)", val: 14.4, baseline: false },
-    { label: "Very Low only\n(post-2013, EW)",      val: 17.7, baseline: false },
-  ]
-  const max = 20
-
-  return (
-    <div>
-      <div className="flex items-end gap-4 h-40 mb-3">
-        {bars.map(({ label, val, baseline }) => (
-          <div key={label} className="flex-1 flex flex-col items-center gap-1">
-            <div className="text-sm font-bold" style={{ color: baseline ? "#8A92A0" : "#0A1F3D" }}>
-              +{val}%
-            </div>
-            <div
-              className="w-full rounded-t-md"
-              style={{
-                height: `${(val / max) * 120}px`,
-                backgroundColor: baseline ? "#DDE0DC" : "#6DAE8B",
-                opacity: baseline ? 1 : 0.9,
-              }}
-            />
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-4">
-        {bars.map(({ label }) => (
-          <div key={label} className="flex-1 text-center text-[10px] text-[#8A92A0] leading-tight whitespace-pre-line">
-            {label}
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 pt-3 border-t border-[#DDE0DC] space-y-1.5">
-        <div className="flex justify-between text-xs text-[#5C6472]">
-          <span>Exclusion effect (removing High/Very High)</span>
-          <span className="font-medium text-[#244636]">+4.2pp</span>
-        </div>
-        <div className="flex justify-between text-xs text-[#5C6472]">
-          <span>Selection effect (Very Low only, post-2013)</span>
-          <span className="font-medium text-[#244636]">+3.3pp</span>
-        </div>
-        <div className="flex justify-between text-xs font-semibold text-[#0A1F3D] pt-1.5 border-t border-[#DDE0DC]">
-          <span>Total Very Low premium vs full universe</span>
-          <span>+7.5pp annualized</span>
-        </div>
-      </div>
-      <p className="text-[11px] text-[#8A92A0] mt-2">
-        Post-2013 (2014–2026, 145 months) · annualized returns · transaction costs not modeled
-      </p>
-    </div>
-  )
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // OAL DATA
 // ─────────────────────────────────────────────────────────────────────────────
@@ -499,14 +389,12 @@ const AXES = [
     id: "axis1",
     label: "Axis 1",
     name: "Operational Anchor Risk",
-    r: "−0.061",
-    regime: "Strongest in COVID (r=−0.128) and post-COVID (r=−0.063). Near-zero pre-2020.",
-    question: "How far does the valuation extend beyond demonstrated operational output?",
-    body: `Axis 1 measures the distance between a company's Enterprise Value and its deepest credible operational anchor — adjusted for the shallowness of that anchor.
+    question: "How deep is the operational support behind the valuation?",
+    body: `Axis 1 measures the distance between a company's current Enterprise Value and its deepest credible operational anchor, adjusted for the shallowness of that anchor.
 
-The formula: log(EV / 3-year cumulative anchor) + OAL_penalty → global percentile rank.
+The formula: log(EV / anchor_3yr) + OAL_penalty → global percentile rank.
 
-The 3-year cumulative anchor is deliberate. A company must have demonstrated positive free cash flow (or net income, EBIT, or revenue) over a full three-year trailing window, not just in the most recent quarter. The shallowness penalty then encodes the structural distance between OAL rungs: a revenue-anchored company is treated as approximately 13.5× more expensive relative to its anchor than an FCF-anchored company at the same raw multiple.
+The anchor is the 3-year cumulative sum of the OAL-appropriate financial series — not trailing twelve months. A 3-year window reduces the noise of a single anomalous quarter and requires sustained demonstrated performance. The logarithm compresses extreme multiples while preserving ordinal relationships. The shallowness penalty encodes structural distance between rungs: after adjustment, a revenue-anchor company is treated as approximately 13.5× more expensive relative to its anchor than an FCF-anchor company at the same raw multiple.
 
 Axis 1 produces its strongest signal during periods of structural stress and dislocation. In calm bull markets where narrative valuations are broadly rewarded, the signal is attenuated — which is both expected and disclosed. The framework measures the structure of risk, not its timing.`,
   },
@@ -514,33 +402,27 @@ Axis 1 produces its strongest signal during periods of structural stress and dis
     id: "axis2",
     label: "Axis 2",
     name: "Operational Trajectory Risk",
-    r: "−0.062",
-    regime: "Present in all regimes including pre-2020 (r=−0.023). Dominant post-COVID (r=−0.100).",
-    question: "Is the operational foundation strengthening or eroding?",
+    question: "Is that operational foundation improving or deteriorating?",
     body: `Axis 2 captures trajectory, not position. A company moving toward demonstrated cash generation is shortening its narrative bridge. A company whose anchor metric is deteriorating is lengthening it — accumulating structural risk regardless of where its price currently sits.
 
-The score is derived from year-over-year comparisons across up to 28 quarters of history, adjusted by an OAL shallowness penalty and ranked globally. The four most recent year-over-year comparisons receive double weight — current trajectory is more relevant to current structural risk than data from six years prior.
+The score is derived from year-over-year comparisons across up to 28 quarters of history, adjusted by an OAL shallowness penalty and ranked globally. The four most recent year-over-year comparisons receive double weight — current trajectory is more relevant to current structural risk than six-year-old data.
 
-Axis 2 is the only axis with meaningful signal across all market regimes, including the 2009–2019 low-volatility period where Axis 1 had near-zero predictive power. This reflects an important structural insight: trajectory risk does not require market disruption to be real. A company quietly deteriorating its anchor is accumulating fragility whether the market notices or not.
+Axis 2 is the stronger and more consistent signal across the validation period. It produced meaningful signal even in the pre-2020 decade (Spearman r = −0.023) where Axis 1 was effectively zero — suggesting trajectory discriminates returns even in environments where valuation alone does not.
 
-Design note: Year-over-year consistency outperformed tanh transformation and R-squared trend fitting against historical data. The simpler measure was used.`,
+Design note: YoY consistency outperformed tanh transformation and R-squared trend fitting in empirical validation. The simpler measure was used. Mathematical sophistication is not a virtue when it disconnects the measure from the phenomenon it is trying to capture.`,
   },
   {
     id: "axis3",
     label: "Axis 3",
     name: "Operational Financing Risk",
-    r: "Contextual — not in composite",
-    regime: "Strongest pre-2020 (r=−0.122). Weakened during COVID-era monetary suppression.",
-    question: "Can the firm service its obligations from actual operational output?",
+    question: "Can the firm meet its obligations from actual operational output?",
     body: `Axis 3 assesses whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.
 
-Axis 3 is a contextual disclosure layer. It is evaluated separately for firms with non-zero interest obligations and is not included in the composite score. The decision reflects an empirical finding: including Axis 3 at any weighting does not materially improve the composite's full-period signal. The two-axis composite scores all companies on a comparable basis; adding Axis 3 restricts the observable universe to interest-bearing companies only.
+Axis 3 is a disclosure layer. It is not included in the composite score. It is evaluated separately for firms with non-zero interest obligations, and presented as contextual information alongside the two-axis composite. This design choice reflects the empirical finding that adding Axis 3 to the composite does not materially improve signal strength — the two-axis composite (Axis 1 + Axis 2, equal weight) produces a Modest full-period Spearman r of −0.054. Including Axis 3 adds complexity without proportional signal benefit.
 
 Firms without interest expense are not assigned an Axis 3 score. Financing risk is undefined in the absence of a financing structure. These firms are labeled "No Financing Structure" — this is a domain restriction, not a data quality decision. Their composite is the normalized mean of Axis 1 and Axis 2 only.
 
-Axis 3 remains analytically meaningful. It is displayed alongside the composite in all company-level outputs. Users focused on interest coverage risk should treat it as a mandatory overlay when evaluating interest-bearing companies.
-
-Debt is not inherently fragile. A mature firm with significant debt and strong operational coverage is structurally sound. Fragility arises from the gap between what a firm owes and what it can credibly produce to service it.`,
+Debt is not inherently fragile. A mature firm running significant debt with strong operational coverage is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it.`,
   },
 ]
 
@@ -548,7 +430,7 @@ function AxisAccordion() {
   const [open, setOpen] = useState<string | null>(null)
   return (
     <div className="space-y-3">
-      {AXES.map(({ id, label, name, r, regime, question, body }) => {
+      {AXES.map(({ id, label, name, question, body }) => {
         const isOpen = open === id
         return (
           <div key={id} className="rounded-xl border border-[#DDE0DC] bg-white overflow-hidden">
@@ -560,19 +442,15 @@ function AxisAccordion() {
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0]">{label}</span>
                 <span className="text-sm font-semibold text-[#0A1F3D]">{name}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[#8A92A0] hidden sm:block">r={r}</span>
-                <ChevronDown
-                  className="h-4 w-4 shrink-0 text-[#8A92A0] transition-transform"
-                  style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-                />
-              </div>
+              <ChevronDown
+                className="h-4 w-4 shrink-0 text-[#8A92A0] transition-transform"
+                style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              />
             </button>
             {isOpen && (
               <div className="px-6 pb-6 border-t border-[#DDE0DC]">
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-[#6DAE8B]">{question}</p>
-                <p className="mt-1 text-xs text-[#8A92A0] italic">{regime}</p>
-                <div className="mt-4 space-y-3 text-base leading-7 text-[#5C6472]">
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-[#8A92A0]">{question}</p>
+                <div className="mt-3 space-y-3 text-base leading-7 text-[#5C6472]">
                   {body.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
                 </div>
               </div>
@@ -592,7 +470,7 @@ const SECTIONS = [
   { id: "framing",     label: "Framing" },
   { id: "problem",     label: "The Problem" },
   { id: "oal",         label: "Anchor Ladder" },
-  { id: "axes",        label: "The Three Axes" },
+  { id: "axes",        label: "The Axes" },
   { id: "composite",   label: "Composite Score" },
   { id: "validation",  label: "Validation" },
   { id: "principles",  label: "Design Principles" },
@@ -833,19 +711,6 @@ export default function OsmrMethodology() {
           {/* OAL return chart */}
           <div className="mt-6 rounded-xl border border-[#DDE0DC] bg-white px-6 py-5">
             <OALReturnChart />
-          </div>
-
-          <div className="mt-4 rounded-xl border-l-4 border-[#244636] bg-white px-6 py-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0] mb-2">
-              Empirical confirmation
-            </p>
-            <p className="text-sm leading-6 text-[#5C6472]">
-              The 27.6pp spread between FCF median returns (+10.2%) and Revenue
-              median returns (−17.3%) across 290,902 observations is stable across
-              all market regimes tested — including the 2009–2019 period where the
-              composite signal was otherwise negligible. Anchor depth is the most
-              durable signal in the framework.
-            </p>
           </div>
 
           <div className="mt-8 space-y-4 text-base leading-7 text-[#5C6472]">
@@ -1178,67 +1043,14 @@ export default function OsmrMethodology() {
 
           {/* Tail risk */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[#0A1F3D]">The Loss Avoidance Case</h3>
+            <h3 className="text-lg font-semibold text-[#0A1F3D]">Tail Risk and Loss Concentration</h3>
             <p className="mt-2 text-base leading-7 text-[#5C6472]">
-              The strongest empirical case for OSMR is not return enhancement — it is
-              loss avoidance. The distribution of outcomes in the Very High composite
-              bucket is structurally dangerous in a way that rank correlations alone
-              do not fully capture.
+              The framework's primary structural contribution is loss avoidance,
+              not return maximization. The difference between buckets is most
+              visible in the left tail — in CVaR, in the concentration of
+              severe losses, and in the frequency of negative outcomes.
             </p>
             <div className="mt-4 rounded-xl border border-[#DDE0DC] bg-white px-6 py-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0] mb-4">
-                Return distribution by band · Very Low vs Very High composite bucket
-              </p>
-              <DistributionChart />
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-[#DDE0DC] bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0] mb-3">Very Low composite</p>
-                {[
-                  { label: "Median 12-month return", val: "+10.3%" },
-                  { label: "Geometric mean",          val: "+8.5%"  },
-                  { label: "Hit rate",                val: "62.4%"  },
-                  { label: "% outcomes below −25%",   val: "12.3%"  },
-                  { label: "CVaR (95th)",              val: "−53.0%" },
-                  { label: "N (observations)",         val: "18,481" },
-                ].map(({ label, val }) => (
-                  <div key={label} className="flex justify-between text-sm py-1.5 border-b border-[#F1F3F0] last:border-0">
-                    <span className="text-[#5C6472]">{label}</span>
-                    <span className="font-semibold text-[#244636]">{val}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-xl border border-[#DDE0DC] bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8A92A0] mb-3">Very High composite</p>
-                {[
-                  { label: "Median 12-month return", val: "−1.5%"  },
-                  { label: "Geometric mean",          val: "−13.1%" },
-                  { label: "Hit rate",                val: "48.8%"  },
-                  { label: "% outcomes below −25%",   val: "31.1%"  },
-                  { label: "CVaR (95th)",              val: "−86.2%" },
-                  { label: "N (observations)",         val: "26,371" },
-                ].map(({ label, val }) => (
-                  <div key={label} className="flex justify-between text-sm py-1.5 border-b border-[#F1F3F0] last:border-0">
-                    <span className="text-[#5C6472]">{label}</span>
-                    <span className="font-semibold text-[#8B3A2A]">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-xl border-l-4 border-[#8B3A2A] bg-white px-6 py-4">
-              <p className="text-sm leading-6 text-[#5C6472]">
-                31.1% of Very High composite observations produced losses exceeding 25%
-                over 12 months. CVaR of −86.2% means that in the worst 5% of outcomes,
-                investors lost approximately 86 cents on every dollar. The arithmetic mean
-                of +9.5% — pulled upward by a small subset of large positive outcomes —
-                would make this cohort appear attractive if used as the headline metric.
-                It is not used as the headline metric here.
-              </p>
-            </div>
-
-            <div className="mt-6 rounded-xl border border-[#DDE0DC] bg-white px-6 py-5">
               <BucketRiskChart />
             </div>
             <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC]">
@@ -1281,16 +1093,18 @@ export default function OsmrMethodology() {
 
           {/* Index performance */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold text-[#0A1F3D]">Portfolio-Level Results</h3>
+            <h3 className="text-lg font-semibold text-[#0A1F3D]">Index Performance</h3>
             <p className="mt-2 text-base leading-7 text-[#5C6472]">
-              OSMR's structural screening produces measurable portfolio-level effects.
-              The premium decomposes into two independent contributions: an exclusion
-              effect (removing structurally fragile companies) and a selection effect
-              (concentrating in the lowest-risk bucket).
+              To translate distributional findings into portfolio-level terms,
+              we constructed equal-weight and cap-weight indexes from the
+              composite buckets, rebalanced monthly. All indexes apply the $5
+              price filter. Results are shown post-2013 to control for thin
+              constituent counts in the 2009–2013 recovery period, where the
+              Very Low bucket averaged fewer than 50 companies per month.
             </p>
 
-            <div className="mt-4 rounded-xl border border-[#DDE0DC] bg-white p-5">
-              <PremiumDecomposition />
+            <div className="mt-4 rounded-xl border border-[#DDE0DC] bg-white px-6 py-5">
+              <IndexComparisonChart />
             </div>
 
             <div className="mt-4 overflow-hidden rounded-xl border border-[#DDE0DC]">
@@ -1477,18 +1291,6 @@ export default function OsmrMethodology() {
               {
                 title: "Axis 3 applies to the interest-bearing universe only",
                 body: "Firms with no interest expense are not assigned an Axis 3 score. Financing risk is undefined in the absence of a financing structure. These firms are labeled 'No Financing Structure' — not assigned a low-risk score. Approximately 16% of the current universe falls outside Axis 3's domain. Their composite score is the normalized mean of Axis 1 and Axis 2. In practice, no-interest firms should be treated as a distinct category with higher uncertainty, not lower risk.",
-              },
-              {
-                title: "Sector invariance is tested at the aggregate level only",
-                body: "The OAL structural result — FCF median +10.2% vs Revenue median −17.3% across 290,902 observations — is measured at the universe level. Whether this spread persists after stratifying by GICS sector is an open research question. Revenue-only companies are disproportionately concentrated in early-stage technology and biotech, where structural dynamics differ materially from industrials or consumer staples. If the signal were entirely a sector composition artifact, it would disappear after controlling for sector. That test has not yet been run. It is planned. Until it is, the cross-sectional result should be interpreted as suggestive of structural causality, not conclusive of it.",
-              },
-              {
-                title: "The framework is a diagnostic tool, not a decision system",
-                body: "OSMR does not contain exit rules, position sizing guidelines, or threshold triggers. There is no composite score at which the framework instructs a user to reduce or exit a position. This is deliberate — those decisions depend on mandate, portfolio context, time horizon, and cost structure that the framework cannot observe. What OSMR provides is a structural risk assessment that informs judgment. Operationalizing that judgment into allocation decisions requires a second layer that each user must construct for themselves. Users treating composite scores as mechanical signals should expect to be disappointed.",
-              },
-              {
-                title: "What would falsify this framework",
-                body: "Honest intellectual commitment requires stating what would prove the OAL concept wrong. The framework would be empirically falsified if FCF-anchored companies systematically underperformed revenue-anchored companies across multiple independent market cycles after controlling for size and momentum — not in a specific regime, but persistently across structurally different environments. That pattern does not exist in the current data: the +27.6pp FCF vs Revenue spread held across all three regimes tested, including the 2009–2013 recovery, the 2014–2019 expansion, and the post-COVID normalization. The pre-2020 composite signal weakness does not falsify the OAL concept — it shows that the valuation and trajectory axes lose discriminating power in extended narrative expansion, while the anchor depth separation remains structurally present throughout.",
               },
               {
                 title: "The framework does not incorporate sector context",
