@@ -7,15 +7,11 @@ export default function HowToUseOSMR() {
   return (
     <main className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
 
-      {/* ── HERO ──────────────────────────────────────────────────────────
-          Function-first. No re-explanation of OSMR.
-          Reader arrives already oriented. This page teaches use.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── HERO ──────────────────────────────────────────────────────────*/}
       <section className="tcs-snap-section border-b border-[#DDE0DC]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
 
-            {/* Left — hero copy */}
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
                 How to Use OSMR
@@ -44,7 +40,6 @@ export default function HowToUseOSMR() {
               </div>
             </div>
 
-            {/* Right — three-function summary card */}
             <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-6 shadow-[0_20px_60px_rgba(10,35,66,0.08)] md:p-8">
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
                 Three Functions
@@ -64,7 +59,7 @@ export default function HowToUseOSMR() {
                   {
                     icon: <BarChart2 className="h-4 w-4" />,
                     label: "Size",
-                    desc: "Let structural data inform how much exposure a position warrants.",
+                    desc: "Let structural context inform how much exposure a position warrants.",
                   },
                 ].map(({ icon, label, desc }) => (
                   <div
@@ -87,12 +82,7 @@ export default function HowToUseOSMR() {
         </div>
       </section>
 
-      {/* ── SCREEN ────────────────────────────────────────────────────────
-          How the structural map and cohort filters are used.
-          Free: aggregate cohort views.
-          Paid: individual company resolution.
-          No prescriptive language — data carries the implication.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── SCREEN ────────────────────────────────────────────────────────*/}
       <section className="tcs-snap-section border-b border-[#DDE0DC]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
@@ -112,10 +102,11 @@ export default function HowToUseOSMR() {
                   and where it is absent — updated weekly.
                 </p>
                 <p>
-                  Filters allow segmentation by sector, industry, market cap,
-                  and structural regime. The cohort return data shows what has
-                  historically happened to companies in each zone over a 12-month
-                  forward horizon.
+                  Composite bucket filters and OAL-level filters allow
+                  segmentation by structural regime. The cohort return data
+                  shows what has historically happened to companies in each
+                  zone over a 12-month forward horizon — across 290,902
+                  observations from 2009 through 2026.
                 </p>
                 <p>
                   This is where the process starts: not with a stock, but with
@@ -125,7 +116,6 @@ export default function HowToUseOSMR() {
               </div>
             </div>
 
-            {/* Right — what each access tier sees */}
             <div className="space-y-4">
               <div className="rounded-2xl border border-[#DDE0DC] bg-white p-6 shadow-[0_12px_32px_rgba(10,35,66,0.05)]">
                 <div className="mb-4 flex items-center justify-between">
@@ -138,7 +128,7 @@ export default function HowToUseOSMR() {
                   {[
                     "Full-universe structural map across all three axes",
                     "Cohort return data by structural regime",
-                    "Sector, industry, and market cap filters",
+                    "Composite bucket and OAL-level filters",
                     "Historical cohort trends over time",
                   ].map(item => (
                     <div key={item} className="flex items-start gap-2.5 text-sm leading-6 text-[#5C6472]">
@@ -160,8 +150,8 @@ export default function HowToUseOSMR() {
                   {[
                     "Individual ticker structural profiles",
                     "Per-company axis scores and percentile rankings",
-                    "Stock-level return data within cohort context",
-                    "Drilldown into anchor trajectory history",
+                    "Stock-level drilldown within cohort context",
+                    "Anchor trajectory history by company",
                   ].map(item => (
                     <div key={item} className="flex items-start gap-2.5 text-sm leading-6 text-[#5C6472]">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0A1F3D]" />
@@ -176,10 +166,7 @@ export default function HowToUseOSMR() {
         </div>
       </section>
 
-      {/* ── MONITOR ───────────────────────────────────────────────────────
-          Tracking anchor trajectory over time.
-          Watchlist is long-term — acknowledged without over-promising.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── MONITOR ───────────────────────────────────────────────────────*/}
       <section className="tcs-snap-section border-b border-[#0D2440] bg-[#0A1F3D]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
@@ -203,19 +190,18 @@ export default function HowToUseOSMR() {
                   monthly structural recalibrations. A position that was
                   structurally sound at entry may not remain so. A company
                   approaching FCF generation from a weaker anchor is moving in
-                  the right direction — and that signal appears here before it
-                  becomes consensus.
+                  the right direction — and that shift appears in the structural
+                  data before it becomes consensus.
                 </p>
               </div>
             </div>
 
-            {/* Right — monitoring signals, 2x2 grid on desktop to control height */}
             <div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {[
                   {
                     title: "Anchor trajectory",
-                    desc: "Whether the firm's operational foundation is improving or deteriorating over time — not just where it stands today.",
+                    desc: "Whether the firm's operational foundation is improving or deteriorating — not just where it stands today.",
                   },
                   {
                     title: "Regime changes",
@@ -237,17 +223,28 @@ export default function HowToUseOSMR() {
                 ))}
               </div>
 
-              {/* Cadence layer — folded into Monitor, gives Trevor/Julia the repeatable routine */}
               <div className="mt-5 rounded-2xl border border-[#1E3A5F] bg-[#071629] p-5">
                 <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#A9BEDF]">
-                  The repeatable routine
+                  A repeatable review cadence
                 </p>
                 <div className="mt-3 space-y-2.5">
                   {[
-                    { cadence: "Weekly", action: "Check snapshot refresh for trajectory changes in positions under consideration. Flag any company that has moved into a higher risk bucket." },
-                    { cadence: "Monthly", action: "Review full structural recalibration. Reassess any position whose composite score has shifted materially from entry." },
-                    { cadence: "Before entry", action: "Screen the target company against its cohort. Understand which structural zone it occupies and what the historical return distribution looks like in that zone." },
-                    { cadence: "After deterioration", action: "When a held position's anchor trajectory weakens, re-examine the sizing decision with updated structural context." },
+                    {
+                      cadence: "Weekly",
+                      action: "Check snapshot refresh for trajectory changes in positions under consideration. Note any company that has moved to a higher structural risk zone.",
+                    },
+                    {
+                      cadence: "Monthly",
+                      action: "Review full structural recalibration. Revisit any position whose composite score has shifted materially from the time of entry.",
+                    },
+                    {
+                      cadence: "Before entry",
+                      action: "Screen the target company against its cohort. Understand which structural zone it occupies and what the historical return distribution looks like in that zone.",
+                    },
+                    {
+                      cadence: "After deterioration",
+                      action: "When a held position's anchor trajectory weakens, re-examine the sizing decision with updated structural context.",
+                    },
                   ].map(({ cadence, action }) => (
                     <div key={cadence} className="flex items-start gap-3">
                       <span className="mt-0.5 shrink-0 rounded-lg bg-[#0D2847] px-2.5 py-1 text-xs font-semibold text-[#A9BEDF]">
@@ -257,9 +254,13 @@ export default function HowToUseOSMR() {
                     </div>
                   ))}
                 </div>
+                <p className="mt-4 text-xs leading-5 text-[#4A6A8A]">
+                  This cadence is a suggested review structure, not a mechanical decision rule.
+                  OSMR does not contain exit thresholds or position triggers — those decisions
+                  depend on mandate and context the framework cannot observe.
+                </p>
               </div>
 
-              {/* Roadmap note — muted, below cadence block */}
               <p className="mt-4 text-xs leading-5 text-[#4A6A8A]">
                 Watchlist functionality — tracking a defined set of companies against
                 their structural evolution — is part of the platform roadmap.
@@ -270,11 +271,7 @@ export default function HowToUseOSMR() {
         </div>
       </section>
 
-      {/* ── SIZE ──────────────────────────────────────────────────────────
-          Allocation implication is data-driven, never prescriptive.
-          The cohort return data carries the argument.
-          No "should" language. No advice framing.
-      ──────────────────────────────────────────────────────────────────── */}
+      {/* ── SIZE ──────────────────────────────────────────────────────────*/}
       <section className="tcs-snap-section border-b border-[#DDE0DC]">
         <div className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:items-start">
@@ -294,41 +291,41 @@ export default function HowToUseOSMR() {
                   part of the information available when sizing any position.
                 </p>
                 <p>
-                  A company whose operational trajectory is deteriorating — whose
-                  anchor is weakening rather than strengthening — sits in a zone
-                  where the historical return distribution has been consistently weak.
-                  That is not a prediction. It is a structural context that belongs
-                  in any honest sizing decision.
+                  A company whose operational trajectory is deteriorating —
+                  whose anchor is weakening rather than strengthening — sits
+                  in a zone where the historical return distribution has been
+                  consistently weak. That is not a prediction. It is structural
+                  context that belongs in any honest sizing decision.
                 </p>
                 <p>
-                  The platform makes that context visible. What the investor
-                  does with it is theirs to decide.
+                  The platform makes that context visible. No sizing rules
+                  are embedded in the framework. What the investor does with
+                  the data is theirs to determine.
                 </p>
               </div>
             </div>
 
-            {/* Right — cohort return data as the proof, not the prescription */}
             <div className="rounded-2xl border border-[#DDE0DC] bg-white p-6 shadow-[0_12px_32px_rgba(10,35,66,0.05)]">
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8A92A0]">
                 What the data shows
               </p>
               <p className="mt-2 text-sm text-[#5C6472]">
-                Median 12-month forward returns by operational trajectory zone.
-                ~260,000 historical observations · interest-bearing universe.
+                Median 12-month forward returns by composite risk bucket.
+                290,902 observations · 2009–2026 · $5M ADV liquidity filter.
               </p>
 
               <div className="mt-5 space-y-3">
                 {[
-                  { label: "Very Low trajectory risk",  value: "+3.1%",  color: "#4CAF7D", width: "62%",  negative: false },
-                  { label: "Low trajectory risk",       value: "+2.2%",  color: "#6DAE8B", width: "50%",  negative: false },
-                  { label: "Moderate trajectory risk",  value: "+1.8%",  color: "#8A92A0", width: "42%",  negative: false },
-                  { label: "High trajectory risk",      value: "−1.2%",  color: "#C47B5F", width: "22%",  negative: true  },
-                  { label: "Very High trajectory risk", value: "−19.9%", color: "#B85C3A", width: "5%",   negative: true  },
+                  { label: "Very Low composite risk",  value: "+10.3%", color: "#244636", width: "78%",  negative: false },
+                  { label: "Low composite risk",       value: "+9.6%",  color: "#6DAE8B", width: "70%",  negative: false },
+                  { label: "Moderate composite risk",  value: "+9.2%",  color: "#8A92A0", width: "65%",  negative: false },
+                  { label: "High composite risk",      value: "+8.9%",  color: "#C47B5F", width: "60%",  negative: false },
+                  { label: "Very High composite risk", value: "−1.5%",  color: "#8B3A2A", width: "8%",   negative: true  },
                 ].map(({ label, value, color, width, negative }) => (
                   <div key={label}>
                     <div className="mb-1 flex items-center justify-between text-sm">
                       <span className="text-[#5C6472]">{label}</span>
-                      <span className={`font-semibold ${negative ? "text-[#B85C3A]" : "text-[#244636]"}`}>
+                      <span className={`font-semibold ${negative ? "text-[#8B3A2A]" : "text-[#244636]"}`}>
                         {value}
                       </span>
                     </div>
@@ -342,17 +339,22 @@ export default function HowToUseOSMR() {
                 ))}
               </div>
 
-              <p className="mt-5 text-xs leading-5 text-[#8A92A0]">
-                Axis II (Operational Trajectory Risk) median returns by bucket.
-                Formation window 2018–2025. Past structural patterns do not
-                guarantee future outcomes.
-              </p>
+              <div className="mt-5 rounded-xl border border-[#DDE0DC] bg-[#F7F8F6] px-4 py-3">
+                <p className="text-xs leading-5 text-[#8A92A0]">
+                  The signal is concentrated in the Very High bucket — median returns
+                  of −1.5% with a CVaR of −86.2% and 31.1% of observations below −25%.
+                  Q1 through Q4 are largely undifferentiated on median return.
+                  This is a loss-avoidance framework, not a return-optimization engine.
+                  Past structural patterns do not guarantee future outcomes.
+                </p>
+              </div>
             </div>
 
           </div>
         </div>
       </section>
 
+      {/* ── CTA ───────────────────────────────────────────────────────────*/}
       <section className="tcs-snap-section">
         <div className="mx-auto w-full max-w-5xl px-6 py-10">
           <div className="rounded-[2rem] border border-[#DDE0DC] bg-white p-8 shadow-[0_12px_32px_rgba(10,35,66,0.05)] md:p-12">
@@ -386,7 +388,6 @@ export default function HowToUseOSMR() {
 
           </div>
 
-          {/* Footer folded into CTA section — no extra scroll segment */}
           <div className="mt-10 border-t border-[#DDE0DC] pt-6 text-center">
             <p className="text-[12px] leading-[1.8] text-[#aaa]">
               The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
