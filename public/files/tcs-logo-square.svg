@@ -1,0 +1,43 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Instrument+Serif:ital@1&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1200" fill="#0E0D0B"/>
+
+  <!-- Gold top bar -->
+  <rect x="0" y="0" width="1200" height="14" fill="#C5A24A"/>
+
+  <!-- OAL bars — scaled up 5x from 240px base -->
+  <!-- FCF — full width, green -->
+  <rect x="358" y="368" width="542" height="70" fill="#5A9870" opacity="0.92"/>
+  <!-- NI — 70%, gold -->
+  <rect x="358" y="463" width="380" height="70" fill="#C5A24A" opacity="0.92"/>
+  <!-- EBIT — 44%, gold faint -->
+  <rect x="358" y="558" width="240" height="70" fill="#C5A24A" opacity="0.52"/>
+  <!-- Revenue — 15%, red -->
+  <rect x="358" y="653" width="82" height="70" fill="#B85C4A" opacity="0.88"/>
+
+  <!-- Spine -->
+  <rect x="345" y="358" width="7" height="375" fill="#33302A"/>
+
+  <!-- Wordmark -->
+  <text x="600" y="890"
+    text-anchor="middle"
+    font-family="'IBM Plex Mono', 'Courier New', monospace"
+    font-size="42"
+    font-weight="400"
+    fill="#554E44"
+    letter-spacing="20">THE CAPITAL</text>
+
+  <text x="600" y="972"
+    text-anchor="middle"
+    font-family="'Instrument Serif', Georgia, serif"
+    font-style="italic"
+    font-size="76"
+    fill="#C5A24A"
+    letter-spacing="2">Steward</text>
+</svg>

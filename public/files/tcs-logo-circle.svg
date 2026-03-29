@@ -1,0 +1,51 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="circle-mask">
+      <circle cx="600" cy="600" r="580"/>
+    </clipPath>
+  </defs>
+
+  <!-- Circle background -->
+  <circle cx="600" cy="600" r="580" fill="#0E0D0B"/>
+
+  <!-- Gold ring border -->
+  <circle cx="600" cy="600" r="580" fill="none" stroke="#C5A24A" stroke-width="7" opacity="0.5"/>
+
+  <!-- All content clipped to circle -->
+  <g clip-path="url(#circle-mask)">
+
+    <!-- Gold top bar -->
+    <rect x="0" y="0" width="1200" height="14" fill="#C5A24A"/>
+
+    <!-- OAL bars -->
+    <!-- FCF -->
+    <rect x="358" y="368" width="542" height="70" fill="#5A9870" opacity="0.92"/>
+    <!-- NI -->
+    <rect x="358" y="463" width="380" height="70" fill="#C5A24A" opacity="0.92"/>
+    <!-- EBIT -->
+    <rect x="358" y="558" width="240" height="70" fill="#C5A24A" opacity="0.52"/>
+    <!-- Revenue -->
+    <rect x="358" y="653" width="82" height="70" fill="#B85C4A" opacity="0.88"/>
+
+    <!-- Spine -->
+    <rect x="345" y="358" width="7" height="375" fill="#33302A"/>
+
+    <!-- Wordmark -->
+    <text x="600" y="890"
+      text-anchor="middle"
+      font-family="'IBM Plex Mono', 'Courier New', monospace"
+      font-size="42"
+      font-weight="400"
+      fill="#554E44"
+      letter-spacing="20">THE CAPITAL</text>
+
+    <text x="600" y="972"
+      text-anchor="middle"
+      font-family="'Instrument Serif', Georgia, serif"
+      font-style="italic"
+      font-size="76"
+      fill="#C5A24A"
+      letter-spacing="2">Steward</text>
+
+  </g>
+</svg>
