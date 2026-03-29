@@ -16,7 +16,7 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "The Capital Steward",
-  description: "Structural Risk Intelligence for Investors.",
+  description: "Structural Risk Research for U.S. Equities.",
 }
 
 export default function RootLayout({
@@ -33,11 +33,4 @@ export default function RootLayout({
       </html>
     </ClerkProvider>
   )
-}
-
-export const metadata: Metadata = {
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/tcs-favicon-180.png',
-  },
 }

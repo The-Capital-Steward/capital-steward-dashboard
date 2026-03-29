@@ -387,7 +387,7 @@ function InterpretiveLayer({ data }: { data: SnapshotRow[] }) {
         ].map(({ label, color, headline, body, consequence }) => (
           <div key={label} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, padding: "14px" })}>
             <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 })}>
-              <span style={s({ fontFamily: E.mono, fontSize: 8px, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted })}>{label}</span>
+              <span style={s({ fontFamily: E.mono, fontSize: 8, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted })}>{label}</span>
               <span style={s({ fontFamily: E.mono, fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: E.pos, background: "rgba(90,152,112,0.08)", padding: "1px 6px" })}>System State</span>
             </div>
             <div style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, color, marginBottom: 6, lineHeight: 1.2 })}>{headline}</div>

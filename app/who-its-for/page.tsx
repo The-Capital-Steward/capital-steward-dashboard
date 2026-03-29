@@ -41,7 +41,7 @@ export default function WhoItsFor() {
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/osmr-methodology" },
+            { label: "Methodology",    href: "/methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
@@ -192,7 +192,7 @@ export default function WhoItsFor() {
                 </div>
               </div>
             ))}
-            <Link href="/osmr-methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 9.5, color: E.gold, textDecoration: "none", marginTop: 14 })}>
+            <Link href="/methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 9.5, color: E.gold, textDecoration: "none", marginTop: 14 })}>
               Full methodology <ArrowRight size={12} />
             </Link>
           </div>
@@ -222,7 +222,7 @@ export default function WhoItsFor() {
           <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 })}>
             Open Platform <ArrowRight size={14} />
           </Link>
-          <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
+          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
             Read the Methodology
           </Link>
         </div>
@@ -236,7 +236,7 @@ export default function WhoItsFor() {
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
           {[
-            { label: "Methodology", href: "/osmr-methodology" },
+            { label: "Methodology", href: "/methodology" },
             { label: "Where It Belongs",  href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>

@@ -119,7 +119,7 @@ export default function Homepage() {
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/osmr-methodology" },
+            { label: "Methodology",    href: "/methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: E.muted, padding: "0 16px", borderLeft: `1px solid ${E.bdr}`, textDecoration: "none", height: 52, display: "flex", alignItems: "center", letterSpacing: "0.02em", transition: "color 0.12s" })}
@@ -177,7 +177,7 @@ export default function Homepage() {
               <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
                 Open Platform <ArrowRight size={14} />
               </Link>
-              <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
+              <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
                 Read the Methodology
               </Link>
             </div>
@@ -376,7 +376,7 @@ export default function Homepage() {
           <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
             Subscribe to Access <ArrowRight size={14} />
           </Link>
-          <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" })}>
+          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" })}>
             Read the Methodology First
           </Link>
         </div>
@@ -391,7 +391,7 @@ export default function Homepage() {
         <div style={s({ display: "flex", gap: 20 })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/osmr-methodology" },
+            { label: "Methodology",    href: "/methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
