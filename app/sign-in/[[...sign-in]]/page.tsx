@@ -1,82 +1,110 @@
 import { SignIn } from '@clerk/nextjs'
+import Link from 'next/link'
+
+// File goes to: app/sign-in/[[...sign-in]]/page.tsx
 
 export default function SignInPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0A1F3D] text-white">
+    <main style={{ minHeight: "100vh", background: "#0E0D0B", display: "flex", flexDirection: "column" }}>
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-32 -top-32 h-[520px] w-[520px] rounded-full border border-[#1E3A5F]" style={{ animation: "spin 40s linear infinite" }} />
-        <div className="absolute -right-16 -top-16 h-[380px] w-[380px] rounded-full border border-[#162E4A]" style={{ animation: "spin 28s linear infinite reverse" }} />
-        <div className="absolute -bottom-24 -left-24 h-[340px] w-[340px] rounded-full border border-[#1A3352]" style={{ animation: "spin 52s linear infinite" }} />
-        <div className="absolute -left-20 top-1/3 h-[260px] w-[260px] rounded-full border border-dashed border-[#1E3A5F]" style={{ animation: "spin 34s linear infinite reverse" }} />
-        <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0D2847] opacity-40 blur-3xl" />
-        <div className="absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2" style={{ animation: "spin 18s linear infinite" }}>
-          <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-[#244636]" />
-          <div className="absolute bottom-0 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#1E3A5F]" />
-        </div>
-        <div className="absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2" style={{ animation: "spin 26s linear infinite reverse" }}>
-          <div className="absolute right-0 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#C9D8CD]" />
-        </div>
-      </div>
+      {/* ── NAV ── */}
+      <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 44px", height: 52, borderBottom: "1px solid #272420" }}>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <span style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: "#554E44" }}>The Capital</span>
+          <span style={{ fontFamily: "'Instrument Serif',Georgia,serif", fontStyle: "italic", fontSize: 17, color: "#C5A24A", marginLeft: 8 }}>Steward</span>
+        </Link>
+        <Link href="/" style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 10.5, fontWeight: 600, color: "#554E44", textDecoration: "none", letterSpacing: "0.02em" }}>
+          ← Back
+        </Link>
+      </nav>
 
-      <div className="relative flex min-h-screen flex-col items-center justify-center px-6">
-        <div className="mb-8 text-center" style={{ animation: "fadeUp 0.6s ease both" }}>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#6DAE8B]">
-            The Capital Steward
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-white">
-            Sign in to continue
+      {/* ── CONTENT ── */}
+      <div style={{ flex: 1, display: "flex" }}>
+
+        {/* Left — context */}
+        <div style={{ flex: 1, padding: "80px 64px", borderRight: "1px solid #272420", display: "flex", flexDirection: "column", justifyContent: "center", maxWidth: 520 }}>
+          <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#C5A24A", marginBottom: 20 }}>Platform access</p>
+          <h1 style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, lineHeight: 1.05, color: "#EDE9E0", letterSpacing: "-0.04em", marginBottom: 24 }}>
+            The structural map<br />
+            <em style={{ fontStyle: "italic", fontFamily: "'Instrument Serif',Georgia,serif", fontWeight: 400, color: "#C5A24A", fontSize: "clamp(32px,4vw,46px)", letterSpacing: "-0.02em" }}>is live.</em>
           </h1>
+          <p style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 14, lineHeight: 1.78, color: "#A89E8E", marginBottom: 40, maxWidth: 400 }}>
+            ~5,200 U.S. equities scored across two independently validated dimensions of structural risk. Updated weekly.
+          </p>
+
+          {/* Key stats */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: "1px solid #272420" }}>
+            {[
+              { val: "289K+", label: "Historical observations" },
+              { val: "+21.0%", label: "Factor-adj. L/S alpha" },
+              { val: "~2×", label: "Very High loss rate vs universe" },
+            ].map(({ val, label }, i) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "14px 0", borderBottom: "1px solid #272420" }}>
+                <span style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 12.5, color: "#A89E8E" }}>{label}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 14, fontWeight: 500, color: "#C5A24A" }}>{val}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 28 }}>
+            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#554E44", lineHeight: 1.65 }}>
+              Not yet a subscriber?{" "}
+              <Link href="/platform" style={{ color: "#C5A24A", textDecoration: "none" }}>See what's included →</Link>
+            </p>
+          </div>
         </div>
 
-        <div style={{ animation: "fadeUp 0.6s ease 0.1s both" }}>
-          <SignIn
-            forceRedirectUrl="/platform-beta"
-            appearance={{
-              variables: {
-                colorBackground: '#0D2847',
-                colorPrimary: '#6DAE8B',
-                colorText: '#EAF0F2',
-                colorTextSecondary: '#8DAFC8',
-                colorTextOnPrimaryBackground: '#0A1F3D',
-                colorInputBackground: '#102642',
-                colorInputText: '#EAF0F2',
-                colorNeutral: '#EAF0F2',
-                borderRadius: '0.5rem',
-                fontFamily: 'var(--font-sans)',
-              },
-              elements: {
-                card: 'border border-[#203754] shadow-[0_12px_32px_rgba(0,0,0,0.3)] bg-[#0D2847]',
-                headerTitle: 'hidden',
-                headerSubtitle: 'hidden',
-                formButtonPrimary: 'bg-[#6DAE8B] hover:bg-[#5a9a78] text-[#0A1F3D] font-semibold rounded-lg',
-                footerActionLink: 'text-[#6DAE8B] hover:text-[#5a9a78]',
-                footerActionText: 'text-[#8DAFC8]',
-                formFieldLabel: 'text-[#8DAFC8]',
-                formFieldInput: 'border-[#203754] rounded-lg',
-                dividerLine: 'bg-[#203754]',
-                dividerText: 'text-[#8DAFC8]',
-                socialButtonsBlockButton: 'border-[#203754] text-[#EAF0F2] hover:bg-[#102642]',
-                socialButtonsBlockButtonText: 'text-[#EAF0F2]',
-                identityPreviewText: 'text-[#EAF0F2]',
-                formFieldInputPlaceholder: 'text-[#8DAFC8]',
-                footer: 'bg-[#0D2847]',
-              },
-            }}
-          />
+        {/* Right — Clerk sign-in */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 44px", background: "#131210" }}>
+          <div style={{ width: "100%", maxWidth: 400 }}>
+            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#554E44", marginBottom: 24, textAlign: "center" as const }}>
+              Sign in to continue
+            </p>
+            <SignIn
+              forceRedirectUrl="/platform"
+              appearance={{
+                variables: {
+                  colorBackground: '#131210',
+                  colorPrimary: '#C5A24A',
+                  colorText: '#EDE9E0',
+                  colorTextSecondary: '#A89E8E',
+                  colorTextOnPrimaryBackground: '#060504',
+                  colorInputBackground: '#0E0D0B',
+                  colorInputText: '#EDE9E0',
+                  colorNeutral: '#EDE9E0',
+                  borderRadius: '0px',
+                  fontFamily: "'Syne',system-ui,sans-serif",
+                },
+                elements: {
+                  card: 'shadow-none',
+                  headerTitle: 'hidden',
+                  headerSubtitle: 'hidden',
+                  formButtonPrimary: 'font-semibold',
+                  footerActionLink: 'underline',
+                  socialButtonsBlockButton: 'border-[#272420]',
+                },
+              }}
+            />
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div style={{ padding: "20px 44px", borderTop: "1px solid #272420", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#554E44" }}>
+          © 2026 The Capital Steward, LLC · Not investment advice
+        </p>
+        <div style={{ display: "flex", gap: 20 }}>
+          {[
+            { label: "Who It's For", href: "/who-its-for" },
+            { label: "Methodology",  href: "/osmr-methodology" },
+          ].map(({ label, href }) => (
+            <Link key={href} href={href} style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 11, color: "#554E44", textDecoration: "none" }}>{label}</Link>
+          ))}
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </main>
   )
 }

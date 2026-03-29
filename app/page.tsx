@@ -118,9 +118,9 @@ export default function Homepage() {
         {/* Nav links */}
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
-            { label: "Why This Exists", href: "/why-this-exists" },
+            { label: "Who It's For", href: "/who-its-for" },
             { label: "Methodology",    href: "/osmr-methodology" },
-            { label: "How to Use",     href: "/how-to-use-osmr" },
+            { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: E.muted, padding: "0 16px", borderLeft: `1px solid ${E.bdr}`, textDecoration: "none", height: 52, display: "flex", alignItems: "center", letterSpacing: "0.02em", transition: "color 0.12s" })}
               onMouseEnter={e => (e.currentTarget.style.color = E.text)}
@@ -390,9 +390,9 @@ export default function Homepage() {
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
           {[
-            { label: "Why This Exists", href: "/why-this-exists" },
+            { label: "Who It's For", href: "/who-its-for" },
             { label: "Methodology",    href: "/osmr-methodology" },
-            { label: "How to Use",     href: "/how-to-use-osmr" },
+            { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}

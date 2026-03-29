@@ -871,8 +871,8 @@ export default function OsmrMethodology() {
               <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "11px 24px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 })}>
                 Open Platform <ArrowRight size={14} />
               </Link>
-              <Link href="/how-to-use-osmr" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", padding: "11px 20px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
-                How to Use OSMR
+              <Link href="/where-it-belongs" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", padding: "11px 20px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
+                Where It Belongs
               </Link>
             </div>
           </div>
