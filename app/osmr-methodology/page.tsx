@@ -303,7 +303,7 @@ const Div = () => <div style={s({ height: 1, background: E.bdr, margin: "52px 0"
 
 function DT({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
   return (
-    <div style={s({ border: `1px solid ${E.bdr}`, margin: "16px 0", overflow: "hidden" })}>
+    <div className="meth-overflow" style={s({ border: `1px solid ${E.bdr}`, margin: "16px 0", overflow: "hidden" })}>
       <table style={s({ width: "100%", borderCollapse: "collapse", fontFamily: E.mono, fontSize: 11 })}>
         <thead>
           <tr style={s({ borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
@@ -324,7 +324,7 @@ function DT({ headers, rows }: { headers: string[]; rows: (string | React.ReactN
 
 function FG({ items }: { items: { label: string; val: string; note: string; vc?: string }[] }) {
   return (
-    <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, border: `1px solid ${E.bdr}`, background: E.bdr, margin: "16px 0" })}>
+    <div className="meth-factor-grid" style={s({ display: "grid", gap: 1, border: `1px solid ${E.bdr}`, background: E.bdr, margin: "16px 0" })}>
       {items.map(({ label, val, note, vc }) => (
         <div key={label} style={s({ background: E.bg2, padding: "18px 20px" })}>
           <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, marginBottom: 8 })}>{label}</p>
@@ -340,7 +340,7 @@ function RBars({ items }: { items: { name: string; pct: string; val: string; w: 
   return (
     <div style={s({ margin: "14px 0" })}>
       {items.map(({ name, pct, val, w }) => (
-        <div key={name} style={s({ display: "grid", gridTemplateColumns: "160px 1fr 60px", alignItems: "center", gap: 14, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
+        <div key={name} className="meth-regime-bars" style={s({ display: "grid", alignItems: "center", gap: 14, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
           <div><span style={s({ fontFamily: E.sans, fontSize: 11.5, color: E.text, fontWeight: 600 })}>{name}</span><span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted, marginLeft: 6 })}>{pct}</span></div>
           <div style={s({ height: 2, background: E.bdr2, position: "relative" })}><div style={s({ position: "absolute", left: 0, top: 0, height: 2, width: `${w}%`, background: E.gold })} /></div>
           <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500, color: E.gold, textAlign: "right" })}>{val}</div>
@@ -392,9 +392,54 @@ export default function OsmrMethodology() {
 
   return (
     <main style={s({ minHeight: "100vh", background: E.bg, color: E.text, fontFamily: E.sans })}>
+      <style>{`
+        .meth-header { padding: 44px 44px 36px; }
+        .meth-meta-bar { flex-wrap: wrap; }
+        .meth-body-wrap { padding: 48px 44px; }
+        .meth-oal-grid { grid-template-columns: 44px 110px 1fr 150px; }
+        .meth-oal-hdr { grid-template-columns: 44px 110px 1fr 150px; }
+        .meth-factor-grid { grid-template-columns: 1fr 1fr; }
+        .meth-bucket-scale-row { grid-template-columns: 120px 80px 1fr; }
+        .meth-compare-grid { grid-template-columns: 1fr 1fr; }
+        .meth-regime-bars { grid-template-columns: 160px 1fr 60px; }
+        .meth-r-scale { grid-template-columns: repeat(5,1fr); }
+        .meth-appendix td:first-child { width: 150px; white-space: nowrap; }
+        .meth-footer { padding: 28px 44px; }
+        @media (max-width: 640px) {
+          .meth-header { padding: 28px 20px 24px; }
+          .meth-footer { padding: 20px; }
+          .meth-body-wrap { padding: 32px 20px; }
+          .meth-meta-bar { flex-direction: column; }
+          .meth-meta-bar span { border-right: none !important; border-bottom: 1px solid #272420; }
+          .meth-oal-hdr { display: none !important; }
+          .meth-oal-grid { grid-template-columns: 40px 1fr; gap: 10px; }
+          .meth-oal-grid .oal-bar-col { display: none; }
+          .meth-factor-grid { grid-template-columns: 1fr; }
+          .meth-bucket-scale-row { grid-template-columns: 1fr; gap: 4px; }
+          .meth-bucket-scale-row .bsc-range { display: none; }
+          .meth-compare-grid { grid-template-columns: 1fr; }
+          .meth-regime-bars { grid-template-columns: 1fr 40px; }
+          .meth-regime-bars .rb-name { grid-column: 1/-1; margin-bottom: -6px; }
+          .meth-r-scale { grid-template-columns: repeat(3,1fr); gap: 3px; }
+          .meth-appendix { display: block; }
+          .meth-appendix tbody { display: block; }
+          .meth-appendix tr { display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+          .meth-appendix td:first-child { width: auto !important; white-space: normal !important; padding: 0 0 4px; }
+          .meth-appendix td { padding: 0 !important; background: transparent !important; }
+          .meth-overflow { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+        @media (max-width: 768px) {
+          .meth-header { padding: 32px 24px 28px; }
+          .meth-body-wrap { padding: 36px 24px; }
+          .meth-footer { padding: 24px; }
+          .meth-oal-grid { grid-template-columns: 40px 90px 1fr; gap: 10px; }
+          .meth-oal-hdr { grid-template-columns: 40px 90px 1fr; gap: 10px; }
+          .meth-r-scale { grid-template-columns: repeat(3,1fr); }
+        }
+      `}</style>
 
       {/* HEADER */}
-      <div style={s({ background: E.bg, borderBottom: `1px solid ${E.bdr}`, padding: "44px 44px 36px" })}>
+      <div className="meth-header" style={s({ background: E.bg, borderBottom: `1px solid ${E.bdr}` })}>
         <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>The Capital Steward · Methodology · 2026</p>
         <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,52px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 18 })}>
           How We Measure<br />
@@ -403,7 +448,7 @@ export default function OsmrMethodology() {
         <p style={s({ fontFamily: E.sans, fontSize: 14, lineHeight: 1.8, color: E.body, maxWidth: 520, marginBottom: 22 })}>
           Most valuation frameworks ask how much a company is worth. This one asks how well-grounded that valuation is in what the company has actually demonstrated. The gap between these questions is where structural investment risk accumulates — before it becomes visible in price.
         </p>
-        <div style={s({ display: "flex", width: "fit-content", marginBottom: 22, border: `1px solid ${E.bdr}` })}>
+        <div className="meth-meta-bar" style={s({ display: "flex", width: "fit-content", marginBottom: 22, border: `1px solid ${E.bdr}` })}>
           {["~5,200 U.S. equities · $5M ADV filter", "289,737 observations · 2009–2026"].map((t, i) => (
             <span key={i} style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, padding: "7px 14px", borderRight: i === 0 ? `1px solid ${E.bdr}` : "none" })}>{t}</span>
           ))}
@@ -431,7 +476,7 @@ export default function OsmrMethodology() {
           </div>
         </aside>
 
-        <div style={s({ flex: 1, padding: "48px 44px", minWidth: 0 })}>
+        <div className="meth-body-wrap" style={s({ flex: 1, minWidth: 0 })}>
 
           {/* FRAMING */}
           <section id="framing" style={s({ marginBottom: 64 })}>
@@ -464,13 +509,13 @@ export default function OsmrMethodology() {
             <B ch={<>The word <em>deepest</em> is deliberate. It refers not to the size of the financial figure but to its proximity to actual cash generation. Free cash flow is the deepest anchor because it represents what a company has genuinely produced after all capital requirements. Revenue is the shallowest anchor because it tells us only that the company sold something — not whether that sale moved it any closer to economic viability.</>} />
 
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "24px 0" })}>
-              <div style={s({ display: "grid", gridTemplateColumns: "44px 110px 1fr 150px", gap: 14, padding: "8px 14px", borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
+              <div className="meth-oal-hdr" style={s({ display: "grid", gap: 14, padding: "8px 14px", borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
                 {["Code", "Anchor", "12-month median return", "Statistics"].map((h, i) => (
                   <span key={h} style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, textAlign: i === 3 ? "right" : "left" })}>{h}</span>
                 ))}
               </div>
               {OAL_RUNGS.map(({ code, label, desc, color, bg, border, empirical, pct }, i) => (
-                <div key={code} style={s({ display: "grid", gridTemplateColumns: "44px 110px 1fr 150px", gap: 14, alignItems: "center", padding: "12px 14px", borderBottom: i < OAL_RUNGS.length - 1 ? `1px solid rgba(255,255,255,0.025)` : "none", opacity: code === "—" ? 0.28 : 1 })}>
+                <div key={code} className="meth-oal-grid" style={s({ display: "grid", gap: 14, alignItems: "center", padding: "12px 14px", borderBottom: i < OAL_RUNGS.length - 1 ? `1px solid rgba(255,255,255,0.025)` : "none", opacity: code === "—" ? 0.28 : 1 })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 500, padding: "2px 5px", textAlign: "center", letterSpacing: "0.06em", color, background: bg, border: `1px solid ${border}` })}>{code}</div>
                   <div>
                     <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text })}>{label}</div>
@@ -538,7 +583,7 @@ export default function OsmrMethodology() {
             </div>
 
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "16px 0" })}>
-              <div style={s({ display: "grid", gridTemplateColumns: "120px 80px 1fr", background: E.bg2, borderBottom: `1px solid ${E.bdr}`, padding: "8px 14px" })}>
+              <div className="meth-bucket-scale-row" style={s({ display: "grid", background: E.bg2, borderBottom: `1px solid ${E.bdr}`, padding: "8px 14px" })}>
                 {["Bucket", "Percentile", "Description"].map(h => <span key={h} style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted })}>{h}</span>)}
               </div>
               {[
@@ -548,7 +593,7 @@ export default function OsmrMethodology() {
                 { bucket: "High",      range: "60–80th",  desc: "Above-average structural risk",            color: "#A05050" },
                 { bucket: "Very High", range: "80–100th", desc: "Shallow anchors, deteriorating trajectory", color: E.neg },
               ].map(({ bucket, range, desc, color }, i) => (
-                <div key={bucket} style={s({ display: "grid", gridTemplateColumns: "120px 80px 1fr", padding: "10px 14px", borderBottom: i < 4 ? `1px solid rgba(255,255,255,0.025)` : "none" })}>
+                <div key={bucket} className="meth-bucket-scale-row" style={s({ display: "grid", padding: "10px 14px", borderBottom: i < 4 ? `1px solid rgba(255,255,255,0.025)` : "none" })}>
                   <div style={s({ display: "flex", alignItems: "center", gap: 8 })}>
                     <div style={s({ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 })} />
                     <span style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 600, color: E.text })}>{bucket}</span>
@@ -571,7 +616,7 @@ export default function OsmrMethodology() {
             <CC ch={<>
               <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>How to read Spearman r in an equity factor context</p>
               <B ch="The Fama-French value factor produces r in the 0.03–0.06 range. Momentum produces 0.05–0.09." />
-              <div style={s({ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 4, marginTop: 14 })}>
+              <div className="meth-r-scale" style={s({ display: "grid", gap: 4, marginTop: 14 })}>
                 {[
                   { l: "Negligible", r: "|r| < 0.03",  bg: E.bg3,                        t: E.muted },
                   { l: "Slight",     r: "0.03–0.05",   bg: "rgba(74,122,168,0.15)",      t: E.blue },
@@ -658,7 +703,7 @@ export default function OsmrMethodology() {
             <B ch="The framework's primary structural contribution is loss avoidance — specifically, the return to holding companies that are independent of the narratives required to sustain fragile valuations. The Very High composite bucket has a hit rate of 49.4% — meaning approximately half of Very High classifications produce positive 12-month returns. The framework identifies a structural risk state, not a predicted outcome. A company in Very High is in a condition where severe loss is approximately 2× more likely than the universe base rate." />
             <CC ch={<><p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>Return distribution · Very Low vs Very High composite bucket</p><DistChart /></>} />
 
-            <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, margin: "16px 0" })}>
+            <div className="meth-compare-grid" style={s({ display: "grid", gap: 4, margin: "16px 0" })}>
               {[
                 { label: "Very Low composite", color: E.pos, items: [["Median 12-month return", "+10.4%"], ["Geometric mean", "+8.6%"], ["Hit rate", "62.4%"], ["% outcomes below −25%", "12.2%"], ["CVaR (95th)", "−52.7%"], ["N", "18,459"]] },
                 { label: "Very High composite", color: E.neg, items: [["Median 12-month return", "−0.8%"], ["Geometric mean", "−11.7%"], ["Hit rate", "49.4%"], ["% outcomes below −25%", "30.3%"], ["CVaR (95th)", "−85.1%"], ["N", "26,128"]] },
@@ -794,7 +839,7 @@ export default function OsmrMethodology() {
             <Ey c="Appendix" />
             <SH ch="Methodology Summary" />
             <div style={s({ border: `1px solid ${E.bdr}`, overflow: "hidden" })}>
-              <table style={s({ width: "100%", borderCollapse: "collapse" })}>
+              <table className="meth-appendix" style={s({ width: "100%", borderCollapse: "collapse" })}>
                 <tbody>
                   {[
                     { f: "Universe",        v: "~5,200 U.S. equity securities. Data: FMP API. $5M minimum ADV · $50M minimum market cap applied before scoring. Refreshed weekly (snapshot) and monthly (full pipeline)." },
@@ -836,7 +881,7 @@ export default function OsmrMethodology() {
       </div>
 
       {/* FOOTER */}
-      <div style={s({ borderTop: `1px solid ${E.bdr}`, padding: "28px 44px", textAlign: "center" })}>
+      <div className="meth-footer" style={s({ borderTop: `1px solid ${E.bdr}`, textAlign: "center" })}>
         <p style={s({ fontFamily: E.mono, fontSize: 10, color: E.muted, lineHeight: 1.7 })}>
           The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com<br />
           © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.

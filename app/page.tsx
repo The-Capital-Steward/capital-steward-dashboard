@@ -1,576 +1,418 @@
 'use client'
 
-import { useState, useEffect } from "react"
+// FONT: same globals.css import (Syne + IBM Plex Mono + Instrument Serif)
+// File goes to: app/page.tsx
+
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { ArrowRight, ChevronRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────────────────────────────────────
+const E = {
+  bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
+  bdr: "#272420", bdr2: "#33302A",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#554E44", dim: "#3A3530",
+  gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
+  pos: "#5A9870", neg: "#B85C4A", blue: "#4A7AA8",
+  mono: "'IBM Plex Mono','Courier New',monospace",
+  sans: "'Syne',system-ui,sans-serif",
+  serif: "'Instrument Serif',Georgia,serif",
+}
 
-type SiteStats = {
-  universe: { total: number }
-  high_risk_cluster: { pct_of_universe: number; revenue_anchored_pct: number }
-  low_risk_cluster: { pct_of_universe: number; fcf_anchored_pct: number }
-  cohort_returns?: { total_observations: number }
-} | null
+const s = (x: object) => x as React.CSSProperties
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HOOKS
-// ─────────────────────────────────────────────────────────────────────────────
-
-function useSystemStats(): SiteStats {
-  const [stats, setStats] = useState<SiteStats>(null)
+// ─── Animated counter ─────────────────────────────────────────────────────────
+function Counter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
+  const [val, setVal] = useState(0)
+  const ref = useRef<HTMLSpanElement>(null)
   useEffect(() => {
-    fetch("/data/key_system_stats.json")
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => null)
-  }, [])
-  return stats
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      const start = Date.now()
+      const tick = () => {
+        const progress = Math.min((Date.now() - start) / 1400, 1)
+        const ease = 1 - Math.pow(1 - progress, 3)
+        setVal(Math.round(ease * target))
+        if (progress < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, { threshold: 0.3 })
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [target])
+  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STATUS DOT
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── OAL inline bar (hero) ────────────────────────────────────────────────────
+function HeroOALBar({ code, label, color, bg, border, pct, ret, delay }: {
+  code: string; label: string; color: string; bg: string; border: string;
+  pct: number; ret: string; delay: number
+}) {
+  const [width, setWidth] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      setTimeout(() => setWidth(pct), delay)
+    }, { threshold: 0.1 })
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [pct, delay])
 
-function StatusDot() {
   return (
-    <span className="relative flex h-2 w-2 shrink-0">
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4CAF7D] opacity-60" />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4CAF7D]" />
-    </span>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RISK CARDS — dark band accordion
-// ─────────────────────────────────────────────────────────────────────────────
-
-const RISK_CARDS = [
-  {
-    title: "Anchor Risk",
-    summary: "The further a valuation reaches beyond credible operational output, the more narrative is required to sustain it — and the more vulnerable it is to deflation.",
-    detail: "A firm will use the deepest operational anchor it can credibly claim to justify its valuation. If free cash flow supports that valuation, the bridge between price and economic reality is short. If the market must reach to revenue — or beyond — the bridge grows long, fragile, and dependent on conditions outside the firm's control.",
-  },
-  {
-    title: "Trajectory Risk",
-    summary: "A firm whose anchor is consistently improving is shortening its narrative bridge. One whose anchor is deteriorating is lengthening it — regardless of where its price sits today.",
-    detail: "This dimension captures trajectory, not just position. A company moving toward demonstrated cash generation is reducing its structural risk over time. A company whose anchor metric is deteriorating is accumulating structural risk regardless of where its price currently sits.",
-  },
-  {
-    title: "Financing Risk",
-    summary: "Whether a firm can service its financing obligations from its actual operational output — not from accounting constructs, narrative projections, or asset sales.",
-    detail: "Debt is not inherently fragile. A mature firm running significant debt with strong coverage from operational output is structurally sound. What creates fragility is the gap between what a firm owes and what it can credibly produce to service it.",
-  },
-]
-
-function RiskCards() {
-  const [expanded, setExpanded] = useState<string | null>(null)
-  return (
-    <div className="flex flex-col gap-2">
-      {RISK_CARDS.map(({ title, summary, detail }) => {
-        const isOpen = expanded === title
-        return (
-          <button
-            key={title}
-            onClick={() => setExpanded(isOpen ? null : title)}
-            className="w-full rounded-2xl border border-[#1E3A5F] bg-[#0D2847] p-5 text-left transition-all duration-200 hover:border-[#2E5A8F] hover:bg-[#0F2E52]"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="text-[13px] font-semibold text-white">{title}</div>
-              <svg
-                width="13" height="13" viewBox="0 0 13 13" fill="none"
-                className="mt-0.5 shrink-0 text-[#A9BEDF] transition-transform duration-200"
-                style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-              >
-                <path d="M2 5l4.5 4.5L11 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <p className="mt-2 text-[13px] leading-[1.7] text-[#A9BEDF]">{summary}</p>
-            {isOpen && (
-              <p className="mt-4 border-t border-[#1E3A5F] pt-4 text-[13px] leading-[1.7] text-[#7A9FCA]">
-                {detail}
-              </p>
-            )}
-          </button>
-        )
-      })}
+    <div style={s({ display: "grid", gridTemplateColumns: "40px 1fr 60px", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: `1px solid rgba(255,255,255,0.03)` })}>
+      <div style={s({ fontFamily: E.mono, fontSize: 9, fontWeight: 500, padding: "2px 4px", textAlign: "center", color, background: bg, border: `1px solid ${border}`, letterSpacing: "0.05em" })}>{code}</div>
+      <div ref={ref} style={s({ height: 2, background: E.bdr2, position: "relative" })}>
+        <div style={s({ position: "absolute", left: 0, top: 0, height: 2, background: color, opacity: 0.85, width: `${width}%`, transition: `width 0.9s cubic-bezier(0.4,0,0.2,1) ${delay}ms` })} />
+      </div>
+      <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500, color, textAlign: "right" })}>{ret}</div>
     </div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// KPI STRIP
-// Numbers locked from methodology page (290,902 obs · 2009–2026 backtest):
-//   universe:     live from key_system_stats.json, fallback ~5,200
-//   observations: live from key_system_stats.json, fallback 290,902
-//   elevated:     live from key_system_stats.json, fallback 16.1%
-//   spread:       +27.6pp — static, from validated backtest suite
-// ─────────────────────────────────────────────────────────────────────────────
+const OAL_DATA = [
+  { code: "FCF",  label: "Free Cash Flow", color: "#5A9870", bg: "rgba(90,152,112,0.09)",  border: "rgba(90,152,112,0.28)",  pct: 70, ret: "+9.8%" },
+  { code: "NI",   label: "Net Income",     color: "#4A7AA8", bg: "rgba(74,122,168,0.09)",  border: "rgba(74,122,168,0.28)",  pct: 42, ret: "+4.0%" },
+  { code: "EBIT", label: "EBIT",           color: "#C5A24A", bg: "rgba(197,162,74,0.09)",  border: "rgba(197,162,74,0.28)",  pct: 29, ret: "+2.5%" },
+  { code: "Rev",  label: "Revenue",        color: "#B85C4A", bg: "rgba(184,92,74,0.09)",   border: "rgba(184,92,74,0.28)",   pct: 6,  ret: "−16.7%" },
+]
 
-function KPIStrip({ stats }: { stats: SiteStats }) {
-  const universe = stats
-    ? stats.universe.total.toLocaleString()
-    : "5,200"
-  const observations = stats?.cohort_returns
-    ? stats.cohort_returns.total_observations.toLocaleString()
-    : "290,902"
-  const elevatedPct = stats
-    ? `${stats.high_risk_cluster.pct_of_universe}%`
-    : "16.1%"
+const RESULTS = [
+  { metric: "Factor-adjusted L/S alpha (FF5 + Momentum)", val: "+21.0%", color: E.pos },
+  { metric: "t-statistic on alpha",                        val: "+4.80",  color: E.text },
+  { metric: "Very High loss rate vs universe",             val: "~2×",    color: E.neg },
+  { metric: "FCF vs Revenue median spread",                val: "+26.6pp",color: E.pos },
+  { metric: "Exclusion premium (long-only filter)",        val: "+4.6pp", color: E.pos },
+  { metric: "Selection premium (Very Low only)",           val: "+3.1pp", color: E.pos },
+]
 
-  return (
-    <section className="border-b border-[#D0D4CF] bg-[#F1F3F0] px-6 py-11">
-      <div className="mx-auto max-w-7xl">
-
-        <div className="flex items-start">
-
-          {/* Universe */}
-          <div className="min-w-0 flex-1 pr-7">
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">
-              Universe
-            </p>
-            <p className="font-serif text-[clamp(26px,3vw,42px)] font-normal leading-none tracking-[-0.015em] text-[#0A1F3D]">
-              {universe}
-            </p>
-            <p className="mt-2 text-[12.5px] leading-[1.55] text-[#5C6472]">
-              U.S.-listed equities scored across all three structural axes
-            </p>
-          </div>
-
-          <div className="mx-1 w-px self-stretch bg-[#D0D4CF]" />
-
-          {/* Observations */}
-          <div className="min-w-0 flex-[1.2] px-7">
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">
-              Cohort observations
-            </p>
-            <p className="font-serif text-[clamp(26px,3vw,42px)] font-normal leading-none tracking-[-0.015em] text-[#0A1F3D]">
-              {observations}
-            </p>
-            <p className="mt-2 text-[12.5px] leading-[1.55] text-[#5C6472]">
-              12-month formation windows · 2009–2026
-            </p>
-          </div>
-
-          <div className="mx-1 w-px self-stretch bg-[#D0D4CF]" />
-
-          {/* Elevated risk zone */}
-          <div className="min-w-0 flex-1 px-7">
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">
-              Elevated risk zone
-            </p>
-            <p className="font-serif text-[clamp(26px,3vw,42px)] font-normal leading-none tracking-[-0.015em] text-[#0A1F3D]">
-              {elevatedPct}
-            </p>
-            <p className="mt-2 text-[12.5px] leading-[1.55] text-[#5C6472]">
-              High / Very High across all three axes simultaneously
-            </p>
-          </div>
-
-          <div className="mx-1 w-px self-stretch bg-[#D0D4CF]" />
-
-          {/* FCF vs Revenue spread */}
-          <div className="min-w-0 flex-[1.3] pl-7">
-            <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">
-              FCF vs Revenue · median spread
-            </p>
-            <p className="font-serif text-[clamp(26px,3vw,42px)] font-normal leading-none tracking-[-0.015em] text-[#1A4D32]">
-              +27.6pp
-            </p>
-            <p className="mt-2 text-[12.5px] leading-[1.55] text-[#5C6472]">
-              12-month return · held across all regimes tested
-            </p>
-          </div>
-
-        </div>
-
-        {/* Disclosure */}
-        <p className="mt-7 border-t border-[#E4E7E2] pt-4 text-[10.5px] leading-[1.65] text-[#9CA5B0]">
-          290,902 historical observations · 2009–2026 · $5M ADV liquidity filter · $5 minimum price at formation · 12-month forward return horizon · transaction costs not modeled. FCF vs Revenue spread: median 12-month return differential across all observations, confirmed stable across pre-2020, COVID, and post-COVID regimes.
-        </p>
-
-      </div>
-    </section>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
-
-export default function HomePage() {
-  const stats = useSystemStats()
+export default function Homepage() {
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    if ("scrollRestoration" in history) history.scrollRestoration = "manual"
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const el = document.getElementById("home-top")
-        if (!el) return
-        const y = el.getBoundingClientRect().top + window.scrollY - 88
-        window.scrollTo(0, Math.max(0, y))
-      })
-    })
+    const handler = () => setScrolled(window.scrollY > 40)
+    window.addEventListener("scroll", handler, { passive: true })
+    return () => window.removeEventListener("scroll", handler)
   }, [])
 
   return (
-    <main id="home-top" className="min-h-screen bg-[#F1F3F0] text-[#1E2228]">
+    <main style={s({ minHeight: "100vh", background: E.bg, color: E.text, fontFamily: E.sans })}>
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-[#DDE0DC]">
-        <div className="mx-auto max-w-7xl px-6 py-14 md:py-20">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-[1.1fr_0.9fr] md:gap-14 md:items-center">
+      {/* ── NAV ── */}
+      <nav style={s({
+        position: "sticky", top: 0, zIndex: 100,
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "0 44px", height: 52,
+        background: scrolled ? "rgba(14,13,11,0.95)" : E.bg,
+        borderBottom: `1px solid ${scrolled ? E.bdr : "transparent"}`,
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        transition: "all 0.25s",
+      })}>
+        {/* Masthead wordmark */}
+        <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase", color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, color: E.gold, marginLeft: 8, letterSpacing: "0.01em" })}>Steward</span>
+        </Link>
 
-            {/* Left */}
-            <div className="max-w-[680px]">
-
-              <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">
-                Structural Risk Research
-              </p>
-
-              <h1 className="font-serif text-[clamp(32px,4.2vw,56px)] font-normal leading-[1.04] tracking-[-0.018em] text-[#0A1F3D]">
-                Markets price narratives.{" "}
-                <br className="hidden md:block" />
-                We measure what's underneath them.
-              </h1>
-
-              <div className="mt-6 flex flex-col gap-4">
-                <p className="text-[16.5px] leading-[1.85] text-[#5C6472]">
-                  The OSMR framework evaluates every U.S.-listed equity on three structural
-                  dimensions: how far a valuation reaches beyond demonstrated operational output,
-                  whether that foundation is improving or deteriorating, and whether the firm can
-                  service its obligations from what it actually produces.
-                </p>
-                <p className="text-[16.5px] leading-[1.85] text-[#5C6472]">
-                  Scores are derived from reported financials — not analyst estimates, not
-                  narrative consensus. Ranked cross-sectionally so structural risk is comparable
-                  across the universe.
-                </p>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link
-                  href="/platform"
-                  className="inline-flex items-center gap-2 rounded-[13px] bg-[#0A1F3D] px-6 py-3.5 text-[13px] font-semibold text-white transition hover:bg-[#153761]"
-                >
-                  Open Platform <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-                <Link
-                  href="/osmr-methodology"
-                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
-                >
-                  Methodology <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-                <Link
-                  href="/how-to-use-osmr"
-                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#5C6472] transition hover:text-[#0A1F3D]"
-                >
-                  How to Use OSMR <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-
-            </div>
-
-            {/* Right — OSMR card, desktop only */}
-            <div className="hidden md:block">
-              <div className="w-full rounded-[28px] border border-[#DDE0DC] bg-white p-7 shadow-[0_16px_48px_rgba(10,35,66,0.07)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_24px_64px_rgba(10,35,66,0.11)]">
-
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">OSMR</p>
-                    <p className="mt-1.5 font-serif text-[18px] font-normal text-[#0A1F3D]">Structural Market Map</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#C9D8CD] bg-[#E8EFE9] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#244636]">
-                    <StatusDot /> Live
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {[
-                    { label: "Anchor Risk",     desc: "How much narrative bridges this valuation to operational output" },
-                    { label: "Trajectory Risk", desc: "Whether the operational foundation is improving or deteriorating" },
-                    { label: "Financing Risk",  desc: "Whether obligations can be serviced from actual operational output" },
-                  ].map(({ label, desc }) => (
-                    <div key={label} className="rounded-xl border border-[#EAECE8] bg-[#F7F8F6] px-4 py-3.5">
-                      <div className="text-[13px] font-semibold text-[#0A1F3D]">{label}</div>
-                      <div className="mt-1 text-[12.5px] leading-[1.5] text-[#7A8390]">{desc}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-[14px] bg-[#0A1F3D] px-4 py-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7A9FCA]">Framework output</p>
-                  <p className="mt-2 text-[13px] leading-[1.65] text-[#D8E4EF]">
-                    A structural map of where valuation is credibly anchored — and where it depends on conditions outside the firm's control.
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
+        {/* Nav links */}
+        <div style={s({ display: "flex", alignItems: "center" })}>
+          {[
+            { label: "Why This Exists", href: "/why-this-exists" },
+            { label: "Methodology",    href: "/osmr-methodology" },
+            { label: "How to Use",     href: "/how-to-use-osmr" },
+          ].map(({ label, href }) => (
+            <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: E.muted, padding: "0 16px", borderLeft: `1px solid ${E.bdr}`, textDecoration: "none", height: 52, display: "flex", alignItems: "center", letterSpacing: "0.02em", transition: "color 0.12s" })}
+              onMouseEnter={e => (e.currentTarget.style.color = E.text)}
+              onMouseLeave={e => (e.currentTarget.style.color = E.muted)}>
+              {label}
+            </Link>
+          ))}
+          <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 20px", background: E.gold, color: "#060504", textDecoration: "none", marginLeft: 20, transition: "opacity 0.15s" })}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
+            Platform
+          </Link>
         </div>
-      </section>
+      </nav>
 
-      {/* ── INFLECTION BRIDGE ─────────────────────────────────────────────── */}
-      <div className="border-b border-[#D0D4CF] bg-[#F1F3F0] px-6 py-5">
-        <div className="mx-auto flex max-w-5xl items-center gap-5">
-          <div className="h-px flex-1 bg-[#D8DBD6]" />
-          <p className="shrink-0 font-serif text-[13.5px] italic text-[#4A5568]">
-            The distribution below is not a ranking artifact. It is a structural separation.
-          </p>
-          <div className="h-px flex-1 bg-[#D8DBD6]" />
+      {/* ── HERO ── */}
+      <div style={s({ position: "relative", overflow: "hidden", borderBottom: `1px solid ${E.bdr}` })}>
+
+        {/* Grid texture */}
+        <div style={s({
+          position: "absolute", inset: 0, pointerEvents: "none",
+          backgroundImage: "linear-gradient(rgba(197,162,74,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(197,162,74,0.03) 1px,transparent 1px)",
+          backgroundSize: "52px 52px",
+          maskImage: "radial-gradient(ellipse 100% 100% at 30% 100%,black 20%,transparent 80%)",
+        })} />
+
+        {/* Radial glow behind headline */}
+        <div style={s({ position: "absolute", top: 0, left: -100, width: 600, height: 500, background: "radial-gradient(ellipse at 30% 40%,rgba(197,162,74,0.05) 0%,transparent 65%)", pointerEvents: "none" })} />
+
+        <div style={s({ position: "relative", display: "grid", gridTemplateColumns: "1fr 340px", minHeight: 480, borderRight: `1px solid ${E.bdr}` })}>
+
+          {/* Left: headline + CTA */}
+          <div style={s({ padding: "80px 52px 72px", borderRight: `1px solid ${E.bdr}`, display: "flex", flexDirection: "column", justifyContent: "flex-end" })}>
+
+            {/* Live status */}
+            <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 36, width: "fit-content" })}>
+              <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.gold, boxShadow: "0 0 6px rgba(197,162,74,0.7)", animation: "pulse 2.5s ease-in-out infinite" })} />
+              <span style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
+                System live · ~5,200 equities · 2026-03-28
+              </span>
+            </div>
+
+            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
+              Markets price<br />
+              <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "-0.02em" })}>narrative.</em><br />
+              We price structure.
+            </h1>
+
+            <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.body, maxWidth: 480, marginBottom: 36 })}>
+              Structural risk research for U.S. equities. We measure the distance between what a company has demonstrated and what its valuation requires — across 5,200 companies, updated weekly.
+            </p>
+
+            <div style={s({ display: "flex", flexWrap: "wrap", gap: 10 })}>
+              <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+                Open Platform <ArrowRight size={14} />
+              </Link>
+              <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
+                Read the Methodology
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: OAL ladder — proof above the fold */}
+          <div style={s({ padding: "48px 32px", background: E.bg2, display: "flex", flexDirection: "column", justifyContent: "center" })}>
+            <div style={s({ marginBottom: 20 })}>
+              <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 4 })}>Anchor depth → median return</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted })}>289,745 obs · 2009–2026</p>
+            </div>
+
+            {OAL_DATA.map((bar, i) => (
+              <HeroOALBar key={bar.code} {...bar} delay={i * 100} />
+            ))}
+
+            <div style={s({ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${E.bdr}` })}>
+              <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline" })}>
+                <span style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted })}>FCF–Revenue spread</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 14, fontWeight: 500, color: E.pos })}>+26.6pp</span>
+              </div>
+              <p style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginTop: 4 })}>Held across all market regimes tested</p>
+            </div>
+
+            {/* Ghost section number */}
+            <div style={s({ position: "absolute", bottom: 16, right: 20, fontFamily: E.sans, fontSize: 80, fontWeight: 800, color: "rgba(197,162,74,0.04)", lineHeight: 1, pointerEvents: "none", userSelect: "none" })}>I</div>
+          </div>
         </div>
       </div>
 
-      {/* ── KPI STRIP ─────────────────────────────────────────────────────── */}
-      <KPIStrip stats={stats} />
-
-      {/* ── RESEARCH LENS ─────────────────────────────────────────────────── */}
-      <section className="border-b border-[#DDE0DC] px-6 py-16">
-        <div className="mx-auto max-w-7xl">
-
-          <div className="mb-10 max-w-lg">
-            <p className="mb-3.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">Research Lens</p>
-            <h2 className="font-serif text-[clamp(24px,2.8vw,38px)] font-normal leading-[1.1] tracking-[-0.014em] text-[#0A1F3D]">
-              Three questions. One structural score.
-            </h2>
+      {/* ── PROOF STRIP — key numbers ── */}
+      <div style={s({ display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+        {[
+          { val: null, target: 289737, suffix: "", prefix: "",  label: "Historical observations",      note: "2009–2026" },
+          { val: null, target: 17,     suffix: "yr",prefix: "", label: "Backtest period",               note: "3 market regimes" },
+          { val: "+21%", target: 0,    suffix: "", prefix: "",  label: "Factor-adj. L/S alpha",         note: "t = +4.80" },
+          { val: "~2×",  target: 0,   suffix: "", prefix: "",  label: "Very High loss rate",            note: "vs universe, all regimes" },
+        ].map(({ val, target, suffix, prefix, label, note }, i) => (
+          <div key={label} style={s({ padding: "24px 28px", borderRight: i < 3 ? `1px solid ${E.bdr}` : "none" })}>
+            <div style={s({ fontFamily: E.mono, fontSize: 26, fontWeight: 500, color: i >= 2 ? E.gold : E.text, letterSpacing: "-0.03em", marginBottom: 4, lineHeight: 1 })}>
+              {target > 0 ? <Counter target={target} suffix={suffix} prefix={prefix} /> : val}
+            </div>
+            <div style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 2 })}>{label}</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.dim })}>{note}</div>
           </div>
+        ))}
+      </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-
-            {/* Focus */}
-            <div className="rounded-[22px] border border-[#DDE0DC] bg-white p-7 shadow-[0_8px_24px_rgba(10,35,66,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(10,35,66,0.08)]">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6DAE8B]">Focus</p>
-              <p className="font-serif text-[19px] font-normal leading-[1.2] tracking-[-0.01em] text-[#0A1F3D]">Anchor depth</p>
-              <p className="mt-4 text-[14.5px] leading-[1.8] text-[#5C6472]">
-                How far a valuation reaches beyond the operational output that credibly supports it — and how much narrative is required to bridge that gap.
-              </p>
-              <p className="mt-3 text-[14.5px] leading-[1.8] text-[#5C6472]">
-                The deeper the anchor, the shorter the bridge. The shallower the anchor, the more the valuation depends on conditions the firm does not control.
-              </p>
+      {/* ── THREE DIMENSIONS ── */}
+      <div style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+        {[
+          {
+            num: "Axis 01",
+            r: "r = −0.034",
+            title: "Anchor Risk",
+            body: "Every company is assigned to its deepest qualifying financial anchor — FCF, Net Income, EBIT, or Revenue. The distance between that anchor and the current valuation, adjusted for anchor shallowness, is Axis 1.",
+          },
+          {
+            num: "Axis 02",
+            r: "r = −0.056",
+            title: "Trajectory Risk",
+            body: "A company moving toward demonstrated cash generation is shortening its narrative bridge. A company deteriorating is lengthening it — accumulating structural risk regardless of current price.",
+          },
+          {
+            num: "Composite",
+            r: "r = −0.052",
+            title: "Structural Risk Score",
+            body: "Equal-weight mean of both axes. Percentile rank across the full universe. Long-run static model. AUC 0.567 vs valuation alone at 0.493 (below random) for predicting severe losses.",
+          },
+        ].map(({ num, r, title, body }, i) => (
+          <div key={num}
+            style={s({ padding: "36px 32px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none", transition: "background 0.15s", cursor: "default" })}
+            onMouseEnter={e => (e.currentTarget.style.background = E.gatm)}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+            <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 })}>
+              <span style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.7 })}>{num}</span>
+              <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>{r}</span>
             </div>
-
-            {/* Scope */}
-            <div className="rounded-[22px] border border-[#DDE0DC] bg-white p-7 shadow-[0_8px_24px_rgba(10,35,66,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(10,35,66,0.08)]">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6DAE8B]">Scope</p>
-              <p className="font-serif text-[19px] font-normal leading-[1.2] tracking-[-0.01em] text-[#0A1F3D]">Cross-sectional</p>
-              <p className="mt-4 text-[14.5px] leading-[1.8] text-[#5C6472]">
-                Every U.S.-listed equity evaluated on the same structural basis. Structural risk is not a property of individual companies in isolation — it is a relative measure.
-              </p>
-              <p className="mt-3 text-[14.5px] leading-[1.8] text-[#5C6472]">
-                Rankings, not absolute scores. What matters is where each company sits in the distribution — not whether its multiple is high or low in the abstract.
-              </p>
-            </div>
-
-            {/* Method */}
-            <div className="rounded-[22px] border border-[#DDE0DC] bg-white p-7 shadow-[0_8px_24px_rgba(10,35,66,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(10,35,66,0.08)]">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6DAE8B]">Method</p>
-              <p className="font-serif text-[19px] font-normal leading-[1.2] tracking-[-0.01em] text-[#0A1F3D]">Three axes</p>
-              <div className="mt-4 flex flex-col gap-1.5">
-                {["Anchor Risk", "Trajectory Risk", "Financing Risk"].map(axis => (
-                  <div
-                    key={axis}
-                    className="rounded-md border border-[#C9D8CD] bg-[#E8EFE9] px-3 py-2 text-[12px] font-semibold text-[#244636]"
-                  >
-                    {axis}
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-[14.5px] leading-[1.8] text-[#5C6472]">
-                Each axis scored independently, then composed into a single structural score. No axis hides behind the others.
-              </p>
-            </div>
-
+            <div style={s({ fontFamily: E.sans, fontSize: 17, fontWeight: 800, color: E.text, letterSpacing: "-0.02em", marginBottom: 12, lineHeight: 1.15 })}>{title}</div>
+            <div style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.78, color: E.body })}>{body}</div>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      {/* ── CORE FRAMEWORK — DARK BAND ────────────────────────────────────── */}
-      <section className="border-b border-[#0D2440] bg-[#0A1F3D] px-6 py-16">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 md:grid-cols-2 md:items-start">
+      {/* ── SIGNAL SPLIT ── */}
+      <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${E.bdr}` })}>
 
-            {/* Left */}
-            <div>
-              <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7A9FCA]">Core Framework</p>
-              <h2 className="font-serif text-[clamp(24px,2.8vw,38px)] font-normal leading-[1.1] tracking-[-0.014em] text-white">
-                If narrative sustains a valuation, the question is what sustains the narrative.
-              </h2>
-              <div className="mt-6 flex flex-col gap-4">
-                <p className="text-[15.5px] leading-[1.85] text-[#A9BEDF]">
-                  The strongest valuations rest on demonstrated cash generation. The bridge between
-                  price and operational reality is short — the narrative required to maintain it
-                  is minimal.
-                </p>
-                <p className="text-[15.5px] leading-[1.85] text-[#A9BEDF]">
-                  The weakest valuations rest on what a company might become. The bridge is long,
-                  the narrative load is heavy, and the valuation is exposed as that narrative weakens.
-                </p>
-                <p className="text-[15.5px] leading-[1.85] text-[#A9BEDF]">
-                  OSMR maps where that load is concentrated across the market. It does not predict
-                  which narratives will fail. It measures how much structural weight each one is
-                  already carrying.
-                </p>
-              </div>
-              <div className="mt-8">
-                <Link
-                  href="/osmr-methodology"
-                  className="inline-flex items-center gap-2 rounded-[13px] bg-white px-6 py-3.5 text-[13px] font-semibold text-[#0A1F3D] transition hover:bg-[#F0F4F8]"
-                >
-                  Methodology <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Right — accordion */}
-            <div>
-              <RiskCards />
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── PLATFORM ──────────────────────────────────────────────────────── */}
-      <section className="border-b border-[#DDE0DC] px-6 py-16">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 md:grid-cols-[1.05fr_0.95fr] md:items-center">
-
-            {/* Left */}
-            <div>
-              <p className="mb-3.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">Platform</p>
-              <h2 className="font-serif text-[clamp(24px,2.8vw,38px)] font-normal leading-[1.1] tracking-[-0.014em] text-[#0A1F3D]">
-                The framework, made usable.
-              </h2>
-              <div className="mt-6 flex flex-col gap-4">
-                <p className="text-[15.5px] leading-[1.85] text-[#5C6472]">
-                  Company-level financial data converted into a structural map of the equity
-                  universe. Identify risk clusters before they reprice. Compare companies on a
-                  common structural basis. Track anchor deterioration over time.
-                </p>
-                <p className="text-[15.5px] leading-[1.85] text-[#5C6472]">
-                  Updated monthly for structural changes. Weekly snapshot refreshes for active monitoring.
-                </p>
-              </div>
-              <div className="mt-8">
-                <Link
-                  href="/platform"
-                  className="inline-flex items-center gap-2 rounded-[13px] bg-[#0A1F3D] px-6 py-3.5 text-[13px] font-semibold text-white transition hover:bg-[#153761]"
-                >
-                  Open Platform <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Right — feature card */}
-            <div className="rounded-[22px] border border-[#DDE0DC] bg-white p-7 shadow-[0_8px_24px_rgba(10,35,66,0.04)]">
-
-              <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">What's live now</p>
-
-              <div className="flex flex-col gap-2">
-                {[
-                  { title: "Structural market map",      desc: "Full-universe OSMR scoring across all three axes." },
-                  { title: "Historical cohort analysis", desc: "Forward return outcomes across structural regimes, 12M horizon." },
-                  { title: "Company-level drilldowns",   desc: "Individual ticker structural profiles, regime context, trajectory history." },
-                ].map(({ title, desc }) => (
-                  <div key={title} className="flex items-start justify-between gap-4 rounded-xl border border-[#EAECE8] bg-[#F7F8F6] px-4 py-3.5">
-                    <div>
-                      <div className="text-[13px] font-semibold text-[#0A1F3D]">{title}</div>
-                      <div className="mt-1 text-[12.5px] leading-[1.5] text-[#6B7A8D]">{desc}</div>
-                    </div>
-                    <div className="mt-0.5 flex shrink-0 items-center gap-1.5 rounded-full border border-[#B6DEC4] bg-[#E3F2E9] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1B5E38]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#3E9E6A]" />
-                      Live
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 border-t border-[#EAECE8] pt-5">
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#B0B8C4]">Coming next</p>
-                <div className="rounded-xl border border-[#EAECE8] bg-[#FAFAF9] px-4 py-3.5 opacity-60">
-                  <div className="text-[13px] font-semibold text-[#6B7280]">Market structure analytics</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#9CA3AF]">
-                    Options and spread microstructure signals layered on structural scores.
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHY THIS EXISTS ───────────────────────────────────────────────── */}
-      <section className="px-6 py-16">
-        <div className="mx-auto max-w-[680px]">
-
-          <p className="mb-3.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8A92A0]">Why This Exists</p>
-          <h2 className="font-serif text-[clamp(24px,2.8vw,38px)] font-normal leading-[1.1] tracking-[-0.014em] text-[#0A1F3D]">
-            Built for investors who want structure, not stories.
+        {/* Left: what it is and isn't */}
+        <div style={s({ padding: "48px 44px", borderRight: `1px solid ${E.bdr}` })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 16 })}>The signal</p>
+          <h2 style={s({ fontFamily: E.sans, fontSize: 24, fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 16 })}>
+            Not a prediction engine.<br />A structural state identifier.
           </h2>
+          <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.8, color: E.body, marginBottom: 16 })}>
+            The Very High composite bucket carries approximately 2× the severe loss rate of the full universe across all market regimes — including Expansion, which accounts for 52.7% of the sample period.
+          </p>
+          <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.8, color: E.body, marginBottom: 28 })}>
+            The framework doesn't tell you what will happen. It tells you what structural condition a company is currently in. 68.5% of Very High entries do not produce severe losses in the subsequent 12 months — we disclose this prominently, not in fine print.
+          </p>
 
-          <div className="mt-7 flex flex-col gap-5">
-            <p className="text-[15.5px] leading-[1.85] text-[#5C6472]">
-              Rigorous structural analysis requires one thing: that conclusions follow
-              the evidence, not the incentive structure of the organization publishing them.
-            </p>
-
-            <blockquote className="border-l-2 border-[#C9D8CD] pl-5">
-              <p className="text-[15.5px] leading-[1.85] text-[#3F4A58]">
-                Most financial publishing does not meet that requirement. Research exists
-                to support a product. The more rigorous the analysis, the harder it becomes
-                to compress into a format optimized for subscriptions rather than truth.
-              </p>
-            </blockquote>
-
-            <p className="text-[15.5px] leading-[1.85] text-[#5C6472]">
-              The work behind this platform was developed inside that environment — and
-              tested against real capital decisions throughout. A framework that measures
-              how much narrative a company requires to justify its valuation cannot be
-              published honestly by an organization whose business model depends on narrative.
-            </p>
-            <p className="text-[15.5px] leading-[1.85] text-[#5C6472]">
-              The Capital Steward exists because that structural incompatibility left no
-              other option. What's here is the same framework, expressed without distortion.
-            </p>
+          {/* Very Low vs Very High comparison */}
+          <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 })}>
+            {[
+              { label: "Very Low composite",  med: "+10.4%", cvar: "−52.7%", below: "12.2%", color: E.pos },
+              { label: "Very High composite", med: "−0.8%",  cvar: "−85.1%", below: "30.3%", color: E.neg },
+            ].map(({ label, med, cvar, below, color }) => (
+              <div key={label} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, padding: "16px" })}>
+                <p style={s({ fontFamily: E.mono, fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, marginBottom: 12 })}>{label}</p>
+                {[["Median return", med], ["CVaR (95%)", cvar], ["< −25% rate", below]].map(([k, v]) => (
+                  <div key={k} style={s({ marginBottom: 10 })}>
+                    <div style={s({ fontFamily: E.mono, fontSize: 16, fontWeight: 500, color })}>{v}</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginTop: 1 })}>{k}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
-
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              href="/why-this-exists"
-              className="inline-flex items-center gap-2 rounded-[13px] bg-[#0A1F3D] px-6 py-3.5 text-[13px] font-semibold text-white transition hover:bg-[#153761]"
-            >
-              Why This Exists <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/osmr-methodology"
-              className="inline-flex items-center gap-2 rounded-[13px] border border-[#D4CDBF] bg-[#F7F8F6] px-5 py-3.5 text-[13px] font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
-            >
-              Methodology <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              href="/how-to-use-osmr"
-              className="inline-flex items-center gap-2 rounded-[13px] border border-[#D4CDBF] bg-[#F7F8F6] px-5 py-3.5 text-[13px] font-medium text-[#1E2228] transition hover:border-[#244636] hover:text-[#0A1F3D]"
-            >
-              How to Use OSMR <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
         </div>
-      </section>
 
-      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-      <div className="border-t border-[#DDE0DC] py-6 text-center">
-        <p className="text-[11px] leading-[1.8] text-[#B0B8C4]">
-          The Capital Steward, LLC · thecapitalsteward.com · inquiries@thecapitalsteward.com
-          <br />
-          © 2026 The Capital Steward, LLC. All rights reserved. For informational purposes only. Not investment advice.
-        </p>
+        {/* Right: empirical results */}
+        <div style={s({ padding: "48px 44px", background: E.gatm })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 24 })}>
+            Key empirical results · 289,737 obs · 2009–2026
+          </p>
+
+          <div style={s({ display: "flex", flexDirection: "column", marginBottom: 36 })}>
+            {RESULTS.map(({ metric, val, color }, i) => (
+              <div key={metric} style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < RESULTS.length - 1 ? `1px solid rgba(255,255,255,0.03)` : "none" })}>
+                <span style={s({ fontFamily: E.sans, fontSize: 12.5, color: E.body, paddingRight: 12 })}>{metric}</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 14, fontWeight: 500, color, flexShrink: 0 })}>{val}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Regime bars */}
+          <div>
+            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>L/S alpha · positive in all three regimes</p>
+            {[
+              { name: "Expansion", note: "52.7% of months", val: "+14.5%", w: 62 },
+              { name: "Neutral",   note: "17.6%",           val: "+18.0%", w: 77 },
+              { name: "Stress",    note: "23.9%",           val: "+23.5%", w: 100 },
+            ].map(({ name, note, val, w }) => (
+              <div key={name} style={s({ display: "grid", gridTemplateColumns: "130px 1fr 56px", alignItems: "center", gap: 12, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
+                <div>
+                  <span style={s({ fontFamily: E.sans, fontSize: 11.5, color: E.text, fontWeight: 600 })}>{name}</span>
+                  <span style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginLeft: 5 })}>{note}</span>
+                </div>
+                <div style={s({ height: 2, background: E.bdr2, position: "relative" })}>
+                  <div style={s({ position: "absolute", left: 0, top: 0, height: 2, width: `${w}%`, background: E.gold })} />
+                </div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11.5, fontWeight: 500, color: E.gold, textAlign: "right" })}>{val}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={s({ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${E.bdr}` })}>
+            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65 })}>Signal is Modest full-period (r = −0.052) and Substantive during structural stress (r = −0.145). Both numbers are honest.</p>
+          </div>
+        </div>
       </div>
+
+      {/* ── THREE PRINCIPLES ── */}
+      <div style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+        {[
+          { num: "01", head: "Structure over narrative", body: "Most valuation frameworks ask how much a company is worth. We ask how well-grounded that valuation is in what the company has actually demonstrated. The gap between those questions is where structural risk accumulates." },
+          { num: "02", head: "Honest about limitations", body: "68.5% of Very High classifications do not produce severe losses in 12 months. We disclose this prominently. The framework identifies structural conditions — not outcomes — and we write accordingly." },
+          { num: "03", head: "No incentive distortion", body: "No advertisers. No sponsored research. No assets under management. The analysis is shaped entirely by what the data shows — not by what we are trying to sell or recommend." },
+        ].map(({ num, head, body }, i) => (
+          <div key={num} style={s({ padding: "36px 32px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>
+            <div style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.4, marginBottom: 14 })}>{num}</div>
+            <div style={s({ fontFamily: E.sans, fontSize: 16, fontWeight: 800, color: E.text, letterSpacing: "-0.02em", marginBottom: 10, lineHeight: 1.2 })}>{head}</div>
+            <div style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.78, color: E.body })}>{body}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── CTA ── */}
+      <div style={s({ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 40, padding: "56px 44px", borderBottom: `1px solid ${E.bdr}` })}>
+        <div>
+          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>Platform access</p>
+          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(24px,3.5vw,36px)", fontWeight: 800, color: E.text, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: 12 })}>
+            The structural map is live now.
+          </h2>
+          <p style={s({ fontFamily: E.sans, fontSize: 14, color: E.body, lineHeight: 1.75, maxWidth: 520 })}>
+            ~5,200 U.S. equities scored across two independently validated dimensions of structural risk. Updated weekly. No narrative. No incentive distortion.
+          </p>
+        </div>
+        <div style={s({ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12, flexShrink: 0 })}>
+          <div style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, textAlign: "right" })}>
+            <span style={s({ color: E.text, fontSize: 22, fontWeight: 500 })}>$159</span>
+            <span style={s({ margin: "0 6px" })}>/</span>month
+            <span style={s({ color: E.dim, margin: "0 10px" })}>·</span>
+            <span style={s({ color: E.text, fontSize: 22, fontWeight: 500 })}>$1,479</span>
+            <span style={s({ margin: "0 6px" })}>/</span>year
+          </div>
+          <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+            Subscribe to Access <ArrowRight size={14} />
+          </Link>
+          <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" })}>
+            Read the Methodology First
+          </Link>
+        </div>
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
+        <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 9, fontWeight: 400, letterSpacing: "0.28em", textTransform: "uppercase", color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
+        </Link>
+        <div style={s({ display: "flex", gap: 20 })}>
+          {[
+            { label: "Why This Exists", href: "/why-this-exists" },
+            { label: "Methodology",    href: "/osmr-methodology" },
+            { label: "How to Use",     href: "/how-to-use-osmr" },
+          ].map(({ label, href }) => (
+            <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
+          ))}
+        </div>
+        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
+      </div>
+
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @media (max-width: 900px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 768px) {
+          .stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .axes-grid  { grid-template-columns: 1fr !important; }
+          .signal-grid { grid-template-columns: 1fr !important; }
+          .phil-grid  { grid-template-columns: 1fr !important; }
+          .cta-grid   { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
 
     </main>
   )
