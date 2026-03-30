@@ -171,43 +171,86 @@ function narrateCompany(c: SnapshotRow) {
 
 function interpretDist(data: SnapshotRow[]) {
   if (!data.length) return { headline:"—", body:"No data.", tone:"moderate" as const, consequence:"" }
-  const n  = data.length
-  const vh = data.filter(r => r.composite_bucket === "Very High").length / n
-  const el = data.filter(r => r.composite_bucket === "Very High" || r.composite_bucket === "High").length / n
-  const rs = data.filter(r => r.composite_bucket === "Very Low"  || r.composite_bucket === "Low").length / n
-  if (vh >= 0.25) return { tone:"elevated" as const,
-    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
-    body:`${Math.round(el*100)}% carry High or Very High composite risk — structural fragility is broadly distributed.`,
-    consequence:`Sector diversification provides limited structural protection when fragility is this widespread.` }
-  if (vh >= 0.15) return { tone:"moderate" as const,
-    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
-    body:`${Math.round(el*100)}% carry elevated composite risk. ${Math.round(rs*100)}% sit in the lower two buckets.`,
-    consequence:`Mixed distribution — elevated names warrant scrutiny, but lower-risk companies remain available.` }
-  return { tone:"subdued" as const,
-    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
-    body:`Structural risk is contained. ${Math.round(rs*100)}% of companies sit in the Very Low or Low bucket.`,
-    consequence:`Contained distribution does not eliminate individual-name risk — scrutiny remains warranted.` }
+  const n   = data.length
+  const vh  = data.filter(r => r.composite_bucket === "Very High")
+  const vhN = vh.length
+  // OAL composition of Very High — revenue-anchored % is the signal
+  // A Very High bucket dominated by revenue-anchored companies means
+  // maximum narrative risk: shallowest anchor + worst composite
+  const vhRev = vh.filter(r => r.oal_label === "Revenue").length
+  const vhRevPct = vhN > 0 ? Math.round(vhRev / vhN * 100) : 0
+  const vhFcf = vh.filter(r => r.oal_label === "FCF").length
+  const vhFcfPct = vhN > 0 ? Math.round(vhFcf / vhN * 100) : 0
+  // Very High as share of total — 20% is the structural baseline (quintile definition)
+  // Deviations above 20% mean filters are concentrating risk; below means filtering it out
+  const vhSharePct = Math.round(vhN / n * 100)
+  // Improving trajectory within Very High — companies moving toward lower risk
+  const vhImproving = vh.filter(r => (r.axis2_pct ?? 1) < 0.5).length
+  const vhImprovingPct = vhN > 0 ? Math.round(vhImproving / vhN * 100) : 0
+
+  if (vhRevPct >= 65) return { tone:"elevated" as const,
+    headline:`${vhRevPct}% of Very High companies are revenue-anchored`,
+    body:`The highest-risk bucket is dominated by companies whose valuations rest on the shallowest possible anchor. Revenue-anchored companies in Very High composite carry maximum narrative dependence — valuation is not supported by earnings, operating income, or cash flow.`,
+    consequence:`The empirical median return for revenue-anchored companies is −16.7% over 12 months. This is not the bucket that produces false positives.` }
+
+  if (vhRevPct >= 50) return { tone:"elevated" as const,
+    headline:`${vhRevPct}% of Very High companies are revenue-anchored — ${vhFcfPct}% are FCF-positive`,
+    body:`The Very High bucket is split: more than half are revenue-anchored companies with no demonstrated path to cash generation at current valuations. The ${vhFcfPct}% that are FCF-anchored in Very High carry valuation stretch as their primary risk, not anchor shallowness.`,
+    consequence:`These are structurally different risk profiles within the same bucket. The OAL rung in the drilldown distinguishes them.` }
+
+  if (vhImprovingPct >= 40) return { tone:"moderate" as const,
+    headline:`${vhImprovingPct}% of Very High companies show improving operational trajectory`,
+    body:`A meaningful share of the highest-risk bucket is moving in the right direction — their operational anchors are strengthening on a trailing basis. These companies carry elevated composite risk from valuation stretch, but the trajectory signal is constructive.`,
+    consequence:`Improving trajectory within Very High is a potential early indicator of composite score improvement in subsequent months.` }
+
+  return { tone:"moderate" as const,
+    headline:`Very High bucket: ${vhRevPct}% revenue-anchored, ${vhFcfPct}% FCF-anchored`,
+    body:`The composition of the highest-risk bucket reflects a mix of anchor depths. Revenue-anchored companies carry the weakest structural foundation; FCF-anchored names in Very High are primarily stretched on valuation, not anchor shallowness.`,
+    consequence:`OAL rung is the primary differentiator within the Very High bucket — it distinguishes narrative risk from valuation stretch.` }
 }
 
 function interpretTraj(data: SnapshotRow[], tone: "elevated"|"moderate"|"subdued") {
   const sc = data.filter(r => r.axis2_pct != null)
   if (!sc.length) return { headline:"Trajectory data unavailable", body:"", direction:"mixed" as const, consequence:"" }
-  const det = sc.filter(r => (r.axis2_pct ?? 0) > 0.5).length / sc.length * 100
-  const imp = sc.filter(r => (r.axis2_pct ?? 0) <= 0.5).length / sc.length * 100
-  if (det >= 60) return { direction:"deteriorating" as const,
-    headline:`${Math.round(det)}% of scored companies show deteriorating operational trajectory`,
-    body:`The majority of the filtered universe is in the upper half of Axis 2 — operational anchor metrics are weakening on a trailing basis.`,
+  // The meaningful signal is NOT position (axis2 > 0.5 is always ~50% by construction)
+  // It's the extremes: companies in the worst trajectory quartile (top 25%)
+  // and the intersection of worst trajectory + worst composite (compound risk)
+  const sevDet = sc.filter(r => (r.axis2_pct ?? 0) >= 0.75).length  // severe deterioration
+  const sevDetPct = Math.round(sevDet / sc.length * 100)
+  const vhSevDet = data.filter(r =>
+    r.composite_bucket === "Very High" && (r.axis2_pct ?? 0) >= 0.75
+  ).length
+  const vhN = data.filter(r => r.composite_bucket === "Very High").length
+  const vhSevDetPct = vhN > 0 ? Math.round(vhSevDet / vhN * 100) : 0
+  // FCF-anchored companies with deteriorating trajectory — canary signal
+  // These are structurally sound companies whose anchor is weakening
+  const fcfDet = data.filter(r =>
+    r.oal_label === "FCF" && (r.axis2_pct ?? 0) >= 0.6
+  ).length
+  const fcfN = data.filter(r => r.oal_label === "FCF").length
+  const fcfDetPct = fcfN > 0 ? Math.round(fcfDet / fcfN * 100) : 0
+
+  if (vhSevDetPct >= 60) return { direction:"deteriorating" as const,
+    headline:`${vhSevDetPct}% of Very High companies are in severe trajectory deterioration`,
+    body:`The majority of the highest-risk bucket is not just structurally fragile — their operational anchors are actively weakening. Severe deterioration (top quartile of Axis 2) combined with Very High composite is the most compound structural risk state the framework identifies.`,
     consequence: tone === "elevated"
-      ? `Combined with elevated distribution: an escalation signal. Structural risk is both broadly present and actively accumulating.`
-      : `Trajectory is deteriorating in a contained distribution — structural risk is accumulating quietly.` }
-  if (imp >= 60) return { direction:"improving" as const,
-    headline:`${Math.round(imp)}% of scored companies show improving operational trajectory`,
-    body:`The majority of the filtered universe is in the lower half of Axis 2 — operational anchor metrics are strengthening on a trailing basis.`,
-    consequence:`A universe tilted toward improving trajectory carries lower structural risk over time, all else equal.` }
+      ? `Compound risk: elevated distribution and accelerating deterioration together. This is the escalation signal.`
+      : `Trajectory is accelerating within the risk cluster even as the broader distribution is contained.` }
+
+  if (fcfDetPct >= 20) return { direction:"deteriorating" as const,
+    headline:`${fcfDetPct}% of FCF-anchored companies show deteriorating trajectory`,
+    body:`A notable share of the deepest-anchored companies in the universe are showing trajectory weakening — their free cash flow generation is declining on a trailing basis. FCF deterioration is an early structural warning because it precedes OAL rung changes.`,
+    consequence:`If trajectory deterioration persists, these companies may slip from FCF to Net Income anchoring in subsequent months, increasing their composite risk score.` }
+
+  if (sevDetPct <= 18) return { direction:"improving" as const,
+    headline:`Severe trajectory deterioration is below baseline — ${sevDetPct}% of universe`,
+    body:`Fewer companies than the structural baseline are showing acute anchor weakening. The top quartile of Axis 2 — representing the most rapidly deteriorating operational profiles — is relatively unpopulated.`,
+    consequence:`Below-baseline severe deterioration reduces the near-term compound risk signal. The constellation should show fewer gold pulse rings than typical.` }
+
   return { direction:"mixed" as const,
-    headline:`Trajectory is mixed — ${Math.round(det)}% deteriorating, ${Math.round(imp)}% improving`,
-    body:`No dominant directional bias. The filtered universe is split between strengthening and weakening operational anchors.`,
-    consequence:`Company-level analysis is more informative than aggregate positioning in a mixed trajectory environment.` }
+    headline:`${sevDetPct}% of universe in severe trajectory deterioration · ${vhSevDetPct}% of Very High`,
+    body:`Severe anchor deterioration is distributed across the universe at roughly baseline levels. Within the Very High bucket, ${vhSevDetPct}% are in acute trajectory decline — the rest carry valuation stretch as their primary risk without active operational weakening.`,
+    consequence:`The trajectory signal is most useful at the company level under these conditions. Scan the constellation for gold pulse rings — those companies are actively deteriorating.` }
 }
 
 // ─── Temporal bar ──────────────────────────────────────────────────────────────
@@ -242,14 +285,14 @@ function TemporalBar({ manifest }: { manifest: HistoryManifestRow[] }) {
 // ─── KPI strip ─────────────────────────────────────────────────────────────────
 
 function KPIStrip({ stats, isPaid }: {
-  stats: { veryHigh:number; improving:number; total:number; fcfAnchored:number }
+  stats: { veryHigh:number; vhRevPct:number; vhFcfPct:number; severeDet:number; fcfImproving:number; total:number; fcfAnchored:number }
   isPaid: boolean
 }) {
   const kpis = [
-    { label:"Structural Stress",    val:stats.veryHigh,   note:"Companies in Very High composite",   color:E.neg,  paid:false },
-    { label:"Improving Trajectory", val:stats.improving,  note:"Axis 2 below 40th pct · strengthening", color:E.pos,  paid:false },
-    { label:"Active Universe",      val:stats.total,      note:"Under active filters",               color:E.text, paid:false },
-    { label:"FCF Anchored",         val:stats.fcfAnchored,note:"Deepest demonstrated anchor",        color:E.pos,  paid:true  },
+    { label:"Very High Risk",        val:stats.veryHigh,      note:"Revenue-anchored: " + stats.vhRevPct + "% · FCF-anchored: " + stats.vhFcfPct + "%", color:E.neg,  paid:false },
+    { label:"Severe Deterioration",  val:stats.severeDet,     note:"Top quartile Axis 2 · anchor actively weakening",  color:E.neg,  paid:false },
+    { label:"FCF · Improving",       val:stats.fcfImproving,  note:"Deepest anchor + strengthening trajectory",        color:E.pos,  paid:false },
+    { label:"FCF Anchored",          val:stats.fcfAnchored,   note:"Deepest demonstrated anchor · full universe",      color:E.pos,  paid:true  },
   ]
   return (
     <div style={s({ display:"grid", gridTemplateColumns:"repeat(4,1fr)", borderBottom:`1px solid ${E.bdr}` })}>
@@ -746,8 +789,7 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
         )}
       </div>
       <p style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted, marginTop:10, lineHeight:1.6 })}>
-        Outlined cells = |return| &gt; 15%. Axis 3 removed from composite — cohort grid is two-axis.
-        Historical analysis only — does not predict individual returns.
+        Outlined cells = |return| &gt; 15% — strongest historical signal zones. Interest-bearing companies only (~84% of universe). Historical analysis — does not predict individual returns.
       </p>
     </div>
   )
@@ -800,7 +842,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
           <div style={s({ fontFamily:E.sans, fontSize:14, fontWeight:700, color:bucketColor(company.composite_bucket) })}>
             {company.composite_bucket}
           </div>
-          <div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}</div>
+          <div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)} pct · higher = more risk</div>
           <button onClick={onClose} style={s({ fontFamily:E.mono, fontSize:9, color:E.muted,
             background:"none", border:`1px solid ${E.bdr}`, padding:"3px 8px", cursor:"pointer", marginTop:8 })}>
             Close
@@ -958,9 +1000,18 @@ function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:Sna
         <table style={s({ width:"100%", borderCollapse:"collapse", minWidth:500 })}>
           <thead>
             <tr style={s({ background:E.bg2, borderBottom:`1px solid ${E.bdr}` })}>
-              {["Symbol","OAL","Anchor Risk","Trajectory","Composite"].map(h => (
+              {[
+                { h:"Symbol",       sub:""                    },
+                { h:"OAL",          sub:"anchor depth"        },
+                { h:"Anchor Risk",  sub:"↑ higher = worse"   },
+                { h:"Trajectory",   sub:"↑ higher = worse"   },
+                { h:"Composite",    sub:"overall risk"        },
+              ].map(({ h, sub }) => (
                 <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
-                  textTransform:"uppercase", color:E.muted, padding:"8px 10px", textAlign:"left", fontWeight:400 })}>{h}</th>
+                  textTransform:"uppercase", color:E.muted, padding:"8px 10px", textAlign:"left", fontWeight:400 })}>
+                  <div>{h}</div>
+                  {sub && <div style={s({ fontSize:8, letterSpacing:"0.08em", color:E.dim, marginTop:1, textTransform:"none", fontWeight:400 })}>{sub}</div>}
+                </th>
               ))}
             </tr>
           </thead>
@@ -971,9 +1022,18 @@ function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:Sna
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = E.gatm}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                 <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:E.text, padding:"7px 10px" })}>{row.symbol}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{row.oal_label}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{fmtPct(row.axis1_pct)}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{fmtPct(row.axis2_pct)}</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
+                  color: row.oal_label==="FCF"?E.pos : row.oal_label==="Revenue"?E.neg : E.body })}>
+                  {row.oal_label}
+                </td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
+                  color: (row.axis1_pct??0)>=0.8?E.neg:(row.axis1_pct??0)>=0.6?"#c47850":(row.axis1_pct??0)<0.3?E.pos:E.body })}>
+                  {fmtPct(row.axis1_pct)}
+                </td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
+                  color: (row.axis2_pct??0)>=0.8?E.neg:(row.axis2_pct??0)>=0.6?"#c47850":(row.axis2_pct??0)<0.3?E.pos:E.body })}>
+                  {fmtPct(row.axis2_pct)}
+                </td>
                 <td style={s({ padding:"7px 10px" })}>
                   <span style={s({ fontFamily:E.mono, fontSize:11, fontWeight:500,
                     color:bucketColor(row.composite_bucket), padding:"2px 7px",
@@ -1046,7 +1106,7 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
           <table style={s({ width:"100%", borderCollapse:"collapse" })}>
             <thead>
               <tr style={s({ borderBottom:`1px solid ${E.bdr}` })}>
-                {["Anchor","Count","Anchor Risk","Composite"].map(h => (
+                {["Anchor","Companies","Median Anchor Risk","Median Composite Risk"].map(h => (
                   <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
                     textTransform:"uppercase", color:E.muted, padding:"6px 8px", textAlign:"left", fontWeight:400 })}>{h}</th>
                 ))}
@@ -1086,7 +1146,7 @@ function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
         <table style={s({ width:"100%", borderCollapse:"collapse" })}>
           <thead>
             <tr style={s({ background:E.bg3, borderBottom:`1px solid ${E.bdr}` })}>
-              {["Month","OAL Scores","OAL Summary","Structural Snapshot"].map(h => (
+              {["Formation Month","Companies Scored","OAL Coverage","Status"].map(h => (
                 <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
                   textTransform:"uppercase", color:E.muted, padding:"8px 14px", textAlign:"left", fontWeight:400 })}>{h}</th>
               ))}
@@ -1098,7 +1158,10 @@ function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
                 <td style={s({ fontFamily:E.mono, fontSize:11.5, fontWeight:500, color:E.text, padding:"7px 14px" })}>{row.month}</td>
                 <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_scores===false?"—":fmtNum(row.oal_scores_rows)}</td>
                 <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_summary===false?"—":fmtNum(row.oal_summary_rows)}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_structural_snapshot===false?"—":fmtNum(row.structural_rows)}</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 14px",
+                  color: row.has_structural_snapshot===false ? E.neg : E.pos })}>
+                  {row.has_structural_snapshot===false ? "Missing" : "Complete"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -1145,12 +1208,21 @@ export default function PlatformBeta() {
     return true
   }), [snapshot, oalF, buckF, search])
 
-  const stats = useMemo(() => ({
-    veryHigh:    filtered.filter(r => r.composite_bucket==="Very High").length,
-    improving:   filtered.filter(r => (r.axis2_pct??1) < 0.4).length,
-    total:       filtered.length,
-    fcfAnchored: filtered.filter(r => r.oal_label==="FCF").length,
-  }), [filtered])
+  const stats = useMemo(() => {
+    const vh = filtered.filter(r => r.composite_bucket==="Very High")
+    const vhN = vh.length
+    const vhRev = vh.filter(r => r.oal_label==="Revenue").length
+    const vhFcf = vh.filter(r => r.oal_label==="FCF").length
+    return {
+      veryHigh:     vhN,
+      vhRevPct:     vhN > 0 ? Math.round(vhRev/vhN*100) : 0,
+      vhFcfPct:     vhN > 0 ? Math.round(vhFcf/vhN*100) : 0,
+      severeDet:    filtered.filter(r => (r.axis2_pct??0) >= 0.75).length,
+      fcfImproving: filtered.filter(r => r.oal_label==="FCF" && (r.axis2_pct??1) < 0.4).length,
+      total:        filtered.length,
+      fcfAnchored:  filtered.filter(r => r.oal_label==="FCF").length,
+    }
+  }, [filtered])
 
   if (loading) return (
     <div style={s({ minHeight:"100vh", background:E.bg, display:"flex", alignItems:"center", justifyContent:"center" })}>
