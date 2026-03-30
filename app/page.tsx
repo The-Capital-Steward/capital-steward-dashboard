@@ -159,7 +159,7 @@ export default function Homepage() {
             <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 36, width: "fit-content" })}>
               <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.gold, boxShadow: "0 0 6px rgba(197,162,74,0.7)", animation: "pulse 2.5s ease-in-out infinite" })} />
               <span style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
-                System live · ~5,200 equities · 2026-03-28
+                System live · ~5,200 equities · Updated weekly
               </span>
             </div>
 
@@ -373,7 +373,7 @@ export default function Homepage() {
             <span style={s({ color: E.text, fontSize: 22, fontWeight: 500 })}>$1,479</span>
             <span style={s({ margin: "0 6px" })}>/</span>year
           </div>
-          <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+          <Link href="/platform/subscribe" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
             Subscribe to Access <ArrowRight size={14} />
           </Link>
           <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" })}>

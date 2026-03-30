@@ -106,7 +106,7 @@ function YearChart() {
 
 function OALChart() {
   return <div>
-    <CL c="Median 12-month return · by OAL anchor rung · 289,745 obs" />
+    <CL c="Median 12-month return · by OAL anchor rung · 289,737 obs" />
     <ResponsiveContainer width="100%" height={180}>
       <BarChart data={OAL_RETURN_DATA} margin={{ top: 4, right: 8, left: 0, bottom: 4 }} barCategoryGap="28%">
         <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false} />
@@ -537,7 +537,7 @@ export default function OsmrMethodology() {
             </div>
 
             <CC ch={<OALChart />} />
-            <Callout label="Empirical confirmation" ch="The 26.6pp spread between FCF median returns (+9.8%) and Revenue median returns (−16.7%) across 289,745 observations is stable across all market regimes tested. Anchor depth is the most durable signal in the framework. Cross-sectional factor analysis confirms: being in the NI anchor rung rather than FCF costs 10.7 percentage points of annual return (t = −10.113) after controlling for all axis scores, size, and standard factors." />
+            <Callout label="Empirical confirmation" ch="The 26.6pp spread between FCF median returns (+9.8%) and Revenue median returns (−16.7%) across 289,737 observations is stable across all market regimes tested. Anchor depth is the most durable signal in the framework. Cross-sectional factor analysis confirms: being in the NI anchor rung rather than FCF costs 10.7 percentage points of annual return (t = −10.113) after controlling for all axis scores, size, and standard factors." />
 
             <SubH ch="The Assignment Logic" />
             <B ch="Each company is evaluated against the OAL rungs in descending order — FCF first, then Net Income, then EBIT, then Revenue — and assigned to the first rung it qualifies for on a three-year cumulative basis. A 3-year window requires sustained demonstrated performance rather than rewarding a single anomalous quarter. Adjusted metrics, normalized earnings, and forward projections are not considered." />
@@ -636,7 +636,7 @@ export default function OsmrMethodology() {
             <DT
               headers={["Factor", "Spearman r", "95% CI", "Label", "N"]}
               rows={[
-                ["Axis 1 — Anchor Risk",     G("−0.0339"), M("[−0.038, −0.030]"), M("Slight"),  "289,745"],
+                ["Axis 1 — Anchor Risk",     G("−0.0339"), M("[−0.038, −0.030]"), M("Slight"),  "289,737"],
                 ["Axis 2 — Trajectory Risk", G("−0.0556"), M("[−0.059, −0.052]"), "Modest",      "289,737"],
                 [<span style={{ color: E.text, fontWeight: 500 }}>Composite (equal weight)</span>, G("−0.0518"), M("[−0.056, −0.048]"), <span style={{ color: E.text, fontWeight: 500 }}>Modest</span>, "289,737"],
               ]}

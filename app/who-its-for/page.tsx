@@ -41,7 +41,7 @@ export default function WhoItsFor() {
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/methodology" },
+            { label: "Methodology",    href: "/osmr-methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
@@ -143,20 +143,6 @@ export default function WhoItsFor() {
         {/* Sidebar */}
         <div style={s({ padding: "40px 32px" })}>
 
-          {/* Who built this */}
-          <div style={s({ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${E.bdr}` })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>Who built this</p>
-            <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.78, color: E.body, marginBottom: 12 })}>
-              The Capital Steward was built by Anthony Summers — a decade in financial research and trading strategy, the last several years as the structural risk governance layer across equity and derivatives services at a major financial publisher.
-            </p>
-            <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.78, color: E.body, marginBottom: 12 })}>
-              The experience of working inside financial publishing — of seeing how research is shaped by what it needs to accomplish commercially — is the direct source of this platform. It is not a criticism of the people. It is a recognition of the system.
-            </p>
-            <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.78, color: E.body })}>
-              The Capital Steward is the research I wanted to read and couldn't find — built without the structural distortions that make most research less honest than it could be.
-            </p>
-          </div>
-
           {/* What this is not */}
           <div style={s({ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${E.bdr}` })}>
             <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>What this is not</p>
@@ -192,7 +178,7 @@ export default function WhoItsFor() {
                 </div>
               </div>
             ))}
-            <Link href="/methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 9.5, color: E.gold, textDecoration: "none", marginTop: 14 })}>
+            <Link href="/osmr-methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 9.5, color: E.gold, textDecoration: "none", marginTop: 14 })}>
               Full methodology <ArrowRight size={12} />
             </Link>
           </div>
@@ -222,7 +208,7 @@ export default function WhoItsFor() {
           <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 })}>
             Open Platform <ArrowRight size={14} />
           </Link>
-          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
+          <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
             Read the Methodology
           </Link>
         </div>
@@ -236,7 +222,7 @@ export default function WhoItsFor() {
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
           {[
-            { label: "Methodology", href: "/methodology" },
+            { label: "Methodology", href: "/osmr-methodology" },
             { label: "Where It Belongs",  href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
