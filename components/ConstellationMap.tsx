@@ -487,7 +487,7 @@ function TooltipCard({
   row: SnapshotRow
   clientX: number
   clientY: number
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
