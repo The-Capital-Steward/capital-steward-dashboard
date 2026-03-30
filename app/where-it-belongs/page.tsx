@@ -53,7 +53,7 @@ export default function HowToUseOSMR() {
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/methodology" },
+            { label: "Methodology",    href: "/osmr-methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: href === "/where-it-belongs" ? E.gold : E.muted, padding: "0 16px", borderLeft: `1px solid ${E.bdr}`, textDecoration: "none", height: 52, display: "flex", alignItems: "center" })}>
@@ -130,7 +130,7 @@ export default function HowToUseOSMR() {
                   num: "01",
                   title: "Screen",
                   body: "The structural market map gives you a cross-sectional view of where structural risk is concentrated and where it's absent across the full U.S. equity universe. Filter by composite bucket or OAL rung to identify the zones worth your research time.",
-                  detail: "290K+ observations · updated weekly",
+                  detail: "289,737 observations · updated weekly",
                 },
                 {
                   num: "02",
@@ -397,7 +397,7 @@ export default function HowToUseOSMR() {
           <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 })}>
             Open Platform <ArrowRight size={14} />
           </Link>
-          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
+          <Link href="/osmr-methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" as const })}>
             Read the Methodology
           </Link>
         </div>
@@ -412,7 +412,7 @@ export default function HowToUseOSMR() {
         <div style={s({ display: "flex", gap: 20 })}>
           {[
             { label: "Who It's For", href: "/who-its-for" },
-            { label: "Methodology",    href: "/methodology" },
+            { label: "Methodology",    href: "/osmr-methodology" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}

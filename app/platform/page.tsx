@@ -247,7 +247,7 @@ function AuthModal({ onClose }: { onClose?: () => void }) {
         {/* Footer */}
         <div style={s({ padding: "12px 32px 20px", borderTop: `1px solid ${E.bdr}` })}>
           <p style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted, textAlign: "center" as const })}>
-            <Link href="/osmr-methodology" style={s({ color: E.gold, textDecoration: "none" })}>Read the methodology</Link>
+            <Link href="/methodology" style={s({ color: E.gold, textDecoration: "none" })}>Read the methodology</Link>
             {" · "}
             <Link href="/who-its-for" style={s({ color: E.muted, textDecoration: "none" })}>Who it's for</Link>
           </p>
