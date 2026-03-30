@@ -10,10 +10,10 @@ export default function SignInPage() {
       {/* ── NAV ── */}
       <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 44px", height: 52, borderBottom: "1px solid #272420" }}>
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
-          <span style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: "#554E44" }}>The Capital</span>
+          <span style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: "#6B6458" }}>The Capital</span>
           <span style={{ fontFamily: "'Instrument Serif',Georgia,serif", fontStyle: "italic", fontSize: 17, color: "#C5A24A", marginLeft: 8 }}>Steward</span>
         </Link>
-        <Link href="/" style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 10.5, fontWeight: 600, color: "#554E44", textDecoration: "none", letterSpacing: "0.02em" }}>
+        <Link href="/" style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 10.5, fontWeight: 600, color: "#6B6458", textDecoration: "none", letterSpacing: "0.02em" }}>
           ← Back
         </Link>
       </nav>
@@ -35,7 +35,7 @@ export default function SignInPage() {
           {/* Key stats */}
           <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: "1px solid #272420" }}>
             {[
-              { val: "289K+", label: "Historical observations" },
+              { val: "289,737", label: "Historical observations" },
               { val: "+21.0%", label: "Factor-adj. L/S alpha" },
               { val: "~2×", label: "Very High loss rate vs universe" },
             ].map(({ val, label }, i) => (
@@ -47,7 +47,7 @@ export default function SignInPage() {
           </div>
 
           <div style={{ marginTop: 28 }}>
-            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#554E44", lineHeight: 1.65 }}>
+            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#6B6458", lineHeight: 1.65 }}>
               Not yet a subscriber?{" "}
               <Link href="/platform" style={{ color: "#C5A24A", textDecoration: "none" }}>See what's included →</Link>
             </p>
@@ -57,7 +57,7 @@ export default function SignInPage() {
         {/* Right — Clerk sign-in */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 44px", background: "#131210" }}>
           <div style={{ width: "100%", maxWidth: 400 }}>
-            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#554E44", marginBottom: 24, textAlign: "center" as const }}>
+            <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#6B6458", marginBottom: 24, textAlign: "center" as const }}>
               Sign in to continue
             </p>
             <SignIn
@@ -92,7 +92,7 @@ export default function SignInPage() {
 
       {/* ── FOOTER ── */}
       <div style={{ padding: "20px 44px", borderTop: "1px solid #272420", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#554E44" }}>
+        <p style={{ fontFamily: "'IBM Plex Mono','Courier New',monospace", fontSize: 9.5, color: "#6B6458" }}>
           © 2026 The Capital Steward, LLC · Not investment advice
         </p>
         <div style={{ display: "flex", gap: 20 }}>
@@ -100,7 +100,7 @@ export default function SignInPage() {
             { label: "Who It's For", href: "/who-its-for" },
             { label: "Methodology",  href: "/osmr-methodology" },
           ].map(({ label, href }) => (
-            <Link key={href} href={href} style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 11, color: "#554E44", textDecoration: "none" }}>{label}</Link>
+            <Link key={href} href={href} style={{ fontFamily: "'Syne',system-ui,sans-serif", fontSize: 11, color: "#6B6458", textDecoration: "none" }}>{label}</Link>
           ))}
         </div>
       </div>

@@ -52,7 +52,7 @@ const REGIME_LOSS_DATA = [
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#554E44", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
   pos: "#5A9870", neg: "#B85C4A", amber: "#D4952A", blue: "#4A7AA8",
   mono: "'IBM Plex Mono','Courier New',monospace",
@@ -60,11 +60,11 @@ const E = {
   serif: "'Instrument Serif',Georgia,serif",
 }
 
-const CS = { fontSize: 10, fontFamily: "'IBM Plex Mono','Courier New',monospace", fill: "#554E44" }
+const CS = { fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", fill: "#6B6458" }
 const TT = { fontSize: 11, fontFamily: "'IBM Plex Mono',monospace", borderColor: "#33302A", borderRadius: 2, background: "#131210", color: "#EDE9E0" }
 
 function CL({ c }: { c: string }) {
-  return <p style={{ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 16 }}>{c}</p>
+  return <p style={{ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 16 }}>{c}</p>
 }
 
 function RegimeChart() {
@@ -232,7 +232,7 @@ const OAL_RUNGS = [
   { code: "NI",   label: "Net Income",     desc: "Profitable but not FCF-positive",  count: "~622",   color: "#4A7AA8", bg: "rgba(74,122,168,0.08)",  border: "rgba(74,122,168,0.25)",  empirical: "+4.0% median · −5.7% geo · 54.6% hit rate", pct: "42%" },
   { code: "EBIT", label: "EBIT",           desc: "Operating income positive",        count: "~111",   color: "#C5A24A", bg: "rgba(197,162,74,0.08)",  border: "rgba(197,162,74,0.25)",  empirical: "+2.5% median · −0.3% geo · 52.3% hit rate", pct: "29%" },
   { code: "Rev",  label: "Revenue",        desc: "Cannot cover operating costs",     count: "~1,163", color: "#B85C4A", bg: "rgba(184,92,74,0.08)",   border: "rgba(184,92,74,0.25)",   empirical: "−16.7% median · −22.9% geo · 39.7% hit rate", pct: "6%" },
-  { code: "—",    label: "Non-Viable",     desc: "Zero or negative revenue",         count: "~372",   color: "#554E44", bg: "transparent",             border: "#272420",                empirical: "Excluded", pct: "0%" },
+  { code: "—",    label: "Non-Viable",     desc: "Zero or negative revenue",         count: "~372",   color: "#6B6458", bg: "transparent",             border: "#272420",                empirical: "Excluded", pct: "0%" },
 ]
 
 const AXES = [
@@ -307,7 +307,7 @@ function DT({ headers, rows }: { headers: string[]; rows: (string | React.ReactN
       <table style={s({ width: "100%", borderCollapse: "collapse", fontFamily: E.mono, fontSize: 11 })}>
         <thead>
           <tr style={s({ borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
-            {headers.map((h, i) => <th key={i} style={s({ fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, padding: "10px 14px", textAlign: i === 0 ? "left" : "right", fontWeight: 400 })}>{h}</th>)}
+            {headers.map((h, i) => <th key={i} style={s({ fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, padding: "10px 14px", textAlign: i === 0 ? "left" : "right", fontWeight: 400 })}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -367,7 +367,7 @@ function AUCG({ items }: { items: { val: string; name: string; note: string; hi?
 function OQ({ title, ch }: { title: string; ch: React.ReactNode }) {
   return (
     <div style={s({ border: `1px solid ${E.bdr2}`, background: E.bg2, padding: "16px 20px", margin: "12px 0", display: "flex", gap: 14 })}>
-      <div style={s({ fontFamily: E.mono, fontSize: 8, letterSpacing: "0.18em", textTransform: "uppercase", color: E.amber, background: "rgba(212,149,42,0.08)", border: "1px solid rgba(212,149,42,0.2)", padding: "3px 8px", whiteSpace: "nowrap", height: "fit-content", flexShrink: 0 })}>Open</div>
+      <div style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.amber, background: "rgba(212,149,42,0.08)", border: "1px solid rgba(212,149,42,0.2)", padding: "3px 8px", whiteSpace: "nowrap", height: "fit-content", flexShrink: 0 })}>Open</div>
       <div><p style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text, marginBottom: 6 })}>{title}</p><div style={s({ display: "flex", flexDirection: "column", gap: 8 })}>{ch}</div></div>
     </div>
   )
@@ -511,7 +511,7 @@ export default function OsmrMethodology() {
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "24px 0" })}>
               <div className="meth-oal-hdr" style={s({ display: "grid", gap: 14, padding: "8px 14px", borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
                 {["Code", "Anchor", "12-month median return", "Statistics"].map((h, i) => (
-                  <span key={h} style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, textAlign: i === 3 ? "right" : "left" })}>{h}</span>
+                  <span key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, textAlign: i === 3 ? "right" : "left" })}>{h}</span>
                 ))}
               </div>
               {OAL_RUNGS.map(({ code, label, desc, color, bg, border, empirical, pct }, i) => (
@@ -584,7 +584,7 @@ export default function OsmrMethodology() {
 
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "16px 0" })}>
               <div className="meth-bucket-scale-row" style={s({ display: "grid", background: E.bg2, borderBottom: `1px solid ${E.bdr}`, padding: "8px 14px" })}>
-                {["Bucket", "Percentile", "Description"].map(h => <span key={h} style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted })}>{h}</span>)}
+                {["Bucket", "Percentile", "Description"].map(h => <span key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted })}>{h}</span>)}
               </div>
               {[
                 { bucket: "Very Low",  range: "0–20th",   desc: "Deepest anchors, improving trajectory",      color: E.pos },

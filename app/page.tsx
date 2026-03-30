@@ -10,7 +10,7 @@ import { ArrowRight } from "lucide-react"
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#554E44", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
   pos: "#5A9870", neg: "#B85C4A", blue: "#4A7AA8",
   mono: "'IBM Plex Mono','Courier New',monospace",
@@ -72,9 +72,9 @@ function HeroOALBar({ code, label, color, bg, border, pct, ret, delay }: {
 }
 
 const OAL_DATA = [
-  { code: "FCF",  label: "Free Cash Flow", color: "#5A9870", bg: "rgba(90,152,112,0.09)",  border: "rgba(90,152,112,0.28)",  pct: 70, ret: "+9.8%" },
-  { code: "NI",   label: "Net Income",     color: "#4A7AA8", bg: "rgba(74,122,168,0.09)",  border: "rgba(74,122,168,0.28)",  pct: 42, ret: "+4.0%" },
-  { code: "EBIT", label: "EBIT",           color: "#C5A24A", bg: "rgba(197,162,74,0.09)",  border: "rgba(197,162,74,0.28)",  pct: 29, ret: "+2.5%" },
+  { code: "FCF",  label: "Free Cash Flow", color: "#6DAE8B", bg: "rgba(90,152,112,0.09)",  border: "rgba(90,152,112,0.28)",  pct: 70, ret: "+9.8%" },
+  { code: "NI",   label: "Net Income",     color: "#6B9EC4", bg: "rgba(74,122,168,0.09)",  border: "rgba(74,122,168,0.28)",  pct: 42, ret: "+4.0%" },
+  { code: "EBIT", label: "EBIT",           color: "#D4B56A", bg: "rgba(197,162,74,0.09)",  border: "rgba(197,162,74,0.28)",  pct: 29, ret: "+2.5%" },
   { code: "Rev",  label: "Revenue",        color: "#B85C4A", bg: "rgba(184,92,74,0.09)",   border: "rgba(184,92,74,0.28)",   pct: 6,  ret: "−16.7%" },
 ]
 
