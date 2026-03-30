@@ -209,7 +209,7 @@ function interpretDist(data: SnapshotRow[]) {
     consequence:`OAL rung is the primary differentiator within the Very High bucket — it distinguishes narrative risk from valuation stretch.` }
 }
 
-function interpretTraj(data: SnapshotRow[], tone: "elevated"|"moderate"|"subdued") {
+function interpretTraj(data: SnapshotRow[], tone: string) {
   const sc = data.filter(r => r.axis2_pct != null)
   if (!sc.length) return { headline:"Trajectory data unavailable", body:"", direction:"mixed" as const, consequence:"" }
   // The meaningful signal is NOT position (axis2 > 0.5 is always ~50% by construction)
@@ -318,15 +318,14 @@ function KPIStrip({ stats, isPaid }: {
 function InterpretiveLayer({ data }: { data: SnapshotRow[] }) {
   const dist = useMemo(() => interpretDist(data), [data])
   const traj = useMemo(() => interpretTraj(data, dist.tone), [data, dist.tone])
-  const toneColor = { elevated:E.neg, moderate:E.body, subdued:E.pos }
-  const dirColor  = { deteriorating:E.neg, improving:E.pos, mixed:E.body }
+  const toneColor: Record<string,string> = { elevated:E.neg, moderate:E.body }
+  const dirColor: Record<string,string>  = { deteriorating:E.neg, improving:E.pos, mixed:E.body }
   const cards = [
     {
       ey:"Distribution · System State",
-      color: toneColor[dist.tone],
+      color: toneColor[dist.tone] ?? E.body,
       head: dist.tone==="elevated" ? "Structural stress is broadly elevated"
-          : dist.tone==="subdued"  ? "Structural risk is contained"
-          : "Structural risk is present but mixed",
+          : "Structural risk is mixed",
       body: dist.body,
       consequence: dist.consequence,
     },
