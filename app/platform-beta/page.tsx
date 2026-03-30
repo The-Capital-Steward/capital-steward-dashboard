@@ -338,7 +338,7 @@ type Dot = {
   color:string; rgb:[number,number,number]; pulse:number; phase:number
 }
 
-const PAD = { t:28, r:16, b:44, l:56 }
+const PAD = { t:36, r:16, b:56, l:56 }
 
 function ConstellationMap({ data, onSelect, selectedSymbol }: {
   data: SnapshotRow[]
@@ -360,14 +360,20 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
     const ph = h - PAD.t - PAD.b
     return rows.filter(r => r.axis1_pct!=null && r.axis2_pct!=null).map(r => {
       const color = bucketColor(r.composite_bucket)
+      // Deterministic jitter from symbol hash — breaks vertical streaking
+      // without random movement on each re-render
+      let hash = 0
+      for (let i = 0; i < r.symbol.length; i++) hash = (hash * 31 + r.symbol.charCodeAt(i)) >>> 0
+      const jx = ((hash & 0xFF) / 255 - 0.5) * 0.018  // ±0.9% of plot width
+      const jy = (((hash >> 8) & 0xFF) / 255 - 0.5) * 0.018
       return {
         row: r,
-        cx: PAD.l + (r.axis2_pct as number) * pw,
-        cy: PAD.t + (1 - (r.axis1_pct as number)) * ph,
+        cx: PAD.l + Math.min(1, Math.max(0, (r.axis2_pct as number) + jx)) * pw,
+        cy: PAD.t + (1 - Math.min(1, Math.max(0, (r.axis1_pct as number) + jy))) * ph,
         r:  dotRadius(r.market_cap),
         color, rgb: hexRgb(color),
         pulse: deterioration(r),
-        phase: Math.random() * Math.PI * 2,
+        phase: ((hash >> 16) & 0xFF) / 255 * Math.PI * 2,
       }
     })
   }, [])
@@ -530,23 +536,23 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
           </text>
         ))}
 
-        {/* Quadrant labels — clear of data area */}
-        <text x={PAD.l+6} y={PAD.t+13} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
+        {/* Quadrant labels — in padding zones, never overlap dots */}
+        <text x={PAD.l} y={PAD.t-8} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
           Improving · Stretched
         </text>
-        <text x={PAD.l+pw-6} y={PAD.t+13} textAnchor="end"
+        <text x={PAD.l+pw} y={PAD.t-8} textAnchor="end"
           fontFamily={E.mono} fontSize={9} fill={E.neg} opacity={0.85}>
           Most fragile ↗
         </text>
-        <text x={PAD.l+6} y={PAD.t+ph-8} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
+        <text x={PAD.l} y={PAD.t+ph+28} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
           Anchored · Improving
         </text>
 
-        {/* Pulse legend */}
-        <g transform={`translate(${PAD.l+pw-4}, ${PAD.t+ph-22})`}>
-          <circle cx={-118} cy={0} r={4} fill={E.gold} opacity={0.9}/>
-          <circle cx={-118} cy={0} r={10} fill="none" stroke={E.gold} strokeWidth={1} opacity={0.3}/>
-          <text x={-108} y={4} fontFamily={E.mono} fontSize={9} fill={E.muted}>
+        {/* Pulse legend — below plot in bottom padding */}
+        <g transform={`translate(${PAD.l+pw}, ${PAD.t+ph+28})`}>
+          <circle cx={-168} cy={0} r={4} fill={E.gold} opacity={0.9}/>
+          <circle cx={-168} cy={0} r={10} fill="none" stroke={E.gold} strokeWidth={1} opacity={0.3}/>
+          <text x={-158} y={4} fontFamily={E.mono} fontSize={9} fill={E.muted} textAnchor="start">
             Gold ring = deteriorating trajectory
           </text>
         </g>
