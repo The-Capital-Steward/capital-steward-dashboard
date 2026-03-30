@@ -361,14 +361,18 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
     return rows.filter(r => r.axis1_pct!=null && r.axis2_pct!=null).map(r => {
       const color = bucketColor(r.composite_bucket)
       // Deterministic jitter from symbol hash — breaks vertical streaking
-      // without random movement on each re-render
+      // Jitter magnitude scales inversely with axis2 score:
+      // low trajectory risk (left side) gets strong jitter to break columns
+      // high trajectory risk (right side) is already dispersed — minimal jitter
       let hash = 0
       for (let i = 0; i < r.symbol.length; i++) hash = (hash * 31 + r.symbol.charCodeAt(i)) >>> 0
-      const jx = ((hash & 0xFF) / 255 - 0.5) * 0.018  // ±0.9% of plot width
-      const jy = (((hash >> 8) & 0xFF) / 255 - 0.5) * 0.018
+      const a2 = r.axis2_pct as number
+      const jitterScale = 0.055 * (1 - a2) + 0.008  // 0.063 at left, 0.008 at right
+      const jx = ((hash & 0xFF) / 255 - 0.5) * jitterScale
+      const jy = (((hash >> 8) & 0xFF) / 255 - 0.5) * 0.022
       return {
         row: r,
-        cx: PAD.l + Math.min(1, Math.max(0, (r.axis2_pct as number) + jx)) * pw,
+        cx: PAD.l + Math.min(1, Math.max(0, a2 + jx)) * pw,
         cy: PAD.t + (1 - Math.min(1, Math.max(0, (r.axis1_pct as number) + jy))) * ph,
         r:  dotRadius(r.market_cap),
         color, rgb: hexRgb(color),
