@@ -9,16 +9,16 @@ import { ArrowRight, ChevronDown } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Cell, ResponsiveContainer } from "recharts"
 
 const REGIME_DATA = [
-  { regime: "Pre-2020\n2009–2019", r: -0.0013, label: "Negligible",  color: "#3A3530" },
-  { regime: "COVID\n2020–2021",    r: -0.1454, label: "Substantive", color: "#5A9870" },
-  { regime: "Post-COVID\n2022–26", r: -0.0913, label: "Substantive", color: "#5A9870" },
+  { regime: "Pre-2020\n2009–2019", r: -0.0013, label: "Negligible",  color: "#857B71" },
+  { regime: "COVID\n2020–2021",    r: -0.1454, label: "Substantive", color: "#74A95C" },
+  { regime: "Post-COVID\n2022–26", r: -0.0913, label: "Substantive", color: "#74A95C" },
   { regime: "Full Period\n2009–26", r: -0.0518, label: "Modest",     color: "#C5A24A" },
 ]
 const OAL_RETURN_DATA = [
-  { rung: "FCF",     median: 9.8,   color: "#5A9870" },
-  { rung: "NI",      median: 4.0,   color: "#4A7AA8" },
+  { rung: "FCF",     median: 9.8,   color: "#74A95C" },
+  { rung: "NI",      median: 4.0,   color: "#627EAA" },
   { rung: "EBIT",    median: 2.5,   color: "#C5A24A" },
-  { rung: "Revenue", median: -16.7, color: "#B85C4A" },
+  { rung: "Revenue", median: -16.7, color: "#D9867C" },
 ]
 const QUINTILE_DATA = [
   { q: "Q1\nLowest",  composite: 9.8 },
@@ -52,15 +52,15 @@ const REGIME_LOSS_DATA = [
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#AA9D91", dim: "#857B71",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos: "#5A9870", neg: "#B85C4A", amber: "#D4952A", blue: "#4A7AA8",
+  pos: "#74A95C", neg: "#D9867C", amber: "#D4952A", blue: "#627EAA",
   mono: "'IBM Plex Mono','Courier New',monospace",
   sans: "'Syne',system-ui,sans-serif",
   serif: "'Instrument Serif',Georgia,serif",
 }
 
-const CS = { fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", fill: "#6B6458" }
+const CS = { fontSize: 11, fontFamily: "'IBM Plex Mono','Courier New',monospace", fill: "#AA9D91" }
 const TT = { fontSize: 11, fontFamily: "'IBM Plex Mono',monospace", borderColor: "#33302A", borderRadius: 2, background: "#131210", color: "#EDE9E0" }
 
 function CL({ c }: { c: string }) {
@@ -100,7 +100,7 @@ function YearChart() {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.6, marginTop: 10 }}>Red bars = signal inversion. 2019 peak (r = +0.0779) marks the narrative expansion peak. 2021 (r = −0.2684) reflects its collapse.</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.6, marginTop: 10 }}>Red bars = signal inversion. 2019 peak (r = +0.0779) marks the narrative expansion peak. 2021 (r = −0.2684) reflects its collapse.</p>
   </div>
 }
 
@@ -117,7 +117,7 @@ function OALChart() {
         <Bar dataKey="median" radius={[2, 2, 0, 0]}>{OAL_RETURN_DATA.map((d, i) => <Cell key={i} fill={d.color} opacity={0.88} />)}</Bar>
       </BarChart>
     </ResponsiveContainer>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginTop: 10 }}>FCF vs Revenue spread: +26.6pp · Held across all regimes tested</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 10 }}>FCF vs Revenue spread: +26.6pp · Held across all regimes tested</p>
   </div>
 }
 
@@ -133,7 +133,7 @@ function QuintChart() {
         <Bar dataKey="composite" name="Composite" fill={E.gold} radius={[2, 2, 0, 0]} opacity={0.85} />
       </BarChart>
     </ResponsiveContainer>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.6, marginTop: 10 }}>Signal concentrates in Q5: geo mean −4.3%, hit rate 55.5%. Q1–Q4 are largely undifferentiated.</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.6, marginTop: 10 }}>Signal concentrates in Q5: geo mean −4.3%, hit rate 55.5%. Q1–Q4 are largely undifferentiated.</p>
   </div>
 }
 
@@ -148,11 +148,11 @@ function CVaRChart() {
         <ReferenceLine x={0} stroke={E.bdr} />
         <Tooltip formatter={(v: any) => [`${Number(v).toFixed(1)}%`, "CVaR"]} contentStyle={TT} />
         <Bar dataKey="cvar" radius={[0, 2, 2, 0]}>
-          {BUCKET_DATA.map((d, i) => <Cell key={i} opacity={0.88} fill={d.bucket === "Very Low" ? E.pos : d.bucket === "Low" ? "#3E6B4F" : d.bucket === "Moderate" ? E.dim : d.bucket === "High" ? "#A05050" : E.neg} />)}
+          {BUCKET_DATA.map((d, i) => <Cell key={i} opacity={0.88} fill={d.bucket === "Very Low" ? E.pos : d.bucket === "Low" ? "#4E8964" : d.bucket === "Moderate" ? E.dim : d.bucket === "High" ? "#C06060" : E.neg} />)}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginTop: 10 }}>Very High: 30.3% of observations ended below −25% over 12 months. Very Low: 12.2%.</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 10 }}>Very High: 30.3% of observations ended below −25% over 12 months. Very Low: 12.2%.</p>
   </div>
 }
 
@@ -181,17 +181,17 @@ function DistChart() {
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ height: 11, borderRadius: 1, width: `${(vl / mx) * 100}%`, background: E.pos, opacity: 0.82 }} />
-              <span style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted }}>{vl}%</span>
+              <span style={{ fontFamily: E.mono, fontSize: 11, color: E.muted }}>{vl}%</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ height: 11, borderRadius: 1, width: `${(vh / mx) * 100}%`, background: E.neg, opacity: 0.82 }} />
-              <span style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted }}>{vh}%</span>
+              <span style={{ fontFamily: E.mono, fontSize: 11, color: E.muted }}>{vh}%</span>
             </div>
           </div>
         </div>
       ))}
     </div>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginTop: 14 }}>% of observations in each return band · Very Low N=18,459 · Very High N=26,128</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 14 }}>% of observations in each return band · Very Low N=18,459 · Very High N=26,128</p>
   </div>
 }
 
@@ -211,7 +211,7 @@ function PremiumDecomp() {
       ))}
     </div>
     <div style={{ display: "flex", gap: 20, marginBottom: 16 }}>
-      {bars.map(({ l }) => <div key={l} style={{ flex: 1, textAlign: "center", fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.5, whiteSpace: "pre-line" }}>{l}</div>)}
+      {bars.map(({ l }) => <div key={l} style={{ flex: 1, textAlign: "center", fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.5, whiteSpace: "pre-line" }}>{l}</div>)}
     </div>
     <div style={{ paddingTop: 16, borderTop: `1px solid ${E.bdr}` }}>
       {[["Exclusion effect (removing High/Very High)", "+4.6pp"], ["Selection effect (Very Low only, post-2013)", "+3.1pp"]].map(([l, v]) => (
@@ -223,16 +223,16 @@ function PremiumDecomp() {
         <span>Total Very Low premium vs full universe</span><span style={{ color: E.gold }}>+7.7pp annualized</span>
       </div>
     </div>
-    <p style={{ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginTop: 8 }}>Post-2013 · 145 months · transaction costs not modeled</p>
+    <p style={{ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 8 }}>Post-2013 · 145 months · transaction costs not modeled</p>
   </div>
 }
 
 const OAL_RUNGS = [
-  { code: "FCF",  label: "Free Cash Flow", desc: "Positive 3-year cumulative FCF",   count: "~2,900", color: "#5A9870", bg: "rgba(90,152,112,0.08)",  border: "rgba(90,152,112,0.25)",  empirical: "+9.8% median · +6.1% geo · 62.7% hit rate", pct: "70%" },
-  { code: "NI",   label: "Net Income",     desc: "Profitable but not FCF-positive",  count: "~622",   color: "#4A7AA8", bg: "rgba(74,122,168,0.08)",  border: "rgba(74,122,168,0.25)",  empirical: "+4.0% median · −5.7% geo · 54.6% hit rate", pct: "42%" },
+  { code: "FCF",  label: "Free Cash Flow", desc: "Positive 3-year cumulative FCF",   count: "~2,900", color: "#74A95C", bg: "rgba(116,169,92,0.08)",  border: "rgba(116,169,92,0.25)",  empirical: "+9.8% median · +6.1% geo · 62.7% hit rate", pct: "70%" },
+  { code: "NI",   label: "Net Income",     desc: "Profitable but not FCF-positive",  count: "~622",   color: "#627EAA", bg: "rgba(98,126,170,0.08)",  border: "rgba(98,126,170,0.25)",  empirical: "+4.0% median · −5.7% geo · 54.6% hit rate", pct: "42%" },
   { code: "EBIT", label: "EBIT",           desc: "Operating income positive",        count: "~111",   color: "#C5A24A", bg: "rgba(197,162,74,0.08)",  border: "rgba(197,162,74,0.25)",  empirical: "+2.5% median · −0.3% geo · 52.3% hit rate", pct: "29%" },
-  { code: "Rev",  label: "Revenue",        desc: "Cannot cover operating costs",     count: "~1,163", color: "#B85C4A", bg: "rgba(184,92,74,0.08)",   border: "rgba(184,92,74,0.25)",   empirical: "−16.7% median · −22.9% geo · 39.7% hit rate", pct: "6%" },
-  { code: "—",    label: "Non-Viable",     desc: "Zero or negative revenue",         count: "~372",   color: "#6B6458", bg: "transparent",             border: "#272420",                empirical: "Excluded", pct: "0%" },
+  { code: "Rev",  label: "Revenue",        desc: "Cannot cover operating costs",     count: "~1,163", color: "#D9867C", bg: "rgba(217,134,124,0.08)",   border: "rgba(217,134,124,0.25)",   empirical: "−16.7% median · −22.9% geo · 39.7% hit rate", pct: "6%" },
+  { code: "—",    label: "Non-Viable",     desc: "Zero or negative revenue",         count: "~372",   color: "#AA9D91", bg: "transparent",             border: "#272420",                empirical: "Excluded", pct: "0%" },
 ]
 
 const AXES = [
@@ -250,7 +250,7 @@ function AxisAccordion() {
           <div key={id} style={{ border: `1px solid ${isOpen ? E.bdr2 : E.bdr}`, background: isOpen ? E.gatm : E.bg2, transition: "all 0.15s" }}>
             <button onClick={() => setOpen(isOpen ? null : id)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: "transparent", border: "none", cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <span style={{ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: E.muted }}>{label}</span>
+                <span style={{ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: E.muted }}>{label}</span>
                 <span style={{ fontFamily: E.sans, fontSize: 14, fontWeight: 600, color: E.text }}>{name}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -260,7 +260,7 @@ function AxisAccordion() {
             </button>
             {isOpen && (
               <div style={{ padding: "0 20px 20px", borderTop: `1px solid ${E.bdr}` }}>
-                <p style={{ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.gold, marginTop: 16, marginBottom: 14 }}>{question}</p>
+                <p style={{ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.gold, marginTop: 16, marginBottom: 14 }}>{question}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   {body.split("\n\n").map((para, i) => <p key={i} style={{ fontFamily: E.sans, fontSize: 13.5, color: E.body, lineHeight: 1.8 }}>{para}</p>)}
                 </div>
@@ -282,19 +282,19 @@ const SECTIONS = [
 ]
 
 const s = (x: object) => x as React.CSSProperties
-const Ey = ({ c }: { c: string }) => <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, marginBottom: 10 })}>{c}</p>
+const Ey = ({ c }: { c: string }) => <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, marginBottom: 10 })}>{c}</p>
 const SH = ({ ch }: { ch: React.ReactNode }) => <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,2.5vw,28px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.03em", marginBottom: 18 })}>{ch}</h2>
 const SubH = ({ ch }: { ch: string }) => <h3 style={s({ fontFamily: E.sans, fontSize: 16, fontWeight: 700, color: E.text, marginTop: 28, marginBottom: 10 })}>{ch}</h3>
 const B = ({ ch, st }: { ch: React.ReactNode; st?: object }) => <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.82, color: E.body, marginBottom: 14, ...st })}>{ch}</p>
 const Callout = ({ label, ch }: { label?: string; ch: string }) => (
   <div style={s({ borderLeft: `2px solid ${E.gold}`, background: E.gatm, padding: "18px 22px", margin: "20px 0" })}>
-    {label && <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.gold, opacity: 0.6, marginBottom: 8 })}>{label}</p>}
+    {label && <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.gold, opacity: 0.6, marginBottom: 8 })}>{label}</p>}
     <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.text })}>{ch}</p>
   </div>
 )
 const NoteBox = ({ label, ch, bc = E.bdr2 }: { label?: string; ch: string; bc?: string }) => (
   <div style={s({ border: `1px solid ${bc}`, background: E.bg2, padding: "16px 20px", margin: "16px 0" })}>
-    {label && <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, marginBottom: 8 })}>{label}</p>}
+    {label && <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, marginBottom: 8 })}>{label}</p>}
     <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>{ch}</p>
   </div>
 )
@@ -307,7 +307,7 @@ function DT({ headers, rows }: { headers: string[]; rows: (string | React.ReactN
       <table style={s({ width: "100%", borderCollapse: "collapse", fontFamily: E.mono, fontSize: 11 })}>
         <thead>
           <tr style={s({ borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
-            {headers.map((h, i) => <th key={i} style={s({ fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, padding: "10px 14px", textAlign: i === 0 ? "left" : "right", fontWeight: 400 })}>{h}</th>)}
+            {headers.map((h, i) => <th key={i} style={s({ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, padding: "10px 14px", textAlign: i === 0 ? "left" : "right", fontWeight: 400 })}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -327,7 +327,7 @@ function FG({ items }: { items: { label: string; val: string; note: string; vc?:
     <div className="meth-factor-grid" style={s({ display: "grid", gap: 1, border: `1px solid ${E.bdr}`, background: E.bdr, margin: "16px 0" })}>
       {items.map(({ label, val, note, vc }) => (
         <div key={label} style={s({ background: E.bg2, padding: "18px 20px" })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, marginBottom: 8 })}>{label}</p>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase", color: E.muted, marginBottom: 8 })}>{label}</p>
           <p style={s({ fontFamily: E.mono, fontSize: 26, fontWeight: 500, color: vc || E.text, lineHeight: 1, marginBottom: 6, letterSpacing: "-0.02em" })}>{val}</p>
           <p style={s({ fontFamily: E.sans, fontSize: 11, color: E.body, lineHeight: 1.5 })}>{note}</p>
         </div>
@@ -341,7 +341,7 @@ function RBars({ items }: { items: { name: string; pct: string; val: string; w: 
     <div style={s({ margin: "14px 0" })}>
       {items.map(({ name, pct, val, w }) => (
         <div key={name} className="meth-regime-bars" style={s({ display: "grid", alignItems: "center", gap: 14, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
-          <div><span style={s({ fontFamily: E.sans, fontSize: 11.5, color: E.text, fontWeight: 600 })}>{name}</span><span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted, marginLeft: 6 })}>{pct}</span></div>
+          <div><span style={s({ fontFamily: E.sans, fontSize: 11.5, color: E.text, fontWeight: 600 })}>{name}</span><span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, marginLeft: 6 })}>{pct}</span></div>
           <div style={s({ height: 2, background: E.bdr2, position: "relative" })}><div style={s({ position: "absolute", left: 0, top: 0, height: 2, width: `${w}%`, background: E.gold })} /></div>
           <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500, color: E.gold, textAlign: "right" })}>{val}</div>
         </div>
@@ -357,7 +357,7 @@ function AUCG({ items }: { items: { val: string; name: string; note: string; hi?
         <div key={name} style={s({ background: E.bg2, padding: "16px", textAlign: "center" })}>
           <div style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 500, letterSpacing: "-0.02em", color: hi ? E.gold : E.muted, marginBottom: 4 })}>{val}</div>
           <div style={s({ fontFamily: E.sans, fontSize: 10, color: E.body, marginBottom: 3, fontWeight: 600 })}>{name}</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>{note}</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>{note}</div>
         </div>
       ))}
     </div>
@@ -367,7 +367,7 @@ function AUCG({ items }: { items: { val: string; name: string; note: string; hi?
 function OQ({ title, ch }: { title: string; ch: React.ReactNode }) {
   return (
     <div style={s({ border: `1px solid ${E.bdr2}`, background: E.bg2, padding: "16px 20px", margin: "12px 0", display: "flex", gap: 14 })}>
-      <div style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.amber, background: "rgba(212,149,42,0.08)", border: "1px solid rgba(212,149,42,0.2)", padding: "3px 8px", whiteSpace: "nowrap", height: "fit-content", flexShrink: 0 })}>Open</div>
+      <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: E.amber, background: "rgba(212,149,42,0.08)", border: "1px solid rgba(212,149,42,0.2)", padding: "3px 8px", whiteSpace: "nowrap", height: "fit-content", flexShrink: 0 })}>Open</div>
       <div><p style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text, marginBottom: 6 })}>{title}</p><div style={s({ display: "flex", flexDirection: "column", gap: 8 })}>{ch}</div></div>
     </div>
   )
@@ -380,6 +380,7 @@ const M = (c: string) => <span style={{ color: E.muted }}>{c}</span>
 
 export default function OsmrMethodology() {
   const [active, setActive] = useState("framing")
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -388,6 +389,12 @@ export default function OsmrMethodology() {
     )
     SECTIONS.forEach(({ id }) => { const el = document.getElementById(id); if (el) obs.observe(el) })
     return () => obs.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   return (
@@ -438,9 +445,51 @@ export default function OsmrMethodology() {
         }
       `}</style>
 
+      {/* NAV */}
+      <nav style={s({
+        position: "sticky", top: 0, zIndex: 100,
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "0 44px", height: 52,
+        background: scrolled ? "rgba(14,13,11,0.95)" : E.bg,
+        borderBottom: `1px solid ${scrolled ? E.bdr : "transparent"}`,
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        transition: "all 0.25s",
+      })}>
+        <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase", color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, color: E.gold, marginLeft: 8 })}>Steward</span>
+        </Link>
+        <div style={s({ display: "flex", alignItems: "center" })}>
+          {[
+            { label: "Who It's For",     href: "/who-its-for" },
+            { label: "Methodology",      href: "/methodology" },
+            { label: "Where It Belongs", href: "/where-it-belongs" },
+          ].map(({ label, href }) => (
+            <Link key={href} href={href} style={s({
+              fontFamily: E.sans, fontSize: 10.5, fontWeight: 600,
+              color: href === "/methodology" ? E.gold : E.muted,
+              padding: "0 16px", borderLeft: `1px solid ${E.bdr}`,
+              textDecoration: "none", height: 52,
+              display: "flex", alignItems: "center",
+              letterSpacing: "0.02em",
+            })}>
+              {label}
+            </Link>
+          ))}
+          <Link href="/platform" style={s({
+            fontFamily: E.sans, fontSize: 10.5, fontWeight: 700,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            padding: "8px 20px", background: E.gold, color: "#060504",
+            textDecoration: "none", marginLeft: 20,
+          })}>
+            Platform
+          </Link>
+        </div>
+      </nav>
+
       {/* HEADER */}
       <div className="meth-header" style={s({ background: E.bg, borderBottom: `1px solid ${E.bdr}` })}>
-        <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>The Capital Steward · Methodology · 2026</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>The Capital Steward · Methodology · 2026</p>
         <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,52px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 18 })}>
           How We Measure<br />
           <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(40px,5.5vw,56px)", letterSpacing: "-0.02em" })}>Structural Risk</em>
@@ -450,7 +499,7 @@ export default function OsmrMethodology() {
         </p>
         <div className="meth-meta-bar" style={s({ display: "flex", width: "fit-content", marginBottom: 22, border: `1px solid ${E.bdr}` })}>
           {["~5,200 U.S. equities · $5M ADV filter", "289,737 observations · 2009–2026"].map((t, i) => (
-            <span key={i} style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, padding: "7px 14px", borderRight: i === 0 ? `1px solid ${E.bdr}` : "none" })}>{t}</span>
+            <span key={i} style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, padding: "7px 14px", borderRight: i === 0 ? `1px solid ${E.bdr}` : "none" })}>{t}</span>
           ))}
         </div>
         <nav style={s({ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 20 })}>
@@ -458,7 +507,7 @@ export default function OsmrMethodology() {
             <a key={id} href={`#${id}`} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: active === id ? E.gold : E.muted, border: `1px solid ${active === id ? "rgba(197,162,74,0.3)" : E.bdr}`, background: active === id ? E.gatm : "transparent", padding: "5px 12px", cursor: "pointer", textDecoration: "none", transition: "all 0.12s" })}>{label}</a>
           ))}
         </nav>
-        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65, maxWidth: 580 })}>All quantitative figures reflect a recent snapshot of the dataset. Universe counts and observation totals are snapshot-dependent values. The dataset refreshes weekly; the full pipeline recalibrates monthly. Backtest results are historical and do not guarantee future outcomes.</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.65, maxWidth: 580 })}>All quantitative figures reflect a recent snapshot of the dataset. Universe counts and observation totals are snapshot-dependent values. The dataset refreshes weekly; the full pipeline recalibrates monthly. Backtest results are historical and do not guarantee future outcomes.</p>
       </div>
 
       {/* BODY */}
@@ -469,7 +518,7 @@ export default function OsmrMethodology() {
           <div style={s({ position: "sticky", top: 0, padding: "32px 0", borderRight: `1px solid ${E.bdr}` })}>
             {SECTIONS.map(({ id, label, num }) => (
               <a key={id} href={`#${id}`} style={s({ display: "flex", alignItems: "baseline", gap: 10, padding: "7px 20px", textDecoration: "none", borderLeft: `2px solid ${active === id ? E.gold : "transparent"}`, background: active === id ? E.gatm : "transparent", transition: "all 0.12s" })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.dim, minWidth: 14 })}>{num}</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.dim, minWidth: 14 })}>{num}</span>
                 <span style={s({ fontFamily: E.sans, fontSize: 10.5, color: active === id ? E.gold : E.muted, fontWeight: 600 })}>{label}</span>
               </a>
             ))}
@@ -511,15 +560,15 @@ export default function OsmrMethodology() {
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "24px 0" })}>
               <div className="meth-oal-hdr" style={s({ display: "grid", gap: 14, padding: "8px 14px", borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
                 {["Code", "Anchor", "12-month median return", "Statistics"].map((h, i) => (
-                  <span key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, textAlign: i === 3 ? "right" : "left" })}>{h}</span>
+                  <span key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, textAlign: i === 3 ? "right" : "left" })}>{h}</span>
                 ))}
               </div>
               {OAL_RUNGS.map(({ code, label, desc, color, bg, border, empirical, pct }, i) => (
                 <div key={code} className="meth-oal-grid" style={s({ display: "grid", gap: 14, alignItems: "center", padding: "12px 14px", borderBottom: i < OAL_RUNGS.length - 1 ? `1px solid rgba(255,255,255,0.025)` : "none", opacity: code === "—" ? 0.28 : 1 })}>
-                  <div style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 500, padding: "2px 5px", textAlign: "center", letterSpacing: "0.06em", color, background: bg, border: `1px solid ${border}` })}>{code}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 500, padding: "2px 5px", textAlign: "center", letterSpacing: "0.06em", color, background: bg, border: `1px solid ${border}` })}>{code}</div>
                   <div>
                     <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text })}>{label}</div>
-                    <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted, marginTop: 2 })}>{desc}</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 2 })}>{desc}</div>
                   </div>
                   <div style={s({ position: "relative" })}>
                     <div style={s({ height: 2, background: E.bdr2 })} />
@@ -527,12 +576,12 @@ export default function OsmrMethodology() {
                   </div>
                   <div style={s({ fontFamily: E.mono, fontSize: 10, textAlign: "right", color: E.body })}>
                     {code !== "—" && <span style={s({ display: "block", fontWeight: 500, color: code === "Rev" ? E.neg : E.pos })}>{empirical.split(" · ")[0]}</span>}
-                    <span style={s({ fontSize: 9, color: E.muted })}>{code !== "—" ? empirical.split(" · ").slice(1).join(" · ") : "excluded"}</span>
+                    <span style={s({ fontSize: 11, color: E.muted })}>{code !== "—" ? empirical.split(" · ").slice(1).join(" · ") : "excluded"}</span>
                   </div>
                 </div>
               ))}
               <div style={s({ padding: "10px 14px", borderTop: `1px solid ${E.bdr}`, background: E.bg2 })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, textAlign: "center" })}>Each step up the ladder increases narrative dependence — and structural risk. FCF–Revenue spread: +26.6pp held across all regimes.</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, textAlign: "center" })}>Each step up the ladder increases narrative dependence — and structural risk. FCF–Revenue spread: +26.6pp held across all regimes.</p>
               </div>
             </div>
 
@@ -577,20 +626,20 @@ export default function OsmrMethodology() {
                   <div key={i} style={s({ flex: 1, background: sc.bg, opacity: sc.op || 1 })} />
                 ))}
               </div>
-              <div style={s({ display: "flex", justifyContent: "space-between", fontFamily: E.mono, fontSize: 9 })}>
+              <div style={s({ display: "flex", justifyContent: "space-between", fontFamily: E.mono, fontSize: 11 })}>
                 <span style={s({ color: E.pos })}>Very Low</span><span style={s({ color: E.muted })}>Low</span><span style={s({ color: E.muted })}>Moderate</span><span style={s({ color: E.muted })}>High</span><span style={s({ color: E.neg })}>Very High</span>
               </div>
             </div>
 
             <div style={s({ border: `1px solid ${E.bdr}`, margin: "16px 0" })}>
               <div className="meth-bucket-scale-row" style={s({ display: "grid", background: E.bg2, borderBottom: `1px solid ${E.bdr}`, padding: "8px 14px" })}>
-                {["Bucket", "Percentile", "Description"].map(h => <span key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted })}>{h}</span>)}
+                {["Bucket", "Percentile", "Description"].map(h => <span key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted })}>{h}</span>)}
               </div>
               {[
                 { bucket: "Very Low",  range: "0–20th",   desc: "Deepest anchors, improving trajectory",      color: E.pos },
-                { bucket: "Low",       range: "20–40th",  desc: "Below-average structural risk",             color: "#3E6B4F" },
+                { bucket: "Low",       range: "20–40th",  desc: "Below-average structural risk",             color: "#4E8964" },
                 { bucket: "Moderate",  range: "40–60th",  desc: "Population center",                        color: E.muted },
-                { bucket: "High",      range: "60–80th",  desc: "Above-average structural risk",            color: "#A05050" },
+                { bucket: "High",      range: "60–80th",  desc: "Above-average structural risk",            color: "#C06060" },
                 { bucket: "Very High", range: "80–100th", desc: "Shallow anchors, deteriorating trajectory", color: E.neg },
               ].map(({ bucket, range, desc, color }, i) => (
                 <div key={bucket} className="meth-bucket-scale-row" style={s({ display: "grid", padding: "10px 14px", borderBottom: i < 4 ? `1px solid rgba(255,255,255,0.025)` : "none" })}>
@@ -614,19 +663,19 @@ export default function OsmrMethodology() {
             <B ch="A scoring framework without empirical grounding is a hypothesis. OSMR has been validated against 289,737 historical observations across the U.S. equity universe from 2009 through 2026, spanning three distinct market regimes. The validation tests whether structural risk classifications produce measurably different distributions of subsequent 12-month returns." />
 
             <CC ch={<>
-              <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>How to read Spearman r in an equity factor context</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>How to read Spearman r in an equity factor context</p>
               <B ch="The Fama-French value factor produces r in the 0.03–0.06 range. Momentum produces 0.05–0.09." />
               <div className="meth-r-scale" style={s({ display: "grid", gap: 4, marginTop: 14 })}>
                 {[
                   { l: "Negligible", r: "|r| < 0.03",  bg: E.bg3,                        t: E.muted },
-                  { l: "Slight",     r: "0.03–0.05",   bg: "rgba(74,122,168,0.15)",      t: E.blue },
+                  { l: "Slight",     r: "0.03–0.05",   bg: "rgba(98,126,170,0.15)",      t: E.blue },
                   { l: "Modest",     r: "0.05–0.07",   bg: "rgba(197,162,74,0.12)",      t: E.gold },
-                  { l: "Strong",     r: "0.07–0.11",   bg: "rgba(90,152,112,0.15)",      t: E.pos },
+                  { l: "Strong",     r: "0.07–0.11",   bg: "rgba(116,169,92,0.15)",      t: E.pos },
                   { l: "Substantive",r: "|r| ≥ 0.11",  bg: E.pos,                        t: E.bg },
                 ].map(({ l, r: rng, bg, t }) => (
                   <div key={l} style={s({ borderRadius: 2, padding: "10px 8px", textAlign: "center", background: bg })}>
                     <div style={s({ fontFamily: E.sans, fontSize: 10, fontWeight: 700, color: t })}>{l}</div>
-                    <div style={s({ fontFamily: E.mono, fontSize: 9, color: t, opacity: 0.7, marginTop: 2 })}>{rng}</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 11, color: t, opacity: 0.7, marginTop: 2 })}>{rng}</div>
                   </div>
                 ))}
               </div>
@@ -641,7 +690,7 @@ export default function OsmrMethodology() {
                 [<span style={{ color: E.text, fontWeight: 500 }}>Composite (equal weight)</span>, G("−0.0518"), M("[−0.056, −0.048]"), <span style={{ color: E.text, fontWeight: 500 }}>Modest</span>, "289,737"],
               ]}
             />
-            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginTop: 8 })}>Bootstrap 95% CI (1,000 samples). All p-values = 0.0000. ICIR: Composite −0.66 · Axis 2 −0.58 · Axis 1 −0.40.</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, marginTop: 8 })}>Bootstrap 95% CI (1,000 samples). All p-values = 0.0000. ICIR: Composite −0.66 · Axis 2 −0.58 · Axis 1 −0.40.</p>
 
             <SubH ch="Signal by Market Regime" />
             <B ch="OSMR's signal is conditional on the market environment. In periods of structural stress and dislocation the signal is Substantive. In the extended pre-2020 bull market, the full-period cross-sectional signal is Negligible. This is the expected behavior of a framework that measures structural risk, not narrative momentum." />
@@ -676,11 +725,11 @@ export default function OsmrMethodology() {
               ]}
             />
             <CC ch={<>
-              <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>Very High loss rates by regime · loss = 12m return &lt; −25%</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>Very High loss rates by regime · loss = 12m return &lt; −25%</p>
               <DT headers={["Regime", "VH loss rate", "Universe rate", "Relative risk"]}
                 rows={REGIME_LOSS_DATA.map(({ regime, vh, all, rel }) => [regime, N(`${vh}%`), M(`${all}%`), <span style={{ color: E.text, fontWeight: 500 }}>{rel}×</span>])}
               />
-              <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.6, marginTop: 10 })}>Expansion absolute loss rate (34.6%) exceeds Stress (28.3%) because market recovery dynamics lift structurally fragile companies in stress periods. The relative risk (~2×) is consistent across all environments.</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.6, marginTop: 10 })}>Expansion absolute loss rate (34.6%) exceeds Stress (28.3%) because market recovery dynamics lift structurally fragile companies in stress periods. The relative risk (~2×) is consistent across all environments.</p>
             </>} />
 
             <SubH ch="Return Distribution by Structural Risk Quintile" />
@@ -697,11 +746,11 @@ export default function OsmrMethodology() {
               ]}
             />
             {/* BOARD ADDITION 2 — Quintile threshold */}
-            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65, marginTop: 10 })}>Q1–Q5 median spread: +4.9pp · t = 10.646 · p = 0.0000 · Full period 2009–2026. The practical decision threshold is the Very High bucket. Q1–Q4 provide rank ordering within the lower-risk population but do not carry the distributional separation that makes the signal actionable.</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.65, marginTop: 10 })}>Q1–Q5 median spread: +4.9pp · t = 10.646 · p = 0.0000 · Full period 2009–2026. The practical decision threshold is the Very High bucket. Q1–Q4 provide rank ordering within the lower-risk population but do not carry the distributional separation that makes the signal actionable.</p>
 
             <SubH ch="The Narrative Independence Premium" />
             <B ch="The framework's primary structural contribution is loss avoidance — specifically, the return to holding companies that are independent of the narratives required to sustain fragile valuations. The Very High composite bucket has a hit rate of 49.4% — meaning approximately half of Very High classifications produce positive 12-month returns. The framework identifies a structural risk state, not a predicted outcome. A company in Very High is in a condition where severe loss is approximately 2× more likely than the universe base rate." />
-            <CC ch={<><p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>Return distribution · Very Low vs Very High composite bucket</p><DistChart /></>} />
+            <CC ch={<><p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 20 })}>Return distribution · Very Low vs Very High composite bucket</p><DistChart /></>} />
 
             <div className="meth-compare-grid" style={s({ display: "grid", gap: 4, margin: "16px 0" })}>
               {[
@@ -709,7 +758,7 @@ export default function OsmrMethodology() {
                 { label: "Very High composite", color: E.neg, items: [["Median 12-month return", "−0.8%"], ["Geometric mean", "−11.7%"], ["Hit rate", "49.4%"], ["% outcomes below −25%", "30.3%"], ["CVaR (95th)", "−85.1%"], ["N", "26,128"]] },
               ].map(({ label, color, items }) => (
                 <div key={label} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, padding: 18 })}>
-                  <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>{label}</p>
+                  <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>{label}</p>
                   {items.map(([k, v]) => (
                     <div key={k} style={s({ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
                       <span style={s({ fontFamily: E.sans, fontSize: 12, color: E.body })}>{k}</span>
@@ -727,7 +776,7 @@ export default function OsmrMethodology() {
               { val: "0.406", name: "Momentum proxy",  note: "Below random · composite required" },
               { val: "0.493", name: "Valuation alone", note: "Below random" },
             ]} />
-            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65, marginTop: 8 })}>At the top-20% threshold: precision 22.7% vs 15.8% base rate — 43% improvement over random. Median lead time: 2 months. False positive rate: 68.5%.</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.65, marginTop: 8 })}>At the top-20% threshold: precision 22.7% vs 15.8% base rate — 43% improvement over random. Median lead time: 2 months. False positive rate: 68.5%.</p>
             <CC ch={<CVaRChart />} />
             <DT
               headers={["Bucket", "Median", "Geo Mean", "CVaR (95%)", "< −25%", "N"]}

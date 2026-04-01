@@ -163,8 +163,8 @@ export default function Homepage() {
               </span>
             </div>
 
-            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
-              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "-0.02em" })}>narrative.</em><br />
+            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
+              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "0.01em", lineHeight: 1.15 })}>narrative.</em><br />
               We value structure.
             </h1>
 
