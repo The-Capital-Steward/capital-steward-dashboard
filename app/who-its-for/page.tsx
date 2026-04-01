@@ -9,9 +9,9 @@ import { ArrowRight } from "lucide-react"
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#AA9D91", dim: "#857B71",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos: "#5A9870", neg: "#B85C4A",
+  pos: "#74A95C", neg: "#D9867C",
   mono: "'IBM Plex Mono','Courier New',monospace",
   sans: "'Syne',system-ui,sans-serif",
   serif: "'Instrument Serif',Georgia,serif",
@@ -35,7 +35,7 @@ export default function WhoItsFor() {
         background: E.bg, borderBottom: `1px solid ${E.bdr}`,
       })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
           <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, color: E.gold, marginLeft: 8 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", alignItems: "center" })}>
@@ -61,7 +61,7 @@ export default function WhoItsFor() {
 
       {/* ── HERO ── */}
       <div style={s({ padding: "80px 44px 72px", borderBottom: `1px solid ${E.bdr}`, maxWidth: 820 })}>
-        <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.gold, marginBottom: 16 })}>Who It's For</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.gold, marginBottom: 16 })}>Who It's For</p>
         <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,58px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
           The investor<br />this was
           <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(40px,5.5vw,62px)", letterSpacing: "-0.02em" })}> built for.</em>
@@ -79,7 +79,7 @@ export default function WhoItsFor() {
 
           {/* Block 1 — The problem */}
           <div style={s({ padding: "52px 44px", borderBottom: `1px solid ${E.bdr}` })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>01 — The problem</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>01 — The problem</p>
             <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.03em", marginBottom: 20 })}>
               Financial publishing has an incentive problem that most people sense but few name directly.
             </h2>
@@ -99,7 +99,7 @@ export default function WhoItsFor() {
 
           {/* Block 2 — What we believe */}
           <div style={s({ padding: "52px 44px", borderBottom: `1px solid ${E.bdr}`, background: E.gatm })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>02 — What we believe</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>02 — What we believe</p>
             <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.03em", marginBottom: 20 })}>
               Markets price narrative. Structure is what narratives eventually have to answer to.
             </h2>
@@ -110,7 +110,7 @@ export default function WhoItsFor() {
 
           {/* Block 3 — The foundation */}
           <div style={s({ padding: "52px 44px" })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>03 — The foundation</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>03 — The foundation</p>
             <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.03em", marginBottom: 20 })}>
               Stewardship is about conformity to reality.
             </h2>
@@ -120,7 +120,7 @@ export default function WhoItsFor() {
 
             {/* Principle block */}
             <div style={s({ border: `1px solid ${E.bdr2}`, background: E.bg2, padding: "24px", marginTop: 28 })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 16 })}>What this means in practice</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 16 })}>What this means in practice</p>
               <div style={s({ display: "flex", flexDirection: "column", gap: 0 })}>
                 {[
                   { principle: "Median over mean", reason: "The mean in our highest-risk bucket is +12.6%. The median is −0.8%. We report the median." },
@@ -145,7 +145,7 @@ export default function WhoItsFor() {
 
           {/* What this is not */}
           <div style={s({ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${E.bdr}` })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>What this is not</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>What this is not</p>
             {[
               "Investment advice",
               "A stock picking service",
@@ -162,7 +162,7 @@ export default function WhoItsFor() {
 
           {/* The empirical record */}
           <div style={s({ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${E.bdr}` })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>The empirical record</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>The empirical record</p>
             <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.78, color: E.body, marginBottom: 16 })}>The framework has been validated against 289,737 observations across 17 years. The results:</p>
             {[
               { label: "Factor-adj. L/S alpha", val: "+21.0%", note: "t = +4.80" },
@@ -174,18 +174,18 @@ export default function WhoItsFor() {
                 <span style={s({ fontFamily: E.sans, fontSize: 12, color: E.body })}>{label}</span>
                 <div style={s({ textAlign: "right" })}>
                   <span style={s({ fontFamily: E.mono, fontSize: 13, fontWeight: 500, color: E.gold })}>{val}</span>
-                  <span style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, marginLeft: 8 })}>{note}</span>
+                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, marginLeft: 8 })}>{note}</span>
                 </div>
               </div>
             ))}
-            <Link href="/methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 9.5, color: E.gold, textDecoration: "none", marginTop: 14 })}>
+            <Link href="/methodology" style={s({ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: E.mono, fontSize: 11, color: E.gold, textDecoration: "none", marginTop: 14 })}>
               Full methodology <ArrowRight size={12} />
             </Link>
           </div>
 
           {/* Foundational principle */}
           <div style={s({ border: `1px solid ${E.bdr2}`, borderTop: `2px solid ${E.gold}`, background: E.gatm, padding: "20px" })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 12 })}>Foundational principle</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 12 })}>Foundational principle</p>
             <p style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, lineHeight: 1.75, color: E.text })}>
               "The work must conform to truth as much as possible and cohere with wise stewardship of capital. This is not a constraint on the work — it is the reason the work matters."
             </p>
@@ -217,7 +217,7 @@ export default function WhoItsFor() {
       {/* ── FOOTER ── */}
       <div style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline" })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
           <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
@@ -228,7 +228,7 @@ export default function WhoItsFor() {
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}
         </div>
-        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
       </div>
 
     </main>

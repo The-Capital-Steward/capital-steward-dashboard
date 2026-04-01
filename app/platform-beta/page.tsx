@@ -1067,7 +1067,7 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
         </div>
         <div style={s({ padding:"16px 20px", height:280 })}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={oalSummary} margin={{top:4,right:8,left:0,bottom:4}} barCategoryGap="28%">
+            <BarChart data={oalSummary.filter(r => r.oal_label !== "Non-viable")} margin={{top:4,right:8,left:0,bottom:4}} barCategoryGap="28%">
               <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
               <XAxis dataKey="oal_label" tick={CS as any} axisLine={false} tickLine={false}/>
               <YAxis tick={CS as any} axisLine={false} tickLine={false} width={42}/>
@@ -1112,14 +1112,22 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
               </tr>
             </thead>
             <tbody>
-              {oalSummary.map(row => (
-                <tr key={row.oal_label} style={s({ borderBottom:`1px solid rgba(255,255,255,0.025)` })}>
-                  <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:E.text, padding:"7px 8px" })}>{row.oal_label}</td>
-                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{fmtNum(row.n)}</td>
-                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{row.median_axis1==null?"—":fmtPct(row.median_axis1)+"th"}</td>
-                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{row.median_composite==null?"—":fmtPct(row.median_composite)+"th"}</td>
-                </tr>
-              ))}
+              {oalSummary.filter(row => row.oal_label !== "Non-viable").map(row => {
+                const anchorColor = row.oal_label==="FCF" ? E.pos
+                  : row.oal_label==="Revenue" ? E.neg : E.body
+                const a1v = row.median_axis1 ?? 0
+                const compv = row.median_composite ?? 0
+                const a1Color = a1v >= 0.7 ? E.neg : a1v <= 0.35 ? E.pos : E.body
+                const compColor = compv >= 0.7 ? E.neg : compv <= 0.35 ? E.pos : E.body
+                return (
+                  <tr key={row.oal_label} style={s({ borderBottom:`1px solid rgba(255,255,255,0.025)` })}>
+                    <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:anchorColor, padding:"7px 8px" })}>{row.oal_label}</td>
+                    <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{fmtNum(row.n)}</td>
+                    <td style={s({ fontFamily:E.mono, fontSize:11, color:a1Color, padding:"7px 8px" })}>{row.median_axis1==null?"—":fmtPct(row.median_axis1)}</td>
+                    <td style={s({ fontFamily:E.mono, fontSize:11, color:compColor, padding:"7px 8px" })}>{row.median_composite==null?"—":fmtPct(row.median_composite)}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

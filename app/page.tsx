@@ -10,9 +10,9 @@ import { ArrowRight } from "lucide-react"
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#AA9D91", dim: "#857B71",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos: "#5A9870", neg: "#B85C4A", blue: "#4A7AA8",
+  pos: "#74A95C", neg: "#D9867C", blue: "#627EAA",
   mono: "'IBM Plex Mono','Courier New',monospace",
   sans: "'Syne',system-ui,sans-serif",
   serif: "'Instrument Serif',Georgia,serif",
@@ -72,10 +72,10 @@ function HeroOALBar({ code, label, color, bg, border, pct, ret, delay }: {
 }
 
 const OAL_DATA = [
-  { code: "FCF",  label: "Free Cash Flow", color: "#6DAE8B", bg: "rgba(90,152,112,0.09)",  border: "rgba(90,152,112,0.28)",  pct: 70, ret: "+9.8%" },
-  { code: "NI",   label: "Net Income",     color: "#6B9EC4", bg: "rgba(74,122,168,0.09)",  border: "rgba(74,122,168,0.28)",  pct: 42, ret: "+4.0%" },
+  { code: "FCF",  label: "Free Cash Flow", color: "#6DAE8B", bg: "rgba(116,169,92,0.09)",  border: "rgba(116,169,92,0.28)",  pct: 70, ret: "+9.8%" },
+  { code: "NI",   label: "Net Income",     color: "#6B9EC4", bg: "rgba(98,126,170,0.09)",  border: "rgba(98,126,170,0.28)",  pct: 42, ret: "+4.0%" },
   { code: "EBIT", label: "EBIT",           color: "#D4B56A", bg: "rgba(197,162,74,0.09)",  border: "rgba(197,162,74,0.28)",  pct: 29, ret: "+2.5%" },
-  { code: "Rev",  label: "Revenue",        color: "#B85C4A", bg: "rgba(184,92,74,0.09)",   border: "rgba(184,92,74,0.28)",   pct: 6,  ret: "−16.7%" },
+  { code: "Rev",  label: "Revenue",        color: "#D9867C", bg: "rgba(217,134,124,0.09)",   border: "rgba(217,134,124,0.28)",   pct: 6,  ret: "−16.7%" },
 ]
 
 const RESULTS = [
@@ -150,7 +150,7 @@ export default function Homepage() {
         {/* Radial glow behind headline */}
         <div style={s({ position: "absolute", top: 0, left: -100, width: 600, height: 500, background: "radial-gradient(ellipse at 30% 40%,rgba(197,162,74,0.05) 0%,transparent 65%)", pointerEvents: "none" })} />
 
-        <div style={s({ position: "relative", display: "grid", gridTemplateColumns: "1fr 340px", minHeight: 480, borderRight: `1px solid ${E.bdr}` })}>
+        <div className="hero-grid" style={s({ position: "relative", display: "grid", gridTemplateColumns: "1fr 340px", minHeight: 480, borderRight: `1px solid ${E.bdr}` })}>
 
           {/* Left: headline + CTA */}
           <div style={s({ padding: "80px 52px 72px", borderRight: `1px solid ${E.bdr}`, display: "flex", flexDirection: "column", justifyContent: "flex-end" })}>
@@ -158,20 +158,24 @@ export default function Homepage() {
             {/* Live status */}
             <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 36, width: "fit-content" })}>
               <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.gold, boxShadow: "0 0 6px rgba(197,162,74,0.7)", animation: "pulse 2.5s ease-in-out infinite" })} />
-              <span style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
+              <span style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
                 System live · ~5,200 equities · Updated weekly
               </span>
             </div>
 
             <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.0, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
-              Markets price<br />
-              <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "-0.02em" })}>narrative.</em><br />
-              We price structure.
+              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "-0.02em" })}>narrative.</em><br />
+              We value structure.
             </h1>
 
-            <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.body, maxWidth: 480, marginBottom: 36 })}>
-              Structural risk research for U.S. equities. We measure the distance between what a company has demonstrated and what its valuation requires — across 5,200 companies, updated weekly.
-            </p>
+            <div style={s({ maxWidth: 480, marginBottom: 36 })}>
+              <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.body, marginBottom: 16 })}>
+                Equity prices reflect narratives more than operational reality. That gap — between a company's market value and what it has demonstrated operationally — is a structural risk that most portfolios do not manage systematically.
+              </p>
+              <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.text, fontWeight: 600 })}>
+                We measure it.
+              </p>
+            </div>
 
             <div style={s({ display: "flex", flexWrap: "wrap", gap: 10 })}>
               <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
@@ -184,10 +188,10 @@ export default function Homepage() {
           </div>
 
           {/* Right: OAL ladder — proof above the fold */}
-          <div style={s({ padding: "48px 32px", background: E.bg2, display: "flex", flexDirection: "column", justifyContent: "center" })}>
+          <div style={s({ padding: "48px 32px", background: E.bg2, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" })}>
             <div style={s({ marginBottom: 20 })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 4 })}>Anchor depth → median return</p>
-              <p style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted })}>289,745 obs · 2009–2026</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 4 })}>Anchor depth → median return</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>289,745 obs · 2009–2026</p>
             </div>
 
             {OAL_DATA.map((bar, i) => (
@@ -196,10 +200,10 @@ export default function Homepage() {
 
             <div style={s({ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${E.bdr}` })}>
               <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline" })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted })}>FCF–Revenue spread</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>FCF–Revenue spread</span>
                 <span style={s({ fontFamily: E.mono, fontSize: 14, fontWeight: 500, color: E.pos })}>+26.6pp</span>
               </div>
-              <p style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginTop: 4 })}>Held across all market regimes tested</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, marginTop: 4 })}>Held across all market regimes tested</p>
             </div>
 
             {/* Ghost section number */}
@@ -209,7 +213,7 @@ export default function Homepage() {
       </div>
 
       {/* ── PROOF STRIP — key numbers ── */}
-      <div style={s({ display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+      <div className="stats-grid" style={s({ display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
         {[
           { val: null, target: 289737, suffix: "", prefix: "",  label: "Historical observations",      note: "2009–2026" },
           { val: null, target: 17,     suffix: "yr",prefix: "", label: "Backtest period",               note: "3 market regimes" },
@@ -220,14 +224,14 @@ export default function Homepage() {
             <div style={s({ fontFamily: E.mono, fontSize: 26, fontWeight: 500, color: i >= 2 ? E.gold : E.text, letterSpacing: "-0.03em", marginBottom: 4, lineHeight: 1 })}>
               {target > 0 ? <Counter target={target} suffix={suffix} prefix={prefix} /> : val}
             </div>
-            <div style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 2 })}>{label}</div>
-            <div style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.dim })}>{note}</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase", color: E.muted, marginBottom: 2 })}>{label}</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.dim })}>{note}</div>
           </div>
         ))}
       </div>
 
       {/* ── THREE DIMENSIONS ── */}
-      <div style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+      <div className="axes-grid" style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
         {[
           {
             num: "Axis 01",
@@ -253,7 +257,7 @@ export default function Homepage() {
             onMouseEnter={e => (e.currentTarget.style.background = E.gatm)}
             onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
             <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 })}>
-              <span style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.7 })}>{num}</span>
+              <span style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.7 })}>{num}</span>
               <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>{r}</span>
             </div>
             <div style={s({ fontFamily: E.sans, fontSize: 17, fontWeight: 800, color: E.text, letterSpacing: "-0.02em", marginBottom: 12, lineHeight: 1.15 })}>{title}</div>
@@ -263,11 +267,11 @@ export default function Homepage() {
       </div>
 
       {/* ── SIGNAL SPLIT ── */}
-      <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${E.bdr}` })}>
+      <div className="signal-grid" style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: `1px solid ${E.bdr}` })}>
 
         {/* Left: what it is and isn't */}
         <div style={s({ padding: "48px 44px", borderRight: `1px solid ${E.bdr}` })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 16 })}>The signal</p>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 16 })}>The signal</p>
           <h2 style={s({ fontFamily: E.sans, fontSize: 24, fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 16 })}>
             Not a prediction engine.<br />A structural state identifier.
           </h2>
@@ -285,11 +289,11 @@ export default function Homepage() {
               { label: "Very High composite", med: "−0.8%",  cvar: "−85.1%", below: "30.3%", color: E.neg },
             ].map(({ label, med, cvar, below, color }) => (
               <div key={label} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, padding: "16px" })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, marginBottom: 12 })}>{label}</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: E.muted, marginBottom: 12 })}>{label}</p>
                 {[["Median return", med], ["CVaR (95%)", cvar], ["< −25% rate", below]].map(([k, v]) => (
                   <div key={k} style={s({ marginBottom: 10 })}>
                     <div style={s({ fontFamily: E.mono, fontSize: 16, fontWeight: 500, color })}>{v}</div>
-                    <div style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginTop: 1 })}>{k}</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, marginTop: 1 })}>{k}</div>
                   </div>
                 ))}
               </div>
@@ -299,7 +303,7 @@ export default function Homepage() {
 
         {/* Right: empirical results */}
         <div style={s({ padding: "48px 44px", background: E.gatm })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 24 })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 24 })}>
             Key empirical results · 289,737 obs · 2009–2026
           </p>
 
@@ -314,7 +318,7 @@ export default function Homepage() {
 
           {/* Regime bars */}
           <div>
-            <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>L/S alpha · positive in all three regimes</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>L/S alpha · positive in all three regimes</p>
             {[
               { name: "Expansion", note: "52.7% of months", val: "+14.5%", w: 62 },
               { name: "Neutral",   note: "17.6%",           val: "+18.0%", w: 77 },
@@ -323,7 +327,7 @@ export default function Homepage() {
               <div key={name} style={s({ display: "grid", gridTemplateColumns: "130px 1fr 56px", alignItems: "center", gap: 12, padding: "7px 0", borderBottom: `1px solid rgba(255,255,255,0.025)` })}>
                 <div>
                   <span style={s({ fontFamily: E.sans, fontSize: 11.5, color: E.text, fontWeight: 600 })}>{name}</span>
-                  <span style={s({ fontFamily: E.mono, fontSize: 8.5, color: E.muted, marginLeft: 5 })}>{note}</span>
+                  <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, marginLeft: 5 })}>{note}</span>
                 </div>
                 <div style={s({ height: 2, background: E.bdr2, position: "relative" })}>
                   <div style={s({ position: "absolute", left: 0, top: 0, height: 2, width: `${w}%`, background: E.gold })} />
@@ -340,14 +344,14 @@ export default function Homepage() {
       </div>
 
       {/* ── THREE PRINCIPLES ── */}
-      <div style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
+      <div className="phil-grid" style={s({ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
         {[
           { num: "01", head: "Structure over narrative", body: "Most valuation frameworks ask how much a company is worth. We ask how well-grounded that valuation is in what the company has actually demonstrated. The gap between those questions is where structural risk accumulates." },
           { num: "02", head: "Honest about limitations", body: "68.5% of Very High classifications do not produce severe losses in 12 months. We disclose this prominently. The framework identifies structural conditions — not outcomes — and we write accordingly." },
           { num: "03", head: "No incentive distortion", body: "No advertisers. No sponsored research. No assets under management. The analysis is shaped entirely by what the data shows — not by what we are trying to sell or recommend." },
         ].map(({ num, head, body }, i) => (
           <div key={num} style={s({ padding: "36px 32px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>
-            <div style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.4, marginBottom: 14 })}>{num}</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.gold, opacity: 0.4, marginBottom: 14 })}>{num}</div>
             <div style={s({ fontFamily: E.sans, fontSize: 16, fontWeight: 800, color: E.text, letterSpacing: "-0.02em", marginBottom: 10, lineHeight: 1.2 })}>{head}</div>
             <div style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.78, color: E.body })}>{body}</div>
           </div>
@@ -355,9 +359,9 @@ export default function Homepage() {
       </div>
 
       {/* ── CTA ── */}
-      <div style={s({ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 40, padding: "56px 44px", borderBottom: `1px solid ${E.bdr}` })}>
+      <div className="cta-grid" style={s({ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 40, padding: "56px 44px", borderBottom: `1px solid ${E.bdr}` })}>
         <div>
-          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>Platform access</p>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 14 })}>Platform access</p>
           <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(24px,3.5vw,36px)", fontWeight: 800, color: E.text, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: 12 })}>
             The structural map is live now.
           </h2>
@@ -383,7 +387,7 @@ export default function Homepage() {
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
+      <div className="site-footer" style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
           <span style={s({ fontFamily: E.mono, fontSize: 9, fontWeight: 400, letterSpacing: "0.28em", textTransform: "uppercase", color: E.muted })}>The Capital</span>
           <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
@@ -394,7 +398,7 @@ export default function Homepage() {
             { label: "Methodology",    href: "/methodology" },
             { label: "Where It Belongs",     href: "/where-it-belongs" },
           ].map(({ label, href }) => (
-            <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
+            <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none", padding: "8px 0", display: "inline-block" })}>{label}</Link>
           ))}
         </div>
         <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
@@ -402,15 +406,57 @@ export default function Homepage() {
 
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @media (max-width: 900px) {
-          .hero-grid { grid-template-columns: 1fr !important; }
+
+        /* ── Responsive breakpoints ── */
+
+        /* Tablet: hero collapses to single column */
+        @media (max-width: 960px) {
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .hero-grid > div:last-child {
+            border-right: none !important;
+            border-top: 1px solid #272420;
+          }
         }
+
+        /* Mobile: all multi-column grids collapse */
         @media (max-width: 768px) {
-          .stats-grid { grid-template-columns: 1fr 1fr !important; }
-          .axes-grid  { grid-template-columns: 1fr !important; }
-          .signal-grid { grid-template-columns: 1fr !important; }
-          .phil-grid  { grid-template-columns: 1fr !important; }
-          .cta-grid   { grid-template-columns: 1fr !important; }
+          .stats-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
+          .axes-grid,
+          .signal-grid,
+          .phil-grid,
+          .cta-grid {
+            grid-template-columns: 1fr !important;
+          }
+          /* Remove mid-grid right borders that become orphaned */
+          .axes-grid > div,
+          .signal-grid > div,
+          .phil-grid > div {
+            border-right: none !important;
+            border-bottom: 1px solid #272420;
+          }
+        }
+
+        /* Small mobile: proof strip goes single column */
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .stats-grid > div {
+            border-right: none !important;
+            border-bottom: 1px solid #272420;
+          }
+        }
+
+        /* Footer nav touch targets */
+        .site-footer a {
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          padding: 0 4px;
         }
       `}</style>
 

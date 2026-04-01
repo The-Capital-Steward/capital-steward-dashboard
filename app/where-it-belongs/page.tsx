@@ -9,9 +9,9 @@ import { ArrowRight } from "lucide-react"
 const E = {
   bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
   bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
+  text: "#EDE9E0", body: "#A89E8E", muted: "#AA9D91", dim: "#857B71",
   gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos: "#5A9870", neg: "#B85C4A", amber: "#D4952A",
+  pos: "#74A95C", neg: "#D9867C", amber: "#D4952A",
   mono: "'IBM Plex Mono','Courier New',monospace",
   sans: "'Syne',system-ui,sans-serif",
   serif: "'Instrument Serif',Georgia,serif",
@@ -20,7 +20,7 @@ const E = {
 const s = (x: object) => x as React.CSSProperties
 
 const Ey = ({ c }: { c: string }) => (
-  <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.gold, marginBottom: 10 })}>{c}</p>
+  <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.gold, marginBottom: 10 })}>{c}</p>
 )
 
 const SH = ({ ch }: { ch: React.ReactNode }) => (
@@ -47,7 +47,7 @@ export default function HowToUseOSMR() {
         background: E.bg, borderBottom: `1px solid ${E.bdr}`,
       })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
           <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, color: E.gold, marginLeft: 8 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", alignItems: "center" })}>
@@ -98,7 +98,7 @@ export default function HowToUseOSMR() {
             {/* Process diagram */}
             <div style={s({ marginTop: 28, border: `1px solid ${E.bdr}`, background: E.bg2 })}>
               <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}` })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Where OSMR enters the process</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Where OSMR enters the process</p>
               </div>
               {[
                 { step: "01", label: "Structural screening", desc: "Use the market map to identify zones worth examining. Filter by composite bucket and OAL rung.", highlight: true },
@@ -108,12 +108,12 @@ export default function HowToUseOSMR() {
                 { step: "05", label: "Ongoing monitoring", desc: "Watch trajectory. A deteriorating anchor is structural information that belongs in any review.", highlight: true },
               ].map(({ step, label, desc, highlight }) => (
                 <div key={step} style={s({ display: "flex", gap: 16, padding: "14px 16px", borderBottom: `1px solid rgba(255,255,255,0.025)`, background: highlight ? E.gatm : "transparent" })}>
-                  <div style={s({ fontFamily: E.mono, fontSize: 9, color: highlight ? E.gold : E.dim, opacity: 0.8, flexShrink: 0, marginTop: 1 })}>{step}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: highlight ? E.gold : E.dim, opacity: 0.8, flexShrink: 0, marginTop: 1 })}>{step}</div>
                   <div>
                     <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: highlight ? E.text : E.muted, marginBottom: 3 })}>{label}</div>
                     <div style={s({ fontFamily: E.sans, fontSize: 12, lineHeight: 1.65, color: E.muted })}>{desc}</div>
                   </div>
-                  {highlight && <div style={s({ marginLeft: "auto", flexShrink: 0, fontFamily: E.mono, fontSize: 8.5, color: E.gold, opacity: 0.6, alignSelf: "center" })}>OSMR</div>}
+                  {highlight && <div style={s({ marginLeft: "auto", flexShrink: 0, fontFamily: E.mono, fontSize: 10.5, color: E.gold, opacity: 0.6, alignSelf: "center" })}>OSMR</div>}
                 </div>
               ))}
             </div>
@@ -148,10 +148,10 @@ export default function HowToUseOSMR() {
                 <div key={num} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, padding: "20px" })}>
                   <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 })}>
                     <div style={s({ display: "flex", gap: 12, alignItems: "baseline" })}>
-                      <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.gold, opacity: 0.6, letterSpacing: "0.1em" })}>{num}</span>
+                      <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.gold, opacity: 0.6, letterSpacing: "0.1em" })}>{num}</span>
                       <span style={s({ fontFamily: E.sans, fontSize: 15, fontWeight: 800, color: E.text, letterSpacing: "-0.02em" })}>{title}</span>
                     </div>
-                    <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>{detail}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>{detail}</span>
                   </div>
                   <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>{body}</p>
                 </div>
@@ -160,7 +160,7 @@ export default function HowToUseOSMR() {
 
             {/* Honest caveat */}
             <div style={s({ border: `1px solid ${E.bdr2}`, background: E.gatm, padding: "18px 20px" })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 8 })}>What this is not</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 8 })}>What this is not</p>
               <div style={s({ display: "flex", flexDirection: "column", gap: 8 })}>
                 {[
                   "Not a buy or sell signal system",
@@ -196,7 +196,7 @@ export default function HowToUseOSMR() {
           {/* Header */}
           <div style={s({ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: `1px solid ${E.bdr}`, background: E.bg3 })}>
             {["State", "What it tells you structurally", "What it does not tell you"].map((h, i) => (
-              <div key={h} style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, padding: "10px 20px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>{h}</div>
+              <div key={h} style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, padding: "10px 20px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>{h}</div>
             ))}
           </div>
 
@@ -206,11 +206,11 @@ export default function HowToUseOSMR() {
               color: E.neg,
               tells: "Valuation is extended far beyond demonstrated output. The anchor is shallow or deteriorating. The empirical base rate for severe loss (>−25% over 12 months) is approximately 2× the universe average across all market regimes.",
               doesnt: "That a loss is imminent, or that the company is a bad business. 68.5% of Very High entries do not produce severe losses in 12 months. The narrative sustaining the valuation may hold for an extended period.",
-              bg: "rgba(184,92,74,0.03)",
+              bg: "rgba(217,134,124,0.03)",
             },
             {
               state: "High",
-              color: "#A05050",
+              color: "#C06060",
               tells: "Above-average structural risk. The anchor is shallower than the universe median, or the trajectory is showing early deterioration. Worth monitoring closely if held.",
               doesnt: "That the company is overvalued by conventional measures, or that it cannot perform. Many High-rated companies produce positive returns.",
               bg: "transparent",
@@ -224,7 +224,7 @@ export default function HowToUseOSMR() {
             },
             {
               state: "Low",
-              color: "#3E6B4F",
+              color: "#4E8964",
               tells: "Below-average structural risk. The anchor is deeper than the universe median, and the trajectory is stable or improving. Favorable structural conditions for further research.",
               doesnt: "That the company will outperform. Low structural risk is not a return guarantee — many factors outside the framework's scope determine returns.",
               bg: "transparent",
@@ -234,7 +234,7 @@ export default function HowToUseOSMR() {
               color: E.pos,
               tells: "Deep anchor, improving trajectory. Median 12-month return in this bucket is +10.4%. Hit rate 62.4%. CVaR −52.7% vs −85.1% for Very High. Favorable conditions on every structural dimension the framework measures.",
               doesnt: "That every Very Low company is a buy. 37.6% of Very Low entries still produced negative 12-month returns. The framework identifies structural conditions — the rest is yours to determine.",
-              bg: "rgba(90,152,112,0.03)",
+              bg: "rgba(116,169,92,0.03)",
             },
           ].map(({ state, color, tells, doesnt, bg }, i) => (
             <div key={state} style={s({ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: i < 4 ? `1px solid ${E.bdr}` : "none", background: bg })}>
@@ -254,7 +254,7 @@ export default function HowToUseOSMR() {
 
         {/* OAL note */}
         <div style={s({ padding: "24px 44px", borderTop: `1px solid ${E.bdr}` })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65 })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.65 })}>
             OAL assignment matters independently of the composite score.
             A Revenue-anchored company in Very Low composite is still more narrative-dependent than an FCF-anchored company at the same score.
             The OAL rung tells you what the company has demonstrated. The composite score tells you how that demonstration compares to its current valuation and trajectory.
@@ -309,7 +309,7 @@ export default function HowToUseOSMR() {
               ].map(({ when, questions }) => (
                 <div key={when} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2 })}>
                   <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}`, display: "flex", alignItems: "center", gap: 10 })}>
-                    <span style={s({ fontFamily: E.mono, fontSize: 9, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: E.gold, background: "rgba(197,162,74,0.08)", border: "1px solid rgba(197,162,74,0.18)", padding: "2px 8px" })}>{when}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: E.gold, background: "rgba(197,162,74,0.08)", border: "1px solid rgba(197,162,74,0.18)", padding: "2px 8px" })}>{when}</span>
                   </div>
                   <div style={s({ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 })}>
                     {questions.map(q => (
@@ -323,7 +323,7 @@ export default function HowToUseOSMR() {
               ))}
             </div>
 
-            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.65, marginTop: 16 })}>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.65, marginTop: 16 })}>
               No exit thresholds or position triggers are embedded in the framework.
               Those decisions depend on mandate, time horizon, and context the framework cannot observe.
             </p>
@@ -339,7 +339,7 @@ export default function HowToUseOSMR() {
 
             <div style={s({ marginTop: 28, border: `1px solid ${E.bdr}`, background: E.bg2 })}>
               <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}` })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Four structural conditions worth distinguishing</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Four structural conditions worth distinguishing</p>
               </div>
               {[
                 { label: "Deep anchor · improving trajectory",    desc: "The best structural condition. Worth examining regardless of current score.", tag: "Favorable" },
@@ -353,7 +353,7 @@ export default function HowToUseOSMR() {
                     <div style={s({ fontFamily: E.sans, fontSize: 12, lineHeight: 1.6, color: E.muted })}>{desc}</div>
                   </div>
                   <div style={s({
-                    fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.12em", textTransform: "uppercase" as const,
+                    fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase" as const,
                     color: tag === "Favorable" ? E.pos : tag === "Elevated" ? E.neg : tag === "Improving" ? E.gold : E.amber,
                     flexShrink: 0, alignSelf: "flex-start", marginTop: 2,
                   })}>{tag}</div>
@@ -380,7 +380,7 @@ export default function HowToUseOSMR() {
       {/* ── CTA ── */}
       <div style={s({ padding: "64px 44px", borderBottom: `1px solid ${E.bdr}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 40 })}>
         <div style={s({ maxWidth: 520 })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 8.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>Platform access</p>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>Platform access</p>
           <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: 12 })}>
             The structural map is live now.
           </h2>
@@ -406,7 +406,7 @@ export default function HowToUseOSMR() {
       {/* ── FOOTER ── */}
       <div style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
           <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
@@ -417,7 +417,7 @@ export default function HowToUseOSMR() {
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}
         </div>
-        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
       </div>
 
     </main>
