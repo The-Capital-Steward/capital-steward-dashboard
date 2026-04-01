@@ -15,7 +15,7 @@ const E = {
   pos: "#74A95C", neg: "#D9867C", blue: "#627EAA",
   mono: "'IBM Plex Mono','Courier New',monospace",
   sans: "'Syne',system-ui,sans-serif",
-  serif: "'Instrument Serif',Georgia,serif",
+  serif: "'Playfair Display',Georgia,serif",
 }
 
 const s = (x: object) => x as React.CSSProperties
