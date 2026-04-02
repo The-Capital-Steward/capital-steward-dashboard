@@ -44,40 +44,7 @@ function Counter({ target, suffix = "", prefix = "" }: { target: number; suffix?
   return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>
 }
 
-// ─── OAL inline bar (hero) ────────────────────────────────────────────────────
-function HeroOALBar({ code, label, color, bg, border, pct, ret, delay }: {
-  code: string; label: string; color: string; bg: string; border: string;
-  pct: number; ret: string; delay: number
-}) {
-  const [width, setWidth] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      observer.disconnect()
-      setTimeout(() => setWidth(pct), delay)
-    }, { threshold: 0.1 })
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [pct, delay])
 
-  return (
-    <div style={s({ display: "grid", gridTemplateColumns: "40px 1fr 60px", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: `1px solid rgba(255,255,255,0.03)` })}>
-      <div style={s({ fontFamily: E.mono, fontSize: 9, fontWeight: 500, padding: "2px 4px", textAlign: "center", color, background: bg, border: `1px solid ${border}`, letterSpacing: "0.05em" })}>{code}</div>
-      <div ref={ref} style={s({ height: 2, background: E.bdr2, position: "relative" })}>
-        <div style={s({ position: "absolute", left: 0, top: 0, height: 2, background: color, opacity: 0.85, width: `${width}%`, transition: `width 0.9s cubic-bezier(0.4,0,0.2,1) ${delay}ms` })} />
-      </div>
-      <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500, color, textAlign: "right" })}>{ret}</div>
-    </div>
-  )
-}
-
-const OAL_DATA = [
-  { code: "FCF",  label: "Free Cash Flow", color: "#6DAE8B", bg: "rgba(116,169,92,0.09)",  border: "rgba(116,169,92,0.28)",  pct: 70, ret: "+9.8%" },
-  { code: "NI",   label: "Net Income",     color: "#6B9EC4", bg: "rgba(98,126,170,0.09)",  border: "rgba(98,126,170,0.28)",  pct: 42, ret: "+4.0%" },
-  { code: "EBIT", label: "EBIT",           color: "#D4B56A", bg: "rgba(197,162,74,0.09)",  border: "rgba(197,162,74,0.28)",  pct: 29, ret: "+2.5%" },
-  { code: "Rev",  label: "Revenue",        color: "#D9867C", bg: "rgba(217,134,124,0.09)",   border: "rgba(217,134,124,0.28)",   pct: 6,  ret: "−16.7%" },
-]
 
 const RESULTS = [
   { metric: "Factor-adjusted L/S alpha (FF5 + Momentum)", val: "+21.0%", color: E.pos },
@@ -137,78 +104,52 @@ export default function Homepage() {
         </div>
       </nav>
 
-      {/* ── HERO ── */}
+            {/* ── HERO ── */}
       <div style={s({ position: "relative", overflow: "hidden", borderBottom: `1px solid ${E.bdr}` })}>
 
-        {/* Grid texture */}
+        {/* Subtle grid texture */}
         <div style={s({
           position: "absolute", inset: 0, pointerEvents: "none",
           backgroundImage: "linear-gradient(rgba(74,94,80,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(74,94,80,0.06) 1px,transparent 1px)",
           backgroundSize: "52px 52px",
-          maskImage: "radial-gradient(ellipse 100% 100% at 30% 100%,black 20%,transparent 80%)",
+          maskImage: "radial-gradient(ellipse 80% 80% at 50% 0%,black 30%,transparent 100%)",
         })} />
 
-        {/* Radial glow behind headline */}
-        <div style={s({ position: "absolute", top: 0, left: -100, width: 600, height: 500, background: "radial-gradient(ellipse at 30% 40%,rgba(74,94,80,0.08) 0%,transparent 65%)", pointerEvents: "none" })} />
+        {/* Centered S1 hero */}
+        <div style={s({ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "96px 36px 80px", maxWidth: 720, margin: "0 auto" })}>
 
-        <div className="hero-grid" style={s({ position: "relative", display: "grid", gridTemplateColumns: "1fr 340px", minHeight: 480, borderRight: `1px solid ${E.bdr}` })}>
-
-          {/* Left: headline + CTA */}
-          <div style={s({ padding: "80px 52px 72px", borderRight: `1px solid ${E.bdr}`, display: "flex", flexDirection: "column", justifyContent: "flex-end" })}>
-
-            {/* Live status */}
-            <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 36, width: "fit-content" })}>
-              <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.sage, boxShadow: "0 0 6px rgba(74,94,80,0.5)", animation: "pulse 2.5s ease-in-out infinite" })} />
-              <span style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
-                System live · ~5,200 equities · Updated weekly
-              </span>
-            </div>
-
-            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(32px,4vw,52px)", fontWeight: 800, lineHeight: 1.1, color: E.text, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 28 })}>
-              Markets value the <span style={s({ color: E.brick })}>story.</span><br />
-              We value the <span style={s({ color: E.sage })}>structure.</span>
-            </h1>
-
-            <div style={s({ maxWidth: 480, marginBottom: 36 })}>
-              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
-                Most valuation frameworks assume that equity markets price fundamentals. The structural question — whether a company's price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
-              </p>
-              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
-                That structural risk is measurable. Seventeen years of data say so.
-              </p>
-            </div>
-
-            <div style={s({ display: "flex", flexWrap: "wrap", gap: 10 })}>
-              <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.text, color: E.bg, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
-                Open Platform <ArrowRight size={14} />
-              </Link>
-              <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.body, border: `1px solid ${E.bdr}`, textDecoration: "none" })}>
-                Read the Methodology
-              </Link>
-            </div>
+          {/* Live status */}
+          <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 44 })}>
+            <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.sage, boxShadow: "0 0 6px rgba(74,94,80,0.5)", animation: "pulse 2.5s ease-in-out infinite" })} />
+            <span style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
+              System live · ~5,200 equities · Updated weekly
+            </span>
           </div>
 
-          {/* Right: OAL ladder — proof above the fold */}
-          <div style={s({ padding: "48px 32px", background: E.bg3, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" })}>
-            <div style={s({ marginBottom: 20 })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 4 })}>Anchor depth → median return</p>
-              <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>289,745 obs · 2009–2026</p>
-            </div>
+          {/* Headline */}
+          <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,60px)", fontWeight: 800, lineHeight: 1.1, color: E.text, letterSpacing: "-0.02em", marginBottom: 32 })}>
+            Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.brick, fontSize: "clamp(38px,5.2vw,64px)", letterSpacing: "0.01em" })}>stories.</em><br />
+            We value <span style={s({ color: E.sage })}>structure.</span>
+          </h1>
 
-            {OAL_DATA.map((bar, i) => (
-              <HeroOALBar key={bar.code} {...bar} delay={i * 100} />
-            ))}
+          {/* Subhead */}
+          <div style={s({ maxWidth: 560, marginBottom: 44 })}>
+            <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 16 })}>
+              Most valuation frameworks assume that equity markets price fundamentals. The structural question — whether a company&#39;s price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
+            </p>
+            <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.gold, fontWeight: 600 })}>
+              That structural risk is measurable. Seventeen years of data say so.
+            </p>
+          </div>
 
-            <div style={s({ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${E.bdr}` })}>
-              <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline" })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>FCF–Revenue spread</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 15, fontWeight: 500, color: E.pos })}>+26.6pp</span>
-              </div>
-              <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, marginTop: 4 })}>Held across all market regimes tested</p>
-            </div>
-
-            {/* Ghost section number */}
-            <div style={s({ position: "absolute", bottom: 16, right: 20, fontFamily: E.sans, fontSize: 80, fontWeight: 800, color: "rgba(74,94,80,0.07)", lineHeight: 1, pointerEvents: "none", userSelect: "none" })}>I</div>
+          {/* CTAs */}
+          <div style={s({ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" })}>
+            <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.text, color: E.bg, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+              Open Platform <ArrowRight size={14} />
+            </Link>
+            <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.body, border: `1px solid ${E.bdr}`, textDecoration: "none" })}>
+              Read the Methodology
+            </Link>
           </div>
         </div>
       </div>
