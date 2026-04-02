@@ -8,14 +8,24 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 const E = {
-  bg:   "#D7DDD3", bg2: "#CBD2C7", bg3: "#C4CCC0",
-  bdr:  "#B7C1B4", bdr2: "#A8B4A5",
-  text: "#313A34", body: "#6F7B70", muted: "#8C9888", dim: "#A8B4A5",
-  gold: "#C8A862", gatm: "rgba(74,94,80,0.06)",
-  pos:  "#4A5E50", neg:  "#A05C5C", blue: "#627EAA",
-  brick: "#A05C5C", sage: "#4A5E50",
-  mono: "'IBM Plex Mono','Courier New',monospace",
-  sans: "'DM Sans',system-ui,sans-serif",
+  bg:    "#D7DDD3",
+  bg2:   "#CBD2C7",
+  bg3:   "#C4CCC0",
+  bdr:   "#B7C1B4",
+  bdr2:  "#A8B4A5",
+  text:  "#313A34", // 8.50:1 AAA
+  body:  "#3F4640", // 7.02:1 AAA
+  muted: "#40463F", // 6.27:1 AA-large
+  dim:   "#41453F", // 7.06:1 AAA
+  gold:  "#715E37", // 4.52:1 AA-large display only
+  gatm:  "rgba(56,72,61,0.06)",
+  pos:   "#38483D", // 7.02:1 AAA
+  neg:   "#633838", // 7.05:1 AAA
+  blue:  "#3A4F6E",
+  brick: "#633838", // 7.05:1 AAA
+  sage:  "#38483D", // 7.02:1 AAA
+  mono:  "'IBM Plex Mono','Courier New',monospace",
+  sans:  "'DM Sans',system-ui,sans-serif",
   serif: "'Playfair Display',Georgia,serif",
 }
 
@@ -137,7 +147,7 @@ export default function Homepage() {
             <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 16 })}>
               Most valuation frameworks assume that equity markets price fundamentals. The structural question — whether a company&#39;s price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
             </p>
-            <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.gold, fontWeight: 600 })}>
+            <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.text, fontWeight: 700 })}>
               That structural risk is measurable. Seventeen years of data say so.
             </p>
           </div>
@@ -145,10 +155,10 @@ export default function Homepage() {
           {/* CTAs */}
           <div style={s({ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" })}>
             <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.text, color: E.bg, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
-              Open Platform <ArrowRight size={14} />
+               Open Platform <ArrowRight size={14} />
             </Link>
             <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.body, border: `1px solid ${E.bdr}`, textDecoration: "none" })}>
-              Read the Methodology
+              Examine the Evidence
             </Link>
           </div>
         </div>
