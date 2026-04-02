@@ -8,13 +8,14 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 const E = {
-  bg: "#0E0D0B", bg2: "#131210", bg3: "#181614",
-  bdr: "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#AA9D91", dim: "#857B71",
-  gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos: "#74A95C", neg: "#D9867C", blue: "#627EAA",
+  bg:   "#D7DDD3", bg2: "#CBD2C7", bg3: "#C4CCC0",
+  bdr:  "#B7C1B4", bdr2: "#A8B4A5",
+  text: "#313A34", body: "#6F7B70", muted: "#8C9888", dim: "#A8B4A5",
+  gold: "#C8A862", gatm: "rgba(74,94,80,0.06)",
+  pos:  "#4A5E50", neg:  "#A05C5C", blue: "#627EAA",
+  brick: "#A05C5C", sage: "#4A5E50",
   mono: "'IBM Plex Mono','Courier New',monospace",
-  sans: "'Syne',system-ui,sans-serif",
+  sans: "'DM Sans',system-ui,sans-serif",
   serif: "'Playfair Display',Georgia,serif",
 }
 
@@ -104,9 +105,9 @@ export default function Homepage() {
         position: "sticky", top: 0, zIndex: 100,
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "0 44px", height: 52,
-        background: scrolled ? "rgba(14,13,11,0.95)" : E.bg,
+        background: scrolled ? "rgba(215,221,211,0.95)" : E.bg,
         borderBottom: `1px solid ${scrolled ? E.bdr : "transparent"}`,
-        backdropFilter: scrolled ? "blur(16px)" : "none",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
         transition: "all 0.25s",
       })}>
         {/* Masthead wordmark */}
@@ -128,7 +129,7 @@ export default function Homepage() {
               {label}
             </Link>
           ))}
-          <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 20px", background: E.gold, color: "#060504", textDecoration: "none", marginLeft: 20, transition: "opacity 0.15s" })}
+          <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 20px", background: E.text, color: E.bg, textDecoration: "none", marginLeft: 20, transition: "opacity 0.15s" })}
             onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
             onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
             Platform
@@ -142,13 +143,13 @@ export default function Homepage() {
         {/* Grid texture */}
         <div style={s({
           position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: "linear-gradient(rgba(197,162,74,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(197,162,74,0.03) 1px,transparent 1px)",
+          backgroundImage: "linear-gradient(rgba(74,94,80,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(74,94,80,0.06) 1px,transparent 1px)",
           backgroundSize: "52px 52px",
           maskImage: "radial-gradient(ellipse 100% 100% at 30% 100%,black 20%,transparent 80%)",
         })} />
 
         {/* Radial glow behind headline */}
-        <div style={s({ position: "absolute", top: 0, left: -100, width: 600, height: 500, background: "radial-gradient(ellipse at 30% 40%,rgba(197,162,74,0.05) 0%,transparent 65%)", pointerEvents: "none" })} />
+        <div style={s({ position: "absolute", top: 0, left: -100, width: 600, height: 500, background: "radial-gradient(ellipse at 30% 40%,rgba(74,94,80,0.08) 0%,transparent 65%)", pointerEvents: "none" })} />
 
         <div className="hero-grid" style={s({ position: "relative", display: "grid", gridTemplateColumns: "1fr 340px", minHeight: 480, borderRight: `1px solid ${E.bdr}` })}>
 
@@ -157,41 +158,41 @@ export default function Homepage() {
 
             {/* Live status */}
             <div style={s({ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 36, width: "fit-content" })}>
-              <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.gold, boxShadow: "0 0 6px rgba(197,162,74,0.7)", animation: "pulse 2.5s ease-in-out infinite" })} />
+              <div style={s({ width: 4, height: 4, borderRadius: "50%", background: E.sage, boxShadow: "0 0 6px rgba(74,94,80,0.5)", animation: "pulse 2.5s ease-in-out infinite" })} />
               <span style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.24em", textTransform: "uppercase", color: E.muted })}>
                 System live · ~5,200 equities · Updated weekly
               </span>
             </div>
 
-            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
-              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: "#A05C5C", fontSize: "clamp(46px,6vw,74px)", letterSpacing: "0.01em", lineHeight: 1.15 })}>stories.</em><br />
-              We value <em style={s({ fontStyle: "normal", color: "#74A95C" })}>structure.</em>
+            <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(32px,4vw,52px)", fontWeight: 800, lineHeight: 1.1, color: E.text, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 28 })}>
+              Markets value the <span style={s({ color: E.brick })}>story.</span><br />
+              We value the <span style={s({ color: E.sage })}>structure.</span>
             </h1>
 
             <div style={s({ maxWidth: 480, marginBottom: 36 })}>
               <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
-                Most valuation frameworks assume markets price fundamentals. The structural question — whether a company's price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
+                Most valuation frameworks assume equity markets price fundamentals while ignoring how narratives misprice what companies have actually demonstrated operationally.
               </p>
               <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
-                That gap is measurable. Seventeen years of data say so.
+                That structural risk is measurable. Seventeen years of data say so.
               </p>
-              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: "#C8A862", fontWeight: 600 })}>
+              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.gold, fontWeight: 600 })}>
                 We measure it.
               </p>
             </div>
 
             <div style={s({ display: "flex", flexWrap: "wrap", gap: 10 })}>
-              <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+              <Link href="/platform" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "13px 28px", background: E.text, color: E.bg, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
                 Open Platform <ArrowRight size={14} />
               </Link>
-              <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
+              <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "13px 24px", background: "transparent", color: E.body, border: `1px solid ${E.bdr}`, textDecoration: "none" })}>
                 Read the Methodology
               </Link>
             </div>
           </div>
 
           {/* Right: OAL ladder — proof above the fold */}
-          <div style={s({ padding: "48px 32px", background: E.bg2, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" })}>
+          <div style={s({ padding: "48px 32px", background: E.bg3, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" })}>
             <div style={s({ marginBottom: 20 })}>
               <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 4 })}>Anchor depth → median return</p>
               <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>289,745 obs · 2009–2026</p>
@@ -210,7 +211,7 @@ export default function Homepage() {
             </div>
 
             {/* Ghost section number */}
-            <div style={s({ position: "absolute", bottom: 16, right: 20, fontFamily: E.sans, fontSize: 80, fontWeight: 800, color: "rgba(197,162,74,0.04)", lineHeight: 1, pointerEvents: "none", userSelect: "none" })}>I</div>
+            <div style={s({ position: "absolute", bottom: 16, right: 20, fontFamily: E.sans, fontSize: 80, fontWeight: 800, color: "rgba(74,94,80,0.07)", lineHeight: 1, pointerEvents: "none", userSelect: "none" })}>I</div>
           </div>
         </div>
       </div>
@@ -305,7 +306,7 @@ export default function Homepage() {
         </div>
 
         {/* Right: empirical results */}
-        <div style={s({ padding: "48px 44px", background: E.gatm })}>
+        <div style={s({ padding: "48px 44px", background: 'rgba(74,94,80,0.05)' })}>
           <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase", color: E.muted, marginBottom: 24 })}>
             Key empirical results · 289,737 obs · 2009–2026
           </p>
@@ -380,10 +381,10 @@ export default function Homepage() {
             <span style={s({ color: E.text, fontSize: 22, fontWeight: 500 })}>$1,479</span>
             <span style={s({ margin: "0 6px" })}>/</span>year
           </div>
-          <Link href="/platform/subscribe" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
+          <Link href="/platform/subscribe" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "14px 30px", background: E.text, color: E.bg, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10 })}>
             Subscribe to Access <ArrowRight size={14} />
           </Link>
-          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none", textAlign: "center" })}>
+          <Link href="/methodology" style={s({ fontFamily: E.sans, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "11px 22px", background: "transparent", color: E.body, border: `1px solid ${E.bdr}`, textDecoration: "none", textAlign: "center" })}>
             Read the Methodology First
           </Link>
         </div>
@@ -419,7 +420,7 @@ export default function Homepage() {
           }
           .hero-grid > div:last-child {
             border-right: none !important;
-            border-top: 1px solid #272420;
+            border-top: 1px solid #B7C1B4;
           }
         }
 
@@ -439,7 +440,7 @@ export default function Homepage() {
           .signal-grid > div,
           .phil-grid > div {
             border-right: none !important;
-            border-bottom: 1px solid #272420;
+            border-bottom: 1px solid #B7C1B4;
           }
         }
 
@@ -450,7 +451,7 @@ export default function Homepage() {
           }
           .stats-grid > div {
             border-right: none !important;
-            border-bottom: 1px solid #272420;
+            border-bottom: 1px solid #B7C1B4;
           }
         }
 
