@@ -1,6 +1,6 @@
 'use client'
 
-// FONT: same globals.css import (Syne + IBM Plex Mono + Instrument Serif)
+// FONT: same globals.css import (Syne + IBM Plex Mono + Playfair Display)
 // File goes to: app/page.tsx
 
 import { useState, useEffect, useRef } from "react"
@@ -164,15 +164,18 @@ export default function Homepage() {
             </div>
 
             <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(42px,5.5vw,68px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.04em", marginBottom: 28 })}>
-              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.gold, fontSize: "clamp(46px,6vw,74px)", letterSpacing: "0.01em", lineHeight: 1.15 })}>narrative.</em><br />
-              We value structure.
+              Markets value <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: "#A05C5C", fontSize: "clamp(46px,6vw,74px)", letterSpacing: "0.01em", lineHeight: 1.15 })}>stories.</em><br />
+              We value <em style={s({ fontStyle: "normal", color: "#74A95C" })}>structure.</em>
             </h1>
 
             <div style={s({ maxWidth: 480, marginBottom: 36 })}>
-              <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.body, marginBottom: 16 })}>
-                Equity prices reflect narratives more than operational reality. That gap — between a company's market value and what it has demonstrated operationally — is a structural risk that most portfolios do not manage systematically.
+              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
+                Most valuation frameworks assume markets price fundamentals. The structural question — whether a company's price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
               </p>
-              <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.78, color: E.text, fontWeight: 600 })}>
+              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
+                That gap is measurable. Seventeen years of data say so.
+              </p>
+              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: "#C8A862", fontWeight: 600 })}>
                 We measure it.
               </p>
             </div>
@@ -201,7 +204,7 @@ export default function Homepage() {
             <div style={s({ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${E.bdr}` })}>
               <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline" })}>
                 <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>FCF–Revenue spread</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 14, fontWeight: 500, color: E.pos })}>+26.6pp</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 15, fontWeight: 500, color: E.pos })}>+26.6pp</span>
               </div>
               <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, marginTop: 4 })}>Held across all market regimes tested</p>
             </div>
@@ -311,7 +314,7 @@ export default function Homepage() {
             {RESULTS.map(({ metric, val, color }, i) => (
               <div key={metric} style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "11px 0", borderBottom: i < RESULTS.length - 1 ? `1px solid rgba(255,255,255,0.03)` : "none" })}>
                 <span style={s({ fontFamily: E.sans, fontSize: 12.5, color: E.body, paddingRight: 12 })}>{metric}</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 14, fontWeight: 500, color, flexShrink: 0 })}>{val}</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 15, fontWeight: 500, color, flexShrink: 0 })}>{val}</span>
               </div>
             ))}
           </div>
@@ -365,7 +368,7 @@ export default function Homepage() {
           <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(24px,3.5vw,36px)", fontWeight: 800, color: E.text, letterSpacing: "-0.04em", lineHeight: 1.1, marginBottom: 12 })}>
             The structural map is live now.
           </h2>
-          <p style={s({ fontFamily: E.sans, fontSize: 14, color: E.body, lineHeight: 1.75, maxWidth: 520 })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 15, color: E.body, lineHeight: 1.75, maxWidth: 520 })}>
             ~5,200 U.S. equities scored across two independently validated dimensions of structural risk. Updated weekly. No narrative. No incentive distortion.
           </p>
         </div>
