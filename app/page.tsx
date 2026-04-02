@@ -168,9 +168,9 @@ export default function Homepage() {
       <div className="stats-grid" style={s({ display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderBottom: `1px solid ${E.bdr}` })}>
         {[
           { val: null, target: 289737, suffix: "", prefix: "",  label: "Historical observations",      note: "2009–2026" },
-          { val: null, target: 17,     suffix: "yr",prefix: "", label: "Backtest period",               note: "3 market regimes" },
-          { val: "+21%", target: 0,    suffix: "", prefix: "",  label: "Factor-adj. L/S alpha",         note: "t = +4.80" },
-          { val: "~2×",  target: 0,   suffix: "", prefix: "",  label: "Very High loss rate",            note: "vs universe, all regimes" },
+          { val: null, target: 17,     suffix: "yr",prefix: "", label: "Backtest period",               note: "Across 3 market cycles" },
+          { val: "+21%", target: 0,    suffix: "", prefix: "",  label: "Factor-adjusted alpha",         note: "t = +4.80" },
+          { val: "~2×",  target: 0,   suffix: "", prefix: "",  label: "Severe loss frequency in flagged stocks vs. universe",            note: "all regimes" },
         ].map(({ val, target, suffix, prefix, label, note }, i) => (
           <div key={label} style={s({ padding: "24px 28px", borderRight: i < 3 ? `1px solid ${E.bdr}` : "none" })}>
             <div style={s({ fontFamily: E.mono, fontSize: 26, fontWeight: 500, color: i >= 2 ? E.gold : E.text, letterSpacing: "-0.03em", marginBottom: 4, lineHeight: 1 })}>
