@@ -171,13 +171,10 @@ export default function Homepage() {
 
             <div style={s({ maxWidth: 480, marginBottom: 36 })}>
               <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
-                Most valuation frameworks assume equity markets price fundamentals while ignoring how narratives misprice what companies have actually demonstrated operationally.
+                Most valuation frameworks assume that equity markets price fundamentals. The structural question — whether a company's price reflects what it has actually demonstrated operationally — rarely gets asked. It should be the first question.
               </p>
               <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.body, marginBottom: 14 })}>
                 That structural risk is measurable. Seventeen years of data say so.
-              </p>
-              <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.78, color: E.gold, fontWeight: 600 })}>
-                We measure it.
               </p>
             </div>
 
