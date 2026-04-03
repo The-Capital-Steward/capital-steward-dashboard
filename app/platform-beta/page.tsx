@@ -572,7 +572,7 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
 }
 
 function MapTooltip({ row, x, y, containerRef }: {
-  row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement>
+  row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement | null>
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({x:0,y:0})
