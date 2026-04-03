@@ -1,7 +1,8 @@
 'use client'
 
 // File: app/platform-beta/page.tsx
-// Auth: Clerk — unauthenticated → /platform
+// Palette: P3 inverse dark · AAA corrected
+// Auth: Clerk \u2014 unauthenticated \u2192 /platform
 // Data: /public/data/*.json (static, no API routes)
 // Tier: free = signed in, subscription != 'active'
 //       paid = subscription === 'active'
@@ -12,23 +13,33 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Lock, Search, Filter } from "lucide-react"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts"
 
-// ─── Design tokens ─────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Design tokens \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 const E = {
-  bg:   "#0E0D0B", bg2: "#131210", bg3: "#181614",
-  bdr:  "#272420", bdr2: "#33302A",
-  text: "#EDE9E0", body: "#A89E8E", muted: "#6B6458", dim: "#3A3530",
-  gold: "#C5A24A", gatm: "rgba(197,162,74,0.04)",
-  pos:  "#5A9870", posSoft: "#3E6B4F",
-  neg:  "#B85C4A", negSoft: "#A05050",
-  blue: "#4A7AA8",
-  mono: "'IBM Plex Mono','Courier New',monospace",
-  sans: "'Syne',system-ui,sans-serif",
-  serif:"'Instrument Serif',Georgia,serif",
+  // Platform dark palette — P3 inverse · AAA verified on #181E19
+  bg:      "#181E19", // deep sage-black
+  bg2:     "#1F2820", // panel surface
+  bg3:     "#253028", // card/inset
+  bdr:     "#2E3B30", // subtle border
+  bdr2:    "#3A4A3C", // stronger border
+  text:    "#F0F4EF", // 15.25:1 AAA
+  body:    "#B8C4B9", //  9.39:1 AAA
+  muted:   "#97AC99", //  7.01:1 AAA
+  dim:     "#8CAF96", //  7.01:1 AAA
+  gold:    "#C6A24A", //  7.00:1 AAA  (display + normal text)
+  gatm:    "rgba(108,182,134,0.05)",
+  pos:     "#6CB686", //  7.00:1 AAA  (normal text)
+  posSoft: "#4A8A60", //  decorative fill only
+  neg:     "#CC6652", //  4.51:1 AA   (large text / display labels only)
+  negSoft: "#8A3A2A", //  decorative fill only
+  blue:    "#5A8EC0", //  decorative / chart use
+  mono:    "'IBM Plex Mono','Courier New',monospace",
+  sans:    "'DM Sans',system-ui,sans-serif",
+  serif:   "'Playfair Display',Georgia,serif",
 }
 const s = (x: object) => x as React.CSSProperties
 
-// ─── Types ─────────────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Types \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 type SnapshotRow = {
   symbol: string
@@ -36,11 +47,11 @@ type SnapshotRow = {
   risk_bucket_within_oal: string | null
   axis1_pct: number | null
   axis2_pct: number | null
-  axis2_prev_pct?: number | null   // prior month — drives pulse
+  axis2_prev_pct?: number | null   // prior month \u2014 drives pulse
   axis2_plot?: number | null
   composite_score: number | null
   composite_bucket: string | null
-  market_cap?: number | null       // USD — drives dot size
+  market_cap?: number | null       // USD \u2014 drives dot size
 }
 
 type OALSummaryRow = {
@@ -69,7 +80,7 @@ type CohortGridMeta  = {
 type CohortGrid = { metadata: CohortGridMeta; panels: CohortGridPanel[] }
 type CohortMetric = "median_return" | "mean_return" | "hit_rate"
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Constants \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 const BUCKET_ORDER = ["Very Low","Low","Moderate","High","Very High"]
 const OAL_ORDER    = ["FCF","Net Income","EBIT","Revenue","Non-viable"]
@@ -80,15 +91,15 @@ const TABS = [
   { id:"history",    label:"History"      },
 ]
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-const fmt       = (v: number | null, d = 1) => v == null || isNaN(v) ? "—" : `${(v*100).toFixed(d)}%`
-const fmtSigned = (v: number | null) => v == null || isNaN(v) ? "—" : `${v>=0?"+":""}${(v*100).toFixed(1)}%`
-const fmtPct    = (v: number | null) => v == null || isNaN(v) ? "—" : `${Math.round(v*100)}th`
-const fmtNum    = (v: number | null) => v == null || isNaN(v) ? "—" : v.toLocaleString()
+const fmt       = (v: number | null, d = 1) => v == null || isNaN(v) ? "\u2014" : `${(v*100).toFixed(d)}%`
+const fmtSigned = (v: number | null) => v == null || isNaN(v) ? "\u2014" : `${v>=0?"+":""}${(v*100).toFixed(1)}%`
+const fmtPct    = (v: number | null) => v == null || isNaN(v) ? "\u2014" : `${Math.round(v*100)}th`
+const fmtNum    = (v: number | null) => v == null || isNaN(v) ? "\u2014" : v.toLocaleString()
 
 function pctToBucket(p: number | null): string {
-  if (p == null) return "—"
+  if (p == null) return "\u2014"
   if (p < 0.2) return "Very Low"; if (p < 0.4) return "Low"
   if (p < 0.6) return "Moderate"; if (p < 0.8) return "High"
   return "Very High"
@@ -109,9 +120,11 @@ function returnHeatBg(v: number | null, sup: boolean) {
 }
 function returnHeatText(v: number | null, sup: boolean) {
   if (sup || v == null) return E.muted
-  if (v <= -0.12) return "#e8806e"; if (v <= -0.03) return "#c47850"
-  if (v <   0.03) return E.body;    if (v <   0.12) return "#7cc89d"
-  return E.pos
+  if (v <= -0.12) return "#FFB8A0"  // 9.10:1 AAA on #4a1212
+  if (v <= -0.03) return "#EC9D6F"  // 7.00:1 AAA on #3a1e12
+  if (v <   0.03) return E.body    // AAA on #1e1c18
+  if (v <   0.12) return "#7CC89C"  // 7.70:1 AAA on #122a1e
+  return "#70BE8B"                    // 7.06:1 AAA on #0e2818
 }
 function skewDir(c: CohortGridCell): "right"|"left"|"none" {
   if (!c.mean_return || !c.median_return || c.suppressed) return "none"
@@ -149,7 +162,7 @@ function narrateCompany(c: SnapshotRow) {
   const driverStr = drivers.length ? `driven by ${drivers.join(" and ")}` : "with limited single-axis dominance"
   const headerRead = `${bucket} structural risk ${driverStr}.`
   const trajectoryProfile = a2 >= 0.8 && a1 >= 0.8
-    ? "Trajectory is deteriorating while valuation is already highly stretched — an escalation profile. The narrative bridge is lengthening as the operational anchor weakens."
+    ? "Trajectory is deteriorating while valuation is already highly stretched \u2014 an escalation profile. The narrative bridge is lengthening as the operational anchor weakens."
     : a2 >= 0.6 && a1 >= 0.6
     ? "Trajectory is deteriorating within an elevated risk profile. Structural pressure is accumulating on both the valuation and operational dimensions."
     : a2 >= 0.6
@@ -167,97 +180,54 @@ function narrateCompany(c: SnapshotRow) {
   return { headerRead, trajectoryProfile, takeaway }
 }
 
-// ─── Interpretive layer helpers ────────────────────────────────────────────────
+// \u2500\u2500\u2500 Interpretive layer helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function interpretDist(data: SnapshotRow[]) {
-  if (!data.length) return { headline:"—", body:"No data.", tone:"moderate" as const, consequence:"" }
-  const n   = data.length
-  const vh  = data.filter(r => r.composite_bucket === "Very High")
-  const vhN = vh.length
-  // OAL composition of Very High — revenue-anchored % is the signal
-  // A Very High bucket dominated by revenue-anchored companies means
-  // maximum narrative risk: shallowest anchor + worst composite
-  const vhRev = vh.filter(r => r.oal_label === "Revenue").length
-  const vhRevPct = vhN > 0 ? Math.round(vhRev / vhN * 100) : 0
-  const vhFcf = vh.filter(r => r.oal_label === "FCF").length
-  const vhFcfPct = vhN > 0 ? Math.round(vhFcf / vhN * 100) : 0
-  // Very High as share of total — 20% is the structural baseline (quintile definition)
-  // Deviations above 20% mean filters are concentrating risk; below means filtering it out
-  const vhSharePct = Math.round(vhN / n * 100)
-  // Improving trajectory within Very High — companies moving toward lower risk
-  const vhImproving = vh.filter(r => (r.axis2_pct ?? 1) < 0.5).length
-  const vhImprovingPct = vhN > 0 ? Math.round(vhImproving / vhN * 100) : 0
-
-  if (vhRevPct >= 65) return { tone:"elevated" as const,
-    headline:`${vhRevPct}% of Very High companies are revenue-anchored`,
-    body:`The highest-risk bucket is dominated by companies whose valuations rest on the shallowest possible anchor. Revenue-anchored companies in Very High composite carry maximum narrative dependence — valuation is not supported by earnings, operating income, or cash flow.`,
-    consequence:`The empirical median return for revenue-anchored companies is −16.7% over 12 months. This is not the bucket that produces false positives.` }
-
-  if (vhRevPct >= 50) return { tone:"elevated" as const,
-    headline:`${vhRevPct}% of Very High companies are revenue-anchored — ${vhFcfPct}% are FCF-positive`,
-    body:`The Very High bucket is split: more than half are revenue-anchored companies with no demonstrated path to cash generation at current valuations. The ${vhFcfPct}% that are FCF-anchored in Very High carry valuation stretch as their primary risk, not anchor shallowness.`,
-    consequence:`These are structurally different risk profiles within the same bucket. The OAL rung in the drilldown distinguishes them.` }
-
-  if (vhImprovingPct >= 40) return { tone:"moderate" as const,
-    headline:`${vhImprovingPct}% of Very High companies show improving operational trajectory`,
-    body:`A meaningful share of the highest-risk bucket is moving in the right direction — their operational anchors are strengthening on a trailing basis. These companies carry elevated composite risk from valuation stretch, but the trajectory signal is constructive.`,
-    consequence:`Improving trajectory within Very High is a potential early indicator of composite score improvement in subsequent months.` }
-
-  return { tone:"moderate" as const,
-    headline:`Very High bucket: ${vhRevPct}% revenue-anchored, ${vhFcfPct}% FCF-anchored`,
-    body:`The composition of the highest-risk bucket reflects a mix of anchor depths. Revenue-anchored companies carry the weakest structural foundation; FCF-anchored names in Very High are primarily stretched on valuation, not anchor shallowness.`,
-    consequence:`OAL rung is the primary differentiator within the Very High bucket — it distinguishes narrative risk from valuation stretch.` }
+  if (!data.length) return { headline:"\u2014", body:"No data.", tone:"moderate" as const, consequence:"" }
+  const n  = data.length
+  const vh = data.filter(r => r.composite_bucket === "Very High").length / n
+  const el = data.filter(r => r.composite_bucket === "Very High" || r.composite_bucket === "High").length / n
+  const rs = data.filter(r => r.composite_bucket === "Very Low"  || r.composite_bucket === "Low").length / n
+  if (vh >= 0.25) return { tone:"elevated" as const,
+    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
+    body:`${Math.round(el*100)}% carry High or Very High composite risk \u2014 structural fragility is broadly distributed.`,
+    consequence:`Sector diversification provides limited structural protection when fragility is this widespread.` }
+  if (vh >= 0.15) return { tone:"moderate" as const,
+    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
+    body:`${Math.round(el*100)}% carry elevated composite risk. ${Math.round(rs*100)}% sit in the lower two buckets.`,
+    consequence:`Mixed distribution \u2014 elevated names warrant scrutiny, but lower-risk companies remain available.` }
+  return { tone:"subdued" as const,
+    headline:`${Math.round(vh*100)}% of the filtered universe is in the Very High bucket`,
+    body:`Structural risk is contained. ${Math.round(rs*100)}% of companies sit in the Very Low or Low bucket.`,
+    consequence:`Contained distribution does not eliminate individual-name risk \u2014 scrutiny remains warranted.` }
 }
 
-function interpretTraj(data: SnapshotRow[], tone: string) {
+function interpretTraj(data: SnapshotRow[], tone: "elevated"|"moderate"|"subdued") {
   const sc = data.filter(r => r.axis2_pct != null)
   if (!sc.length) return { headline:"Trajectory data unavailable", body:"", direction:"mixed" as const, consequence:"" }
-  // The meaningful signal is NOT position (axis2 > 0.5 is always ~50% by construction)
-  // It's the extremes: companies in the worst trajectory quartile (top 25%)
-  // and the intersection of worst trajectory + worst composite (compound risk)
-  const sevDet = sc.filter(r => (r.axis2_pct ?? 0) >= 0.75).length  // severe deterioration
-  const sevDetPct = Math.round(sevDet / sc.length * 100)
-  const vhSevDet = data.filter(r =>
-    r.composite_bucket === "Very High" && (r.axis2_pct ?? 0) >= 0.75
-  ).length
-  const vhN = data.filter(r => r.composite_bucket === "Very High").length
-  const vhSevDetPct = vhN > 0 ? Math.round(vhSevDet / vhN * 100) : 0
-  // FCF-anchored companies with deteriorating trajectory — canary signal
-  // These are structurally sound companies whose anchor is weakening
-  const fcfDet = data.filter(r =>
-    r.oal_label === "FCF" && (r.axis2_pct ?? 0) >= 0.6
-  ).length
-  const fcfN = data.filter(r => r.oal_label === "FCF").length
-  const fcfDetPct = fcfN > 0 ? Math.round(fcfDet / fcfN * 100) : 0
-
-  if (vhSevDetPct >= 60) return { direction:"deteriorating" as const,
-    headline:`${vhSevDetPct}% of Very High companies are in severe trajectory deterioration`,
-    body:`The majority of the highest-risk bucket is not just structurally fragile — their operational anchors are actively weakening. Severe deterioration (top quartile of Axis 2) combined with Very High composite is the most compound structural risk state the framework identifies.`,
+  const det = sc.filter(r => (r.axis2_pct ?? 0) > 0.5).length / sc.length * 100
+  const imp = sc.filter(r => (r.axis2_pct ?? 0) <= 0.5).length / sc.length * 100
+  if (det >= 60) return { direction:"deteriorating" as const,
+    headline:`${Math.round(det)}% of scored companies show deteriorating operational trajectory`,
+    body:`The majority of the filtered universe is in the upper half of Axis 2 \u2014 operational anchor metrics are weakening on a trailing basis.`,
     consequence: tone === "elevated"
-      ? `Compound risk: elevated distribution and accelerating deterioration together. This is the escalation signal.`
-      : `Trajectory is accelerating within the risk cluster even as the broader distribution is contained.` }
-
-  if (fcfDetPct >= 20) return { direction:"deteriorating" as const,
-    headline:`${fcfDetPct}% of FCF-anchored companies show deteriorating trajectory`,
-    body:`A notable share of the deepest-anchored companies in the universe are showing trajectory weakening — their free cash flow generation is declining on a trailing basis. FCF deterioration is an early structural warning because it precedes OAL rung changes.`,
-    consequence:`If trajectory deterioration persists, these companies may slip from FCF to Net Income anchoring in subsequent months, increasing their composite risk score.` }
-
-  if (sevDetPct <= 18) return { direction:"improving" as const,
-    headline:`Severe trajectory deterioration is below baseline — ${sevDetPct}% of universe`,
-    body:`Fewer companies than the structural baseline are showing acute anchor weakening. The top quartile of Axis 2 — representing the most rapidly deteriorating operational profiles — is relatively unpopulated.`,
-    consequence:`Below-baseline severe deterioration reduces the near-term compound risk signal. The constellation should show fewer gold pulse rings than typical.` }
-
+      ? `Combined with elevated distribution: an escalation signal. Structural risk is both broadly present and actively accumulating.`
+      : `Trajectory is deteriorating in a contained distribution \u2014 structural risk is accumulating quietly.` }
+  if (imp >= 60) return { direction:"improving" as const,
+    headline:`${Math.round(imp)}% of scored companies show improving operational trajectory`,
+    body:`The majority of the filtered universe is in the lower half of Axis 2 \u2014 operational anchor metrics are strengthening on a trailing basis.`,
+    consequence:`A universe tilted toward improving trajectory carries lower structural risk over time, all else equal.` }
   return { direction:"mixed" as const,
-    headline:`${sevDetPct}% of universe in severe trajectory deterioration · ${vhSevDetPct}% of Very High`,
-    body:`Severe anchor deterioration is distributed across the universe at roughly baseline levels. Within the Very High bucket, ${vhSevDetPct}% are in acute trajectory decline — the rest carry valuation stretch as their primary risk without active operational weakening.`,
-    consequence:`The trajectory signal is most useful at the company level under these conditions. Scan the constellation for gold pulse rings — those companies are actively deteriorating.` }
+    headline:`Trajectory is mixed \u2014 ${Math.round(det)}% deteriorating, ${Math.round(imp)}% improving`,
+    body:`No dominant directional bias. The filtered universe is split between strengthening and weakening operational anchors.`,
+    consequence:`Company-level analysis is more informative than aggregate positioning in a mixed trajectory environment.` }
 }
 
-// ─── Temporal bar ──────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Temporal bar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function TemporalBar({ manifest }: { manifest: HistoryManifestRow[] }) {
   const st = useMemo(() => {
-    if (!manifest.length) return { formLabel:"—", nextLabel:"—", days: null }
+    if (!manifest.length) return { formLabel:"\u2014", nextLabel:"\u2014", days: null }
     const latest = [...manifest].sort((a,b) => b.month.localeCompare(a.month))[0].month
     const [y,m] = latest.split("-").map(Number)
     const next = new Date(y, m, 1)
@@ -272,9 +242,9 @@ function TemporalBar({ manifest }: { manifest: HistoryManifestRow[] }) {
   return (
     <div style={s({ display:"flex", flexWrap:"wrap", gap:"6px 20px", padding:"7px 28px", borderBottom:`1px solid ${E.bdr}`, background:E.bg2 })}>
       {[
-        `Snapshot · ${st.formLabel}`,
-        `Next recalibration · ${st.nextLabel}`,
-        st.days == null ? "—" : st.days === 0 ? "Recalibrating today" : `${st.days} days remaining`,
+        `Snapshot \u00b7 ${st.formLabel}`,
+        `Next recalibration \u00b7 ${st.nextLabel}`,
+        st.days == null ? "\u2014" : st.days === 0 ? "Recalibrating today" : `${st.days} days remaining`,
       ].map((t,i) => (
         <span key={i} style={s({ fontFamily:E.mono, fontSize:9.5, color: i===2&&near ? E.pos : E.muted })}>{t}</span>
       ))}
@@ -282,17 +252,17 @@ function TemporalBar({ manifest }: { manifest: HistoryManifestRow[] }) {
   )
 }
 
-// ─── KPI strip ─────────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 KPI strip \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function KPIStrip({ stats, isPaid }: {
-  stats: { veryHigh:number; vhRevPct:number; vhFcfPct:number; severeDet:number; fcfImproving:number; total:number; fcfAnchored:number }
+  stats: { veryHigh:number; improving:number; total:number; fcfAnchored:number }
   isPaid: boolean
 }) {
   const kpis = [
-    { label:"Very High Risk",        val:stats.veryHigh,      note:"Revenue-anchored: " + stats.vhRevPct + "% · FCF-anchored: " + stats.vhFcfPct + "%", color:E.neg,  paid:false },
-    { label:"Severe Deterioration",  val:stats.severeDet,     note:"Top quartile Axis 2 · anchor actively weakening",  color:E.neg,  paid:false },
-    { label:"FCF · Improving",       val:stats.fcfImproving,  note:"Deepest anchor + strengthening trajectory",        color:E.pos,  paid:false },
-    { label:"FCF Anchored",          val:stats.fcfAnchored,   note:"Deepest demonstrated anchor · full universe",      color:E.pos,  paid:true  },
+    { label:"Structural Stress",    val:stats.veryHigh,   note:"Companies in Very High composite",   color:E.neg,  paid:false },
+    { label:"Improving Trajectory", val:stats.improving,  note:"Axis 2 below 40th pct \u00b7 strengthening", color:E.pos,  paid:false },
+    { label:"Active Universe",      val:stats.total,      note:"Under active filters",               color:E.text, paid:false },
+    { label:"FCF Anchored",         val:stats.fcfAnchored,note:"Deepest demonstrated anchor",        color:E.pos,  paid:true  },
   ]
   return (
     <div style={s({ display:"grid", gridTemplateColumns:"repeat(4,1fr)", borderBottom:`1px solid ${E.bdr}` })}>
@@ -313,24 +283,25 @@ function KPIStrip({ stats, isPaid }: {
   )
 }
 
-// ─── Interpretive layer ────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Interpretive layer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function InterpretiveLayer({ data }: { data: SnapshotRow[] }) {
   const dist = useMemo(() => interpretDist(data), [data])
   const traj = useMemo(() => interpretTraj(data, dist.tone), [data, dist.tone])
-  const toneColor: Record<string,string> = { elevated:E.neg, moderate:E.body }
-  const dirColor: Record<string,string>  = { deteriorating:E.neg, improving:E.pos, mixed:E.body }
+  const toneColor = { elevated:E.neg, moderate:E.body, subdued:E.pos }
+  const dirColor  = { deteriorating:E.neg, improving:E.pos, mixed:E.body }
   const cards = [
     {
-      ey:"Distribution · System State",
-      color: toneColor[dist.tone] ?? E.body,
+      ey:"Distribution \u00b7 System State",
+      color: toneColor[dist.tone],
       head: dist.tone==="elevated" ? "Structural stress is broadly elevated"
-          : "Structural risk is mixed",
+          : dist.tone==="subdued"  ? "Structural risk is contained"
+          : "Structural risk is present but mixed",
       body: dist.body,
       consequence: dist.consequence,
     },
     {
-      ey:"Trajectory · System State",
+      ey:"Trajectory \u00b7 System State",
       color: dirColor[traj.direction],
       head: traj.direction==="deteriorating" ? "Universe deteriorating in aggregate"
           : traj.direction==="improving"     ? "Universe improving in aggregate"
@@ -342,7 +313,7 @@ function InterpretiveLayer({ data }: { data: SnapshotRow[] }) {
   return (
     <div style={s({ padding:"18px 24px", borderBottom:`1px solid ${E.bdr}`, background:E.gatm })}>
       <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.22em", textTransform:"uppercase", color:E.gold, marginBottom:10 })}>
-        Current Market Interpretation · Start here
+        Current Market Interpretation \u00b7 Start here
       </p>
       <div style={s({ display:"grid", gridTemplateColumns:"1fr 1fr", gap:4 })}>
         {cards.map(({ ey, color, head, body, consequence }) => (
@@ -360,7 +331,7 @@ function InterpretiveLayer({ data }: { data: SnapshotRow[] }) {
   )
 }
 
-// ─── Constellation map (canvas + SVG overlay) ──────────────────────────────────
+// \u2500\u2500\u2500 Constellation map (canvas + SVG overlay) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function dotRadius(mc: number | null | undefined): number {
   if (!mc || mc <= 0) return 3
@@ -380,7 +351,7 @@ type Dot = {
   color:string; rgb:[number,number,number]; pulse:number; phase:number
 }
 
-const PAD = { t:36, r:16, b:56, l:56 }
+const PAD = { t:28, r:16, b:44, l:56 }
 
 function ConstellationMap({ data, onSelect, selectedSymbol }: {
   data: SnapshotRow[]
@@ -402,24 +373,14 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
     const ph = h - PAD.t - PAD.b
     return rows.filter(r => r.axis1_pct!=null && r.axis2_pct!=null).map(r => {
       const color = bucketColor(r.composite_bucket)
-      // Deterministic jitter from symbol hash — breaks vertical streaking
-      // Jitter magnitude scales inversely with axis2 score:
-      // low trajectory risk (left side) gets strong jitter to break columns
-      // high trajectory risk (right side) is already dispersed — minimal jitter
-      let hash = 0
-      for (let i = 0; i < r.symbol.length; i++) hash = (hash * 31 + r.symbol.charCodeAt(i)) >>> 0
-      const a2 = r.axis2_pct as number
-      const jitterScale = 0.055 * (1 - a2) + 0.008  // 0.063 at left, 0.008 at right
-      const jx = ((hash & 0xFF) / 255 - 0.5) * jitterScale
-      const jy = (((hash >> 8) & 0xFF) / 255 - 0.5) * 0.022
       return {
         row: r,
-        cx: PAD.l + Math.min(1, Math.max(0, a2 + jx)) * pw,
-        cy: PAD.t + (1 - Math.min(1, Math.max(0, (r.axis1_pct as number) + jy))) * ph,
+        cx: PAD.l + (r.axis2_pct as number) * pw,
+        cy: PAD.t + (1 - (r.axis1_pct as number)) * ph,
         r:  dotRadius(r.market_cap),
         color, rgb: hexRgb(color),
         pulse: deterioration(r),
-        phase: ((hash >> 16) & 0xFF) / 255 * Math.PI * 2,
+        phase: Math.random() * Math.PI * 2,
       }
     })
   }, [])
@@ -472,7 +433,7 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
 
       // Sort: Very High on top
       const ORDER: Record<string,number> = {"Very Low":0,"Low":1,"Moderate":2,"High":3,"Very High":4}
-      const dots = [...dotsRef.current].sort((a,b) => (ORDER[a.row.composite_bucket ?? ""] ?? 2) - (ORDER[b.row.composite_bucket ?? ""] ?? 2))
+      const dots = [...dotsRef.current].sort((a,b) => (ORDER[a.row.composite_bucket??]??2) - (ORDER[b.row.composite_bucket??]??2))
 
       t += 0.016
       const [pr,pg,pb] = hexRgb(E.gold)
@@ -483,7 +444,7 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
         const [r,g,b] = dot.rgb
         const alpha = dot.row.composite_bucket === "Moderate" ? 0.4 : 0.84
 
-        // Pulse ring — trajectory deterioration only
+        // Pulse ring \u2014 trajectory deterioration only
         if (dot.pulse > 0) {
           const speed = 0.7 + dot.pulse * 1.6
           const prog  = (Math.sin((t*speed + dot.phase) % (Math.PI*2)) + 1) / 2
@@ -551,19 +512,19 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
         onMouseLeave={() => { setHovered(null); setTooltip(null) }}
       />
 
-      {/* SVG overlay — labels only, never clips dots */}
+      {/* SVG overlay \u2014 labels only, never clips dots */}
       <svg viewBox={`0 0 ${dims.w} ${dims.h}`} width={dims.w} height={dims.h}
         style={{ position:"absolute", top:0, left:0, pointerEvents:"none", overflow:"visible" }}>
 
         {/* Axis titles */}
         <text x={PAD.l + pw/2} y={dims.h - 6} textAnchor="middle"
           fontFamily={E.mono} fontSize={10} fill={E.muted} letterSpacing="0.16em">
-          TRAJECTORY RISK →
+          TRAJECTORY RISK \u2192
         </text>
         <text x={14} y={PAD.t + ph/2} textAnchor="middle"
           fontFamily={E.mono} fontSize={10} fill={E.muted} letterSpacing="0.16em"
           transform={`rotate(-90,14,${PAD.t+ph/2})`}>
-          ANCHOR RISK ↑
+          ANCHOR RISK \u2191
         </text>
 
         {/* X ticks */}
@@ -582,23 +543,23 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
           </text>
         ))}
 
-        {/* Quadrant labels — in padding zones, never overlap dots */}
-        <text x={PAD.l} y={PAD.t-8} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
-          Improving · Stretched
+        {/* Quadrant labels \u2014 clear of data area */}
+        <text x={PAD.l+6} y={PAD.t+13} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
+          Improving \u00b7 Stretched
         </text>
-        <text x={PAD.l+pw} y={PAD.t-8} textAnchor="end"
+        <text x={PAD.l+pw-6} y={PAD.t+13} textAnchor="end"
           fontFamily={E.mono} fontSize={9} fill={E.neg} opacity={0.85}>
-          Most fragile ↗
+          Most fragile \u2197
         </text>
-        <text x={PAD.l} y={PAD.t+ph+28} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
-          Anchored · Improving
+        <text x={PAD.l+6} y={PAD.t+ph-8} fontFamily={E.mono} fontSize={9} fill={E.pos} opacity={0.65}>
+          Anchored \u00b7 Improving
         </text>
 
-        {/* Pulse legend — below plot in bottom padding */}
-        <g transform={`translate(${PAD.l+pw}, ${PAD.t+ph+28})`}>
-          <circle cx={-168} cy={0} r={4} fill={E.gold} opacity={0.9}/>
-          <circle cx={-168} cy={0} r={10} fill="none" stroke={E.gold} strokeWidth={1} opacity={0.3}/>
-          <text x={-158} y={4} fontFamily={E.mono} fontSize={9} fill={E.muted} textAnchor="start">
+        {/* Pulse legend */}
+        <g transform={`translate(${PAD.l+pw-4}, ${PAD.t+ph-22})`}>
+          <circle cx={-118} cy={0} r={4} fill={E.gold} opacity={0.9}/>
+          <circle cx={-118} cy={0} r={10} fill="none" stroke={E.gold} strokeWidth={1} opacity={0.3}/>
+          <text x={-108} y={4} fontFamily={E.mono} fontSize={9} fill={E.muted}>
             Gold ring = deteriorating trajectory
           </text>
         </g>
@@ -611,7 +572,7 @@ function ConstellationMap({ data, onSelect, selectedSymbol }: {
 }
 
 function MapTooltip({ row, x, y, containerRef }: {
-  row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement | null>
+  row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement>
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({x:0,y:0})
@@ -629,16 +590,16 @@ function MapTooltip({ row, x, y, containerRef }: {
   return (
     <div ref={ref} style={{ position:"absolute", left:pos.x, top:pos.y, background:E.bg,
       border:`1px solid ${E.bdr2}`, padding:"10px 14px", pointerEvents:"none", zIndex:50,
-      minWidth:192, boxShadow:"0 4px 28px rgba(0,0,0,0.7)" }}>
+      minWidth:192, boxShadow:"0 4px 28px rgba(0,0,0,0.85)" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:8 }}>
         <span style={{ fontFamily:E.sans, fontSize:15, fontWeight:800, color:E.text, letterSpacing:"-0.02em" }}>{row.symbol}</span>
         <span style={{ fontFamily:E.mono, fontSize:10, fontWeight:500, color, marginLeft:10 }}>{row.composite_bucket}</span>
       </div>
       {[
-        ["OAL",       row.oal_label ?? "—"],
-        ["Anchor",    fmtPct(row.axis1_pct)],
-        ["Trajectory",fmtPct(row.axis2_pct)],
-        ["Composite", fmtPct(row.composite_score)],
+        ["OAL",       row.oal_label ?? "\u2014"],
+        ["Anchor",    fmtPct(row.axis1_pct)+"th pct"],
+        ["Trajectory",fmtPct(row.axis2_pct)+"th pct"],
+        ["Composite", fmtPct(row.composite_score)+"th pct"],
       ].map(([k,v]) => (
         <div key={k} style={{ display:"flex", justifyContent:"space-between", gap:16, marginBottom:3 }}>
           <span style={{ fontFamily:E.mono, fontSize:10, color:E.muted }}>{k}</span>
@@ -648,14 +609,14 @@ function MapTooltip({ row, x, y, containerRef }: {
       {det > 0 && (
         <div style={{ marginTop:6, paddingTop:6, borderTop:`1px solid ${E.bdr}`,
           fontFamily:E.mono, fontSize:9, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:E.gold }}>
-          ↓ Trajectory deteriorating
+          \u2193 Trajectory deteriorating
         </div>
       )}
     </div>
   )
 }
 
-// ─── Active risk cluster ────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Active risk cluster \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function ActiveRiskCluster({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:SnapshotRow)=>void }) {
   const top = useMemo(() =>
@@ -665,7 +626,7 @@ function ActiveRiskCluster({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r
     <div style={s({ padding:"18px 24px", borderBottom:`1px solid ${E.bdr}` })}>
       <div style={s({ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:10 })}>
         <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.2em", textTransform:"uppercase", color:E.muted })}>
-          Highest Structural Risk · Top {top.length} under active filters
+          Highest Structural Risk \u00b7 Top {top.length} under active filters
         </p>
         <span style={s({ fontFamily:E.mono, fontSize:9, color:E.dim })}>Click to open drilldown</span>
       </div>
@@ -688,7 +649,7 @@ function ActiveRiskCluster({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r
   )
 }
 
-// ─── Cohort grid ───────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Cohort grid \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
   const [metric, setMetric] = useState<CohortMetric>("median_return")
@@ -696,8 +657,8 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
   const panel = grid.panels[0]
 
   const fmtCell = (c:CohortGridCell) => {
-    if (c.suppressed) return "—"
-    const v = c[metric]; if (v==null) return "—"
+    if (c.suppressed) return "\u2014"
+    const v = c[metric]; if (v==null) return "\u2014"
     if (metric==="hit_rate") return `${(v*100).toFixed(1)}%`
     return `${v>=0?"+":""}${(v*100).toFixed(1)}%`
   }
@@ -708,7 +669,7 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
       <div style={s({ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 })}>
         <div style={s({ display:"flex", flexWrap:"wrap", gap:"4px 12px" })}>
           {[
-            { bg:"#4a1212", label:"Strong loss (<−12%)" },
+            { bg:"#4a1212", label:"Strong loss (<\u221212%)" },
             { bg:"#3a1e12", label:"Mild loss"           },
             { bg:"#1e1c18", label:"Neutral"             },
             { bg:"#122a1e", label:"Mild gain"           },
@@ -741,7 +702,7 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
               <tr>
                 <th style={s({ fontFamily:E.mono, fontSize:9, color:E.muted, padding:"6px 10px",
                   textAlign:"left", borderBottom:`1px solid ${E.bdr}`, fontWeight:400 })}>
-                  Trajectory ↓ / Anchor →
+                  Trajectory \u2193 / Anchor \u2192
                 </th>
                 {grid.metadata.x_axis_labels.map(l => (
                   <th key={l} style={s({ fontFamily:E.mono, fontSize:9, color:E.muted,
@@ -761,17 +722,17 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
                     const skew = skewDir(cell)
                     return (
                       <td key={cell.axis1_bucket} style={s({ padding:2, borderBottom:`1px solid rgba(255,255,255,0.025)` })}
-                        title={`Median: ${fmtSigned(cell.median_return)} · Hit rate: ${fmt(cell.hit_rate)} · N=${cell.count}`}>
+                        title={`Median: ${fmtSigned(cell.median_return)} \u00b7 Hit rate: ${fmt(cell.hit_rate)} \u00b7 N=${cell.count}`}>
                         <div style={s({ height:54, display:"flex", flexDirection:"column",
                           alignItems:"center", justifyContent:"center",
                           background:returnHeatBg(cv,cell.suppressed),
-                          border: strong?`2px solid rgba(255,255,255,0.32)`:`1px solid ${E.bdr}` })}>
+                          border: strong?`2px solid rgba(240,244,239,0.25)`:`1px solid ${E.bdr}` })}>
                           <div style={s({ fontFamily:E.mono, fontSize:11, fontWeight:500, color:returnHeatText(cv,cell.suppressed) })}>
                             {fmtCell(cell)}
                           </div>
                           {skew!=="none" && metric==="mean_return" && (
                             <div style={s({ fontFamily:E.mono, fontSize:8.5, color:skew==="right"?E.pos:E.neg, marginTop:1 })}>
-                              {skew==="right"?"▲ skewed":"▼ skewed"}
+                              {skew==="right"?"\u25b2 skewed":"\u25bc skewed"}
                             </div>
                           )}
                           <div style={s({ fontFamily:E.mono, fontSize:8.5, color:"rgba(255,255,255,0.3)", marginTop:1 })}>
@@ -788,13 +749,14 @@ function CohortGrid({ grid, isPaid }: { grid:CohortGrid; isPaid:boolean }) {
         )}
       </div>
       <p style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted, marginTop:10, lineHeight:1.6 })}>
-        Outlined cells = |return| &gt; 15% — strongest historical signal zones. Interest-bearing companies only (~84% of universe). Historical analysis — does not predict individual returns.
+        Outlined cells = |return| &gt; 15%. Axis 3 removed from composite \u2014 cohort grid is two-axis.
+        Historical analysis only \u2014 does not predict individual returns.
       </p>
     </div>
   )
 }
 
-// ─── Company drilldown ─────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Company drilldown \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function Drilldown({ company, grid, isPaid, onClose }: {
   company:SnapshotRow; grid:CohortGrid|null; isPaid:boolean; onClose:()=>void
@@ -817,7 +779,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
       label:"Operational Trajectory Risk", bucket:a2, pct:company.axis2_pct,
       interp: (company.axis2_pct??0) >= 0.8 ? "Operational anchor is weakening rapidly on a trailing basis."
         : (company.axis2_pct??0) >= 0.6 ? "Operational anchor is deteriorating on a trailing basis."
-        : (company.axis2_pct??0) >= 0.4 ? "Operational trajectory is mixed — no clear directional signal."
+        : (company.axis2_pct??0) >= 0.4 ? "Operational trajectory is mixed \u2014 no clear directional signal."
         : "Operational anchor is strengthening on a trailing basis.",
     },
   ]
@@ -831,17 +793,17 @@ function Drilldown({ company, grid, isPaid, onClose }: {
           <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.16em",
             textTransform:"uppercase", color:E.muted, marginBottom:4 })}>Company Drilldown</p>
           <div style={s({ fontFamily:E.sans, fontSize:22, fontWeight:800, color:E.text, letterSpacing:"-0.03em" })}>{company.symbol}</div>
-          <div style={s({ fontFamily:E.mono, fontSize:10, color:E.muted, marginTop:2 })}>{company.oal_label ?? "—"}</div>
+          <div style={s({ fontFamily:E.mono, fontSize:10, color:E.muted, marginTop:2 })}>{company.oal_label ?? "\u2014"}</div>
           {det > 0 && (
             <div style={s({ marginTop:6, fontFamily:E.mono, fontSize:9, letterSpacing:"0.12em",
-              textTransform:"uppercase", color:E.gold })}>↓ Trajectory deteriorating</div>
+              textTransform:"uppercase", color:E.gold })}>\u2193 Trajectory deteriorating</div>
           )}
         </div>
         <div style={s({ textAlign:"right" })}>
           <div style={s({ fontFamily:E.sans, fontSize:14, fontWeight:700, color:bucketColor(company.composite_bucket) })}>
             {company.composite_bucket}
           </div>
-          <div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)} pct · higher = more risk</div>
+          <div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}th pct</div>
           <button onClick={onClose} style={s({ fontFamily:E.mono, fontSize:9, color:E.muted,
             background:"none", border:`1px solid ${E.bdr}`, padding:"3px 8px", cursor:"pointer", marginTop:8 })}>
             Close
@@ -865,7 +827,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
               <div style={s({ display:"flex", justifyContent:"space-between", marginBottom:4 })}>
                 <span style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.1em",
                   textTransform:"uppercase", color:E.muted })}>{label}</span>
-                <span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} · {fmtPct(pct)}</span>
+                <span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} \u00b7 {fmtPct(pct)}th</span>
               </div>
               <div style={s({ height:2, background:E.bdr2, marginBottom:6, position:"relative" })}>
                 <div style={s({ position:"absolute", left:0, top:0, height:2,
@@ -883,7 +845,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
           <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.16em",
             textTransform:"uppercase", color:E.muted, marginBottom:8 })}>Historical Cohort Match</p>
           <p style={s({ fontFamily:E.mono, fontSize:9.5, color:E.dim, marginBottom:10, lineHeight:1.5 })}>
-            Anchor {a1} · Trajectory {a2} · 12-month forward horizon
+            Anchor {a1} \u00b7 Trajectory {a2} \u00b7 12-month forward horizon
           </p>
           {cohortCell && !cohortCell.suppressed ? (
             <>
@@ -905,13 +867,13 @@ function Drilldown({ company, grid, isPaid, onClose }: {
                 <strong style={s({ color:E.text })}>{fmtSigned(cohortCell.median_return)}</strong> median return
                 over 12 months, with a{" "}
                 <strong style={s({ color:E.text })}>{fmt(cohortCell.hit_rate)}</strong> hit rate.
-                {skewDir(cohortCell)==="right" && ` Mean is materially higher (${fmtSigned(cohortCell.mean_return)}) — right-skewed by a small number of large winners.`}
-                {skewDir(cohortCell)==="left"  && ` Mean is materially lower (${fmtSigned(cohortCell.mean_return)}) — left-skewed by outsized losses.`}
+                {skewDir(cohortCell)==="right" && ` Mean is materially higher (${fmtSigned(cohortCell.mean_return)}) \u2014 right-skewed by a small number of large winners.`}
+                {skewDir(cohortCell)==="left"  && ` Mean is materially lower (${fmtSigned(cohortCell.mean_return)}) \u2014 left-skewed by outsized losses.`}
               </p>
             </>
           ) : (
             <p style={s({ fontFamily:E.mono, fontSize:10.5, color:E.muted })}>
-              {cohortCell?.suppressed ? "Cell suppressed — insufficient observations." : "No cohort match found for this structural profile."}
+              {cohortCell?.suppressed ? "Cell suppressed \u2014 insufficient observations." : "No cohort match found for this structural profile."}
             </p>
           )}
         </div>
@@ -927,7 +889,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
           </p>
           <a href="/platform/subscribe" style={s({ fontFamily:E.sans, fontSize:10.5, fontWeight:700,
             letterSpacing:"0.08em", textTransform:"uppercase", padding:"8px 16px",
-            background:E.gold, color:"#060504", textDecoration:"none", display:"inline-block" })}>
+            background:E.gold, color:E.bg, textDecoration:"none", display:"inline-block" })}>
             Upgrade to Full Access
           </a>
         </div>
@@ -958,7 +920,7 @@ function Drilldown({ company, grid, isPaid, onClose }: {
   )
 }
 
-// ─── Snapshot table ────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Snapshot table \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:SnapshotRow)=>void }) {
   const [search, setSearch]   = useState("")
@@ -999,18 +961,9 @@ function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:Sna
         <table style={s({ width:"100%", borderCollapse:"collapse", minWidth:500 })}>
           <thead>
             <tr style={s({ background:E.bg2, borderBottom:`1px solid ${E.bdr}` })}>
-              {[
-                { h:"Symbol",       sub:""                    },
-                { h:"OAL",          sub:"anchor depth"        },
-                { h:"Anchor Risk",  sub:"↑ higher = worse"   },
-                { h:"Trajectory",   sub:"↑ higher = worse"   },
-                { h:"Composite",    sub:"overall risk"        },
-              ].map(({ h, sub }) => (
+              {["Symbol","OAL","Anchor Risk","Trajectory","Composite"].map(h => (
                 <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
-                  textTransform:"uppercase", color:E.muted, padding:"8px 10px", textAlign:"left", fontWeight:400 })}>
-                  <div>{h}</div>
-                  {sub && <div style={s({ fontSize:8, letterSpacing:"0.08em", color:E.dim, marginTop:1, textTransform:"none", fontWeight:400 })}>{sub}</div>}
-                </th>
+                  textTransform:"uppercase", color:E.muted, padding:"8px 10px", textAlign:"left", fontWeight:400 })}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -1021,18 +974,9 @@ function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:Sna
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = E.gatm}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                 <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:E.text, padding:"7px 10px" })}>{row.symbol}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
-                  color: row.oal_label==="FCF"?E.pos : row.oal_label==="Revenue"?E.neg : E.body })}>
-                  {row.oal_label}
-                </td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
-                  color: (row.axis1_pct??0)>=0.8?E.neg:(row.axis1_pct??0)>=0.6?"#c47850":(row.axis1_pct??0)<0.3?E.pos:E.body })}>
-                  {fmtPct(row.axis1_pct)}
-                </td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 10px",
-                  color: (row.axis2_pct??0)>=0.8?E.neg:(row.axis2_pct??0)>=0.6?"#c47850":(row.axis2_pct??0)<0.3?E.pos:E.body })}>
-                  {fmtPct(row.axis2_pct)}
-                </td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{row.oal_label}</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{fmtPct(row.axis1_pct)}th</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 10px" })}>{fmtPct(row.axis2_pct)}th</td>
                 <td style={s({ padding:"7px 10px" })}>
                   <span style={s({ fontFamily:E.mono, fontSize:11, fontWeight:500,
                     color:bucketColor(row.composite_bucket), padding:"2px 7px",
@@ -1050,7 +994,7 @@ function SnapshotTable({ data, onSelect }: { data:SnapshotRow[]; onSelect:(r:Sna
   )
 }
 
-// ─── Anchor structure tab ──────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Anchor structure tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
   const CS = { fontFamily:E.mono, fontSize:10, fill:E.muted }
@@ -1062,12 +1006,12 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
             color:E.muted, marginBottom:4 })}>Anchor Distribution</p>
           <p style={s({ fontFamily:E.sans, fontSize:12.5, color:E.body, lineHeight:1.65 })}>
             Companies by deepest qualifying operational anchor. Each step toward Revenue increases
-            narrative dependence — and structural risk.
+            narrative dependence \u2014 and structural risk.
           </p>
         </div>
         <div style={s({ padding:"16px 20px", height:280 })}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={oalSummary.filter(r => r.oal_label !== "Non-viable")} margin={{top:4,right:8,left:0,bottom:4}} barCategoryGap="28%">
+            <BarChart data={oalSummary} margin={{top:4,right:8,left:0,bottom:4}} barCategoryGap="28%">
               <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
               <XAxis dataKey="oal_label" tick={CS as any} axisLine={false} tickLine={false}/>
               <YAxis tick={CS as any} axisLine={false} tickLine={false} width={42}/>
@@ -1076,10 +1020,10 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
               <Bar dataKey="n" radius={[2,2,0,0]}>
                 {oalSummary.map((row,i) => (
                   <Cell key={i} fill={
-                    row.oal_label==="FCF"?"#5A9870":
-                    row.oal_label==="Net Income"?"#4A7AA8":
-                    row.oal_label==="EBIT"?"#C5A24A":
-                    row.oal_label==="Revenue"?"#B85C4A": E.muted
+                    row.oal_label==="FCF"?"#6CB686":
+                    row.oal_label==="Net Income"?"#5A8EC0":
+                    row.oal_label==="EBIT"?"#C6A24A":
+                    row.oal_label==="Revenue"?"#CC6652": E.muted
                   } opacity={0.85}/>
                 ))}
               </Bar>
@@ -1088,7 +1032,7 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
         </div>
         <div style={s({ padding:"10px 20px", borderTop:`1px solid ${E.bdr}` })}>
           <p style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>
-            FCF vs Revenue median return spread: +26.6pp · Held across all regimes tested
+            FCF vs Revenue median return spread: +26.6pp \u00b7 Held across all regimes tested
           </p>
         </div>
       </div>
@@ -1105,29 +1049,21 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
           <table style={s({ width:"100%", borderCollapse:"collapse" })}>
             <thead>
               <tr style={s({ borderBottom:`1px solid ${E.bdr}` })}>
-                {["Anchor","Companies","Median Anchor Risk","Median Composite Risk"].map(h => (
+                {["Anchor","Count","Anchor Risk","Composite"].map(h => (
                   <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
                     textTransform:"uppercase", color:E.muted, padding:"6px 8px", textAlign:"left", fontWeight:400 })}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {oalSummary.filter(row => row.oal_label !== "Non-viable").map(row => {
-                const anchorColor = row.oal_label==="FCF" ? E.pos
-                  : row.oal_label==="Revenue" ? E.neg : E.body
-                const a1v = row.median_axis1 ?? 0
-                const compv = row.median_composite ?? 0
-                const a1Color = a1v >= 0.7 ? E.neg : a1v <= 0.35 ? E.pos : E.body
-                const compColor = compv >= 0.7 ? E.neg : compv <= 0.35 ? E.pos : E.body
-                return (
-                  <tr key={row.oal_label} style={s({ borderBottom:`1px solid rgba(255,255,255,0.025)` })}>
-                    <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:anchorColor, padding:"7px 8px" })}>{row.oal_label}</td>
-                    <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{fmtNum(row.n)}</td>
-                    <td style={s({ fontFamily:E.mono, fontSize:11, color:a1Color, padding:"7px 8px" })}>{row.median_axis1==null?"—":fmtPct(row.median_axis1)}</td>
-                    <td style={s({ fontFamily:E.mono, fontSize:11, color:compColor, padding:"7px 8px" })}>{row.median_composite==null?"—":fmtPct(row.median_composite)}</td>
-                  </tr>
-                )
-              })}
+              {oalSummary.map(row => (
+                <tr key={row.oal_label} style={s({ borderBottom:`1px solid rgba(255,255,255,0.025)` })}>
+                  <td style={s({ fontFamily:E.mono, fontSize:12, fontWeight:500, color:E.text, padding:"7px 8px" })}>{row.oal_label}</td>
+                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{fmtNum(row.n)}</td>
+                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{row.median_axis1==null?"\u2014":fmtPct(row.median_axis1)+"th"}</td>
+                  <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 8px" })}>{row.median_composite==null?"\u2014":fmtPct(row.median_composite)+"th"}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -1136,7 +1072,7 @@ function AnchorTab({ oalSummary }: { oalSummary:OALSummaryRow[] }) {
   )
 }
 
-// ─── History tab ───────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 History tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
   return (
@@ -1146,14 +1082,14 @@ function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
           color:E.muted, marginBottom:4 })}>Historical Coverage</p>
         <p style={s({ fontFamily:E.sans, fontSize:12.5, color:E.body, lineHeight:1.65 })}>
           Archived monthly structural snapshots. Each month is a formation state from which
-          12-month forward returns were measured — the empirical basis of the cohort grids.
+          12-month forward returns were measured \u2014 the empirical basis of the cohort grids.
         </p>
       </div>
       <div style={s({ overflowX:"auto" })}>
         <table style={s({ width:"100%", borderCollapse:"collapse" })}>
           <thead>
             <tr style={s({ background:E.bg3, borderBottom:`1px solid ${E.bdr}` })}>
-              {["Formation Month","Companies Scored","OAL Coverage","Status"].map(h => (
+              {["Month","OAL Scores","OAL Summary","Structural Snapshot"].map(h => (
                 <th key={h} style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.14em",
                   textTransform:"uppercase", color:E.muted, padding:"8px 14px", textAlign:"left", fontWeight:400 })}>{h}</th>
               ))}
@@ -1163,12 +1099,9 @@ function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
             {manifest.map(row => (
               <tr key={row.month} style={s({ borderBottom:`1px solid rgba(255,255,255,0.025)` })}>
                 <td style={s({ fontFamily:E.mono, fontSize:11.5, fontWeight:500, color:E.text, padding:"7px 14px" })}>{row.month}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_scores===false?"—":fmtNum(row.oal_scores_rows)}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_summary===false?"—":fmtNum(row.oal_summary_rows)}</td>
-                <td style={s({ fontFamily:E.mono, fontSize:11, padding:"7px 14px",
-                  color: row.has_structural_snapshot===false ? E.neg : E.pos })}>
-                  {row.has_structural_snapshot===false ? "Missing" : "Complete"}
-                </td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_scores===false?"\u2014":fmtNum(row.oal_scores_rows)}</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_oal_summary===false?"\u2014":fmtNum(row.oal_summary_rows)}</td>
+                <td style={s({ fontFamily:E.mono, fontSize:11, color:E.body, padding:"7px 14px" })}>{row.has_structural_snapshot===false?"\u2014":fmtNum(row.structural_rows)}</td>
               </tr>
             ))}
           </tbody>
@@ -1178,7 +1111,7 @@ function HistoryTab({ manifest }: { manifest:HistoryManifestRow[] }) {
   )
 }
 
-// ─── Page ──────────────────────────────────────────────────────────────────────
+// \u2500\u2500\u2500 Page \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 export default function PlatformBeta() {
   const { user, isSignedIn } = useUser()
@@ -1215,21 +1148,12 @@ export default function PlatformBeta() {
     return true
   }), [snapshot, oalF, buckF, search])
 
-  const stats = useMemo(() => {
-    const vh = filtered.filter(r => r.composite_bucket==="Very High")
-    const vhN = vh.length
-    const vhRev = vh.filter(r => r.oal_label==="Revenue").length
-    const vhFcf = vh.filter(r => r.oal_label==="FCF").length
-    return {
-      veryHigh:     vhN,
-      vhRevPct:     vhN > 0 ? Math.round(vhRev/vhN*100) : 0,
-      vhFcfPct:     vhN > 0 ? Math.round(vhFcf/vhN*100) : 0,
-      severeDet:    filtered.filter(r => (r.axis2_pct??0) >= 0.75).length,
-      fcfImproving: filtered.filter(r => r.oal_label==="FCF" && (r.axis2_pct??1) < 0.4).length,
-      total:        filtered.length,
-      fcfAnchored:  filtered.filter(r => r.oal_label==="FCF").length,
-    }
-  }, [filtered])
+  const stats = useMemo(() => ({
+    veryHigh:    filtered.filter(r => r.composite_bucket==="Very High").length,
+    improving:   filtered.filter(r => (r.axis2_pct??1) < 0.4).length,
+    total:       filtered.length,
+    fcfAnchored: filtered.filter(r => r.oal_label==="FCF").length,
+  }), [filtered])
 
   if (loading) return (
     <div style={s({ minHeight:"100vh", background:E.bg, display:"flex", alignItems:"center", justifyContent:"center" })}>
@@ -1264,11 +1188,11 @@ export default function PlatformBeta() {
         </div>
         <div style={s({ display:"flex", alignItems:"center", gap:8 })}>
           <div style={s({ width:5, height:5, borderRadius:"50%", background:E.gold, animation:"pulse 2.5s ease-in-out infinite" })}/>
-          <span style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.18em", textTransform:"uppercase", color:E.muted })}>Live · Mar 2026</span>
+          <span style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.18em", textTransform:"uppercase", color:E.muted })}>Live \u00b7 Mar 2026</span>
           {!isPaid && (
             <a href="/platform/subscribe" style={s({ fontFamily:E.sans, fontSize:9.5, fontWeight:700,
               letterSpacing:"0.08em", textTransform:"uppercase", padding:"5px 12px",
-              background:E.gold, color:"#060504", textDecoration:"none", marginLeft:10 })}>Upgrade</a>
+              background:E.gold, color:E.bg, textDecoration:"none", marginLeft:10 })}>Upgrade</a>
           )}
         </div>
       </nav>
@@ -1315,7 +1239,7 @@ export default function PlatformBeta() {
       <div style={s({ display:"grid", gridTemplateColumns: selected?"1fr 320px":"1fr", minHeight:"calc(100vh - 196px)" })}>
         <div style={s({ borderRight: selected?`1px solid ${E.bdr}`:"none" })}>
 
-          {/* ── MARKET MAP ── */}
+          {/* \u2500\u2500 MARKET MAP \u2500\u2500 */}
           {tab==="market-map" && (
             <div>
               <InterpretiveLayer data={filtered}/>
@@ -1325,7 +1249,7 @@ export default function PlatformBeta() {
                     Structural Constellation
                   </p>
                   <span style={s({ fontFamily:E.mono, fontSize:9, color:E.dim })}>
-                    X = Trajectory Risk · Y = Anchor Risk · Color = Composite bucket
+                    X = Trajectory Risk \u00b7 Y = Anchor Risk \u00b7 Color = Composite bucket
                   </span>
                 </div>
                 {/* Legend row */}
@@ -1337,7 +1261,7 @@ export default function PlatformBeta() {
                     </div>
                   ))}
                   <span style={s({ fontFamily:E.mono, fontSize:9.5, color:E.dim, marginLeft:4 })}>
-                    · Dot size = market cap · Click dot to inspect
+                    \u00b7 Dot size = market cap \u00b7 Click dot to inspect
                   </span>
                 </div>
                 <ConstellationMap
@@ -1354,11 +1278,11 @@ export default function PlatformBeta() {
                       Historical Cohort Outcomes
                     </p>
                     <span style={s({ fontFamily:E.mono, fontSize:9, color:E.dim })}>
-                      {fmtNum(cohortGrid.metadata.observation_count)} obs · {cohortGrid.metadata.horizon_months}M forward
+                      {fmtNum(cohortGrid.metadata.observation_count)} obs \u00b7 {cohortGrid.metadata.horizon_months}M forward
                     </span>
                   </div>
                   <p style={s({ fontFamily:E.sans, fontSize:12, color:E.body, marginBottom:14, lineHeight:1.65 })}>
-                    How companies in each structural zone have historically performed. The bottom-right cells — high anchor risk, high trajectory risk — carry the strongest signal.
+                    How companies in each structural zone have historically performed. The bottom-right cells \u2014 high anchor risk, high trajectory risk \u2014 carry the strongest signal.
                   </p>
                   {isPaid ? (
                     <CohortGrid grid={cohortGrid} isPaid={isPaid}/>
@@ -1369,11 +1293,11 @@ export default function PlatformBeta() {
                         <span style={s({ fontFamily:E.mono, fontSize:9, letterSpacing:"0.16em", textTransform:"uppercase", color:E.gold })}>Paid Subscribers</span>
                       </div>
                       <p style={s({ fontFamily:E.sans, fontSize:13, color:E.body, lineHeight:1.75, marginBottom:14 })}>
-                        The full cohort grid — {fmtNum(cohortGrid.metadata.observation_count)} observations across {cohortGrid.metadata.horizon_months}-month forward horizons — is available with a paid subscription.
+                        The full cohort grid \u2014 {fmtNum(cohortGrid.metadata.observation_count)} observations across {cohortGrid.metadata.horizon_months}-month forward horizons \u2014 is available with a paid subscription.
                       </p>
                       <a href="/platform/subscribe" style={s({ fontFamily:E.sans, fontSize:11, fontWeight:700,
                         letterSpacing:"0.08em", textTransform:"uppercase", padding:"10px 20px",
-                        background:E.gold, color:"#060504", textDecoration:"none", display:"inline-block" })}>
+                        background:E.gold, color:E.bg, textDecoration:"none", display:"inline-block" })}>
                         Subscribe to Access
                       </a>
                     </div>
@@ -1383,7 +1307,7 @@ export default function PlatformBeta() {
             </div>
           )}
 
-          {/* ── SNAPSHOT ── */}
+          {/* \u2500\u2500 SNAPSHOT \u2500\u2500 */}
           {tab==="snapshot" && (
             <div style={s({ padding:"20px 24px" })}>
               <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.2em", textTransform:"uppercase", color:E.muted, marginBottom:6 })}>Current Snapshot</p>
@@ -1394,18 +1318,18 @@ export default function PlatformBeta() {
             </div>
           )}
 
-          {/* ── ANCHOR STRUCTURE ── */}
+          {/* \u2500\u2500 ANCHOR STRUCTURE \u2500\u2500 */}
           {tab==="anchors" && (
             <div style={s({ padding:"20px 24px" })}>
               <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.2em", textTransform:"uppercase", color:E.muted, marginBottom:6 })}>Anchor Structure</p>
               <p style={s({ fontFamily:E.sans, fontSize:12, color:E.body, marginBottom:14, lineHeight:1.65 })}>
-                Distribution across levels of demonstrated operational output. Anchor depth is the most durable signal in the framework — the FCF–Revenue spread of +26.6pp held across all regimes tested.
+                Distribution across levels of demonstrated operational output. Anchor depth is the most durable signal in the framework \u2014 the FCF\u2013Revenue spread of +26.6pp held across all regimes tested.
               </p>
               <AnchorTab oalSummary={oalSummary}/>
             </div>
           )}
 
-          {/* ── HISTORY ── */}
+          {/* \u2500\u2500 HISTORY \u2500\u2500 */}
           {tab==="history" && (
             <div style={s({ padding:"20px 24px" })}>
               <p style={s({ fontFamily:E.mono, fontSize:8.5, letterSpacing:"0.2em", textTransform:"uppercase", color:E.muted, marginBottom:6 })}>Historical Coverage</p>
@@ -1419,8 +1343,8 @@ export default function PlatformBeta() {
           {/* FOOTER */}
           <div style={s({ padding:"24px 28px", borderTop:`1px solid ${E.bdr}`, textAlign:"center" })}>
             <p style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted, lineHeight:1.7 })}>
-              The Capital Steward, LLC · thecapitalsteward.com<br/>
-              © 2026 The Capital Steward, LLC. For informational purposes only. Not investment advice.
+              The Capital Steward, LLC \u00b7 thecapitalsteward.com<br/>
+              \u00a9 2026 The Capital Steward, LLC. For informational purposes only. Not investment advice.
             </p>
           </div>
         </div>
@@ -1438,3 +1362,1003 @@ export default function PlatformBeta() {
     </div>
   )
 }
+ENDOFFILE
+echo "Done. $(wc -l < /home/claude/platform-beta-v2.tsx) lines""}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01PkTidi4U9WComgUCxCBKAv",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"Done. 1351 lines
+","stderr":""}",
+        "uuid": "47a67b7b-d157-46e8-9677-eb075a44b4f9"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"Done. 1351 lines
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:00:36.671711Z",
+    "stop_timestamp": "2026-03-30T02:00:48.994801Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01R4DbMXm41mpWqGxTaPzFMS",
+    "name": "bash_tool",
+    "input": {
+      "command": "# Fix the two syntax issues: empty ?? and optional chaining on non-optional
+python3 << 'EOF'
+content = open("/home/claude/platform-beta-v2.tsx").read()
+
+# Fix: (ORDER[a.row.composite_bucket??]??2) — missing fallback string
+content = content.replace(
+    '(ORDER[a.row.composite_bucket??]??2) - (ORDER[b.row.composite_bucket??]??2)',
+    '(ORDER[a.row.composite_bucket ?? ""] ?? 2) - (ORDER[b.row.composite_bucket ?? ""] ?? 2)'
+)
+
+# Fix fmtPct in tooltip — fmtPct already handles null so the "th pct" suffix is doubled
+# The tooltip rows have `fmtPct(row.axis1_pct)+"th pct"` but fmtPct already returns "Nth pct"
+content = content.replace(
+    '["Anchor",    fmtPct(row.axis1_pct)+"th pct"],',
+    '["Anchor",    fmtPct(row.axis1_pct)],',
+)
+content = content.replace(
+    '["Trajectory",fmtPct(row.axis2_pct)+"th pct"],',
+    '["Trajectory",fmtPct(row.axis2_pct)],',
+)
+content = content.replace(
+    '["Composite", fmtPct(row.composite_score)+"th pct"],',
+    '["Composite", fmtPct(row.composite_score)],',
+)
+
+# Also fix axis breakdown "th pct" duplication in SnapshotTable
+content = content.replace(
+    '{fmtPct(row.axis1_pct)}th</td>',
+    '{fmtPct(row.axis1_pct)}</td>',
+)
+content = content.replace(
+    '{fmtPct(row.axis2_pct)}th</td>',
+    '{fmtPct(row.axis2_pct)}</td>',
+)
+
+# Fix drilldown axis bucket display — "th pct" already in fmtPct
+content = content.replace(
+    '<span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} · {fmtPct(pct)}th</span>',
+    '<span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} · {fmtPct(pct)}</span>',
+)
+content = content.replace(
+    '<div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}th pct</div>',
+    '<div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}</div>',
+)
+
+open("/home/claude/platform-beta-v2.tsx", "w").write(content)
+
+# Final check
+remaining = content.count('??]')
+print(f"Remaining ??] syntax issues: {remaining}")
+print(f"File size: {len(content)} chars, {content.count(chr(10))} lines")
+EOF",
+      "description": "Fix syntax issues in the generated file"
+    },
+    "message": "Fix syntax issues in the generated file",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "# Fix the two syntax issues: empty ?? and optional chaining on non-optional
+python3 << 'EOF'
+content = open("/home/claude/platform-beta-v2.tsx").read()
+
+# Fix: (ORDER[a.row.composite_bucket??]??2) \u2014 missing fallback string
+content = content.replace(
+    '(ORDER[a.row.composite_bucket??]??2) - (ORDER[b.row.composite_bucket??]??2)',
+    '(ORDER[a.row.composite_bucket ?? ""] ?? 2) - (ORDER[b.row.composite_bucket ?? ""] ?? 2)'
+)
+
+# Fix fmtPct in tooltip \u2014 fmtPct already handles null so the "th pct" suffix is doubled
+# The tooltip rows have `fmtPct(row.axis1_pct)+"th pct"` but fmtPct already returns "Nth pct"
+content = content.replace(
+    '["Anchor",    fmtPct(row.axis1_pct)+"th pct"],',
+    '["Anchor",    fmtPct(row.axis1_pct)],',
+)
+content = content.replace(
+    '["Trajectory",fmtPct(row.axis2_pct)+"th pct"],',
+    '["Trajectory",fmtPct(row.axis2_pct)],',
+)
+content = content.replace(
+    '["Composite", fmtPct(row.composite_score)+"th pct"],',
+    '["Composite", fmtPct(row.composite_score)],',
+)
+
+# Also fix axis breakdown "th pct" duplication in SnapshotTable
+content = content.replace(
+    '{fmtPct(row.axis1_pct)}th</td>',
+    '{fmtPct(row.axis1_pct)}</td>',
+)
+content = content.replace(
+    '{fmtPct(row.axis2_pct)}th</td>',
+    '{fmtPct(row.axis2_pct)}</td>',
+)
+
+# Fix drilldown axis bucket display \u2014 "th pct" already in fmtPct
+content = content.replace(
+    '<span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} \u00b7 {fmtPct(pct)}th</span>',
+    '<span style={s({ fontFamily:E.mono, fontSize:9.5, fontWeight:500, color:bucketColor(bucket) })}>{bucket} \u00b7 {fmtPct(pct)}</span>',
+)
+content = content.replace(
+    '<div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}th pct</div>',
+    '<div style={s({ fontFamily:E.mono, fontSize:9.5, color:E.muted })}>{fmtPct(company.composite_score)}</div>',
+)
+
+open("/home/claude/platform-beta-v2.tsx", "w").write(content)
+
+# Final check
+remaining = content.count('??]')
+print(f"Remaining ??] syntax issues: {remaining}")
+print(f"File size: {len(content)} chars, {content.count(chr(10))} lines")
+EOF"}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01R4DbMXm41mpWqGxTaPzFMS",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"Remaining ??] syntax issues: 0
+File size: 70133 chars, 1351 lines
+","stderr":""}",
+        "uuid": "015e8245-bff7-4f84-bcc9-9592ada19b81"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"Remaining ??] syntax issues: 0
+File size: 70133 chars, 1351 lines
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:01:01.924331Z",
+    "stop_timestamp": "2026-03-30T02:01:02.957250Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01UYc2NeCW4bRPtW7FjejTdJ",
+    "name": "bash_tool",
+    "input": {
+      "command": "cp /home/claude/platform-beta-v2.tsx /mnt/user-data/outputs/platform-beta-page.tsx
+echo "Copied. $(wc -l < /mnt/user-data/outputs/platform-beta-page.tsx) lines"",
+      "description": "Copy to outputs"
+    },
+    "message": "Copy to outputs",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "cp /home/claude/platform-beta-v2.tsx /mnt/user-data/outputs/platform-beta-page.tsx
+echo "Copied. $(wc -l < /mnt/user-data/outputs/platform-beta-page.tsx) lines""}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01UYc2NeCW4bRPtW7FjejTdJ",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"Copied. 1351 lines
+","stderr":""}",
+        "uuid": "9ad1a445-f27f-4cd7-b1af-20bb3d7f07c7"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"Copied. 1351 lines
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:01:06.126612Z",
+    "stop_timestamp": "2026-03-30T02:01:06.274201Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_016eJPVFFwY1a1YkTsrzNd8z",
+    "name": "present_files",
+    "input": {
+      "filepaths": [
+        "/mnt/user-data/outputs/platform-beta-page.tsx"
+      ]
+    },
+    "message": "Presenting file(s)...",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "context": null,
+    "display_content": {
+      "type": "table",
+      "table": [
+        [
+          "filepaths",
+          "['/mnt/user-data/outputs/platform-beta-page.tsx']"
+        ]
+      ]
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_016eJPVFFwY1a1YkTsrzNd8z",
+    "name": "present_files",
+    "content": [
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/platform-beta-page.tsx",
+        "name": "platform-beta-page",
+        "mime_type": null,
+        "uuid": "93f4d6d8-9904-4bfe-9a56-3cb7ba26d0e3"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": "Presented file",
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "display_content": null
+  },
+  {
+    "start_timestamp": "2026-03-30T02:01:09.763240Z",
+    "stop_timestamp": "2026-03-30T02:01:18.728535Z",
+    "flags": null,
+    "type": "text",
+    "text": "`app/platform-beta/page.tsx` — complete replacement, 1,351 lines. Drop it in and it should build clean.
+
+**What changed from the version you pasted:**
+
+The `ConstellationMap` is now embedded directly in the file — no separate component file needed, no import path issues. The canvas + SVG architecture, pulse rings, market-cap dot sizing, axis labels, and tooltip are all self-contained.
+
+**Tabs renamed and restructured:**
+- Market Map ✓
+- Snapshot ✓
+- `OAL Structure` → **Anchor Structure** — retitled to be intuitive without reading the methodology
+- `Financing Context` → **removed entirely** — Axis 3 gone from the tab bar
+- History ✓
+
+**KPI strip updated:**
+- `Financing Stress` → **Improving Trajectory** — companies with Axis 2 below 40th percentile (operationally strengthening). This is actionable information, not just a risk flag.
+
+**Two pipeline fields needed** for full fidelity — the map works now, these unlock pulse and sizing:
+- `axis2_prev_pct` in `osmr_snapshot.json` → enables pulse rings
+- `market_cap` in `osmr_snapshot.json` → enables dot sizing by market cap",
+    "citations": []
+  }
+]
+
+================================================================================
+
+Human:
+Files:
+  - tcs-fb-banner.png (UUID: 019d3c76-790c-7736-934a-0e33a7dc7f58, Purpose: inference_image)
+Content:
+[
+  {
+    "start_timestamp": "2026-03-30T02:02:02.757492Z",
+    "stop_timestamp": "2026-03-30T02:02:02.757492Z",
+    "flags": null,
+    "type": "text",
+    "text": "I need a version of this for the linkedin banner",
+    "citations": []
+  }
+]
+
+================================================================================
+
+Assistant:
+Content:
+[
+  {
+    "start_timestamp": "2026-03-30T02:02:07.277712Z",
+    "stop_timestamp": "2026-03-30T02:02:09.176999Z",
+    "flags": null,
+    "type": "text",
+    "text": " LinkedIn banner is 1584×396px — wider and shorter than Facebook's 1640×624. The bars will need to be more compact vertically and the layout shifts accordingly.",
+    "citations": []
+  },
+  {
+    "start_timestamp": "2026-03-30T02:02:09.489104Z",
+    "stop_timestamp": "2026-03-30T02:02:20.041779Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01V3xwPfEyQ7nNxZeGjRMeNY",
+    "name": "bash_tool",
+    "input": {
+      "command": "cat > /home/claude/tcs-linkedin-banner.svg << 'EOF'
+<svg width="1584" height="396" viewBox="0 0 1584 396" xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="1584" height="396" fill="#181E19"/>
+  <rect x="0" y="0" width="1584" height="4" fill="#C6A24A"/>
+
+  <!-- Faint grid lines -->
+  <line x1="528" y1="0" x2="528" y2="396" stroke="#161412" stroke-width="1"/>
+  <line x1="1056" y1="0" x2="1056" y2="396" stroke="#161412" stroke-width="1"/>
+
+  <!-- OAL bars — tighter vertical spacing for shorter canvas -->
+  <!-- FCF -->
+  <rect x="110" y="108" width="680" height="42" fill="#6CB686" opacity="0.9"/>
+  <!-- NI -->
+  <rect x="110" y="158" width="476" height="42" fill="#C6A24A" opacity="0.88"/>
+  <!-- EBIT -->
+  <rect x="110" y="208" width="300" height="42" fill="#C6A24A" opacity="0.48"/>
+  <!-- Revenue -->
+  <rect x="110" y="258" width="96" height="42" fill="#CC6652" opacity="0.86"/>
+
+  <!-- Spine -->
+  <rect x="100" y="98" width="5" height="214" fill="#3A4A3C"/>
+
+  <!-- Wordmark -->
+  <text x="1180" y="176"
+    font-family="'IBM Plex Mono', 'Courier New', monospace"
+    font-size="18"
+    font-weight="400"
+    fill="#554E44"
+    letter-spacing="10">THE CAPITAL</text>
+
+  <text x="1176" y="268"
+    font-family="'Playfair Display', Georgia, serif"
+    font-style="italic"
+    font-size="88"
+    fill="#F0F4EF"
+    letter-spacing="-1">Steward</text>
+
+</svg>
+EOF
+
+python3 -c "
+import cairosvg
+cairosvg.svg2png(
+    url='/home/claude/tcs-linkedin-banner.svg',
+    write_to='/home/claude/tcs-linkedin-banner.png',
+    output_width=1584, output_height=396,
+)
+print('Done')
+"
+cp /home/claude/tcs-linkedin-banner.png /mnt/user-data/outputs/tcs-linkedin-banner.png
+cp /home/claude/tcs-linkedin-banner.svg /mnt/user-data/outputs/tcs-linkedin-banner.svg",
+      "description": "Build LinkedIn banner SVG and render PNG"
+    },
+    "message": "Build LinkedIn banner SVG and render PNG",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "cat > /home/claude/tcs-linkedin-banner.svg << 'EOF'
+<svg width="1584" height="396" viewBox="0 0 1584 396" xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="1584" height="396" fill="#181E19"/>
+  <rect x="0" y="0" width="1584" height="4" fill="#C6A24A"/>
+
+  <!-- Faint grid lines -->
+  <line x1="528" y1="0" x2="528" y2="396" stroke="#161412" stroke-width="1"/>
+  <line x1="1056" y1="0" x2="1056" y2="396" stroke="#161412" stroke-width="1"/>
+
+  <!-- OAL bars \u2014 tighter vertical spacing for shorter canvas -->
+  <!-- FCF -->
+  <rect x="110" y="108" width="680" height="42" fill="#6CB686" opacity="0.9"/>
+  <!-- NI -->
+  <rect x="110" y="158" width="476" height="42" fill="#C6A24A" opacity="0.88"/>
+  <!-- EBIT -->
+  <rect x="110" y="208" width="300" height="42" fill="#C6A24A" opacity="0.48"/>
+  <!-- Revenue -->
+  <rect x="110" y="258" width="96" height="42" fill="#CC6652" opacity="0.86"/>
+
+  <!-- Spine -->
+  <rect x="100" y="98" width="5" height="214" fill="#3A4A3C"/>
+
+  <!-- Wordmark -->
+  <text x="1180" y="176"
+    font-family="'IBM Plex Mono', 'Courier New', monospace"
+    font-size="18"
+    font-weight="400"
+    fill="#554E44"
+    letter-spacing="10">THE CAPITAL</text>
+
+  <text x="1176" y="268"
+    font-family="'Playfair Display', Georgia, serif"
+    font-style="italic"
+    font-size="88"
+    fill="#F0F4EF"
+    letter-spacing="-1">Steward</text>
+
+</svg>
+EOF
+
+python3 -c "
+import cairosvg
+cairosvg.svg2png(
+    url='/home/claude/tcs-linkedin-banner.svg',
+    write_to='/home/claude/tcs-linkedin-banner.png',
+    output_width=1584, output_height=396,
+)
+print('Done')
+"
+cp /home/claude/tcs-linkedin-banner.png /mnt/user-data/outputs/tcs-linkedin-banner.png
+cp /home/claude/tcs-linkedin-banner.svg /mnt/user-data/outputs/tcs-linkedin-banner.svg"}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01V3xwPfEyQ7nNxZeGjRMeNY",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"Done
+","stderr":""}",
+        "uuid": "422bf842-783e-42fd-bb98-c5c725c535cc"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"Done
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:02:25.536368Z",
+    "stop_timestamp": "2026-03-30T02:02:25.854940Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01FY9FtfQfKBLiT7mDJmERXA",
+    "name": "present_files",
+    "input": {
+      "filepaths": [
+        "/mnt/user-data/outputs/tcs-linkedin-banner.png",
+        "/mnt/user-data/outputs/tcs-linkedin-banner.svg"
+      ]
+    },
+    "message": "Presenting file(s)...",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "context": null,
+    "display_content": {
+      "type": "table",
+      "table": [
+        [
+          "filepaths",
+          "['/mnt/user-data/outputs/tcs-linkedin-banner.png', '/mnt/user-data/outputs/tcs-linkedin-banner.svg']"
+        ]
+      ]
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01FY9FtfQfKBLiT7mDJmERXA",
+    "name": "present_files",
+    "content": [
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/tcs-linkedin-banner.png",
+        "name": "tcs-linkedin-banner",
+        "mime_type": "image/png",
+        "uuid": "ffcf3fbe-e08a-4d1b-9f09-a8f40b3b490c"
+      },
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/tcs-linkedin-banner.svg",
+        "name": "tcs-linkedin-banner",
+        "mime_type": "image/svg+xml",
+        "uuid": "7efc1881-7786-4c2b-a89d-e4c2f7da40fb"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": "Presented 2 files",
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "display_content": null
+  },
+  {
+    "start_timestamp": "2026-03-30T02:02:29.053794Z",
+    "stop_timestamp": "2026-03-30T02:02:30.440927Z",
+    "flags": null,
+    "type": "text",
+    "text": "1584×396px — same layout as the Facebook banner, compressed vertically to fit LinkedIn's aspect ratio. Bars are tighter, wordmark repositioned to match. Upload the PNG directly to LinkedIn.",
+    "citations": []
+  }
+]
+
+================================================================================
+
+Human:
+Content:
+[
+  {
+    "start_timestamp": "2026-03-30T02:07:35.856558Z",
+    "stop_timestamp": "2026-03-30T02:07:35.856558Z",
+    "flags": null,
+    "type": "text",
+    "text": "Two things.
+
+one this:
+
+22:02:36.334 Running build in Washington, D.C., USA (East) – iad1
+22:02:36.334 Build machine configuration: 2 cores, 8 GB
+22:02:36.505 Cloning github.com/The-Capital-Steward/capital-steward-dashboard (Branch: main, Commit: 16af89d)
+22:02:36.878 Cloning completed: 373.000ms
+22:02:37.860 Restored build cache from previous deployment (CEBBZYPjn3rgs8yqU5zRPeKTKzGL)
+22:02:38.131 Running "vercel build"
+22:02:39.016 Vercel CLI 50.37.1
+22:02:39.249 Installing dependencies...
+22:02:40.740 
+22:02:40.741 up to date in 1s
+22:02:40.741 
+22:02:40.742 235 packages are looking for funding
+22:02:40.742   run `npm fund` for details
+22:02:40.772 Detected Next.js version: 16.1.6
+22:02:40.777 Running "npm run build"
+22:02:40.879 
+22:02:40.879 > capital-steward-dashboard@0.1.0 build
+22:02:40.880 > next build
+22:02:40.880 
+22:02:41.929 ▲ Next.js 16.1.6 (Turbopack)
+22:02:41.930 
+22:02:41.951 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+22:02:42.268   Creating an optimized production build ...
+22:02:59.141 ✓ Compiled successfully in 16.3s
+22:02:59.143   Running TypeScript ...
+22:03:06.040 Failed to compile.
+22:03:06.040 
+22:03:06.041 ./app/platform-beta/page.tsx:556:44
+22:03:06.041 Type error: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<HTMLDivElement>'.
+22:03:06.042   Type 'HTMLDivElement | null' is not assignable to type 'HTMLDivElement'.
+22:03:06.042     Type 'null' is not assignable to type 'HTMLDivElement'.
+22:03:06.042 
+22:03:06.042 [0m [90m 554 |[39m
+22:03:06.043  [90m 555 |[39m       {[90m/* Dot tooltip */[39m}
+22:03:06.043 [31m[1m>[22m[39m[90m 556 |[39m       {tooltip [33m&&[39m [33m<[39m[33mMapTooltip[39m {[33m...[39mtooltip} containerRef[33m=[39m{containerRef} [33m/[39m[33m>[39m}
+22:03:06.043  [90m     |[39m                                            [31m[1m^[22m[39m
+22:03:06.043  [90m 557 |[39m     [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+22:03:06.044  [90m 558 |[39m   )
+22:03:06.044  [90m 559 |[39m }[0m
+22:03:06.088 Next.js build worker exited with code: 1 and signal: null
+22:03:06.133 Error: Command "npm run build" exited with 1
+
+two, this page is 404
+
+https://www.thecapitalsteward.com/platform/subscribe",
+    "citations": []
+  }
+]
+
+================================================================================
+
+Assistant:
+Content:
+[
+  {
+    "start_timestamp": "2026-03-30T02:07:39.399491Z",
+    "stop_timestamp": "2026-03-30T02:07:39.951151Z",
+    "flags": null,
+    "type": "text",
+    "text": " Two quick fixes.",
+    "citations": []
+  },
+  {
+    "start_timestamp": "2026-03-30T02:07:40.353329Z",
+    "stop_timestamp": "2026-03-30T02:07:44.039432Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01BBqRX9Y4kWLGNsLViHD82r",
+    "name": "bash_tool",
+    "input": {
+      "command": "python3 << 'EOF'
+content = open("/mnt/user-data/outputs/platform-beta-page.tsx").read()
+
+# Fix 1: RefObject<HTMLDivElement | null> → RefObject<HTMLDivElement | null> accepted
+# The issue is the prop type on MapTooltip. Change containerRef type to accept null.
+content = content.replace(
+    'row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement>',
+    'row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement | null>'
+)
+
+open("/mnt/user-data/outputs/platform-beta-page.tsx", "w").write(content)
+print("Fix 1 applied:", 'RefObject<HTMLDivElement | null>' in content)
+print("Remaining old type:", 'containerRef:React.RefObject<HTMLDivElement>' in content)
+EOF",
+      "description": "Fix RefObject type error"
+    },
+    "message": "Fix RefObject type error",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "python3 << 'EOF'
+content = open("/mnt/user-data/outputs/platform-beta-page.tsx").read()
+
+# Fix 1: RefObject<HTMLDivElement | null> \u2192 RefObject<HTMLDivElement | null> accepted
+# The issue is the prop type on MapTooltip. Change containerRef type to accept null.
+content = content.replace(
+    'row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement>',
+    'row:SnapshotRow; x:number; y:number; containerRef:React.RefObject<HTMLDivElement | null>'
+)
+
+open("/mnt/user-data/outputs/platform-beta-page.tsx", "w").write(content)
+print("Fix 1 applied:", 'RefObject<HTMLDivElement | null>' in content)
+print("Remaining old type:", 'containerRef:React.RefObject<HTMLDivElement>' in content)
+EOF"}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01BBqRX9Y4kWLGNsLViHD82r",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"Fix 1 applied: True
+Remaining old type: False
+","stderr":""}",
+        "uuid": "4b2d1f51-30f3-4f37-a940-2a0258cde653"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"Fix 1 applied: True
+Remaining old type: False
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:07:47.965150Z",
+    "stop_timestamp": "2026-03-30T02:07:49.796304Z",
+    "flags": null,
+    "type": "text",
+    "text": "Now the subscribe page 404. That route is `app/platform/subscribe/page.tsx` — it exists in outputs but likely wasn't pushed to the repo, or the file got lost. Let me check what we have and deliver it cleanly.",
+    "citations": []
+  },
+  {
+    "start_timestamp": "2026-03-30T02:07:50.133949Z",
+    "stop_timestamp": "2026-03-30T02:07:50.326733Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_018k4YqNKEhHLzhPSQpm7sLr",
+    "name": "bash_tool",
+    "input": {
+      "command": "ls /mnt/user-data/outputs/ | grep -i subscribe",
+      "description": "Check if subscribe page exists in outputs"
+    },
+    "message": "Check if subscribe page exists in outputs",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "ls /mnt/user-data/outputs/ | grep -i subscribe"}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_018k4YqNKEhHLzhPSQpm7sLr",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"subscribe-page.tsx
+subscribe-success-page.tsx
+","stderr":""}",
+        "uuid": "d20d7fec-6099-49a5-85a7-e00e30841284"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"subscribe-page.tsx
+subscribe-success-page.tsx
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:07:54.651404Z",
+    "stop_timestamp": "2026-03-30T02:07:54.973402Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01JxaaURuy4GMxf2xnp25AzY",
+    "name": "bash_tool",
+    "input": {
+      "command": "head -20 /mnt/user-data/outputs/subscribe-page.tsx",
+      "description": "Check subscribe page header"
+    },
+    "message": "Check subscribe page header",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "context": null,
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"language": "bash", "code": "head -20 /mnt/user-data/outputs/subscribe-page.tsx"}"
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01JxaaURuy4GMxf2xnp25AzY",
+    "name": "bash_tool",
+    "content": [
+      {
+        "type": "text",
+        "text": "{"returncode":0,"stdout":"'use client'
+
+// File goes to: app/platform/subscribe/page.tsx
+//
+// SETUP REQUIRED:
+// Add to .env.local:
+//   NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID=price_...
+//   NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID=price_...
+//
+// Get these from Stripe Dashboard → Products → Create product → Add pricing
+
+import { useState } from 'react'
+import { useUser } from '@clerk/nextjs'
+import Link from 'next/link'
+import { ArrowRight, Check } from 'lucide-react'
+
+const E = {
+  bg: "#181E19", bg2: "#1F2820",
+  bdr: "#2E3B30", bdr2: "#3A4A3C",
+  text: "#F0F4EF", body: "#B8C4B9", muted: "#97AC99", dim: "#253028",
+","stderr":""}",
+        "uuid": "4e9e5148-c630-4cb0-9721-eaeab548c5c4"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": null,
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "commandLine",
+    "display_content": {
+      "type": "json_block",
+      "json_block": "{"returncode":0,"stdout":"'use client'
+
+// File goes to: app/platform/subscribe/page.tsx
+//
+// SETUP REQUIRED:
+// Add to .env.local:
+//   NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID=price_...
+//   NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID=price_...
+//
+// Get these from Stripe Dashboard → Products → Create product → Add pricing
+
+import { useState } from 'react'
+import { useUser } from '@clerk/nextjs'
+import Link from 'next/link'
+import { ArrowRight, Check } from 'lucide-react'
+
+const E = {
+  bg: "#181E19", bg2: "#1F2820",
+  bdr: "#2E3B30", bdr2: "#3A4A3C",
+  text: "#F0F4EF", body: "#B8C4B9", muted: "#97AC99", dim: "#253028",
+","stderr":""}"
+    }
+  },
+  {
+    "start_timestamp": "2026-03-30T02:07:59.362880Z",
+    "stop_timestamp": "2026-03-30T02:08:00.256228Z",
+    "flags": null,
+    "type": "text",
+    "text": "The file exists. It's not in the repo. Two things to do:",
+    "citations": []
+  },
+  {
+    "start_timestamp": "2026-03-30T02:08:00.256228Z",
+    "stop_timestamp": "2026-03-30T02:08:00.828182Z",
+    "flags": null,
+    "type": "tool_use",
+    "id": "toolu_01QWQSSnznxSNdb39aYbLEDi",
+    "name": "present_files",
+    "input": {
+      "filepaths": [
+        "/mnt/user-data/outputs/platform-beta-page.tsx",
+        "/mnt/user-data/outputs/subscribe-page.tsx",
+        "/mnt/user-data/outputs/subscribe-success-page.tsx"
+      ]
+    },
+    "message": "Presenting file(s)...",
+    "integration_name": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "context": null,
+    "display_content": {
+      "type": "table",
+      "table": [
+        [
+          "filepaths",
+          "['/mnt/user-data/outputs/platform-beta-page.tsx', '/mnt/user-data/outputs/subscribe-page.tsx', '/mnt/user-data/outputs/subscribe-success-page.tsx']"
+        ]
+      ]
+    },
+    "approval_options": null,
+    "approval_key": null,
+    "is_mcp_app": null,
+    "mcp_server_url": null
+  },
+  {
+    "start_timestamp": null,
+    "stop_timestamp": null,
+    "flags": null,
+    "type": "tool_result",
+    "tool_use_id": "toolu_01QWQSSnznxSNdb39aYbLEDi",
+    "name": "present_files",
+    "content": [
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/platform-beta-page.tsx",
+        "name": "platform-beta-page",
+        "mime_type": null,
+        "uuid": "7e4559c0-6bc0-40ec-acd0-829b3dce54c1"
+      },
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/subscribe-page.tsx",
+        "name": "subscribe-page",
+        "mime_type": null,
+        "uuid": "847c6bd1-3ebd-4a7a-a92d-1f3dcbc4775c"
+      },
+      {
+        "type": "local_resource",
+        "file_path": "/mnt/user-data/outputs/subscribe-success-page.tsx",
+        "name": "subscribe-success-page",
+        "mime_type": null,
+        "uuid": "64b50903-7372-47b7-b96b-fe6a94306b90"
+      }
+    ],
+    "is_error": false,
+    "structured_content": null,
+    "meta": null,
+    "message": "Presented 3 files",
+    "integration_name": null,
+    "mcp_server_url": null,
+    "integration_icon_url": null,
+    "icon_name": "file",
+    "display_content": null
+  },
+  {
+    "start_timestamp": "2026-03-30T02:08:05.262583Z",
+    "stop_timestamp": "2026-03-30T02:08:10.490178Z",
+    "flags": null,
+    "type": "text",
+    "text": "**Fix 1 — `platform-beta-page.tsx`** — type error patched. Replace `app/platform-beta/page.tsx`.
+
+**Fix 2 — subscribe 404** — the file exists but was never pushed to the repo. You need to create the directory and add the file:

@@ -18,6 +18,15 @@
 //   export default clerkMiddleware((auth, req) => {
 //     if (req.nextUrl.pathname.startsWith('/platform-beta')) auth().protect()
 //   })
+//
+// COPY REVISIONS:
+// — Bridge headline: "The platform is ready." → "The map is yours."
+//   Confirms the decision, signals relationship start. Stage 5 requirement.
+// — Bridge body: rewritten for both tiers to confirm the decision
+//   rather than describe access level in purely functional terms.
+// — "unlock" → "adds" in modal description. "Unlock" is SaaS retail register.
+// — "Subscribe to access" → "Open full access" on paid CTA. More specific.
+// — Modal footer: "Read the methodology" → "Examine the Evidence" for consistency.
 
 import { useState, useEffect } from "react"
 import { useUser, SignIn, SignUp } from "@clerk/nextjs"
@@ -167,8 +176,14 @@ function AuthModal({ onClose }: { onClose?: () => void }) {
             <h2 style={s({ fontFamily: E.sans, fontSize: 22, fontWeight: 800, color: E.text, letterSpacing: "-0.03em", marginBottom: 8, lineHeight: 1.1 })}>
               Access the structural map.
             </h2>
+
+            {/*
+              REVISION — "unlock" → "adds".
+              "Unlock" is a SaaS retail convention that implies content behind a gate.
+              "Adds" is accurate and stays in the platform's register.
+            */}
             <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body, marginBottom: 24 })}>
-              Create a free account to explore the market map and OAL structure across ~5,200 U.S. equities. Paid subscribers unlock company drilldowns and cohort grids.
+              Create a free account to explore the market map and OAL structure across ~5,200 U.S. equities. A paid subscription adds company drilldowns and cohort grids.
             </p>
 
             {/* Tier comparison */}
@@ -183,10 +198,15 @@ function AuthModal({ onClose }: { onClose?: () => void }) {
                   primary: false,
                 },
                 {
-                  tier: "Paid · $159/mo",
+                  tier: "Full access · $159/mo",
                   features: ["Everything in free", "Company drilldowns", "Cohort grids (290K+ obs)", "Weekly score updates"],
                   locked: [],
-                  cta: "Subscribe to access",
+                  /*
+                    REVISION — "Subscribe to access" → "Open full access".
+                    More specific to what the reader is doing. Consistent with
+                    "Open Platform" language established on the homepage.
+                  */
+                  cta: "Open full access",
                   action: () => window.location.href = '/platform/subscribe',
                   primary: true,
                 },
@@ -245,11 +265,15 @@ function AuthModal({ onClose }: { onClose?: () => void }) {
         </div>
 
         {/* Footer */}
+        {/*
+          REVISION — "Read the methodology" → "Examine the Evidence".
+          Consistent with CTA language established site-wide.
+        */}
         <div style={s({ padding: "12px 32px 20px", borderTop: `1px solid ${E.bdr}` })}>
           <p style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted, textAlign: "center" as const })}>
-            <Link href="/methodology" style={s({ color: E.gold, textDecoration: "none" })}>Read the methodology</Link>
+            <Link href="/methodology" style={s({ color: E.gold, textDecoration: "none" })}>Examine the evidence</Link>
             {" · "}
-            <Link href="/who-its-for" style={s({ color: E.muted, textDecoration: "none" })}>Who it's for</Link>
+            <Link href="/who-its-for" style={s({ color: E.muted, textDecoration: "none" })}>Who it&apos;s for</Link>
           </p>
         </div>
       </div>
@@ -300,8 +324,7 @@ export default function PlatformPage() {
     )
   }
 
-  // Authenticated — redirect to actual platform
-  // For now, show a bridge page while /platform-beta is being finalized
+  // Authenticated — bridge page while /platform-beta is being finalized
   return (
     <div style={s({ minHeight: "100vh", background: E.bg, color: E.text, fontFamily: E.sans })}>
 
@@ -323,18 +346,33 @@ export default function PlatformPage() {
         </div>
       </nav>
 
-      {/* Bridge — authenticated, redirecting to platform-beta */}
+      {/*
+        REVISION — Bridge page copy rewritten for both tiers.
+
+        Old headline: "The platform is ready."
+        Problem: Statement about the platform's state. Doesn't confirm the
+        decision or signal that the relationship has started. The principles
+        document requires the close to "confirm the decision was right" and
+        "deliver immediately on the first use."
+
+        New headline: "The map is yours."
+        Confirms possession, signals the relationship has started, uses the
+        map language established throughout the site.
+
+        Body copy rewritten for both tiers to lead with confirmation of the
+        decision before describing what the access level includes.
+      */}
       <div style={s({ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 52px)", padding: "40px" })}>
         <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.gold, marginBottom: 16 })}>
           {isPaid ? "Full access" : "Free access"}
         </p>
         <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, color: E.text, letterSpacing: "-0.04em", marginBottom: 16, textAlign: "center" as const, lineHeight: 1.1 })}>
-          The platform is ready.
+          The map is yours.
         </h1>
         <p style={s({ fontFamily: E.sans, fontSize: 14, color: E.body, lineHeight: 1.75, maxWidth: 440, textAlign: "center" as const, marginBottom: 32 })}>
           {isPaid
-            ? "You have full subscriber access. The platform dashboard is available now."
-            : "You have free access to the structural market map and OAL structure. Upgrade for company drilldowns and cohort grids."}
+            ? "~5,200 U.S. equities. Two independently validated dimensions of structural risk. Company drilldowns, cohort grids, and weekly score updates — everything the framework produces is available now."
+            : "The structural market map and OAL distribution across ~5,200 equities are available now. Company drilldowns and cohort grids are available with a full subscription."}
         </p>
         <div style={s({ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" })}>
           <Link href="/platform-beta" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, padding: "13px 28px", background: E.gold, color: "#060504", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 })}>
@@ -342,7 +380,7 @@ export default function PlatformPage() {
           </Link>
           {!isPaid && (
             <Link href="/platform/subscribe" style={s({ fontFamily: E.sans, fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, padding: "13px 22px", background: "transparent", color: E.muted, border: `1px solid ${E.bdr2}`, textDecoration: "none" })}>
-              Upgrade to Full Access
+              Open Full Access
             </Link>
           )}
         </div>
