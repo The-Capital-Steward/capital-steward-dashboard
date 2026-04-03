@@ -1,6 +1,9 @@
 'use client'
 
 // P3 palette · DM Sans · AAA corrected · File → app/where-it-fits/page.tsx
+// Revised: secondary CTA → "Examine the Evidence",
+//          "Platform access" label removed from CTA section,
+//          component renamed WhereItFits
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
@@ -11,17 +14,17 @@ const E = {
   bg3:   "#C4CCC0",
   bdr:   "#B7C1B4",
   bdr2:  "#A8B4A5",
-  text:  "#313A34", // 8.50:1 AAA
-  body:  "#3F4640", // 7.02:1 AAA
-  muted: "#40463F", // 6.27:1 AA-large
-  dim:   "#41453F", // 7.06:1 AAA
-  gold:  "#715E37", // 4.52:1 AA-large display only
+  text:  "#313A34",
+  body:  "#3F4640",
+  muted: "#40463F",
+  dim:   "#41453F",
+  gold:  "#715E37",
   gatm:  "rgba(56,72,61,0.06)",
-  pos:   "#38483D", // 7.02:1 AAA
-  neg:   "#633838", // 7.05:1 AAA
+  pos:   "#38483D",
+  neg:   "#633838",
   brick: "#633838",
   sage:  "#38483D",
-  amber: "#6B4F2A", // darkened for contrast
+  amber: "#6B4F2A",
   mono:  "'IBM Plex Mono','Courier New',monospace",
   sans:  "'DM Sans',system-ui,sans-serif",
   serif: "'Playfair Display',Georgia,serif",
@@ -41,7 +44,7 @@ const B = ({ ch }: { ch: React.ReactNode }) => (
   <p style={s({ fontFamily: E.sans, fontSize: 14, lineHeight: 1.85, color: E.body, marginBottom: 16 })}>{ch}</p>
 )
 
-export default function WhereItBelongs() {
+export default function WhereItFits() {
   return (
     <main style={s({ minHeight: "100vh", background: E.bg, color: E.text, fontFamily: E.sans })}>
 
@@ -60,8 +63,8 @@ export default function WhereItBelongs() {
         </Link>
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
-            { label: "Who It's For",     href: "/who-its-for" },
-            { label: "Methodology",      href: "/methodology" },
+            { label: "Who It's For",  href: "/who-its-for" },
+            { label: "Methodology",   href: "/methodology" },
             { label: "Where It Fits", href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
@@ -120,11 +123,11 @@ export default function WhereItBelongs() {
                 <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Where OSMR enters the process</p>
               </div>
               {[
-                { step: "01", label: "Structural screening",    desc: "Use the market map to identify zones worth examining. Filter by composite bucket and OAL rung.", highlight: true },
-                { step: "02", label: "Company-specific research",desc: "Your existing analytical process. OSMR provides structural context, not a substitute.", highlight: false },
-                { step: "03", label: "Structural validation",   desc: "Before entry: check the company's cohort. Understand the historical return distribution in that zone.", highlight: true },
-                { step: "04", label: "Position sizing",         desc: "Let structural context inform exposure. Not a sizing rule — context for an honest sizing decision.", highlight: false },
-                { step: "05", label: "Ongoing monitoring",      desc: "Watch trajectory. A deteriorating anchor is structural information that belongs in any review.", highlight: true },
+                { step: "01", label: "Structural screening",     desc: "Use the market map to identify zones worth examining. Filter by composite bucket and OAL rung.", highlight: true },
+                { step: "02", label: "Company-specific research", desc: "Your existing analytical process. OSMR provides structural context, not a substitute.", highlight: false },
+                { step: "03", label: "Structural validation",    desc: "Before entry: check the company's cohort. Understand the historical return distribution in that zone.", highlight: true },
+                { step: "04", label: "Position sizing",          desc: "Let structural context inform exposure. Not a sizing rule — context for an honest sizing decision.", highlight: false },
+                { step: "05", label: "Ongoing monitoring",       desc: "Watch trajectory. A deteriorating anchor is structural information that belongs in any review.", highlight: true },
               ].map(({ step, label, desc, highlight }) => (
                 <div key={step} style={s({ display: "flex", gap: 16, padding: "14px 16px", borderBottom: `1px solid ${E.bdr}`, background: highlight ? E.gatm : "transparent" })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: highlight ? E.dim : E.muted, flexShrink: 0, marginTop: 1 })}>{step}</div>
@@ -361,10 +364,10 @@ export default function WhereItBelongs() {
                 <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Four structural conditions worth distinguishing</p>
               </div>
               {[
-                { label: "Deep anchor · improving trajectory",       desc: "The best structural condition. Worth examining regardless of current score.",          tag: "Favorable", tagColor: E.sage },
-                { label: "Deep anchor · deteriorating trajectory",   desc: "A potential early warning. The score may still look good; the trend does not.",        tag: "Watch",     tagColor: E.amber },
-                { label: "Shallow anchor · improving trajectory",    desc: "Moving in the right direction. The narrative load is decreasing.",                     tag: "Improving", tagColor: E.pos },
-                { label: "Shallow anchor · deteriorating trajectory",desc: "The highest-risk structural condition the framework identifies.",                       tag: "Elevated",  tagColor: E.neg },
+                { label: "Deep anchor · improving trajectory",        desc: "The best structural condition. Worth examining regardless of current score.",        tag: "Favorable", tagColor: E.sage },
+                { label: "Deep anchor · deteriorating trajectory",    desc: "A potential early warning. The score may still look good; the trend does not.",      tag: "Watch",     tagColor: E.amber },
+                { label: "Shallow anchor · improving trajectory",     desc: "Moving in the right direction. The narrative load is decreasing.",                   tag: "Improving", tagColor: E.pos },
+                { label: "Shallow anchor · deteriorating trajectory", desc: "The highest-risk structural condition the framework identifies.",                     tag: "Elevated",  tagColor: E.neg },
               ].map(({ label, desc, tag, tagColor }, i) => (
                 <div key={label} style={s({ padding: "14px 16px", borderBottom: i < 3 ? `1px solid ${E.bdr}` : "none", display: "flex", justifyContent: "space-between", gap: 16 })}>
                   <div>
@@ -393,14 +396,20 @@ export default function WhereItBelongs() {
       </div>
 
       {/* ── CTA ── */}
+      {/*
+        REVISION — "Platform access" label removed.
+        "The structural map is live now." carries the section without introduction.
+        Pricing display makes transactional directness appropriate here;
+        a section header announcing the close before the close arrived was redundant.
+        Secondary CTA updated to "Examine the Evidence" for site-wide consistency.
+      */}
       <div style={s({ padding: "64px 44px", borderBottom: `1px solid ${E.bdr}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 40 })}>
         <div style={s({ maxWidth: 520 })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>Platform access</p>
-          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 12 })}>
+          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 16 })}>
             The structural map is live now.
           </h2>
-          <p style={s({ fontFamily: E.sans, fontSize: 14.5, color: E.body, lineHeight: 1.75 })}>
-            ~5,200 U.S. equities scored across two independently validated dimensions of structural risk. Updated weekly. What&apos;s described on this page is accessible now.
+          <p style={s({ fontFamily: E.mono, fontSize: 11.5, color: E.muted, lineHeight: 1.75, letterSpacing: "0.04em" })}>
+            ~5,200 U.S. equities · Two independently validated dimensions of structural risk · Updated weekly
           </p>
         </div>
         <div style={s({ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, flexShrink: 0 })}>
@@ -424,7 +433,7 @@ export default function WhereItBelongs() {
             color: E.body, border: `1px solid ${E.bdr}`,
             textDecoration: "none", textAlign: "center" as const,
           })}>
-            Read the Methodology
+            Examine the Evidence
           </Link>
         </div>
       </div>
@@ -448,13 +457,13 @@ export default function WhereItBelongs() {
 
       <style>{`
         @media (max-width: 960px) {
-          .wib-grid { grid-template-columns: 1fr !important; }
-          .wib-grid > div:first-child { border-right: none !important; border-bottom: 1px solid ${E.bdr}; }
-          .wib-table { grid-template-columns: 1fr !important; }
+          .wif-grid { grid-template-columns: 1fr !important; }
+          .wif-grid > div:first-child { border-right: none !important; border-bottom: 1px solid ${E.bdr}; }
+          .wif-table { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
-          .wib-cta { flex-direction: column !important; align-items: flex-start !important; }
-          .wib-cta > div:last-child { align-items: flex-start !important; }
+          .wif-cta { flex-direction: column !important; align-items: flex-start !important; }
+          .wif-cta > div:last-child { align-items: flex-start !important; }
         }
       `}</style>
 

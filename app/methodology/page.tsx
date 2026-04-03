@@ -104,7 +104,7 @@ function RegimeChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: any) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v: any, name: any) => [`${v.toFixed(4)}`, "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[4, 4, 0, 0]}>
@@ -148,7 +148,7 @@ function YearByYearChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: any) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v: any, name: any) => [`${v.toFixed(4)}`, "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[3, 3, 0, 0]}>
@@ -189,7 +189,7 @@ function OALReturnChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: any) => [`${v.toFixed(1)}%`, "Median return"]}
+            formatter={(v: any, name: any) => [`${v.toFixed(1)}%`, "Median return"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="median" radius={[4, 4, 0, 0]}>
@@ -223,7 +223,7 @@ function QuintileChart() {
           />
           <Tooltip
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
-            formatter={(v: number, name: string) => [`${v.toFixed(1)}%`, name]}
+            formatter={(v: any, name: any) => [`${v.toFixed(1)}%`, name]}
           />
           <Bar dataKey="composite" name="Composite" fill="#313A34" radius={[4, 4, 0, 0]} />
         </BarChart>
@@ -254,7 +254,7 @@ function IndexComparisonChart() {
             domain={[0, 22]}
           />
           <Tooltip
-            formatter={(v: any) => [`${v.toFixed(1)}%`, "Ann. return"]}
+            formatter={(v: any, name: any) => [`${v.toFixed(1)}%`, "Ann. return"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="ann" radius={[4, 4, 0, 0]}>
@@ -293,7 +293,7 @@ function BucketRiskChart() {
           />
           <ReferenceLine x={0} stroke="#B7C1B4" />
           <Tooltip
-            formatter={(v: any) => [`${v.toFixed(1)}%`, "CVaR (95%)"]}
+            formatter={(v: any, name: any) => [`${v.toFixed(1)}%`, "CVaR (95%)"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="cvar" radius={[0, 4, 4, 0]}>
@@ -1633,7 +1633,7 @@ export default function OsmrMethodology() {
               Open Platform <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/how-to-use-osmr"
+              href="/platform"
               className="inline-flex items-center gap-2 rounded-2xl border border-[#D4CDBF] bg-[#F7F8F6] px-6 py-3.5 text-sm font-medium text-[#313A34] transition hover:border-[#38483D] hover:text-[#313A34]"
             >
               How to Use OSMR

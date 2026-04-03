@@ -98,7 +98,7 @@ export default function Homepage() {
           {[
             { label: "Who It's For", href: "/who-its-for" },
             { label: "Methodology",    href: "/methodology" },
-            { label: "Where It Belongs",     href: "/where-it-belongs" },
+            { label: "Where It Fits",     href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 10.5, fontWeight: 600, color: E.muted, padding: "0 16px", borderLeft: `1px solid ${E.bdr}`, textDecoration: "none", height: 52, display: "flex", alignItems: "center", letterSpacing: "0.02em", transition: "color 0.12s" })}
               onMouseEnter={e => (e.currentTarget.style.color = E.text)}
@@ -348,7 +348,7 @@ export default function Homepage() {
           {[
             { label: "Who It's For", href: "/who-its-for" },
             { label: "Methodology",    href: "/methodology" },
-            { label: "Where It Belongs",     href: "/where-it-belongs" },
+            { label: "Where It Fits",     href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none", padding: "8px 0", display: "inline-block" })}>{label}</Link>
           ))}
