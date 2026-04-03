@@ -104,7 +104,7 @@ function RegimeChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v: any) => [`${v.toFixed(4)}`, "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[4, 4, 0, 0]}>
@@ -148,7 +148,7 @@ function YearByYearChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(4)}`, "Spearman r"]}
+            formatter={(v: any) => [`${v.toFixed(4)}`, "Spearman r"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="r" radius={[3, 3, 0, 0]}>
@@ -189,7 +189,7 @@ function OALReturnChart() {
           />
           <ReferenceLine y={0} stroke="#B7C1B4" strokeWidth={1} />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "Median return"]}
+            formatter={(v: any) => [`${v.toFixed(1)}%`, "Median return"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="median" radius={[4, 4, 0, 0]}>
@@ -254,7 +254,7 @@ function IndexComparisonChart() {
             domain={[0, 22]}
           />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "Ann. return"]}
+            formatter={(v: any) => [`${v.toFixed(1)}%`, "Ann. return"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="ann" radius={[4, 4, 0, 0]}>
@@ -293,7 +293,7 @@ function BucketRiskChart() {
           />
           <ReferenceLine x={0} stroke="#B7C1B4" />
           <Tooltip
-            formatter={(v: number) => [`${v.toFixed(1)}%`, "CVaR (95%)"]}
+            formatter={(v: any) => [`${v.toFixed(1)}%`, "CVaR (95%)"]}
             contentStyle={{ fontSize: 12, borderColor: "#B7C1B4", borderRadius: 8 }}
           />
           <Bar dataKey="cvar" radius={[0, 4, 4, 0]}>

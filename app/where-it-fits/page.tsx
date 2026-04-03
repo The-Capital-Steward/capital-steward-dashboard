@@ -1,6 +1,6 @@
 'use client'
 
-// P3 palette · DM Sans · AAA corrected · File → app/where-it-belongs/page.tsx
+// P3 palette · DM Sans · AAA corrected · File → app/where-it-fits/page.tsx
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
@@ -62,11 +62,11 @@ export default function WhereItBelongs() {
           {[
             { label: "Who It's For",     href: "/who-its-for" },
             { label: "Methodology",      href: "/methodology" },
-            { label: "Where It Belongs", href: "/where-it-belongs" },
+            { label: "Where It Fits", href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
               fontFamily: E.sans, fontSize: 10.5, fontWeight: 600,
-              color: href === "/where-it-belongs" ? E.text : E.muted,
+              color: href === "/where-it-fits" ? E.text : E.muted,
               padding: "0 16px", borderLeft: `1px solid ${E.bdr}`,
               textDecoration: "none", height: 52,
               display: "flex", alignItems: "center", letterSpacing: "0.02em",
@@ -88,7 +88,7 @@ export default function WhereItBelongs() {
       {/* ── HERO ── */}
       <div style={s({ borderBottom: `1px solid ${E.bdr}`, padding: "72px 44px 64px" })}>
         <div style={s({ maxWidth: 760 })}>
-          <Ey c="Where It Belongs" />
+          <Ey c="Where It Fits" />
           <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,56px)", fontWeight: 800, lineHeight: 1.05, color: E.text, letterSpacing: "-0.03em", marginBottom: 24 })}>
             A governance layer for
             <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.brick, fontSize: "clamp(40px,5.5vw,60px)", letterSpacing: "-0.01em" })}> what you already do.</em>

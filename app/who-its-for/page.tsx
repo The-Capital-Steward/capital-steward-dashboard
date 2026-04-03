@@ -1,6 +1,8 @@
 'use client'
 
 // P3 palette · DM Sans · AAA corrected · File → app/who-its-for/page.tsx
+// Revised: reader section added, Block 2 removed, pull quotes fixed,
+//          sidebar affirmative added, CTA closing line isolated
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
@@ -11,14 +13,14 @@ const E = {
   bg3:   "#C4CCC0",
   bdr:   "#B7C1B4",
   bdr2:  "#A8B4A5",
-  text:  "#313A34", // 8.50:1 AAA
-  body:  "#3F4640", // 7.02:1 AAA
-  muted: "#40463F", // 6.27:1 AA-large
-  dim:   "#41453F", // 7.06:1 AAA
-  gold:  "#715E37", // 4.52:1 AA-large display only
+  text:  "#313A34",
+  body:  "#3F4640",
+  muted: "#40463F",
+  dim:   "#41453F",
+  gold:  "#715E37",
   gatm:  "rgba(56,72,61,0.06)",
-  pos:   "#38483D", // 7.02:1 AAA
-  neg:   "#633838", // 7.05:1 AAA
+  pos:   "#38483D",
+  neg:   "#633838",
   brick: "#633838",
   sage:  "#38483D",
   mono:  "'IBM Plex Mono','Courier New',monospace",
@@ -51,9 +53,9 @@ export default function WhoItsFor() {
         </Link>
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
-            { label: "Who It's For",    href: "/who-its-for" },
-            { label: "Methodology",     href: "/methodology" },
-            { label: "Where It Belongs",href: "/where-it-belongs" },
+            { label: "Who It's For",  href: "/who-its-for" },
+            { label: "Methodology",   href: "/methodology" },
+            { label: "Where It Fits", href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
               fontFamily: E.sans, fontSize: 10.5, fontWeight: 600,
@@ -104,28 +106,38 @@ export default function WhoItsFor() {
             <B ch="This structure doesn't require anyone to lie. It just rewards certain kinds of analysis over others. Confident analysis. Actionable analysis. Analysis that makes readers feel like they have an edge. Analysis that confirms existing beliefs, because readers who feel validated keep subscribing." />
             <B ch="The result is a financial media ecosystem optimized for engagement rather than truth. Not because the people inside it are dishonest — most of them aren't — but because the incentives point in a different direction than accuracy. A framework that says 'the data is ambiguous and you should be cautious' doesn't build an audience. A framework that says 'here's your next big opportunity' does." />
 
-            {/* Pull quote */}
+            {/*
+              REVISION 1 — Pull quote reformatted.
+              Removed quotation marks. The voice is the platform's own.
+              Displaying as a block statement, not an attributed quote.
+            */}
             <div style={s({ borderLeft: `3px solid ${E.brick}`, padding: "16px 22px", margin: "28px 0", background: E.gatm })}>
               <p style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, lineHeight: 1.75, color: E.text })}>
-                &ldquo;The distortion is in the system, not necessarily in the people. That distinction matters. It means the problem is structural — and structural problems require structural solutions.&rdquo;
+                The distortion is in the system, not necessarily in the people. That distinction matters. It means the problem is structural — and structural problems require structural solutions.
               </p>
             </div>
 
             <B ch="The Capital Steward is a structural solution. It has no advertisers. It has no assets under management. It does not run a portfolio whose performance depends on its recommendations. It has no relationship with the companies it scores. The analysis is shaped entirely by what the data shows — because there is no other force acting on it." />
           </div>
 
-          {/* Block 2 — What we believe */}
+          {/*
+            REVISION 2 — New reader-facing section inserted between 01 and 03.
+            Draws from: loneliness of rigor, peer accountability, epistemic frustration.
+            Earns the page title "Who It's For" by naming the reader directly.
+            Block 2 "What We Believe" removed — it repeated methodology content
+            at the wrong emotional moment and has been cut.
+          */}
           <div style={s({ padding: "52px 44px", borderBottom: `1px solid ${E.bdr}`, background: E.gatm })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>02 — What we believe</p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>02 — The investor</p>
             <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.02em", marginBottom: 20 })}>
-              Markets price narrative. Structure is what narratives eventually have to answer to.
+              The investor this was built for already suspects something is structurally wrong with most of what they read.
             </h2>
-            <B ch="Every stock price is a statement of belief about the future. Every valuation multiple is the market's current price for a story about what a company will eventually demonstrate. Some of those stories are well-grounded — the company has already demonstrated most of what its valuation requires. Others are not — the valuation depends entirely on the market continuing to believe something the company has not yet shown." />
-            <B ch="This gap — between what a company has demonstrated and what its valuation requires — is where structural investment risk accumulates. It is not always visible in price. It can persist for years while a narrative holds. But it is always there, and it eventually has to reconcile." />
-            <B ch="The framework we built measures that gap. Not to predict when it will reconcile — that is not knowable — but to make it visible, to quantify it, and to put it in the hands of investors who would rather know than not know." />
+            <B ch="They are not looking for tips. They are looking for a framework they can defend — to themselves, to a board, to an investment committee — because they understand that operating with a flawed lens compounds quietly over time in ways that eventually become visible." />
+            <B ch="They have consumed financial research for years and still feel like they are missing something structural. The analysis they get is either too shallow to be useful or too incentivized to be trusted. They have learned to discount financial media at the pattern level, not just case by case." />
+            <B ch="They have probably felt, at some point, like the only person in their circle asking these kinds of questions. They are not." />
           </div>
 
-          {/* Block 3 — The foundation */}
+          {/* Block 3 — The foundation (renumbered to 03) */}
           <div style={s({ padding: "52px 44px" })}>
             <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>03 — The foundation</p>
             <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.02em", marginBottom: 20 })}>
@@ -140,11 +152,11 @@ export default function WhoItsFor() {
               <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 16 })}>What this means in practice</p>
               <div style={s({ display: "flex", flexDirection: "column" })}>
                 {[
-                  { principle: "Median over mean",           reason: "The mean in our highest-risk bucket is +12.6%. The median is −0.8%. We report the median." },
-                  { principle: "Limitations prominently",    reason: "Not in fine print. The false positive rate, the regime dependence, the open questions — in the main text." },
-                  { principle: "No forward-state language",  reason: "The platform describes structural conditions that exist now. It does not predict what will happen next." },
-                  { principle: "No overclaiming",            reason: "The signal is Modest full-period. We say so. The empirical record supports the framework. We say that too." },
-                  { principle: "No narratives about narratives", reason: "We measure structure. We don't editorialize about which companies deserve their valuations." },
+                  { principle: "Median over mean",              reason: "The mean in our highest-risk bucket is +12.6%. The median is −0.8%. We report the median." },
+                  { principle: "Limitations prominently",       reason: "Not in fine print. The false positive rate, the regime dependence, the open questions — in the main text." },
+                  { principle: "No forward-state language",     reason: "The platform describes structural conditions that exist now. It does not predict what will happen next." },
+                  { principle: "No overclaiming",               reason: "The signal is Modest full-period. We say so. The empirical record supports the framework. We say that too." },
+                  { principle: "No narratives about narratives",reason: "We measure structure. We don't editorialize about which companies deserve their valuations." },
                 ].map(({ principle, reason }, i) => (
                   <div key={principle} style={s({ display: "grid", gridTemplateColumns: "180px 1fr", gap: 16, padding: "14px 0", borderBottom: i < 4 ? `1px solid ${E.bdr}` : "none" })}>
                     <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text })}>{principle}</div>
@@ -160,9 +172,15 @@ export default function WhoItsFor() {
         {/* Sidebar */}
         <div style={s({ padding: "40px 32px", background: E.bg2 })}>
 
-          {/* What this is not */}
+          {/*
+            REVISION 3 — "What This Is Not" sidebar gets a single affirmative
+            line above the negatives. Reads as precision, not defensiveness.
+          */}
           <div style={s({ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${E.bdr}` })}>
             <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 14 })}>What this is not</p>
+            <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.7, color: E.text, fontWeight: 600, marginBottom: 14 })}>
+              What it is: a structural lens for investors who already know how to think.
+            </p>
             {[
               "Investment advice",
               "A stock picking service",
@@ -200,25 +218,36 @@ export default function WhoItsFor() {
             </Link>
           </div>
 
-          {/* Foundational principle */}
+          {/*
+            REVISION 4 — Foundational principle sidebar.
+            Quotation marks removed. Explicit attribution added.
+            Unattributed quotes implied an external source; this is the
+            platform's own founding statement and should read as such.
+          */}
           <div style={s({ border: `1px solid ${E.bdr}`, borderTop: `3px solid ${E.brick}`, background: E.bg, padding: "20px" })}>
             <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 12 })}>Foundational principle</p>
-            <p style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, lineHeight: 1.78, color: E.text })}>
-              &ldquo;The work must conform to truth as much as possible and cohere with wise stewardship of capital. This is not a constraint on the work — it is the reason the work matters.&rdquo;
+            <p style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, lineHeight: 1.78, color: E.text, marginBottom: 12 })}>
+              The work must conform to truth as much as possible and cohere with wise stewardship of capital. This is not a constraint on the work — it is the reason the work matters.
             </p>
+            <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.12em", color: E.muted })}>— The Capital Steward, founding principle</p>
           </div>
 
         </div>
       </div>
 
       {/* ── CTA ── */}
+      {/*
+        REVISION 5 — Closing line isolated from platform specs.
+        "If you recognize yourself in this, the platform is open." does more
+        work as a standalone beat. Specs moved into a subordinate line below.
+      */}
       <div style={s({ padding: "64px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 40, borderBottom: `1px solid ${E.bdr}` })}>
         <div style={s({ maxWidth: 520 })}>
-          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 12 })}>
+          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 16 })}>
             If you recognize yourself in this, the platform is open.
           </h2>
-          <p style={s({ fontFamily: E.sans, fontSize: 14.5, color: E.body, lineHeight: 1.75 })}>
-            ~5,200 U.S. equities. Two independently validated dimensions of structural risk. Updated weekly. No narrative inflation.
+          <p style={s({ fontFamily: E.mono, fontSize: 11.5, color: E.muted, lineHeight: 1.75, letterSpacing: "0.04em" })}>
+            ~5,200 U.S. equities · Two independently validated dimensions of structural risk · Updated weekly
           </p>
         </div>
         <div style={s({ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, flexShrink: 0 })}>
@@ -237,7 +266,7 @@ export default function WhoItsFor() {
             color: E.body, border: `1px solid ${E.bdr}`,
             textDecoration: "none", textAlign: "center" as const,
           })}>
-            Read the Methodology
+            Examine the Evidence
           </Link>
         </div>
       </div>
@@ -250,8 +279,8 @@ export default function WhoItsFor() {
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
           {[
-            { label: "Methodology",      href: "/methodology" },
-            { label: "Where It Belongs", href: "/where-it-belongs" },
+            { label: "Methodology",   href: "/methodology" },
+            { label: "Where It Fits", href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}
