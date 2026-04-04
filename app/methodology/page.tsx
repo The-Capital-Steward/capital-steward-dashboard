@@ -16,19 +16,19 @@ import {
 // ─── Design tokens — P3 public light ─────────────────────────────────────────
 
 const E = {
-  bg:     "#D7DDD3",  // unchanged
-  bg2:    "#E4E9E1",  // lightened — WCAG AAA body/muted/sage: 7.88:1
-  bg3:    "#DCE2D8",  // lightened — WCAG AAA body/muted/sage: 7.36:1
-  bdr:    "#B5BEB2",  // unchanged
-  bdr2:   "#A3AEA0",  // unchanged
-  text:   "#1A1E1A",  // unchanged — 12.19:1 on bg
-  body:   "#3F4640",  // unchanged — 7.02:1 on bg, 7.88:1 on bg2
-  muted:  "#40463F",  // unchanged — 7.01:1 on bg, 7.87:1 on bg2
-  sage:   "#38483D",  // unchanged — 7.02:1 on bg, 7.88:1 on bg2
-  brick:  "#8B3A2A",  // decorative/large-text only — 5.54:1 (passes large text AAA)
-  brickS: "#5A2519",  // small-text brick — 8.86:1 on bg, 9.95:1 on bg2 ✓
-  gold:   "#4E3918",  // darkened — 7.89:1 on bg, 8.86:1 on bg2 ✓ (was #7A5C2E)
-  blue:   "#243B5E",  // darkened — 8.15:1 on bg, 9.15:1 on bg2 ✓ (was #2E4A6B)
+  bg:     "#E0E6DC",  // C — lighter sage (chosen) · body 11.52:1 · muted 8.41:1
+  bg2:    "#EAEFEA",  // section alt · body 12.58:1 · muted 9.18:1
+  bg3:    "#E5EBE2",  // limitations section · body 12.08:1 · muted 8.82:1
+  bdr:    "#7C8579",  // adjusted for C background
+  bdr2:   "#687166",  // adjusted
+  text:   "#1A1E1A",  // 13.28:1 on bg
+  body:   "#2C2822",  // warm dark neutral — 11.52:1 on bg (was #3F4640 sage-tinted)
+  muted:  "#463C38",  // warm medium neutral — 8.41:1 on bg (was #40463F sage-tinted)
+  sage:   "#38483D",  // 7.64:1 on bg
+  brick:  "#8B3A2A",  // decorative/large-text only (5.14:1, passes large text AAA)
+  brickS: "#5A2519",  // small-text AAA — 9.69:1 on bg
+  gold:   "#4E3918",  // 8.59:1 on bg
+  blue:   "#243B5E",  // 8.87:1 on bg
   mono:   "'IBM Plex Mono','Courier New',monospace",
   sans:   "'DM Sans',system-ui,sans-serif",
   serif:  "'Playfair Display',Georgia,serif",
@@ -39,10 +39,10 @@ const s = (x: object) => x as React.CSSProperties
 
 // Script 04 — regime composite r
 const REGIME_DATA = [
-  { regime: "Pre-2020\n2009–2019", r: -0.0254, label: "Slight",       n: "155,069", color: E.muted   },
-  { regime: "COVID\n2020–2021",    r: -0.2427, label: "Substantive",  n: "47,953",  color: E.sage  },
-  { regime: "Post-COVID\n2022–26", r: -0.1124, label: "Substantive",  n: "82,223",  color: E.sage  },
-  { regime: "Full Period\n2009–26", r: -0.0907, label: "Strong",       n: "285,245", color: E.blue  },
+  { regime: "Pre-2020\n2009–2019", r: -0.0254, label: "Slight",       n: "155,069", color: E.muted,  opacity: 0.45 },
+  { regime: "COVID\n2020–2021",    r: -0.2427, label: "Substantive",  n: "47,953",  color: E.sage,  opacity: 1.0  },
+  { regime: "Post-COVID\n2022–26", r: -0.1124, label: "Substantive",  n: "82,223",  color: E.sage,  opacity: 0.75 },
+  { regime: "Full Period\n2009–26", r: -0.0907, label: "Strong",       n: "285,245", color: E.blue,  opacity: 0.85 },
 ]
 
 // Script 04 — year-by-year composite r (2009–2025)
@@ -106,8 +106,8 @@ const INDEX_DATA = [
 
 const SIGNAL_SCALE = [
   { label: "Negligible",  range: "|r| < 0.03", bg: E.bg3,   text: E.text  },  // 12.79:1 ✓
-  { label: "Slight",      range: "0.03–0.05",  bg: E.bdr,   text: E.text  },  //  8.82:1 ✓
-  { label: "Modest",      range: "0.05–0.07",  bg: E.bdr2,  text: E.text  },  //  7.33:1 ✓
+  { label: "Slight",      range: "0.03–0.05",  bg: '#C8D2C5',  text: E.text  },  // 10.83:1 ✓ (dedicated badge bg)
+  { label: "Modest",      range: "0.05–0.07",  bg: '#A8B4A4',  text: E.text  },  //  7.82:1 ✓ (dedicated badge bg)
   { label: "Strong",      range: "0.07–0.11",  bg: E.sage,  text: E.bg    },  //  7.02:1 ✓
   { label: "Substantive", range: "|r| ≥ 0.11", bg: E.text,  text: E.bg    },  // 12.19:1 ✓
 ]
@@ -156,7 +156,7 @@ function SectionNav({ active }: { active: string }) {
       borderBottom: `1px solid ${E.bdr}`, marginBottom: 0 })}>
       {NAV_SECTIONS.map(({ id, label }) => (
         <a key={id} href={`#${id}`} style={s({
-          fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.1em",
+          fontFamily: E.mono, fontSize: 11, letterSpacing: "0.1em",
           textTransform: "uppercase", padding: "5px 12px",
           background: active === id ? E.text : "transparent",
           color: active === id ? E.bg : E.muted,
@@ -171,24 +171,24 @@ function SectionNav({ active }: { active: string }) {
 // ─── Charts ───────────────────────────────────────────────────────────────────
 
 function RegimeChart() {
-  const CS = { fontFamily: E.mono, fontSize: 10, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         Composite Spearman r by market regime · <M>285,245</M> observations · 2009–2026
       </p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={REGIME_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
-          <XAxis dataKey="regime" tick={{ ...CS, fontSize: 9.5 }} axisLine={false} tickLine={false}/>
+          <CartesianGrid strokeDasharray="2 6" stroke={E.bdr} strokeOpacity={0.45} vertical={false}/>
+          <XAxis dataKey="regime" tick={{ ...CS, fontSize: 11 }} axisLine={false} tickLine={false}/>
           <YAxis tick={CS as any} axisLine={false} tickLine={false} width={52}
             tickFormatter={v => v.toFixed(2)} domain={[-0.28, 0.05]}/>
           <Tooltip content={<ChartTip fmt={(v: number) => `r = ${v.toFixed(4)}`}/>}/>
-          <ReferenceLine y={0} stroke={E.bdr2} strokeWidth={1}/>
+          <ReferenceLine y={0} stroke={E.sage} strokeWidth={1.5} strokeOpacity={0.6}/>
           <Bar dataKey="r" radius={[2,2,0,0]}>
             {REGIME_DATA.map((d,i) => (
-              <Cell key={i} fill={d.color}
+              <Cell key={i} fill={d.color} fillOpacity={d.opacity ?? 1}
                 opacity={d.label === "Slight" ? 0.55 : 1}/>
             ))}
           </Bar>
@@ -200,7 +200,7 @@ function RegimeChart() {
           { color: E.blue,  label: "Strong signal (0.07 ≤ |r| < 0.11)" },
           { color: E.muted, label: "Slight (|r| < 0.03)" },
         ].map(({ color, label }) => (
-          <span key={label} style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted,
+          <span key={label} style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted,
             display: "flex", alignItems: "center", gap: 6 })}>
             <span style={s({ width: 8, height: 8, borderRadius: 2, background: color, display: "inline-block" })}/>
             {label}
@@ -212,32 +212,33 @@ function RegimeChart() {
 }
 
 function YearlyChart() {
-  const CS = { fontFamily: E.mono, fontSize: 9, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         Composite Spearman r · year by year · 2009–2025
       </p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={YEARLY_DATA} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
+          <CartesianGrid strokeDasharray="2 6" stroke={E.bdr} strokeOpacity={0.45} vertical={false}/>
           <XAxis dataKey="year" tick={{ ...CS }} axisLine={false} tickLine={false}
             interval={1}/>
           <YAxis tick={CS as any} axisLine={false} tickLine={false} width={48}
             tickFormatter={v => v.toFixed(2)} domain={[-0.5, 0.14]}/>
           <Tooltip content={<ChartTip fmt={(v: number) => `r = ${v.toFixed(4)}`}/>}/>
-          <ReferenceLine y={0} stroke={E.bdr2} strokeWidth={1}/>
+          <ReferenceLine y={0} stroke={E.sage} strokeWidth={1.5} strokeOpacity={0.6}/>
           <Bar dataKey="r" radius={[2,2,0,0]}>
             {YEARLY_DATA.map((d,i) => (
               <Cell key={i}
-                fill={d.r < -0.11 ? E.sage : d.r < -0.03 ? E.blue : d.r > 0.03 ? E.brick : E.muted}
+                fill={d.r < -0.11 ? E.sage : d.r < -0.03 ? E.blue : d.r > 0.05 ? E.brick : E.muted}
+                fillOpacity={Math.abs(d.r) > 0.11 ? 1.0 : Math.abs(d.r) > 0.03 ? 0.75 : 0.45}
                 opacity={Math.abs(d.r) < 0.03 ? 0.5 : 1}/>
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8, lineHeight: 1.6 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 7, lineHeight: 1.6 })}>
         Red bars = signal inversion (higher risk outperformed). 2019 peak inversion
         (r=+0.088) coincides with the narrative premium cycle peak.
         2021 extraordinary signal (r=−0.437) reflects the subsequent collapse.
@@ -247,27 +248,27 @@ function YearlyChart() {
 }
 
 function OALReturnChart() {
-  const CS = { fontFamily: E.mono, fontSize: 10, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         Median 12-month return by anchor rung · full period 2009–2026
       </p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={OAL_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
+          <CartesianGrid strokeDasharray="2 6" stroke={E.bdr} strokeOpacity={0.45} vertical={false}/>
           <XAxis dataKey="rung" tick={CS as any} axisLine={false} tickLine={false}/>
           <YAxis tick={CS as any} axisLine={false} tickLine={false} width={44}
             tickFormatter={v => `${v}%`} domain={[-35, 20]}/>
-          <ReferenceLine y={0} stroke={E.bdr2} strokeWidth={1}/>
+          <ReferenceLine y={0} stroke={E.sage} strokeWidth={1.5} strokeOpacity={0.6}/>
           <Tooltip content={<ChartTip fmt={(v: number) => `${v.toFixed(1)}%`}/>}/>
           <Bar dataKey="median" radius={[2,2,0,0]}>
             {OAL_DATA.map((d,i) => <Cell key={i} fill={d.color}/>)}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 8 })}>
         FCF vs Revenue median spread: <M>+37.3pp</M> · Held across all regimes tested · n=290,902
       </p>
     </div>
@@ -275,29 +276,30 @@ function OALReturnChart() {
 }
 
 function QuintileChart() {
-  const CS = { fontFamily: E.mono, fontSize: 9.5, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         Median 12-month return by composite quintile
       </p>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={QUINTILE_DATA} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
-          <XAxis dataKey="q" tick={{ ...CS, fontSize: 9 }} axisLine={false} tickLine={false}/>
+          <CartesianGrid strokeDasharray="2 6" stroke={E.bdr} strokeOpacity={0.45} vertical={false}/>
+          <XAxis dataKey="q" tick={{ ...CS, fontSize: 11 }} axisLine={false} tickLine={false}/>
           <YAxis tick={CS as any} axisLine={false} tickLine={false} width={44}
             tickFormatter={v => `${v}%`}/>
           <Tooltip content={<ChartTip fmt={(v: number) => `${v.toFixed(1)}%`}/>}/>
           <Bar dataKey="composite" name="Composite" radius={[2,2,0,0]}>
             {QUINTILE_DATA.map((_,i) => (
               <Cell key={i} fill={i===0 ? E.sage : i===4 ? E.brick : E.muted}
+                fillOpacity={i===0 || i===4 ? 1.0 : 0.5}
                 opacity={i===0||i===4 ? 1 : 0.6}/>
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 8 })}>
         Signal concentrates in Q5 penalty: median geo return −10.9%, hit rate 51.2%.
       </p>
     </div>
@@ -305,10 +307,10 @@ function QuintileChart() {
 }
 
 function IndexChart() {
-  const CS = { fontFamily: E.mono, fontSize: 9.5, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         Annualized return comparison · equal-weight and cap-weight indexes · post-2013
       </p>
@@ -320,8 +322,8 @@ function IndexChart() {
             { name: "Full Scored\nUniverse (CW)",     val: 9.8,  color: E.muted },
           ]}
           margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke={E.bdr} vertical={false}/>
-          <XAxis dataKey="name" tick={{ ...CS, fontSize: 9 }} axisLine={false} tickLine={false}/>
+          <CartesianGrid strokeDasharray="2 6" stroke={E.bdr} strokeOpacity={0.45} vertical={false}/>
+          <XAxis dataKey="name" tick={{ ...CS, fontSize: 11 }} axisLine={false} tickLine={false}/>
           <YAxis tick={CS as any} axisLine={false} tickLine={false} width={40}
             tickFormatter={v => `${v}%`}/>
           <Tooltip content={<ChartTip fmt={(v: number) => `${v.toFixed(1)}% ann.`}/>}/>
@@ -335,10 +337,10 @@ function IndexChart() {
 }
 
 function CVaRChart() {
-  const CS = { fontFamily: E.mono, fontSize: 9.5, fill: E.muted }
+  const CS = { fontFamily: E.mono, fontSize: 11, fill: E.body }
   return (
     <div>
-      <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
         textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
         CVaR (95%) by composite bucket · average loss in worst 5% of 12-month windows
       </p>
@@ -359,7 +361,7 @@ function CVaRChart() {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 8 })}>
         Very High bucket: <M>39.6%</M> of observations ended below −25% over the subsequent 12 months.
         Very Low bucket: <M>10.5%</M>.
       </p>
@@ -374,38 +376,38 @@ function DistributionBars() {
   const maxVal = Math.max(...ranges.map(r => Math.max(r.vl, r.vh)))
   return (
     <div>
-      <div style={s({ display: "flex", gap: 12, marginBottom: 10 })}>
-        <span style={s({ display: "flex", alignItems: "center", gap: 6,
-          fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>
+      <div style={s({ display: "flex", gap: 11, marginBottom: 10 })}>
+        <span style={s({ display: "flex", alignItems: "center", gap: 7,
+          fontFamily: E.mono, fontSize: 11, color: E.muted })}>
           <span style={s({ width: 10, height: 10, background: E.sage, opacity: 0.8 })}/>
           Very Low risk
         </span>
-        <span style={s({ display: "flex", alignItems: "center", gap: 6,
-          fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>
+        <span style={s({ display: "flex", alignItems: "center", gap: 7,
+          fontFamily: E.mono, fontSize: 11, color: E.muted })}>
           <span style={s({ width: 10, height: 10, background: E.brick, opacity: 0.8 })}/>
           Very High risk
         </span>
       </div>
       {ranges.map(({ range, vl, vh }) => (
         <div key={range} style={s({ marginBottom: 8 })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginBottom: 3 })}>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginBottom: 3 })}>
             {range}
           </div>
           <div style={s({ display: "flex", flexDirection: "column", gap: 2 })}>
             <div style={s({ display: "flex", alignItems: "center", gap: 6 })}>
               <div style={s({ width: `${(vl / maxVal) * 100}%`, height: 8,
                 background: E.sage, opacity: 0.8 })}/>
-              <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.body })}>{vl}%</span>
+              <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>{vl}%</span>
             </div>
             <div style={s({ display: "flex", alignItems: "center", gap: 6 })}>
               <div style={s({ width: `${(vh / maxVal) * 100}%`, height: 8,
                 background: E.brick, opacity: 0.8 })}/>
-              <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.body })}>{vh}%</span>
+              <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>{vh}%</span>
             </div>
           </div>
         </div>
       ))}
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 8 })}>
         % of observations in each return band · Very Low: N=18,137 · Very High: N=26,695
       </p>
     </div>
@@ -425,35 +427,35 @@ function OALLadder() {
     <div style={s({ border: `1px solid ${E.bdr}`, background: E.bg2 })}>
       <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}`,
         display: "flex", alignItems: "center", justifyContent: "space-between" })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
+        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
           textTransform: "uppercase", color: E.text })}>Operational Anchor Ladder</span>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.body })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
           ↓ deeper = more structurally grounded
         </span>
       </div>
       {rungs.map(({ label, penalty, desc, color, median }, i) => (
         <div key={label} style={s({
           display: "grid", gridTemplateColumns: "90px 1fr auto",
-          alignItems: "center", gap: 12, padding: "14px 16px",
+          alignItems: "center", gap: 11, padding: "14px 16px",
           borderBottom: i < rungs.length - 1 ? `1px solid ${E.bdr}` : "none",
           borderLeft: `3px solid ${color}`,
         })}>
           <div>
-            <div style={s({ fontFamily: E.sans, fontSize: 13, fontWeight: 700,
+            <div style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700,
               color: E.text, marginBottom: 2 })}>{label}</div>
-            <div style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body })}>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
               +{penalty} penalty
             </div>
           </div>
-          <div style={s({ fontFamily: E.sans, fontSize: 12, color: E.body, lineHeight: 1.5 })}>
+          <div style={s({ fontFamily: E.sans, fontSize: 18, color: E.body, lineHeight: 1.5 })}>
             {desc}
           </div>
           <div style={s({ textAlign: "right" })}>
-            <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500,
+            <div style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 400,
               color: parseFloat(median) >= 0 ? E.sage : E.brickS })}>
               {median}
             </div>
-            <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>median</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>median</div>
           </div>
         </div>
       ))}
@@ -475,7 +477,7 @@ function SignalTable() {
         <thead>
           <tr style={s({ background: E.bg2, borderBottom: `1px solid ${E.bdr}` })}>
             {["Factor", "Spearman r", "95% CI", "Label", "N"].map(h => (
-              <th key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.12em",
+              <th key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: E.text, padding: "10px 14px",
                 textAlign: "left", fontWeight: 400 })}>{h}</th>
             ))}
@@ -484,14 +486,14 @@ function SignalTable() {
         <tbody>
           {axes.map(({ factor, r, ci, label, n }) => (
             <tr key={factor} style={s({ borderBottom: `1px solid ${E.bdr}`, background: E.bg })}>
-              <td style={s({ fontFamily: E.sans, fontSize: 13, fontWeight: 500,
+              <td style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 400,
                 color: E.text, padding: "10px 14px" })}>{factor}</td>
-              <td style={s({ fontFamily: E.mono, fontSize: 12, color: E.text,
+              <td style={s({ fontFamily: E.mono, fontSize: 11, color: E.text,
                 padding: "10px 14px" })}>{r}</td>
               <td style={s({ fontFamily: E.mono, fontSize: 11, color: E.body,
                 padding: "10px 14px" })}>{ci}</td>
               <td style={s({ padding: "10px 14px" })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 10,
+                <span style={s({ fontFamily: E.mono, fontSize: 11,
                   color: E.text, background: `${E.sage}18`,
                   padding: "2px 8px", letterSpacing: "0.08em" })}>{label}</span>
               </td>
@@ -501,7 +503,7 @@ function SignalTable() {
           ))}
         </tbody>
       </table>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8, lineHeight: 1.6 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 7, lineHeight: 1.6 })}>
         Bootstrap 95% confidence intervals (1,000 samples). All p-values = 0.0000.
         ICIR: Composite −0.7343, Axis 2 −0.6364, Axis 1 −0.5406.
         Inter-axis Pearson correlation: 0.0088 (shared variance &lt;0.01%).
@@ -527,9 +529,9 @@ function FactorStrip() {
           padding: "20px 0", textAlign: "center",
           borderRight: i < 2 ? `1px solid ${E.bdr}` : "none",
         })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 28, fontWeight: 500,
+          <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400,
             color: E.text, letterSpacing: "-0.03em", marginBottom: 4 })}>{value}</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.12em",
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em",
             textTransform: "uppercase", color: E.text })}>{label}</div>
         </div>
       ))}
@@ -546,7 +548,7 @@ function BucketTable() {
         <thead>
           <tr style={s({ background: E.bg2, borderBottom: `1px solid ${E.bdr}` })}>
             {["Bucket", "Median", "Geo Mean", "CVaR (95%)", "<−25%", "N"].map(h => (
-              <th key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.12em",
+              <th key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: E.text, padding: "10px 12px",
                 textAlign: h === "Bucket" ? "left" : "right", fontWeight: 400 })}>{h}</th>
             ))}
@@ -562,7 +564,7 @@ function BucketTable() {
                 borderBottom: `1px solid ${E.bdr}`,
                 background: isVH ? `${E.brick}08` : isVL ? `${E.sage}08` : E.bg,
               })}>
-                <td style={s({ fontFamily: E.sans, fontSize: 13, fontWeight: 500,
+                <td style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 400,
                   color: isVH ? E.brickS : isVL ? E.sage : E.text,
                   padding: "10px 12px" })}>{bucket}</td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
@@ -585,7 +587,7 @@ function BucketTable() {
           })}
         </tbody>
       </table>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8, lineHeight: 1.6 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 7, lineHeight: 1.6 })}>
         CVaR (95%): average loss in the worst 5% of 12-month outcomes.
         "{'<'}−25%": percentage of observations with 12-month return below −25%.
       </p>
@@ -608,7 +610,7 @@ function IndexTable() {
         <thead>
           <tr style={s({ background: E.bg2, borderBottom: `1px solid ${E.bdr}` })}>
             {["Index", "Ann Ret", "Sortino", "Max DD", "Months", ""].map(h => (
-              <th key={h} style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.12em",
+              <th key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: E.text, padding: "10px 12px",
                 textAlign: h === "Index" ? "left" : "right", fontWeight: 400 })}>{h}</th>
             ))}
@@ -618,17 +620,17 @@ function IndexTable() {
           {rows.map(({ idx, ann, sor, mdd, mo, note }, i) => (
             <tr key={idx} style={s({ borderBottom: `1px solid ${E.bdr}`,
               background: i === 0 ? `${E.sage}08` : E.bg })}>
-              <td style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 500,
+              <td style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 400,
                 color: i === 0 ? E.sage : E.text, padding: "10px 12px" })}>{idx}</td>
-              <td style={s({ fontFamily: E.mono, fontSize: 12, textAlign: "right",
+              <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                 color: E.text, padding: "10px 12px" })}>{ann}</td>
-              <td style={s({ fontFamily: E.mono, fontSize: 12, textAlign: "right",
+              <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                 color: E.body, padding: "10px 12px" })}>{sor}</td>
-              <td style={s({ fontFamily: E.mono, fontSize: 12, textAlign: "right",
+              <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                 color: E.body, padding: "10px 12px" })}>{mdd}</td>
               <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                 color: E.body, padding: "10px 12px" })}>{mo}</td>
-              <td style={s({ fontFamily: E.mono, fontSize: 10, color: E.body,
+              <td style={s({ fontFamily: E.mono, fontSize: 11, color: E.body,
                 padding: "10px 12px" })}>{note}</td>
             </tr>
           ))}
@@ -646,11 +648,11 @@ function Pre2020Callout() {
       borderLeft: `4px solid ${E.sage}`, background: E.bg,
       padding: "20px 24px", margin: "28px 0",
     })}>
-      <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
+      <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
         textTransform: "uppercase", color: E.sage, marginBottom: 14 })}>
         Pre-2020 Signal — Honest Disclosure
       </p>
-      <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.8, color: E.body, marginBottom: 14 })}>
+      <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body, marginBottom: 14 })}>
         The pre-2020 composite signal (r = −0.025) is lower than in subsequent regimes but is neither
         absent nor negligible in the factor-adjusted sense. The distinction matters. Spearman r measures
         rank-order consistency across the full return distribution simultaneously. When narrative premium
@@ -659,13 +661,13 @@ function Pre2020Callout() {
         long-short portfolio strips this market-wide effect and isolates the structural signal. Pre-2020,
         that signal produced <M>+16.5%</M> annualized alpha with a t-statistic of <M>3.55</M>.
       </p>
-      <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.8, color: E.body, marginBottom: 14 })}>
+      <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body, marginBottom: 14 })}>
         The weakest sub-period within the pre-2020 window is 2017–2019, when narrative premium expansion
         was at its peak and structurally fragile companies were broadly rewarded by the market. The 2019
         peak inversion (r = <M>+0.088</M>) is the strongest anti-signal year in the dataset. The 2021
         signal (r = <M>−0.437</M>, Substantive) reflects the subsequent collapse of those same narratives.
       </p>
-      <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.8, color: E.body })}>
+      <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body })}>
         The pattern is structurally coherent. The framework identified correctly which companies were fragile
         throughout. The market spent 2017–2019 rewarding exactly that fragility at the cross-sectional level.
         The factor-adjusted alpha confirms the structural condition was present and real the entire time.
@@ -680,9 +682,9 @@ function Pre2020Callout() {
 function LimitCard({ title, body }: { title: string; body: string }) {
   return (
     <div style={s({ border: `1px solid ${E.bdr}`, background: E.bg, padding: "18px 20px", marginBottom: 10 })}>
-      <p style={s({ fontFamily: E.sans, fontSize: 13.5, fontWeight: 700,
+      <p style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700,
         color: E.text, marginBottom: 8 })}>{title}</p>
-      <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>{body}</p>
+      <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body })}>{body}</p>
     </div>
   )
 }
@@ -692,9 +694,9 @@ function LimitCard({ title, body }: { title: string; body: string }) {
 function DesignCard({ title, body }: { title: string; body: string }) {
   return (
     <div style={s({ borderBottom: `1px solid ${E.bdr}`, padding: "16px 0" })}>
-      <p style={s({ fontFamily: E.mono, fontSize: 10.5, fontWeight: 600,
+      <p style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700,
         color: E.text, marginBottom: 6, letterSpacing: "0.04em" })}>{title}</p>
-      <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>{body}</p>
+      <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body })}>{body}</p>
     </div>
   )
 }
@@ -704,7 +706,7 @@ function DesignCard({ title, body }: { title: string; body: string }) {
 function Prose({ children, id, bg }: { children: React.ReactNode; id?: string; bg?: string }) {
   return (
     <div id={id} style={s({ background: bg ?? E.bg, borderTop: `1px solid ${E.bdr}` })}>
-      <div style={s({ maxWidth: 720, margin: "0 auto", padding: "56px 32px" })}>
+      <div style={s({ maxWidth: 720, margin: "0 auto", padding: "47px 29px" })}>
         {children}
       </div>
     </div>
@@ -713,7 +715,7 @@ function Prose({ children, id, bg }: { children: React.ReactNode; id?: string; b
 
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <p style={s({ fontFamily: E.sans, fontSize: 16, lineHeight: 1.85,
+    <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.85,
       color: E.body, marginBottom: 26 })}>{children}</p>
   )
 }
@@ -757,16 +759,16 @@ export default function MethodologyPage() {
         height: 48, padding: "0 32px", borderBottom: `1px solid ${E.bdr}`,
         background: E.bg, position: "sticky", top: 0, zIndex: 50 })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 6 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em",
+          <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em",
             textTransform: "uppercase", color: E.text })}>The Capital</span>
-          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.gold })}>Steward</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 18, color: E.gold })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", gap: 24 })}>
           {[
             { href: "/where-it-fits", label: "Where It Fits" },
             { href: "/platform", label: "Open Platform →" },
           ].map(({ href, label }) => (
-            <Link key={href} href={href} style={s({ fontFamily: E.mono, fontSize: 10,
+            <Link key={href} href={href} style={s({ fontFamily: E.mono, fontSize: 11,
               letterSpacing: "0.12em", textTransform: "uppercase",
               color: label.includes("Platform") ? E.sage : E.muted,
               textDecoration: "none" })}>{label}</Link>
@@ -775,15 +777,15 @@ export default function MethodologyPage() {
       </nav>
 
       {/* HEADER */}
-      <div style={s({ background: E.bg, padding: "64px 32px 40px", borderBottom: `1px solid ${E.bdr}` })}>
+      <div style={s({ background: E.bg, padding: "47px 29px 29px", borderBottom: `1px solid ${E.bdr}` })}>
         <div style={s({ maxWidth: 720, margin: "0 auto" })}>
-          <h1 style={s({ fontFamily: E.serif, fontSize: "clamp(26px, 4vw, 38px)",
+          <h1 style={s({ fontFamily: E.serif, fontSize: "clamp(29px, 4vw, 47px)",
             fontWeight: 400, lineHeight: 1.25, color: E.text,
             letterSpacing: "-0.02em", marginBottom: 16 })}>
             Most frameworks ask if the story is plausible.
             This one asks how far it's strayed from reality.
           </h1>
-          <p style={s({ fontFamily: E.sans, fontSize: 16, color: E.body,
+          <p style={s({ fontFamily: E.sans, fontSize: 18, color: E.body,
             lineHeight: 1.65, marginBottom: 24 })}>
             The structural case for narrative risk — and how we measure it.
           </p>
@@ -808,7 +810,7 @@ export default function MethodologyPage() {
         <div style={s({ position: "relative" })}>
           <div style={s({ position: "absolute", left: -32, top: 0, bottom: 0,
             width: 1, background: E.sage, opacity: 0.4 })}/>
-          <p style={s({ fontFamily: E.sans, fontSize: "clamp(15px, 2vw, 18px)",
+          <p style={s({ fontFamily: E.sans, fontSize: "18px",
             lineHeight: 1.85, color: E.body, marginBottom: 0 })}>
             This document is designed to answer one question: whether the claim that structural
             narrative risk is measurable — and that measuring it produces a consistent, defensible
@@ -846,7 +848,7 @@ export default function MethodologyPage() {
         {/* Empirical confirmation callout */}
         <div style={s({ border: `1px solid ${E.sage}`, background: `${E.sage}0A`,
           padding: "18px 22px", marginTop: 24 })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
+          <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
             textTransform: "uppercase", color: E.sage, marginBottom: 10 })}>
             Empirical confirmation
           </p>
@@ -858,10 +860,10 @@ export default function MethodologyPage() {
               { label: "NI median return",             val: "+11.2%",  sub: "43.8% of universe · 7yr anchor" },
             ].map(({ label, val, sub }) => (
               <div key={label}>
-                <div style={s({ fontFamily: E.mono, fontSize: 15, fontWeight: 500,
+                <div style={s({ fontFamily: E.mono, fontSize: 18, fontWeight: 400,
                   color: val.startsWith("−") ? E.brickS : E.sage, marginBottom: 2 })}>{val}</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body })}>{label}</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>{sub}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>{label}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>{sub}</div>
               </div>
             ))}
           </div>
@@ -921,7 +923,7 @@ export default function MethodologyPage() {
         </P>
 
         {/* Axis cards */}
-        <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 8 })}>
+        <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 11, marginTop: 8 })}>
           {[
             {
               id: "Axis 1",
@@ -948,25 +950,25 @@ export default function MethodologyPage() {
             },
           ].map(({ id, name, r, regime, body }) => (
             <div key={id} style={s({ border: `1px solid ${E.bdr}`, background: E.bg, padding: "18px 20px" })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
+              <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
                 textTransform: "uppercase", color: E.text, marginBottom: 6 })}>{id}</p>
-              <p style={s({ fontFamily: E.sans, fontSize: 14.5, fontWeight: 700,
+              <p style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700,
                 color: E.text, marginBottom: 8 })}>{name}</p>
-              <p style={s({ fontFamily: E.mono, fontSize: 12, color: E.sage, marginBottom: 6 })}>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.sage, marginBottom: 6 })}>
                 r = {r}
               </p>
-              <p style={s({ fontFamily: E.mono, fontSize: 10, color: E.body,
-                marginBottom: 12, lineHeight: 1.55, fontStyle: "italic" })}>{regime}</p>
-              <p style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.7, color: E.body })}>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body,
+                marginBottom: 11, lineHeight: 1.55, fontStyle: "italic" })}>{regime}</p>
+              <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.7, color: E.body })}>
                 {body}
               </p>
             </div>
           ))}
         </div>
 
-        <div style={s({ marginTop: 28, padding: "16px 20px", border: `1px solid ${E.bdr}`,
+        <div style={s({ marginTop: 28, padding: "11px 18px", border: `1px solid ${E.bdr}`,
           background: E.bg })}>
-          <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body })}>
             <strong>Axis 3 — Anchor Coverage Risk</strong> is a contextual disclosure layer. It is
             evaluated separately for firms with non-zero interest obligations and is not included in
             the composite score. The decision reflects an empirical finding: including Axis 3 at any
@@ -982,13 +984,13 @@ export default function MethodologyPage() {
       <DataSection id="independence">
         <div style={s({ maxWidth: 720, margin: "0 auto 36px" })}>
           {/* How to read Spearman r */}
-          <div style={s({ border: `1px solid ${E.bdr}`, padding: "16px 20px",
+          <div style={s({ border: `1px solid ${E.bdr}`, padding: "11px 18px",
             background: E.bg2, marginBottom: 32 })}>
-            <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+            <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
               textTransform: "uppercase", color: E.text, marginBottom: 10 })}>
               How to read Spearman r in an equity factor context
             </p>
-            <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body, marginBottom: 12 })}>
+            <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body, marginBottom: 12 })}>
               Cross-sectional Spearman r measures rank-order consistency between a risk score and
               subsequent returns across all companies simultaneously. The scale differs materially
               from behavioural or clinical research. The Fama-French value factor — one of the most
@@ -998,7 +1000,7 @@ export default function MethodologyPage() {
             <div style={s({ display: "flex", flexWrap: "wrap", gap: 6 })}>
               {SIGNAL_SCALE.map(({ label, range, bg, text }) => (
                 <span key={label} style={s({ background: bg, color: text, fontFamily: E.mono,
-                  fontSize: 10.5, padding: "5px 12px", letterSpacing: "0.06em" })}>
+                  fontSize: 11, padding: "5px 12px", letterSpacing: "0.06em" })}>
                   {label} — {range}
                 </span>
               ))}
@@ -1104,7 +1106,7 @@ export default function MethodologyPage() {
         <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 })}>
           <QuintileChart/>
           <div>
-            <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+            <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
               textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
               Quintile table — full period
             </p>
@@ -1112,7 +1114,7 @@ export default function MethodologyPage() {
               <thead>
                 <tr style={s({ borderBottom: `1px solid ${E.bdr}` })}>
                   {["Q", "Median", "Geo", "Hit", "N"].map(h => (
-                    <th key={h} style={s({ fontFamily: E.mono, fontSize: 9, color: E.text,
+                    <th key={h} style={s({ fontFamily: E.mono, fontSize: 11, color: E.text,
                       padding: "6px 8px", textAlign: h === "Q" ? "left" : "right",
                       fontWeight: 400, letterSpacing: "0.1em" })}>{h}</th>
                   ))}
@@ -1128,7 +1130,7 @@ export default function MethodologyPage() {
                 ].map(({ q, med, geo, hit, n }, i) => (
                   <tr key={q} style={s({ borderBottom: `1px solid ${E.bdr}`,
                     background: i===0 ? `${E.sage}08` : i===4 ? `${E.brick}08` : "transparent" })}>
-                    <td style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 500,
+                    <td style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 400,
                       color: i===0 ? E.sage : i===4 ? E.brickS : E.text, padding: "7px 8px" })}>{q}</td>
                     <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                       padding: "7px 8px", color: E.body })}>{med}</td>
@@ -1136,13 +1138,13 @@ export default function MethodologyPage() {
                       padding: "7px 8px", color: E.body })}>{geo}</td>
                     <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                       padding: "7px 8px", color: E.body })}>{hit}</td>
-                    <td style={s({ fontFamily: E.mono, fontSize: 10, textAlign: "right",
+                    <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                       padding: "7px 8px", color: E.body })}>{n}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, marginTop: 8 })}>
+            <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginTop: 8 })}>
               Q1–Q5 median spread: <M>+9.5 pp</M> · t=<M>17.56</M> · p=0.0000 · Full period 2009–2026.
             </p>
           </div>
@@ -1217,9 +1219,9 @@ export default function MethodologyPage() {
         <div style={s({ marginTop: 24 })}>
           <IndexTable/>
         </div>
-        <div style={s({ marginTop: 20, padding: "14px 18px", border: `1px solid ${E.bdr}`,
+        <div style={s({ marginTop: 18, padding: "14px 18px", border: `1px solid ${E.bdr}`,
           background: E.bg2 })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, lineHeight: 1.7 })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.7 })}>
             Very Low index: equal-weight, post-2013 (avg. ~123 constituents/month).
             Full-period figure includes 2009–2013 recovery with thinner constituent counts.
             Post-2013 (+18.9%) is the appropriate reference. OSMR-Filtered: cap-weight,
@@ -1239,7 +1241,7 @@ export default function MethodologyPage() {
 
         <div style={s({ marginTop: 36, padding: "18px 22px", border: `1px solid ${E.bdr}`,
           background: E.bg2 })}>
-          <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.8, color: E.body })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body })}>
             <M>39.6%</M> of Very High composite observations produced losses exceeding 25% over
             12 months. CVaR of <M>−88.9%</M> means that in the worst 5% of outcomes, the average
             loss approached near-total drawdown. The Very High mean return of approximately{" "}
@@ -1250,7 +1252,7 @@ export default function MethodologyPage() {
         </div>
 
         <div style={s({ marginTop: 36 })}>
-          <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.14em",
+          <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.14em",
             textTransform: "uppercase", color: E.text, marginBottom: 14 })}>
             Design decisions
           </p>
@@ -1298,12 +1300,12 @@ export default function MethodologyPage() {
             Not a guarantee. Not a timing signal. A structural lens that makes a specific kind
             of risk visible before it resolves.
           </p>
-          <p style={s({ fontFamily: E.sans, fontSize: 20, fontWeight: 700,
-            color: E.text, marginBottom: 36, letterSpacing: "-0.02em" })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700,
+            color: E.text, marginBottom: 29, letterSpacing: "-0.02em" })}>
             The structural map is live.
           </p>
           <Link href="/platform" style={s({
-            display: "inline-block", fontFamily: E.sans, fontSize: 13, fontWeight: 700,
+            display: "inline-block", fontFamily: E.sans, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.1em", textTransform: "uppercase",
             padding: "14px 36px", background: E.text, color: E.bg, textDecoration: "none",
           })}>
@@ -1314,7 +1316,7 @@ export default function MethodologyPage() {
 
       {/* APPENDIX */}
       <DataSection>
-        <p style={s({ fontFamily: E.mono, fontSize: 10, letterSpacing: "0.16em",
+        <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
           textTransform: "uppercase", color: E.text, marginBottom: 20 })}>
           Appendix — Methodology specification
         </p>
@@ -1330,9 +1332,9 @@ export default function MethodologyPage() {
             { field: "Index construction",   value: "Equal-weight (EW): simple average of 1-month returns across bucket constituents, monthly rebalancing. Cap-weight (CW): market-cap weighted average. Price filter ≥$5 applied at formation. Transaction costs not modeled." },
           ].map(({ field, value }) => (
             <div key={field} style={s({ borderBottom: `1px solid ${E.bdr}`, paddingBottom: 14 })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.12em",
+              <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em",
                 textTransform: "uppercase", color: E.text, marginBottom: 6 })}>{field}</p>
-              <p style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.65,
+              <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.65,
                 color: E.body })}>{value}</p>
             </div>
           ))}
@@ -1341,7 +1343,7 @@ export default function MethodologyPage() {
 
       {/* FOOTER */}
       <div style={s({ padding: "32px", borderTop: `1px solid ${E.bdr}`, textAlign: "center" })}>
-        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, lineHeight: 1.7 })}>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.7 })}>
           The Capital Steward, LLC · thecapitalsteward.com<br/>
           © 2026 The Capital Steward, LLC. For informational purposes only. Not investment advice.
           Past performance of a backtest does not guarantee future results.

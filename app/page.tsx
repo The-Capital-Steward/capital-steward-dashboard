@@ -12,18 +12,19 @@ import Link from "next/link"
 // ─── Design tokens — P3 public light ─────────────────────────────────────────
 
 const E = {
-  bg:     "#D7DDD3",
-  bg2:    "#E4E9E1",  // lightened for WCAG AAA
-  bg3:    "#DCE2D8",  // lightened for WCAG AAA
-  bdr:    "#B5BEB2",
-  bdr2:   "#A3AEA0",
-  text:   "#1A1E1A",
-  body:   "#3F4640",
-  muted:  "#40463F",
-  sage:   "#38483D",
-  brick:  "#8B3A2A",
-  brickS: "#5A2519",  // darkened for WCAG AAA small text
-  gold:   "#4E3918",  // darkened for WCAG AAA — was #7A5C2E
+  bg:     "#E0E6DC",  // C — lighter sage (chosen) · body 11.52:1 · muted 8.41:1
+  bg2:    "#EAEFEA",  // section alt · body 12.58:1 · muted 9.18:1
+  bg3:    "#E5EBE2",  // limitations section · body 12.08:1 · muted 8.82:1
+  bdr:    "#7C8579",  // adjusted for C background
+  bdr2:   "#687166",  // adjusted
+  text:   "#1A1E1A",  // 13.28:1 on bg
+  body:   "#2C2822",  // warm dark neutral — 11.52:1 on bg (was #3F4640 sage-tinted)
+  muted:  "#463C38",  // warm medium neutral — 8.41:1 on bg (was #40463F sage-tinted)
+  sage:   "#38483D",  // 7.64:1 on bg
+  brick:  "#8B3A2A",  // decorative/large-text only (5.14:1, passes large text AAA)
+  brickS: "#5A2519",  // small-text AAA — 9.69:1 on bg
+  gold:   "#4E3918",  // 8.59:1 on bg
+  blue:   "#243B5E",  // 8.87:1 on bg
   mono:   "'IBM Plex Mono','Courier New',monospace",
   sans:   "'DM Sans',system-ui,sans-serif",
   serif:  "'Playfair Display',Georgia,serif",
@@ -88,9 +89,9 @@ function Nav() {
       background: E.bg, position: "sticky", top: 0, zIndex: 50,
     })}>
       <div style={s({ display: "flex", alignItems: "baseline", gap: 6 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em",
+        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em",
           textTransform: "uppercase", color: E.muted })}>The Capital</span>
-        <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15,
+        <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 18,
           color: E.gold })}>Steward</span>
       </div>
       <div style={s({ display: "flex", alignItems: "center", gap: 28 })}>
@@ -100,12 +101,12 @@ function Nav() {
           { href: "/who-its-for",  label: "Who It's For"        },
         ].map(({ href, label }) => (
           <Link key={href} href={href} style={s({
-            fontFamily: E.mono, fontSize: 10, letterSpacing: "0.1em",
+            fontFamily: E.mono, fontSize: 11, letterSpacing: "0.1em",
             textTransform: "uppercase", color: E.body, textDecoration: "none",
           })}>{label}</Link>
         ))}
         <Link href="/platform" style={s({
-          fontFamily: E.mono, fontSize: 10, letterSpacing: "0.1em",
+          fontFamily: E.mono, fontSize: 11, letterSpacing: "0.1em",
           textTransform: "uppercase", color: E.bg, background: E.text,
           padding: "6px 14px", textDecoration: "none",
         })}>Open Platform →</Link>
@@ -122,7 +123,7 @@ function StatusBar() {
       display: "flex", justifyContent: "center", padding: "8px 32px",
       borderBottom: `1px solid ${E.bdr}`, background: E.bg2,
     })}>
-      <span style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em",
+      <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em",
         textTransform: "uppercase", color: E.body, display: "flex",
         alignItems: "center", gap: 8 })}>
         <span style={s({ width: 5, height: 5, borderRadius: "50%",
@@ -145,7 +146,7 @@ function Hero() {
       {/* Headline */}
       <h1 style={s({
         fontFamily: E.serif, fontWeight: 400, textAlign: "center",
-        fontSize: "clamp(32px, 5.5vw, 58px)", lineHeight: 1.15,
+        fontSize: "clamp(47px, 6vw, 76px)", lineHeight: 1.15,
         letterSpacing: "-0.025em", marginBottom: 28, maxWidth: 680,
       })}>
         <span style={s({ color: E.text })}>Markets value </span>
@@ -157,7 +158,7 @@ function Hero() {
 
       {/* Subhead */}
       <p style={s({
-        fontFamily: E.sans, fontSize: "clamp(15px, 2vw, 18px)", lineHeight: 1.8,
+        fontFamily: E.sans, fontSize: "18px", lineHeight: 1.8,
         color: E.body, textAlign: "center", maxWidth: 580, marginBottom: 28,
       })}>
         Most valuation frameworks assume that equity markets price fundamentals.
@@ -172,7 +173,7 @@ function Hero() {
       {/* Product definition line */}
       <p style={s({
         fontFamily: E.mono, fontSize: 11, color: E.body, letterSpacing: "0.06em",
-        marginBottom: 36, textAlign: "center",
+        marginBottom: 29, textAlign: "center",
       })}>
         A structural risk scoring system for ~5,200 U.S. equities — updated weekly,
         grounded in 17 years of validated data.
@@ -181,7 +182,7 @@ function Hero() {
       {/* CTAs */}
       <div style={s({ display: "flex", gap: 10, alignItems: "center" })}>
         <Link href="/platform" style={s({
-          fontFamily: E.sans, fontSize: 13, fontWeight: 700,
+          fontFamily: E.sans, fontSize: 18, fontWeight: 700,
           letterSpacing: "0.08em", textTransform: "uppercase",
           padding: "13px 28px", background: E.text, color: E.bg,
           textDecoration: "none",
@@ -189,7 +190,7 @@ function Hero() {
           Open Platform →
         </Link>
         <Link href="/methodology" style={s({
-          fontFamily: E.sans, fontSize: 13, fontWeight: 600,
+          fontFamily: E.sans, fontSize: 18, fontWeight: 700,
           letterSpacing: "0.08em", textTransform: "uppercase",
           padding: "13px 28px", background: "transparent", color: E.body,
           border: `1px solid ${E.bdr2}`, textDecoration: "none",
@@ -206,7 +207,7 @@ function Hero() {
 function Section1() {
   // Option B: Left margin rule in sage at 40% opacity, full height of column, removes below 960px
   const emphasisStyle = s({
-    fontWeight: 600,
+    fontWeight: 700,
     color: E.text,
   })
 
@@ -224,7 +225,7 @@ function Section1() {
         })}/>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           Every stock price is a statement of belief. The multiple — P/E, EV/EBITDA,
@@ -233,7 +234,7 @@ function Section1() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           Some of those stories are well-grounded. The company has already built
@@ -247,7 +248,7 @@ function Section1() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           Most valuation frameworks don't ask how wide that distance is. They ask
@@ -256,7 +257,7 @@ function Section1() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body,
         })}>
           Seventeen years of data across ~5,200 U.S. equities show that the
@@ -290,20 +291,20 @@ function StatTiles() {
             borderRight: i < 3 ? `1px solid ${E.bdr}` : "none",
           })}>
             <div style={s({
-              fontFamily: E.mono, fontSize: "clamp(24px, 3vw, 32px)",
-              fontWeight: 500, color: E.text, letterSpacing: "-0.03em",
-              lineHeight: 1, marginBottom: 8,
+              fontFamily: E.mono, fontSize: "29px",
+              fontWeight: 400, color: E.text, letterSpacing: "-0.03em",
+              lineHeight: 1, marginBottom: 7,
             })}>
               {stat}
             </div>
             <div style={s({
-              fontFamily: E.sans, fontSize: 13, fontWeight: 500,
+              fontFamily: E.sans, fontSize: 18, fontWeight: 400,
               color: E.body, marginBottom: 4, lineHeight: 1.4,
             })}>
               {label}
             </div>
             <div style={s({
-              fontFamily: E.mono, fontSize: 10, color: E.body,
+              fontFamily: E.mono, fontSize: 11, color: E.body,
               letterSpacing: "0.06em",
             })}>
               {sub}
@@ -332,14 +333,14 @@ function Section2() {
         maxWidth: 720, margin: "0 auto", padding: "80px 32px",
       })}>
         <p style={s({
-          fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: E.text, marginBottom: 32,
+          fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: E.text, marginBottom: 29,
         })}>
           The Evidence
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           The most durable finding in the data is also the simplest. Companies that
@@ -352,7 +353,7 @@ function Section2() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           The second question any serious allocator asks about a new framework is
@@ -369,7 +370,7 @@ function Section2() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body,
         })}>
           The signal concentrates where it matters most. In the highest structural
@@ -395,14 +396,14 @@ function Section3() {
         maxWidth: 720, margin: "0 auto", padding: "80px 32px",
       })}>
         <p style={s({
-          fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: E.muted, marginBottom: 32,
+          fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em",
+          textTransform: "uppercase", color: E.muted, marginBottom: 29,
         })}>
           What It Produces
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           The platform scores approximately 5,200 U.S. equities across two
@@ -414,7 +415,7 @@ function Section3() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 40,
         })}>
           Every company in the universe receives an anchor rung — a designation
@@ -433,34 +434,34 @@ function Section3() {
             padding: "10px 16px", borderBottom: `1px solid ${E.bdr}`,
             display: "flex", justifyContent: "space-between", alignItems: "center",
           })}>
-            <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
+            <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.16em",
               textTransform: "uppercase", color: E.text })}>
               Operational Anchor Ladder
             </span>
-            <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.body })}>
+            <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
               ↓ deeper = stronger structural anchor
             </span>
           </div>
           {OAL_RUNGS.map(({ label, desc, color, penalty }, i) => (
             <div key={label} style={s({
               display: "grid", gridTemplateColumns: "80px 1fr auto",
-              alignItems: "center", gap: 12,
+              alignItems: "center", gap: 11,
               padding: "14px 16px",
               borderBottom: i < OAL_RUNGS.length - 1 ? `1px solid ${E.bdr}` : "none",
               borderLeft: `3px solid ${color}`,
             })}>
               <span style={s({
-                fontFamily: E.sans, fontSize: 13, fontWeight: 700, color: E.text,
+                fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text,
               })}>
                 {label}
               </span>
               <span style={s({
-                fontFamily: E.sans, fontSize: 12.5, color: E.body,
+                fontFamily: E.sans, fontSize: 18, color: E.body,
               })}>
                 {desc}
               </span>
               <span style={s({
-                fontFamily: E.mono, fontSize: 10, color: E.body, whiteSpace: "nowrap",
+                fontFamily: E.mono, fontSize: 11, color: E.body, whiteSpace: "nowrap",
               })}>
                 +{penalty} penalty
               </span>
@@ -469,7 +470,7 @@ function Section3() {
         </div>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body, marginBottom: 28,
         })}>
           The second is trajectory. A company moving toward deeper operational
@@ -479,7 +480,7 @@ function Section3() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(15px, 1.8vw, 17px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.9, color: E.body,
         })}>
           The composite score ranks every company against the full universe on both
@@ -498,13 +499,13 @@ function Section4() {
   return (
     <section style={s({ background: E.bg, borderBottom: `1px solid ${E.bdr}` })}>
       <div style={s({
-        maxWidth: 560, margin: "0 auto", padding: "96px 32px",
+        maxWidth: 560, margin: "0 auto", padding: "47px 29px",
         textAlign: "center",
       })}>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(16px, 2vw, 20px)",
-          lineHeight: 1.8, color: E.body, marginBottom: 20,
+          fontFamily: E.sans, fontSize: "18px",
+          lineHeight: 1.8, color: E.body, marginBottom: 18,
         })}>
           For a long time, the question was whether structural narrative risk —
           the distance between what a company has built and what its valuation
@@ -512,7 +513,7 @@ function Section4() {
         </p>
 
         <p style={s({
-          fontFamily: E.sans, fontSize: "clamp(16px, 2vw, 20px)",
+          fontFamily: E.sans, fontSize: "18px",
           lineHeight: 1.8, color: E.body, marginBottom: 40,
         })}>
           The answer required a framework that could evaluate the full U.S. equity
@@ -523,7 +524,7 @@ function Section4() {
         {/* "It does now." — isolated, additional space above */}
         <p style={s({
           fontFamily: E.serif, fontStyle: "italic",
-          fontSize: "clamp(22px, 3.5vw, 32px)", fontWeight: 400,
+          fontSize: "29px", fontWeight: 400,
           color: E.text, letterSpacing: "-0.02em",
           marginTop: 48, marginBottom: 48,
           lineHeight: 1.2,
@@ -534,7 +535,7 @@ function Section4() {
         {/* CTAs — identical visual treatment to above-fold */}
         <div style={s({ display: "flex", gap: 10, alignItems: "center", justifyContent: "center" })}>
           <Link href="/platform" style={s({
-            fontFamily: E.sans, fontSize: 13, fontWeight: 700,
+            fontFamily: E.sans, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.08em", textTransform: "uppercase",
             padding: "13px 28px", background: E.text, color: E.bg,
             textDecoration: "none",
@@ -542,7 +543,7 @@ function Section4() {
             Open Platform →
           </Link>
           <Link href="/methodology" style={s({
-            fontFamily: E.sans, fontSize: 13, fontWeight: 600,
+            fontFamily: E.sans, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.08em", textTransform: "uppercase",
             padding: "13px 28px", background: "transparent", color: E.body,
             border: `1px solid ${E.bdr2}`, textDecoration: "none",
@@ -560,18 +561,18 @@ function Section4() {
 function Footer() {
   return (
     <footer style={s({
-      padding: "28px 32px", borderTop: `1px solid ${E.bdr}`,
+      padding: "29px 29px", borderTop: `1px solid ${E.bdr}`,
       background: E.bg2,
       display: "flex", justifyContent: "space-between", alignItems: "center",
-      flexWrap: "wrap", gap: 12,
+      flexWrap: "wrap", gap: 11,
     })}>
       <div style={s({ display: "flex", alignItems: "baseline", gap: 6 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em",
+        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em",
           textTransform: "uppercase", color: E.muted })}>The Capital</span>
-        <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 14,
+        <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 18,
           color: E.gold })}>Steward</span>
       </div>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, lineHeight: 1.7 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.7 })}>
         © 2026 The Capital Steward, LLC. For informational purposes only.
         Not investment advice.
       </p>
@@ -582,7 +583,7 @@ function Footer() {
           { href: "/who-its-for",  label: "Who It's For" },
         ].map(({ href, label }) => (
           <Link key={href} href={href} style={s({
-            fontFamily: E.mono, fontSize: 9.5, color: E.body,
+            fontFamily: E.mono, fontSize: 11, color: E.body,
             textDecoration: "none", letterSpacing: "0.1em",
           })}>{label}</Link>
         ))}
