@@ -1,30 +1,27 @@
 'use client'
 
 // P3 palette · DM Sans · AAA corrected · File → app/where-it-fits/page.tsx
-// Revised: secondary CTA → "Examine the Evidence",
-//          "Platform access" label removed from CTA section,
-//          component renamed WhereItFits
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 const E = {
-  bg:    "#D7DDD3",
-  bg2:   "#CBD2C7",
-  bg3:   "#C4CCC0",
-  bdr:   "#B7C1B4",
-  bdr2:  "#A8B4A5",
-  text:  "#313A34",
-  body:  "#3F4640",
-  muted: "#40463F",
-  dim:   "#41453F",
-  gold:  "#715E37",
+  bg:    "#E0E6DC",
+  bg2:   "#EAEFEA",
+  bg3:   "#E5EBE2",
+  bdr:   "#7C8579",
+  bdr2:  "#687166",
+  text:  "#1A1E1A",
+  body:  "#2C2822",
+  muted: "#463C38",
+  dim:   "#463C38",
+  gold:  "#4E3918",
   gatm:  "rgba(56,72,61,0.06)",
   pos:   "#38483D",
-  neg:   "#633838",
-  brick: "#633838",
+  neg:   "#5A2519",
+  brick: "#8B3A2A",
   sage:  "#38483D",
-  amber: "#6B4F2A",
+  amber: "#4E3918",
   mono:  "'IBM Plex Mono','Courier New',monospace",
   sans:  "'DM Sans',system-ui,sans-serif",
   serif: "'Playfair Display',Georgia,serif",
@@ -33,15 +30,15 @@ const E = {
 const s = (x: object) => x as React.CSSProperties
 
 const Ey = ({ c }: { c: string }) => (
-  <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 10 })}>{c}</p>
+  <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 10 })}>{c}</p>
 )
 
 const SH = ({ ch }: { ch: React.ReactNode }) => (
-  <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(20px,2.5vw,26px)", fontWeight: 800, lineHeight: 1.15, color: E.text, letterSpacing: "-0.02em", marginBottom: 18 })}>{ch}</h2>
+  <h2 style={s({ fontFamily: E.sans, fontSize: "18px", fontWeight: 700, lineHeight: 1.15, color: E.text, letterSpacing: "-0.02em", marginBottom: 18 })}>{ch}</h2>
 )
 
 const B = ({ ch }: { ch: React.ReactNode }) => (
-  <p style={s({ fontFamily: E.sans, fontSize: 14, lineHeight: 1.85, color: E.body, marginBottom: 16 })}>{ch}</p>
+  <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.85, color: E.body, marginBottom: 16 })}>{ch}</p>
 )
 
 export default function WhereItFits() {
@@ -53,13 +50,13 @@ export default function WhereItFits() {
         position: "sticky", top: 0, zIndex: 100,
         display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "0 44px", height: 52,
-        background: "rgba(215,221,211,0.97)",
+        background: "rgba(224,230,220,0.97)",
         borderBottom: `1px solid ${E.bdr}`,
         backdropFilter: "blur(12px)",
       })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9.5, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
-          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 17, color: E.text, marginLeft: 8 })}>Steward</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 400, letterSpacing: "0.32em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 18, color: E.text, marginLeft: 8 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", alignItems: "center" })}>
           {[
@@ -68,7 +65,7 @@ export default function WhereItFits() {
             { label: "Where It Fits", href: "/where-it-fits" },
           ].map(({ label, href }) => (
             <Link key={href} href={href} style={s({
-              fontFamily: E.sans, fontSize: 10.5, fontWeight: 600,
+              fontFamily: E.sans, fontSize: 11, fontWeight: 700,
               color: href === "/where-it-fits" ? E.text : E.muted,
               padding: "0 16px", borderLeft: `1px solid ${E.bdr}`,
               textDecoration: "none", height: 52,
@@ -78,7 +75,7 @@ export default function WhereItFits() {
             </Link>
           ))}
           <Link href="/platform" style={s({
-            fontFamily: E.sans, fontSize: 10.5, fontWeight: 700,
+            fontFamily: E.sans, fontSize: 11, fontWeight: 700,
             letterSpacing: "0.1em", textTransform: "uppercase" as const,
             padding: "8px 20px", background: E.text, color: E.bg,
             textDecoration: "none", marginLeft: 20,
@@ -89,17 +86,17 @@ export default function WhereItFits() {
       </nav>
 
       {/* ── HERO ── */}
-      <div style={s({ borderBottom: `1px solid ${E.bdr}`, padding: "72px 44px 64px" })}>
+      <div style={s({ borderBottom: `1px solid ${E.bdr}`, padding: "47px 44px 47px" })}>
         <div style={s({ maxWidth: 760 })}>
           <Ey c="Where It Fits" />
-          <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(36px,5vw,56px)", fontWeight: 800, lineHeight: 1.05, color: E.text, letterSpacing: "-0.03em", marginBottom: 24 })}>
+          <h1 style={s({ fontFamily: E.sans, fontSize: "clamp(47px, 6vw, 76px)", fontWeight: 700, lineHeight: 1.05, color: E.text, letterSpacing: "-0.03em", marginBottom: 24 })}>
             A governance layer for
-            <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.brick, fontSize: "clamp(40px,5.5vw,60px)", letterSpacing: "-0.01em" })}> what you already do.</em>
+            <em style={s({ fontStyle: "italic", fontFamily: E.serif, fontWeight: 400, color: E.brick, fontSize: "clamp(47px, 6vw, 76px)", letterSpacing: "-0.01em" })}> what you already do.</em>
           </h1>
-          <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.8, color: E.body, maxWidth: 580, marginBottom: 14 })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body, maxWidth: 580, marginBottom: 14 })}>
             This framework is not a replacement for fundamental analysis. It is a structural pre-screening layer — a way of knowing, before you look closely at anything, whether the universe you&apos;re examining is worth examining.
           </p>
-          <p style={s({ fontFamily: E.sans, fontSize: 15.5, lineHeight: 1.8, color: E.body, maxWidth: 580 })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body, maxWidth: 580 })}>
             What it produces is not a recommendation. It is structural context — and serious investors have always made better decisions with more of it.
           </p>
         </div>
@@ -110,7 +107,7 @@ export default function WhereItFits() {
         <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr" })}>
 
           {/* Left */}
-          <div style={s({ padding: "52px 44px", borderRight: `1px solid ${E.bdr}` })}>
+          <div style={s({ padding: "29px 44px", borderRight: `1px solid ${E.bdr}` })}>
             <Ey c="Section I" />
             <SH ch="Where it fits in an existing process." />
             <B ch="Most investment processes already have a research workflow. You identify candidates, you analyze them, you size positions, you monitor them. OSMR doesn't replace any of those steps — it sits upstream of all of them." />
@@ -120,7 +117,7 @@ export default function WhereItFits() {
             {/* Process diagram */}
             <div style={s({ marginTop: 28, border: `1px solid ${E.bdr}`, background: E.bg2 })}>
               <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}` })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Where OSMR enters the process</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Where OSMR enters the process</p>
               </div>
               {[
                 { step: "01", label: "Structural screening",     desc: "Use the market map to identify zones worth examining. Filter by composite bucket and OAL rung.", highlight: true },
@@ -132,11 +129,11 @@ export default function WhereItFits() {
                 <div key={step} style={s({ display: "flex", gap: 16, padding: "14px 16px", borderBottom: `1px solid ${E.bdr}`, background: highlight ? E.gatm : "transparent" })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: highlight ? E.dim : E.muted, flexShrink: 0, marginTop: 1 })}>{step}</div>
                   <div style={s({ flex: 1 })}>
-                    <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text, marginBottom: 3 })}>{label}</div>
-                    <div style={s({ fontFamily: E.sans, fontSize: 12, lineHeight: 1.65, color: E.body })}>{desc}</div>
+                    <div style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text, marginBottom: 3 })}>{label}</div>
+                    <div style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.65, color: E.body })}>{desc}</div>
                   </div>
                   {highlight && (
-                    <div style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, flexShrink: 0, alignSelf: "center" })}>OSMR</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, flexShrink: 0, alignSelf: "center" })}>OSMR</div>
                   )}
                 </div>
               ))}
@@ -144,7 +141,7 @@ export default function WhereItFits() {
           </div>
 
           {/* Right */}
-          <div style={s({ padding: "52px 44px" })}>
+          <div style={s({ padding: "29px 44px" })}>
             <Ey c="The three uses" />
             <SH ch="Screen. Validate. Monitor." />
 
@@ -170,18 +167,18 @@ export default function WhereItFits() {
                   <div style={s({ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 })}>
                     <div style={s({ display: "flex", gap: 12, alignItems: "baseline" })}>
                       <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, letterSpacing: "0.1em" })}>{num}</span>
-                      <span style={s({ fontFamily: E.sans, fontSize: 15, fontWeight: 800, color: E.text, letterSpacing: "-0.02em" })}>{title}</span>
+                      <span style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text, letterSpacing: "-0.02em" })}>{title}</span>
                     </div>
-                    <span style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted })}>{detail}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>{detail}</span>
                   </div>
-                  <p style={s({ fontFamily: E.sans, fontSize: 13, lineHeight: 1.75, color: E.body })}>{body}</p>
+                  <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body })}>{body}</p>
                 </div>
               ))}
             </div>
 
             {/* Honest caveat */}
             <div style={s({ border: `1px solid ${E.bdr}`, background: E.gatm, padding: "18px 20px" })}>
-              <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 10 })}>What this is not</p>
+              <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, marginBottom: 10 })}>What this is not</p>
               <div style={s({ display: "flex", flexDirection: "column", gap: 8 })}>
                 {[
                   "Not a buy or sell signal system",
@@ -190,8 +187,8 @@ export default function WhereItFits() {
                   "Not a guarantee — 68.5% of Very High entries do not produce severe losses in 12 months",
                 ].map(item => (
                   <div key={item} style={s({ display: "flex", gap: 10, alignItems: "baseline" })}>
-                    <div style={s({ fontFamily: E.mono, fontSize: 10, color: E.muted, flexShrink: 0 })}>—</div>
-                    <span style={s({ fontFamily: E.sans, fontSize: 12.5, color: E.body, lineHeight: 1.65 })}>{item}</span>
+                    <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, flexShrink: 0 })}>—</div>
+                    <span style={s({ fontFamily: E.sans, fontSize: 18, color: E.body, lineHeight: 1.65 })}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -206,7 +203,7 @@ export default function WhereItFits() {
         <div style={s({ padding: "52px 44px 0" })}>
           <Ey c="Section II" />
           <SH ch="Reading the structural signal." />
-          <p style={s({ fontFamily: E.sans, fontSize: 14.5, lineHeight: 1.8, color: E.body, maxWidth: 620, marginBottom: 36 })}>
+          <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.8, color: E.body, maxWidth: 620, marginBottom: 36 })}>
             Each composite bucket describes a structural condition — not a predicted outcome. Here is what each state tells you structurally, and what it explicitly does not tell you.
           </p>
         </div>
@@ -217,7 +214,7 @@ export default function WhereItFits() {
           {/* Header */}
           <div style={s({ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: `1px solid ${E.bdr}`, background: E.bg3 })}>
             {["State", "What it tells you structurally", "What it does not tell you"].map((h, i) => (
-              <div key={h} style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, padding: "10px 20px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>{h}</div>
+              <div key={h} style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted, padding: "10px 20px", borderRight: i < 2 ? `1px solid ${E.bdr}` : "none" })}>{h}</div>
             ))}
           </div>
 
@@ -256,13 +253,13 @@ export default function WhereItFits() {
             <div key={state} style={s({ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: i < 4 ? `1px solid ${E.bdr}` : "none", background: bg })}>
               <div style={s({ padding: "20px", borderRight: `1px solid ${E.bdr}`, display: "flex", alignItems: "flex-start", gap: 10 })}>
                 <div style={s({ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0, marginTop: 5 })} />
-                <span style={s({ fontFamily: E.sans, fontSize: 13, fontWeight: 700, color: E.text })}>{state}</span>
+                <span style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text })}>{state}</span>
               </div>
               <div style={s({ padding: "20px", borderRight: `1px solid ${E.bdr}` })}>
-                <p style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.72, color: E.body })}>{tells}</p>
+                <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.72, color: E.body })}>{tells}</p>
               </div>
               <div style={s({ padding: "20px" })}>
-                <p style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.72, color: E.body })}>{doesnt}</p>
+                <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.72, color: E.body })}>{doesnt}</p>
               </div>
             </div>
           ))}
@@ -283,7 +280,7 @@ export default function WhereItFits() {
         <div style={s({ display: "grid", gridTemplateColumns: "1fr 1fr" })}>
 
           {/* Left */}
-          <div style={s({ padding: "52px 44px", borderRight: `1px solid ${E.bdr}` })}>
+          <div style={s({ padding: "29px 44px", borderRight: `1px solid ${E.bdr}` })}>
             <Ey c="Section III" />
             <SH ch="A suggested review cadence." />
             <B ch="This is not a mechanical decision rule. It is the kind of review structure that makes the framework useful in practice — the questions worth asking at each stage of the process." />
@@ -327,7 +324,7 @@ export default function WhereItFits() {
                 <div key={when} style={s({ border: `1px solid ${E.bdr}`, background: E.bg2, marginBottom: 2 })}>
                   <div style={s({ padding: "10px 16px", borderBottom: `1px solid ${E.bdr}`, display: "flex", alignItems: "center" })}>
                     <span style={s({
-                      fontFamily: E.mono, fontSize: 10.5, fontWeight: 500,
+                      fontFamily: E.mono, fontSize: 11, fontWeight: 400,
                       letterSpacing: "0.12em", textTransform: "uppercase" as const,
                       color: E.text, background: E.bg3,
                       border: `1px solid ${E.bdr}`, padding: "2px 8px",
@@ -336,8 +333,8 @@ export default function WhereItFits() {
                   <div style={s({ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 })}>
                     {questions.map(q => (
                       <div key={q} style={s({ display: "flex", gap: 10, alignItems: "baseline" })}>
-                        <div style={s({ fontFamily: E.mono, fontSize: 10, color: E.muted, flexShrink: 0 })}>—</div>
-                        <span style={s({ fontFamily: E.sans, fontSize: 12.5, lineHeight: 1.65, color: E.body })}>{q}</span>
+                        <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, flexShrink: 0 })}>—</div>
+                        <span style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.65, color: E.body })}>{q}</span>
                       </div>
                     ))}
                   </div>
@@ -352,7 +349,7 @@ export default function WhereItFits() {
           </div>
 
           {/* Right */}
-          <div style={s({ padding: "52px 44px" })}>
+          <div style={s({ padding: "29px 44px" })}>
             <Ey c="On trajectory" />
             <SH ch="Trajectory is often more important than position." />
             <B ch="A company in High structural risk with an improving trajectory — moving toward FCF generation from an EBIT anchor — is accumulating structural strength. The composite score will reflect that improvement over time, before the market necessarily does." />
@@ -361,7 +358,7 @@ export default function WhereItFits() {
 
             <div style={s({ marginTop: 28, border: `1px solid ${E.bdr}`, background: E.bg2 })}>
               <div style={s({ padding: "12px 16px", borderBottom: `1px solid ${E.bdr}` })}>
-                <p style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Four structural conditions worth distinguishing</p>
+                <p style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: E.muted })}>Four structural conditions worth distinguishing</p>
               </div>
               {[
                 { label: "Deep anchor · improving trajectory",        desc: "The best structural condition. Worth examining regardless of current score.",        tag: "Favorable", tagColor: E.sage },
@@ -371,10 +368,10 @@ export default function WhereItFits() {
               ].map(({ label, desc, tag, tagColor }, i) => (
                 <div key={label} style={s({ padding: "14px 16px", borderBottom: i < 3 ? `1px solid ${E.bdr}` : "none", display: "flex", justifyContent: "space-between", gap: 16 })}>
                   <div>
-                    <div style={s({ fontFamily: E.sans, fontSize: 12.5, fontWeight: 700, color: E.text, marginBottom: 4 })}>{label}</div>
-                    <div style={s({ fontFamily: E.sans, fontSize: 12, lineHeight: 1.6, color: E.body })}>{desc}</div>
+                    <div style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text, marginBottom: 4 })}>{label}</div>
+                    <div style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.6, color: E.body })}>{desc}</div>
                   </div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: tagColor, flexShrink: 0, alignSelf: "flex-start", marginTop: 2 })}>{tag}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: tagColor, flexShrink: 0, alignSelf: "flex-start", marginTop: 2 })}>{tag}</div>
                 </div>
               ))}
             </div>
@@ -382,10 +379,10 @@ export default function WhereItFits() {
             <div style={s({ marginTop: 28 })}>
               <Ey c="On the false positive rate" />
               <div style={s({ border: `1px solid ${E.bdr}`, background: E.gatm, padding: "18px 20px" })}>
-                <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.78, color: E.body, marginBottom: 12 })}>
+                <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.78, color: E.body, marginBottom: 12 })}>
                   68.5% of Very High classifications do not produce severe losses in the subsequent 12 months. This is not a flaw in the framework — it is the correct way to understand it.
                 </p>
-                <p style={s({ fontFamily: E.sans, fontSize: 13.5, lineHeight: 1.78, color: E.body })}>
+                <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.78, color: E.body })}>
                   The framework identifies a structural condition associated with elevated loss probability. It does not predict which companies in that condition will experience a loss, or when. The base rate is the information. What an investor does with it is theirs to determine.
                 </p>
               </div>
@@ -396,30 +393,23 @@ export default function WhereItFits() {
       </div>
 
       {/* ── CTA ── */}
-      {/*
-        REVISION — "Platform access" label removed.
-        "The structural map is live now." carries the section without introduction.
-        Pricing display makes transactional directness appropriate here;
-        a section header announcing the close before the close arrived was redundant.
-        Secondary CTA updated to "Examine the Evidence" for site-wide consistency.
-      */}
-      <div style={s({ padding: "64px 44px", borderBottom: `1px solid ${E.bdr}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 40 })}>
+      <div style={s({ padding: "47px 44px", borderBottom: `1px solid ${E.bdr}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 40 })}>
         <div style={s({ maxWidth: 520 })}>
-          <h2 style={s({ fontFamily: E.sans, fontSize: "clamp(22px,3vw,32px)", fontWeight: 800, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 16 })}>
+          <h2 style={s({ fontFamily: E.sans, fontSize: "29px", fontWeight: 700, color: E.text, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 16 })}>
             The structural map is live now.
           </h2>
-          <p style={s({ fontFamily: E.mono, fontSize: 11.5, color: E.muted, lineHeight: 1.75, letterSpacing: "0.04em" })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted, lineHeight: 1.75, letterSpacing: "0.04em" })}>
             ~5,200 U.S. equities · Two independently validated dimensions of structural risk · Updated weekly
           </p>
         </div>
         <div style={s({ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10, flexShrink: 0 })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.body, textAlign: "right" as const })}>
-            <span style={s({ color: E.text, fontSize: 20, fontWeight: 500 })}>$159</span> / month
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, textAlign: "right" as const })}>
+            <span style={s({ color: E.text, fontSize: 29, fontWeight: 400 })}>$159</span> / month
             <span style={s({ color: E.muted, margin: "0 8px" })}>·</span>
-            <span style={s({ color: E.text, fontSize: 20, fontWeight: 500 })}>$1,479</span> / year
+            <span style={s({ color: E.text, fontSize: 29, fontWeight: 400 })}>$1,479</span> / year
           </div>
           <Link href="/platform" style={s({
-            fontFamily: E.sans, fontSize: 12, fontWeight: 700,
+            fontFamily: E.sans, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.08em", textTransform: "uppercase" as const,
             padding: "13px 28px", background: E.text, color: E.bg,
             textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8,
@@ -427,7 +417,7 @@ export default function WhereItFits() {
             Open Platform <ArrowRight size={14} />
           </Link>
           <Link href="/methodology" style={s({
-            fontFamily: E.sans, fontSize: 11, fontWeight: 600,
+            fontFamily: E.sans, fontSize: 11, fontWeight: 700,
             letterSpacing: "0.06em", textTransform: "uppercase" as const,
             padding: "11px 22px", background: "transparent",
             color: E.body, border: `1px solid ${E.bdr}`,
@@ -441,8 +431,8 @@ export default function WhereItFits() {
       {/* ── FOOTER ── */}
       <div style={s({ padding: "28px 44px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14 })}>
         <Link href="/" style={s({ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 })}>
-          <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
-          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 15, color: E.text, marginLeft: 6 })}>Steward</span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase" as const, color: E.muted })}>The Capital</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 18, color: E.text, marginLeft: 6 })}>Steward</span>
         </Link>
         <div style={s({ display: "flex", gap: 20 })}>
           {[
@@ -452,20 +442,8 @@ export default function WhereItFits() {
             <Link key={href} href={href} style={s({ fontFamily: E.sans, fontSize: 11, color: E.muted, textDecoration: "none" })}>{label}</Link>
           ))}
         </div>
-        <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
+        <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>© 2026 The Capital Steward, LLC · Not investment advice</p>
       </div>
-
-      <style>{`
-        @media (max-width: 960px) {
-          .wif-grid { grid-template-columns: 1fr !important; }
-          .wif-grid > div:first-child { border-right: none !important; border-bottom: 1px solid ${E.bdr}; }
-          .wif-table { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 768px) {
-          .wif-cta { flex-direction: column !important; align-items: flex-start !important; }
-          .wif-cta > div:last-child { align-items: flex-start !important; }
-        }
-      `}</style>
 
     </main>
   )
