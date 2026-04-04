@@ -101,7 +101,7 @@ function Nav() {
         ].map(({ href, label }) => (
           <Link key={href} href={href} style={s({
             fontFamily: E.mono, fontSize: 10, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: E.muted, textDecoration: "none",
+            textTransform: "uppercase", color: E.body, textDecoration: "none",
           })}>{label}</Link>
         ))}
         <Link href="/platform" style={s({
@@ -123,7 +123,7 @@ function StatusBar() {
       borderBottom: `1px solid ${E.bdr}`, background: E.bg2,
     })}>
       <span style={s({ fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em",
-        textTransform: "uppercase", color: E.muted, display: "flex",
+        textTransform: "uppercase", color: E.body, display: "flex",
         alignItems: "center", gap: 8 })}>
         <span style={s({ width: 5, height: 5, borderRadius: "50%",
           background: E.sage, display: "inline-block" })}/>
@@ -171,7 +171,7 @@ function Hero() {
 
       {/* Product definition line */}
       <p style={s({
-        fontFamily: E.mono, fontSize: 11, color: E.muted, letterSpacing: "0.06em",
+        fontFamily: E.mono, fontSize: 11, color: E.body, letterSpacing: "0.06em",
         marginBottom: 36, textAlign: "center",
       })}>
         A structural risk scoring system for ~5,200 U.S. equities — updated weekly,
@@ -303,7 +303,7 @@ function StatTiles() {
               {label}
             </div>
             <div style={s({
-              fontFamily: E.mono, fontSize: 10, color: E.muted,
+              fontFamily: E.mono, fontSize: 10, color: E.body,
               letterSpacing: "0.06em",
             })}>
               {sub}
@@ -333,7 +333,7 @@ function Section2() {
       })}>
         <p style={s({
           fontFamily: E.mono, fontSize: 9.5, letterSpacing: "0.18em",
-          textTransform: "uppercase", color: E.muted, marginBottom: 32,
+          textTransform: "uppercase", color: E.text, marginBottom: 32,
         })}>
           The Evidence
         </p>
@@ -434,10 +434,10 @@ function Section3() {
             display: "flex", justifyContent: "space-between", alignItems: "center",
           })}>
             <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: "0.16em",
-              textTransform: "uppercase", color: E.muted })}>
+              textTransform: "uppercase", color: E.text })}>
               Operational Anchor Ladder
             </span>
-            <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>
+            <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.body })}>
               ↓ deeper = stronger structural anchor
             </span>
           </div>
@@ -460,7 +460,7 @@ function Section3() {
                 {desc}
               </span>
               <span style={s({
-                fontFamily: E.mono, fontSize: 10, color: E.muted, whiteSpace: "nowrap",
+                fontFamily: E.mono, fontSize: 10, color: E.body, whiteSpace: "nowrap",
               })}>
                 +{penalty} penalty
               </span>
@@ -571,7 +571,7 @@ function Footer() {
         <span style={s({ fontFamily: E.serif, fontStyle: "italic", fontSize: 14,
           color: E.gold })}>Steward</span>
       </div>
-      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted, lineHeight: 1.7 })}>
+      <p style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.body, lineHeight: 1.7 })}>
         © 2026 The Capital Steward, LLC. For informational purposes only.
         Not investment advice.
       </p>
@@ -582,7 +582,7 @@ function Footer() {
           { href: "/who-its-for",  label: "Who It's For" },
         ].map(({ href, label }) => (
           <Link key={href} href={href} style={s({
-            fontFamily: E.mono, fontSize: 9.5, color: E.muted,
+            fontFamily: E.mono, fontSize: 9.5, color: E.body,
             textDecoration: "none", letterSpacing: "0.1em",
           })}>{label}</Link>
         ))}
