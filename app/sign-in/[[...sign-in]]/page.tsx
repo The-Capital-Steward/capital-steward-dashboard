@@ -198,7 +198,7 @@ export default function SignInPage() {
           {/* Clerk component */}
           <SignIn
             appearance={CLERK_APPEARANCE}
-            redirectUrl="/platform"
+            forceRedirectUrl="/platform"
             signUpUrl="/platform/subscribe"
           />
         </div>
