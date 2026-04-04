@@ -16,20 +16,19 @@ import {
 // ─── Design tokens — P3 public light ─────────────────────────────────────────
 
 const E = {
-  bg:     "#D7DDD3",
-  bg2:    "#CDD4C9",
-  bg3:    "#C3CBC0",
-  bdr:    "#B5BEB2",
-  bdr2:   "#A3AEA0",
-  text:   "#1A1E1A",
-  body:   "#3F4640",
-  muted:  "#40463F",
-  dim:    "#5A6359",
-  sage:   "#38483D",
-  brick:  "#8B3A2A",
-  brickS: "#6B2D20",
-  gold:   "#7A5C2E",
-  blue:   "#2E4A6B",
+  bg:     "#D7DDD3",  // unchanged
+  bg2:    "#E4E9E1",  // lightened — WCAG AAA body/muted/sage: 7.88:1
+  bg3:    "#DCE2D8",  // lightened — WCAG AAA body/muted/sage: 7.36:1
+  bdr:    "#B5BEB2",  // unchanged
+  bdr2:   "#A3AEA0",  // unchanged
+  text:   "#1A1E1A",  // unchanged — 12.19:1 on bg
+  body:   "#3F4640",  // unchanged — 7.02:1 on bg, 7.88:1 on bg2
+  muted:  "#40463F",  // unchanged — 7.01:1 on bg, 7.87:1 on bg2
+  sage:   "#38483D",  // unchanged — 7.02:1 on bg, 7.88:1 on bg2
+  brick:  "#8B3A2A",  // decorative/large-text only — 5.54:1 (passes large text AAA)
+  brickS: "#5A2519",  // small-text brick — 8.86:1 on bg, 9.95:1 on bg2 ✓
+  gold:   "#4E3918",  // darkened — 7.89:1 on bg, 8.86:1 on bg2 ✓ (was #7A5C2E)
+  blue:   "#243B5E",  // darkened — 8.15:1 on bg, 9.15:1 on bg2 ✓ (was #2E4A6B)
   mono:   "'IBM Plex Mono','Courier New',monospace",
   sans:   "'DM Sans',system-ui,sans-serif",
   serif:  "'Playfair Display',Georgia,serif",
@@ -40,7 +39,7 @@ const s = (x: object) => x as React.CSSProperties
 
 // Script 04 — regime composite r
 const REGIME_DATA = [
-  { regime: "Pre-2020\n2009–2019", r: -0.0254, label: "Slight",       n: "155,069", color: E.dim   },
+  { regime: "Pre-2020\n2009–2019", r: -0.0254, label: "Slight",       n: "155,069", color: E.muted   },
   { regime: "COVID\n2020–2021",    r: -0.2427, label: "Substantive",  n: "47,953",  color: E.sage  },
   { regime: "Post-COVID\n2022–26", r: -0.1124, label: "Substantive",  n: "82,223",  color: E.sage  },
   { regime: "Full Period\n2009–26", r: -0.0907, label: "Strong",       n: "285,245", color: E.blue  },
@@ -106,11 +105,11 @@ const INDEX_DATA = [
 // ─── Signal scale ─────────────────────────────────────────────────────────────
 
 const SIGNAL_SCALE = [
-  { label: "Negligible",  range: "|r| < 0.03", bg: E.bg3,  text: E.muted },
-  { label: "Slight",      range: "0.03–0.05",  bg: E.bdr,  text: E.blue  },
-  { label: "Modest",      range: "0.05–0.07",  bg: E.bdr2, text: E.sage  },
-  { label: "Strong",      range: "0.07–0.11",  bg: "#8FA89A", text: "#1A1E1A" },
-  { label: "Substantive", range: "|r| ≥ 0.11", bg: E.sage, text: "#D7DDD3" },
+  { label: "Negligible",  range: "|r| < 0.03", bg: E.bg3,   text: E.text  },  // 12.79:1 ✓
+  { label: "Slight",      range: "0.03–0.05",  bg: E.bdr,   text: E.text  },  //  8.82:1 ✓
+  { label: "Modest",      range: "0.05–0.07",  bg: E.bdr2,  text: E.text  },  //  7.33:1 ✓
+  { label: "Strong",      range: "0.07–0.11",  bg: E.sage,  text: E.bg    },  //  7.02:1 ✓
+  { label: "Substantive", range: "|r| ≥ 0.11", bg: E.text,  text: E.bg    },  // 12.19:1 ✓
 ]
 
 // ─── Tooltip helper ───────────────────────────────────────────────────────────
@@ -199,7 +198,7 @@ function RegimeChart() {
         {[
           { color: E.sage,  label: "Substantive signal (|r| ≥ 0.11)" },
           { color: E.blue,  label: "Strong signal (0.07 ≤ |r| < 0.11)" },
-          { color: E.dim, label: "Slight (|r| < 0.03)" },
+          { color: E.muted, label: "Slight (|r| < 0.03)" },
         ].map(({ color, label }) => (
           <span key={label} style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted,
             display: "flex", alignItems: "center", gap: 6 })}>
@@ -451,7 +450,7 @@ function OALLadder() {
           </div>
           <div style={s({ textAlign: "right" })}>
             <div style={s({ fontFamily: E.mono, fontSize: 12, fontWeight: 500,
-              color: parseFloat(median) >= 0 ? E.sage : E.brick })}>
+              color: parseFloat(median) >= 0 ? E.sage : E.brickS })}>
               {median}
             </div>
             <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>median</div>
@@ -493,7 +492,7 @@ function SignalTable() {
                 padding: "10px 14px" })}>{ci}</td>
               <td style={s({ padding: "10px 14px" })}>
                 <span style={s({ fontFamily: E.mono, fontSize: 10,
-                  color: E.sage, background: `${E.sage}18`,
+                  color: E.text, background: `${E.sage}18`,
                   padding: "2px 8px", letterSpacing: "0.08em" })}>{label}</span>
               </td>
               <td style={s({ fontFamily: E.mono, fontSize: 11, color: E.body,
@@ -564,20 +563,20 @@ function BucketTable() {
                 background: isVH ? `${E.brick}08` : isVL ? `${E.sage}08` : E.bg,
               })}>
                 <td style={s({ fontFamily: E.sans, fontSize: 13, fontWeight: 500,
-                  color: isVH ? E.brick : isVL ? E.sage : E.text,
+                  color: isVH ? E.brickS : isVL ? E.sage : E.text,
                   padding: "10px 12px" })}>{bucket}</td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
-                  color: median >= 0 ? E.sage : E.brick, padding: "10px 12px" })}>
+                  color: median >= 0 ? E.sage : E.brickS, padding: "10px 12px" })}>
                   {median >= 0 ? "+" : ""}{median.toFixed(1)}%
                 </td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
-                  color: geo >= 0 ? E.sage : E.brick, padding: "10px 12px" })}>
+                  color: geo >= 0 ? E.sage : E.brickS, padding: "10px 12px" })}>
                   {geo >= 0 ? "+" : ""}{geo.toFixed(1)}%
                 </td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                   color: E.body, padding: "10px 12px" })}>{cvar.toFixed(1)}%</td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
-                  color: isVH ? E.brick : E.body, padding: "10px 12px",
+                  color: isVH ? E.brickS : E.body, padding: "10px 12px",
                   fontWeight: isVH ? 600 : 400 })}>{pct_below_25.toFixed(1)}%</td>
                 <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                   color: E.muted, padding: "10px 12px" })}>{n.toLocaleString()}</td>
@@ -788,7 +787,7 @@ export default function MethodologyPage() {
             lineHeight: 1.65, marginBottom: 24 })}>
             The structural case for narrative risk — and how we measure it.
           </p>
-          <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.dim, lineHeight: 1.7 })}>
+          <p style={s({ fontFamily: E.mono, fontSize: 10.5, color: E.muted, lineHeight: 1.7 })}>
             285,245 observations · 2009-01 through 2025-02 formation window ·
             12-month forward return horizon · $5 minimum price filter ·
             bootstrap 95% CI (1,000 samples) · 7-year trailing anchor window
@@ -860,9 +859,9 @@ export default function MethodologyPage() {
             ].map(({ label, val, sub }) => (
               <div key={label}>
                 <div style={s({ fontFamily: E.mono, fontSize: 15, fontWeight: 500,
-                  color: val.startsWith("−") ? E.brick : E.sage, marginBottom: 2 })}>{val}</div>
+                  color: val.startsWith("−") ? E.brickS : E.sage, marginBottom: 2 })}>{val}</div>
                 <div style={s({ fontFamily: E.mono, fontSize: 9.5, color: E.muted })}>{label}</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim })}>{sub}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.muted })}>{sub}</div>
               </div>
             ))}
           </div>
@@ -1130,7 +1129,7 @@ export default function MethodologyPage() {
                   <tr key={q} style={s({ borderBottom: `1px solid ${E.bdr}`,
                     background: i===0 ? `${E.sage}08` : i===4 ? `${E.brick}08` : "transparent" })}>
                     <td style={s({ fontFamily: E.sans, fontSize: 11.5, fontWeight: 500,
-                      color: i===0 ? E.sage : i===4 ? E.brick : E.text, padding: "7px 8px" })}>{q}</td>
+                      color: i===0 ? E.sage : i===4 ? E.brickS : E.text, padding: "7px 8px" })}>{q}</td>
                     <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",
                       padding: "7px 8px", color: E.body })}>{med}</td>
                     <td style={s({ fontFamily: E.mono, fontSize: 11, textAlign: "right",

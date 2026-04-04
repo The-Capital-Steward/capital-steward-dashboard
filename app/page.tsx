@@ -13,18 +13,17 @@ import Link from "next/link"
 
 const E = {
   bg:     "#D7DDD3",
-  bg2:    "#CDD4C9",
-  bg3:    "#C3CBC0",
+  bg2:    "#E4E9E1",  // lightened for WCAG AAA
+  bg3:    "#DCE2D8",  // lightened for WCAG AAA
   bdr:    "#B5BEB2",
   bdr2:   "#A3AEA0",
   text:   "#1A1E1A",
   body:   "#3F4640",
   muted:  "#40463F",
-  dim:    "#5A6359",
   sage:   "#38483D",
   brick:  "#8B3A2A",
-  brickS: "#6B2D20",
-  gold:   "#7A5C2E",
+  brickS: "#5A2519",  // darkened for WCAG AAA small text
+  gold:   "#4E3918",  // darkened for WCAG AAA — was #7A5C2E
   mono:   "'IBM Plex Mono','Courier New',monospace",
   sans:   "'DM Sans',system-ui,sans-serif",
   serif:  "'Playfair Display',Georgia,serif",
@@ -75,7 +74,7 @@ const STAT_TILES = [
 const OAL_RUNGS = [
   { label: "Revenue", desc: "Shallowest anchor",       color: E.brick,  penalty: "4.236×" },
   { label: "EBIT",    desc: "Operating income only",   color: E.gold,   penalty: "1.618×" },
-  { label: "NI",      desc: "Profitable, not cash+",   color: E.dim,    penalty: "1.0×"   },
+  { label: "NI",      desc: "Profitable, not cash+",   color: E.muted,    penalty: "1.0×"   },
   { label: "FCF",     desc: "Deepest anchor",          color: E.sage,   penalty: "0×"     },
 ]
 
