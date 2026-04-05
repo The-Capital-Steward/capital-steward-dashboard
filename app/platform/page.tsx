@@ -2,15 +2,25 @@
 
 // app/platform/page.tsx
 //
-// Sprint changes:
-//   1. Constellation initial positions: forceNodes now spread from cluster centers
-//      (not origin). Eliminates right-edge clipping from simulation explosion.
-//   2. Section 2: RegimePanels — redesigned from OAL-composition format to
-//      signal-performance format. Shows ICIR, VH/VL loss rates, relative risk,
-//      and Spearman r by regime. Data from real backtest (20_regime_signal.json).
-//   3. Section 3+: PaidBlur — blurred teaser of deeper descent levels with upgrade CTA.
-//   4. Tooltip position: fixed (not absolute) — prevents scroll offset bug.
-//   5. current_regime corrected to "expansion" (was synthetic "neutral").
+// Changes in this version:
+//   1. HOVER DELAY FIXED — refreshNodes debounced with requestAnimationFrame.
+//      Was iterating 10,400 DOM nodes on every pixel of mousemove. Now batches
+//      to one frame. Hover should feel instant.
+//   2. FREE-TIER TOOLTIP REMOVED — individual company data (ticker, scores)
+//      is paid. Free users get cross-panel highlighting only, no tooltip content.
+//   3. SECTION 3 ADDED — Four OAL Anchor Rung Views. Derived from node data,
+//      no new JSON file needed. Shows bucket distribution, OAL weights, and
+//      confirmed median returns (FCF +10.2%, Revenue −17.3% only).
+//   4. SECTION 4 ADDED — Seven EV Quantile Band Views. Derived from node data.
+//      Stacked bar chart showing risk composition across the EV spectrum.
+//   5. PAID BLUR MOVED — now covers Sections 5–7 only. Sections 3 and 4 are
+//      free tier. The prior code blurred everything from Section 3 onward.
+//   6. FILE PATH NOTE — fetch('/data/...') is correct for Next.js when the
+//      project root is /osmr/capital-steward-dashboard/. If fetches hit the
+//      wrong app, set NEXT_PUBLIC_DATA_BASE in your .env.local. The canonical
+//      locations are:
+//        /osmr/capital-steward-dashboard/public/data/regime_summary.json
+//        /osmr/capital-steward-dashboard/public/data/constellation_positions.json
 
 import { useEffect, useRef, useState } from 'react'
 import { useUser, SignIn, SignUp } from '@clerk/nextjs'
@@ -61,38 +71,31 @@ interface Node {
   y: number
 }
 
-interface PositionRecord {
-  id: string
-  nx: number
-  ny: number
-}
+interface PositionRecord { id: string; nx: number; ny: number }
 
 interface RegimeData {
   id: string
   label: string
-  classifier: string         // e.g. ">+10% trailing 12m"
+  classifier: string
   n_months: number
-  spearman_r: number         // composite rank-IC mean
-  icir: number               // IC / σ(IC) — signal consistency
-  vh_loss_rate: number       // fraction of Very High obs with 12m return < −25%
-  vl_loss_rate: number       // fraction of Very Low obs with 12m return < −25%
+  spearman_r: number
+  icir: number
+  vh_loss_rate: number
+  vl_loss_rate: number
   universe_loss_rate: number
-  rel_risk: number           // vh_loss_rate / vl_loss_rate
-  vl_median_fwd: number      // median 12m forward return, Very Low bucket
-  vh_median_fwd: number      // median 12m forward return, Very High bucket
-  spread: number             // vl_median_fwd − vh_median_fwd
+  rel_risk: number
+  vl_median_fwd: number
+  vh_median_fwd: number
+  spread: number
 }
 
 interface RegimeSummary {
   regimes: RegimeData[]
   current_regime: string
   unconditional: {
-    spearman_r: number
-    icir: number
-    vh_loss_rate: number
-    vl_loss_rate: number
-    universe_loss_rate: number
-    rel_risk: number
+    spearman_r: number; icir: number
+    vh_loss_rate: number; vl_loss_rate: number
+    universe_loss_rate: number; rel_risk: number
   }
 }
 
@@ -100,6 +103,8 @@ type Band   = 'all' | 1 | 2 | 3 | 4 | 5 | 6 | 7
 type OALKey = 'all' | 'FCF' | 'NI' | 'EBIT' | 'Revenue'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+
+const DATA_BASE = process.env.NEXT_PUBLIC_DATA_BASE ?? ''
 
 const DESCENT_LEVELS = [
   { n: 1,  label: 'Universe',   paid: false },
@@ -114,38 +119,57 @@ const DESCENT_LEVELS = [
 const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as const
 
 const EV_BANDS = [
-  { band: 'all' as Band, label: 'All',      sub: undefined },
-  { band: 1 as Band,     label: 'Band I',   sub: '<$300M' },
-  { band: 2 as Band,     label: 'Band II',  sub: '$300M–$1B' },
-  { band: 3 as Band,     label: 'Band III', sub: '$1B–$3B' },
-  { band: 4 as Band,     label: 'Band IV',  sub: '$3B–$10B' },
-  { band: 5 as Band,     label: 'Band V',   sub: '$10B–$30B' },
-  { band: 6 as Band,     label: 'Band VI',  sub: '$30B–$100B' },
-  { band: 7 as Band,     label: 'Band VII', sub: '>$100B' },
+  { band: 'all' as Band, label: 'All',       sub: undefined },
+  { band: 1 as Band,     label: 'Band I',    sub: '<$300M' },
+  { band: 2 as Band,     label: 'Band II',   sub: '$300M–$1B' },
+  { band: 3 as Band,     label: 'Band III',  sub: '$1B–$3B' },
+  { band: 4 as Band,     label: 'Band IV',   sub: '$3B–$10B' },
+  { band: 5 as Band,     label: 'Band V',    sub: '$10B–$30B' },
+  { band: 6 as Band,     label: 'Band VI',   sub: '$30B–$100B' },
+  { band: 7 as Band,     label: 'Band VII',  sub: '>$100B' },
 ]
 
-// OAL rung order: Revenue (shallowest) → FCF (deepest). Locked design decision.
 const OAL_RUNGS = [
-  { key: 'all' as OALKey,     label: 'All Rungs', sub: undefined },
+  { key: 'all'     as OALKey, label: 'All Rungs', sub: undefined },
   { key: 'Revenue' as OALKey, label: 'Revenue',   sub: 'Shallowest' },
-  { key: 'EBIT' as OALKey,    label: 'EBIT',      sub: 'Operating' },
-  { key: 'NI' as OALKey,      label: 'NI',        sub: 'Net Income' },
-  { key: 'FCF' as OALKey,     label: 'FCF',       sub: 'Deepest anchor' },
+  { key: 'EBIT'    as OALKey, label: 'EBIT',      sub: 'Operating' },
+  { key: 'NI'      as OALKey, label: 'NI',        sub: 'Net Income' },
+  { key: 'FCF'     as OALKey, label: 'FCF',       sub: 'Deepest' },
+]
+
+// OAL rung definitions — confirmed from Number Swap List (7yr anchor)
+const OAL_RUNG_DEFS = [
+  {
+    key: 'Revenue' as OALKey, label: 'Revenue', depth: 'Shallowest anchor',
+    weight: 4.3, medianReturn: -17.3, hasReturn: true,
+    description: 'Companies that have not yet earned their way to profit, let alone cash generation.',
+  },
+  {
+    key: 'EBIT' as OALKey, label: 'EBIT', depth: 'Operating income',
+    weight: 0.1, medianReturn: null, hasReturn: false,
+    description: 'Companies generating operating income before financing and taxes.',
+  },
+  {
+    key: 'NI' as OALKey, label: 'Net Income', depth: 'Profit anchor',
+    weight: 43.8, medianReturn: null, hasReturn: false,
+    description: 'Companies that have demonstrated sustained profitability after all obligations.',
+  },
+  {
+    key: 'FCF' as OALKey, label: 'Free Cash Flow', depth: 'Deepest anchor',
+    weight: 51.8, medianReturn: 10.2, hasReturn: true,
+    description: 'Companies generating actual cash after capital expenditure. The deepest operational reality.',
+  },
 ]
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function bucketColor(b: string): string {
-  const map: Record<string, string> = {
-    'Very Low': E.VL, 'Low': E.L, 'Moderate': E.M, 'High': E.H, 'Very High': E.VH,
-  }
-  return map[b] ?? E.M
+  return ({ 'Very Low': E.VL, 'Low': E.L, 'Moderate': E.M, 'High': E.H, 'Very High': E.VH } as Record<string, string>)[b] ?? E.M
 }
 
 function nodeRadius(mc: number): number {
   if (!mc || mc <= 0) return 1.5
-  const log = Math.log10(mc)
-  return Math.max(1.5, Math.min(6, (log - 8) * 1.4))
+  return Math.max(1.5, Math.min(6, (Math.log10(mc) - 8) * 1.4))
 }
 
 function fmtEV(v: number): string {
@@ -167,6 +191,7 @@ function generateNodes(n = 5200): Node[] {
     const u1 = rng(), u2 = rng()
     return Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2)
   }
+  // OAL weights from confirmed 7yr anchor Number Swap List
   const OAL_WEIGHTS: [Node['oal'], number][] = [
     ['FCF', 0.518], ['NI', 0.438], ['EBIT', 0.001], ['Revenue', 0.043],
   ]
@@ -177,6 +202,7 @@ function generateNodes(n = 5200): Node[] {
   }
 
   const raw = Array.from({ length: n }, (_, i) => {
+    // Axis 1 and 2 generated independently — composite derived from them
     const axis1 = Math.min(100, Math.max(0, rng() * 100))
     const axis2 = Math.min(100, Math.max(0, rng() * 100))
     const composite = (axis1 + axis2) / 2
@@ -184,6 +210,7 @@ function generateNodes(n = 5200): Node[] {
     return { i, axis1, axis2, composite, ev, oal: randOal(), mc: ev * (0.65 + rng() * 0.7) }
   })
 
+  // Bucket from composite percentile rank
   const ranked = [...raw].sort((a, b) => a.composite - b.composite)
   const bucketOf = (rank: number): Node['bucket'] => {
     const pct = rank / n
@@ -203,6 +230,7 @@ function generateNodes(n = 5200): Node[] {
     evBand: 0, x: 0, y: 0,
   }))
 
+  // EV bands: 7 equal-population quantiles by EV
   const byEV = [...nodes].sort((a, b) => a.ev - b.ev)
   const bandSize = Math.ceil(byEV.length / 7)
   byEV.forEach((nd, i) => { nd.evBand = Math.min(7, Math.floor(i / bandSize) + 1) })
@@ -244,18 +272,18 @@ function AuthModal() {
           </div>
           {mode === 'prompt' && <>
             <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 7, lineHeight: 1.1 })}>The structural map.</h2>
-            <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body, marginBottom: 18 })}>~5,200 U.S. equities. Two independently validated dimensions of structural risk. Free to explore.</p>
+            <p style={s({ fontFamily: E.sans, fontSize: 14, lineHeight: 1.75, color: E.body, marginBottom: 18 })}>~5,200 U.S. equities. Two independently validated dimensions of structural risk. Free to explore.</p>
             <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 18 })}>
               {[
                 { tier: 'Free', cta: 'Create account', action: () => setMode('signup'), primary: false,
-                  features: ['Full constellation map', 'EV band filter', 'OAL rung filter', 'Three regime views'] },
+                  features: ['Full constellation map', 'Three regime views', 'OAL rung filter', 'EV band filter'] },
                 { tier: 'Full access · $159/mo', cta: 'Open full access', action: () => { window.location.href = '/platform/subscribe' }, primary: true,
-                  features: ['Everything free', 'Company drilldowns', 'Cohort grids (285K+ obs)', 'Weekly updates'] },
+                  features: ['Everything free', 'Sector breakdown', 'Structural archetypes', 'Company drilldowns · 7yr history'] },
               ].map(({ tier, cta, action, primary, features }) => (
                 <div key={tier} style={s({ border: `1px solid ${primary ? E.bdr3 : E.bdr2}`, background: primary ? 'rgba(197,162,74,0.05)' : 'transparent', padding: '18px' })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: primary ? E.gold : E.sec, marginBottom: 11 })}>{tier}</div>
                   <div style={s({ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 11 })}>
-                    {features.map(f => <div key={f} style={s({ fontFamily: E.sans, fontSize: 18, color: E.body, lineHeight: 1.4 })}>{f}</div>)}
+                    {features.map(f => <div key={f} style={s({ fontFamily: E.sans, fontSize: 13, color: E.body, lineHeight: 1.4 })}>{f}</div>)}
                   </div>
                   <button onClick={action} style={s({ width: '100%', fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '11px 0', background: primary ? E.gold : 'transparent', color: primary ? E.bg : E.body, border: primary ? 'none' : `1px solid ${E.bdr3}`, cursor: 'pointer' })}>{cta}</button>
                 </div>
@@ -288,7 +316,7 @@ function AuthModal() {
   )
 }
 
-// ─── Platform preview ─────────────────────────────────────────────────────────
+// ─── Platform preview (unauthenticated background) ───────────────────────────
 
 const PREVIEW_DOTS = Array.from({ length: 120 }, (_, i) => {
   const rng = makeLCG(i * 7 + 13)
@@ -315,9 +343,7 @@ function PlatformPreview() {
         {[0, 1].map(panel => (
           <div key={panel} style={s({ borderRight: panel === 0 ? `1px solid ${E.bdr2}` : 'none', background: E.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
             <svg width="90%" height="90%" viewBox="0 0 400 300">
-              {PREVIEW_DOTS.map((d, i) => (
-                <circle key={i} cx={panel === 0 ? d.cx : d.cx * 0.9 + 20} cy={d.cy} r={d.r} fill={d.fill} opacity={d.opacity} />
-              ))}
+              {PREVIEW_DOTS.map((d, i) => <circle key={i} cx={panel === 0 ? d.cx : d.cx * 0.9 + 20} cy={d.cy} r={d.r} fill={d.fill} opacity={d.opacity} />)}
             </svg>
           </div>
         ))}
@@ -326,128 +352,78 @@ function PlatformPreview() {
   )
 }
 
-// ─── Section 2: Regime panels ─────────────────────────────────────────────────
-//
-// Redesign (Option B, approved): shows signal-performance data instead of
-// OAL composition. OAL composition is not available per-regime in backtest output.
-// Signal-performance data is more actionable and directly from validated backtest.
-//
-// Key finding communicated: ICIR ≈ −0.76 across all three regimes — the signal
-// is equally consistent regardless of macro environment. VH loss rate varies
-// (44.8% Expansion, 34% Neutral, 37% Stress) but remains 2–2.5× universe rate.
+// ─── Section header component ─────────────────────────────────────────────────
 
-function RegimePanels({ summary }: { summary: RegimeSummary }) {
-  const MAX_LOSS = 0.50  // bar scale ceiling — VH max is 44.8%
+function SectionHeader({ lucas, label, sub }: { lucas: number; label: string; sub: string }) {
+  return (
+    <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', alignItems: 'baseline', gap: 11 })}>
+      <span style={s({ fontFamily: E.mono, fontSize: 18, color: E.gold, fontWeight: 700, lineHeight: 1 })}>{lucas}</span>
+      <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>{label}</span>
+      <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{sub}</span>
+    </div>
+  )
+}
 
-  function fmtPct(v: number) { return `${(v * 100).toFixed(0)}%` }
-  function fmtR(v: number)   { return v.toFixed(3) }
-  function fmtFwd(v: number) {
-    const sign = v >= 0 ? '+' : ''
-    return `${sign}${(v * 100).toFixed(1)}%`
-  }
+// ─── Section 2: Three Market Regime Summaries ─────────────────────────────────
+
+function Section2Regimes({ summary }: { summary: RegimeSummary }) {
+  const MAX_LOSS = 0.50
+  const fmtPct = (v: number) => `${(v * 100).toFixed(0)}%`
+  const fmtFwd = (v: number) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`
 
   return (
     <section>
-      {/* Section header */}
-      <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', alignItems: 'baseline', gap: 11 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.gold })}>3 · Regimes</span>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>OSMR signal by market regime · 2010–2026 · ex ante classifier</span>
-      </div>
-
+      <SectionHeader lucas={3} label="Market Regimes" sub="OSMR signal by market regime · 2010–2026 · ex ante classifier" />
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: `1px solid ${E.bdr2}` })}>
         {summary.regimes.map((regime, i) => {
           const isCurrent = regime.id === summary.current_regime
-
           return (
-            <div key={regime.id} style={s({
-              borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none',
-              background: isCurrent ? '#0C0A08' : E.bg,
-              padding: '18px',
-            })}>
-
-              {/* Header row: label + NOW badge + n_months */}
+            <div key={regime.id} style={s({ borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none', background: isCurrent ? '#0C0A08' : E.bg, padding: '18px' })}>
               <div style={s({ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 11 })}>
                 <div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: isCurrent ? E.text : E.body, fontWeight: isCurrent ? 700 : 400, marginBottom: 3 })}>
-                    {regime.label}
-                  </div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
-                    {regime.classifier}
-                  </div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: isCurrent ? E.text : E.body, fontWeight: isCurrent ? 700 : 400, marginBottom: 3 })}>{regime.label}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{regime.classifier}</div>
                 </div>
                 <div style={s({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 })}>
-                  {isCurrent && (
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: E.bg, background: E.gold, padding: '2px 7px' })}>
-                      NOW
-                    </span>
-                  )}
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
-                    {regime.n_months} mo
-                  </span>
+                  {isCurrent && <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: E.bg, background: E.gold, padding: '2px 7px' })}>NOW</span>}
+                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{regime.n_months} mo</span>
                 </div>
               </div>
 
-              {/* ICIR — primary metric, 29px */}
+              {/* ICIR */}
               <div style={s({ marginBottom: 11 })}>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.12em', marginBottom: 4 })}>
-                  ICIR
-                </div>
-                <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400, color: isCurrent ? E.text : E.body, lineHeight: 1 })}>
-                  {regime.icir.toFixed(2)}
-                </div>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>
-                  Signal consistency · r̄ / σ(r)
-                </div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.12em', marginBottom: 4 })}>ICIR</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400, color: isCurrent ? E.text : E.body, lineHeight: 1 })}>{regime.icir.toFixed(2)}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Signal consistency · r̄ / σ(r)</div>
               </div>
 
               <div style={s({ height: 1, background: E.bdr2, margin: '11px 0' })} />
 
-              {/* Loss rate comparison bars */}
+              {/* Loss rate bars */}
               <div style={s({ marginBottom: 11 })}>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 7 })}>
-                  SEVERE LOSS FREQUENCY
-                </div>
-
-                {/* VH bar */}
-                <div style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH, width: 18, flexShrink: 0 })}>VH</span>
-                  <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
-                    <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(regime.vh_loss_rate / MAX_LOSS) * 100}%`, background: E.VH, opacity: 0.75 })} />
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 7 })}>SEVERE LOSS FREQUENCY</div>
+                {[
+                  { key: 'VH', rate: regime.vh_loss_rate, color: E.VH },
+                  { key: 'All', rate: regime.universe_loss_rate, color: E.sec },
+                  { key: 'VL', rate: regime.vl_loss_rate, color: E.VL },
+                ].map(({ key, rate, color }) => (
+                  <div key={key} style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 18, flexShrink: 0 })}>{key}</span>
+                    <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
+                      <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(rate / MAX_LOSS) * 100}%`, background: color, opacity: key === 'All' ? 0.45 : 0.75 })} />
+                    </div>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(rate)}</span>
                   </div>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(regime.vh_loss_rate)}</span>
-                </div>
-
-                {/* Universe bar */}
-                <div style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, width: 18, flexShrink: 0 })}>All</span>
-                  <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
-                    <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(regime.universe_loss_rate / MAX_LOSS) * 100}%`, background: E.sec, opacity: 0.45 })} />
-                  </div>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(regime.universe_loss_rate)}</span>
-                </div>
-
-                {/* VL bar */}
-                <div style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7 })}>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL, width: 18, flexShrink: 0 })}>VL</span>
-                  <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
-                    <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(regime.vl_loss_rate / MAX_LOSS) * 100}%`, background: E.VL, opacity: 0.75 })} />
-                  </div>
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(regime.vl_loss_rate)}</span>
-                </div>
-
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec })}>
-                  {regime.rel_risk.toFixed(1)}× higher for Very High
-                </div>
+                ))}
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec, marginTop: 4 })}>{regime.rel_risk.toFixed(1)}× higher for Very High</div>
               </div>
 
               <div style={s({ height: 1, background: E.bdr2, margin: '11px 0' })} />
 
-              {/* Median forward returns + Spearman r */}
+              {/* Median returns + Spearman r */}
               <div style={s({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' })}>
                 <div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 4 })}>
-                    MEDIAN 12M FWD
-                  </div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 4 })}>MEDIAN 12M FWD</div>
                   <div style={s({ display: 'flex', gap: 11 })}>
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>VL {fmtFwd(regime.vl_median_fwd)}</span>
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color: regime.vh_median_fwd < 0 ? E.VH : E.sec })}>VH {fmtFwd(regime.vh_median_fwd)}</span>
@@ -455,10 +431,9 @@ function RegimePanels({ summary }: { summary: RegimeSummary }) {
                 </div>
                 <div style={s({ textAlign: 'right' as const })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 3 })}>r</div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 18, color: isCurrent ? E.body : E.sec })}>{fmtR(regime.spearman_r)}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 18, color: isCurrent ? E.body : E.sec })}>{regime.spearman_r.toFixed(3)}</div>
                 </div>
               </div>
-
             </div>
           )
         })}
@@ -467,9 +442,232 @@ function RegimePanels({ summary }: { summary: RegimeSummary }) {
   )
 }
 
-// ─── Section 3+: Paid blur ────────────────────────────────────────────────────
+// ─── Section 3: Four OAL Anchor Rung Views ───────────────────────────────────
+//
+// The OAL ladder is the framework's deepest structural concept.
+// Revenue floats at the top — thin, shallowest anchor.
+// FCF grounds at the bottom — wide, deepest anchor.
+// Visual treatment echoes the logo mark.
+// Confirmed median returns: FCF +10.2%, Revenue −17.3% only.
+// EBIT and NI return data not confirmed from Number Swap List for this graphic.
 
-function PaidBlur() {
+function Section3OALRungs({ nodes, selectedOal }: { nodes: Node[]; selectedOal: OALKey }) {
+  const rungStats = OAL_RUNG_DEFS.map(rung => {
+    const rungNodes = nodes.filter(n => n.oal === rung.key)
+    const total = rungNodes.length
+    const buckets = Object.fromEntries(
+      BUCKET_ORDER.map(b => [b, rungNodes.filter(n => n.bucket === b).length])
+    ) as Record<string, number>
+    const pctVH = total > 0 ? ((buckets['Very High'] / total) * 100).toFixed(0) : '0'
+    const pctVL = total > 0 ? ((buckets['Very Low'] / total) * 100).toFixed(0) : '0'
+    return { ...rung, total, buckets, pctVH, pctVL }
+  })
+
+  return (
+    <section>
+      <SectionHeader lucas={4} label="OAL Anchor Rungs" sub="Operational Anchor Ladder · What each company has actually demonstrated over 7 years" />
+      <div style={s({ borderBottom: `1px solid ${E.bdr2}` })}>
+        {rungStats.map((rung, i) => {
+          const isSelected = selectedOal === rung.key
+          const isHighlighted = selectedOal === 'all' || isSelected
+          // Border thickness echoes the logo mark stroke weights
+          const borderWeights = [1, 2, 3, 5]
+          const borderW = borderWeights[i]
+
+          return (
+            <div key={rung.key} style={s({
+              borderBottom: i < 3 ? `1px solid ${E.bdr2}` : 'none',
+              borderLeft: `${borderW}px solid ${isSelected ? E.gold : isHighlighted ? E.bdr3 : E.bdr}`,
+              background: isSelected ? '#0C0A08' : E.bg,
+              padding: '18px 18px 18px 22px',
+              opacity: selectedOal !== 'all' && !isSelected ? 0.35 : 1,
+              transition: 'opacity 0.2s, border-color 0.2s, background 0.2s',
+              display: 'grid',
+              gridTemplateColumns: '220px 1fr 180px',
+              gap: 22,
+              alignItems: 'center',
+            })}>
+
+              {/* Left: rung identity */}
+              <div>
+                <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: isSelected ? E.gold : E.sec, marginBottom: 5 })}>{rung.depth}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 18, color: isSelected ? E.text : E.body, fontWeight: isSelected ? 700 : 400, marginBottom: 4 })}>{rung.label}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+                  {rung.total.toLocaleString()} companies
+                </div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isSelected ? E.gold : E.sec, marginTop: 3 })}>
+                  {rung.weight}% of composite weight
+                </div>
+              </div>
+
+              {/* Center: bucket distribution */}
+              <div>
+                <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: E.sec, marginBottom: 7 })}>Risk Distribution</div>
+                {/* Stacked horizontal bar */}
+                <div style={s({ display: 'flex', height: 8, overflow: 'hidden', gap: 1, marginBottom: 7 })}>
+                  {BUCKET_ORDER.map(b => {
+                    const pct = rung.total > 0 ? (rung.buckets[b] / rung.total) * 100 : 0
+                    return <div key={b} style={s({ width: `${pct}%`, background: bucketColor(b), opacity: 0.85, flexShrink: 0 })} />
+                  })}
+                </div>
+                <div style={s({ display: 'flex', gap: 11 })}>
+                  {BUCKET_ORDER.map(b => {
+                    const pct = rung.total > 0 ? ((rung.buckets[b] / rung.total) * 100).toFixed(0) : '0'
+                    return (
+                      <span key={b} style={s({ fontFamily: E.mono, fontSize: 9, color: bucketColor(b) })}>
+                        {b === 'Very Low' ? 'VL' : b === 'Very High' ? 'VH' : b === 'Moderate' ? 'Mod' : b.slice(0, 1)} {pct}%
+                      </span>
+                    )
+                  })}
+                </div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 7, lineHeight: 1.55 })}>{rung.description}</div>
+              </div>
+
+              {/* Right: confirmed return figure or placeholder */}
+              <div style={s({ textAlign: 'right' as const })}>
+                {rung.hasReturn ? (
+                  <>
+                    <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: E.sec, marginBottom: 4 })}>Median 12m Return</div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 36, fontWeight: 700, color: rung.medianReturn! > 0 ? E.VL : E.VH, letterSpacing: '-0.02em', lineHeight: 1 })}>
+                      {rung.medianReturn! > 0 ? '+' : ''}{rung.medianReturn}%
+                    </div>
+                    <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 4 })}>
+                      285,245 obs · 7yr anchor
+                    </div>
+                  </>
+                ) : (
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.ghost, lineHeight: 1.6 })}>
+                    Return data<br />not yet confirmed<br />for this rung
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+// ─── Section 4: Seven EV Quantile Band Views ─────────────────────────────────
+//
+// Seven equal-population EV quantile bands — framework-native taxonomy.
+// EV is the primary Axis 1 input, so EV bands are structurally meaningful,
+// not borrowed from conventional market-cap taxonomy.
+// Answers: does structural fragility concentrate by company size?
+
+function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand: Band }) {
+  const bandDefs = [
+    { band: 1, label: 'Band I',   sub: '<$300M' },
+    { band: 2, label: 'Band II',  sub: '$300M–$1B' },
+    { band: 3, label: 'Band III', sub: '$1B–$3B' },
+    { band: 4, label: 'Band IV',  sub: '$3B–$10B' },
+    { band: 5, label: 'Band V',   sub: '$10B–$30B' },
+    { band: 6, label: 'Band VI',  sub: '$30B–$100B' },
+    { band: 7, label: 'Band VII', sub: '>$100B' },
+  ]
+
+  const bandData = bandDefs.map(bd => {
+    const bandNodes = nodes.filter(n => n.evBand === bd.band)
+    const total = bandNodes.length
+    const pcts = Object.fromEntries(
+      BUCKET_ORDER.map(b => [b, total > 0 ? (bandNodes.filter(n => n.bucket === b).length / total) * 100 : 0])
+    ) as Record<string, number>
+    const pctVH = pcts['Very High'].toFixed(0)
+    return { ...bd, total, pcts, pctVH }
+  })
+
+  const maxVH = Math.max(...bandData.map(d => d.pcts['Very High']))
+
+  return (
+    <section>
+      <SectionHeader lucas={7} label="EV Quantile Bands" sub="Seven equal-population bands by enterprise value · Framework-native taxonomy" />
+      <div style={s({ padding: '18px', borderBottom: `1px solid ${E.bdr2}` })}>
+
+        {/* Context line */}
+        <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 18 })}>
+          Risk bucket composition by EV band · Does structural fragility concentrate by company size?
+        </div>
+
+        {/* Stacked bar chart */}
+        <div style={s({ display: 'flex', alignItems: 'flex-end', gap: 7 })}>
+
+          {/* Y-axis label */}
+          <div style={s({ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 180, paddingBottom: 42, marginRight: 4 })}>
+            {['100%', '75%', '50%', '25%', '0%'].map(l => (
+              <span key={l} style={s({ fontFamily: E.mono, fontSize: 9, color: E.ghost, lineHeight: 1 })}>{l}</span>
+            ))}
+          </div>
+
+          {bandData.map(bd => {
+            const isSelected = selectedBand === bd.band
+            const isActive = selectedBand === 'all' || isSelected
+            return (
+              <div key={bd.band} style={s({ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 })}>
+                {/* Stacked bar */}
+                <div style={s({
+                  height: 180,
+                  display: 'flex',
+                  flexDirection: 'column-reverse',
+                  border: `1px solid ${isSelected ? E.gold : E.bdr2}`,
+                  overflow: 'hidden',
+                  opacity: isActive ? 1 : 0.28,
+                  transition: 'opacity 0.2s, border-color 0.2s',
+                })}>
+                  {BUCKET_ORDER.map(b => (
+                    <div key={b} style={s({
+                      width: '100%',
+                      height: `${bd.pcts[b]}%`,
+                      background: bucketColor(b),
+                      opacity: 0.85,
+                      flexShrink: 0,
+                    })} />
+                  ))}
+                </div>
+
+                {/* VH callout */}
+                <div style={s({ fontFamily: E.mono, fontSize: 9, color: isSelected ? E.VH : E.sec, textAlign: 'center' as const, marginTop: 5 })}>
+                  {bd.pctVH}% VH
+                </div>
+
+                {/* Band label */}
+                <div style={s({ fontFamily: E.mono, fontSize: 9, color: isSelected ? E.gold : E.sec, textAlign: 'center' as const, marginTop: 3 })}>{bd.label}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost, textAlign: 'center' as const, marginTop: 1 })}>{bd.sub}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost, textAlign: 'center' as const, marginTop: 1 })}>n={bd.total.toLocaleString()}</div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Legend */}
+        <div style={s({ display: 'flex', alignItems: 'center', gap: 18, marginTop: 18 })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginRight: 4 })}>Risk bucket:</span>
+          {BUCKET_ORDER.map(b => (
+            <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 5 })}>
+              <div style={s({ width: 10, height: 10, background: bucketColor(b), opacity: 0.85 })} />
+              <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec })}>{b}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Finding callout */}
+        <div style={s({ marginTop: 18, borderLeft: `2px solid ${E.bdr3}`, paddingLeft: 14 })}>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, lineHeight: 1.65 })}>
+            Structural fragility is not a small-cap phenomenon. Very High risk companies appear across all seven bands.
+            The framework identifies structural conditions regardless of company size.
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Paid wall ────────────────────────────────────────────────────────────────
+//
+// Covers Sections 5 (11 Sectors), 6 (18 Archetypes), 7 (29 Companies) only.
+// Sections 3 and 4 are free tier — do not include them here.
+
+function PaidWall() {
   const rng = makeLCG(9001)
   const SECTORS = [
     'Technology', 'Health Care', 'Industrials', 'Financials',
@@ -480,78 +678,68 @@ function PaidBlur() {
     name,
     vl: Math.round(rng() * 18 + 4),
     vh: Math.round(rng() * 22 + 6),
-    median: (rng() * 60 + 20).toFixed(1),
   }))
 
   return (
     <section style={s({ position: 'relative', borderBottom: `1px solid ${E.bdr2}` })}>
-      {/* Header — not blurred */}
+      {/* Header — visible, not blurred */}
       <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', alignItems: 'baseline', gap: 11 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.bdr3 })}>11 · 18 · 29</span>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.bdr3 })}>Sectors · Archetypes · Companies — Full subscription</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 18, color: E.ghost, fontWeight: 700 })}>11 · 18 · 29</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.ghost })}>Sectors · Archetypes · Companies</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.ghost })}>Full subscription required</span>
       </div>
 
-      {/* Blurred content — deliberately low detail, just shape */}
+      {/* Blurred content — shape only, no real data */}
       <div style={s({ position: 'relative', overflow: 'hidden' })}>
-        <div style={s({ filter: 'blur(7px)', opacity: 0.40, userSelect: 'none', pointerEvents: 'none', padding: '18px' })}>
-          <div style={s({ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7, marginBottom: 7 })}>
+        <div style={s({ filter: 'blur(7px)', opacity: 0.38, userSelect: 'none', pointerEvents: 'none', padding: '18px' })}>
+          {/* Sector grid preview */}
+          <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body, marginBottom: 11 })}>11 · Sectors</div>
+          <div style={s({ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7, marginBottom: 18 })}>
             {sectorData.map(sec => (
               <div key={sec.name} style={s({ background: E.bg2, border: `1px solid ${E.bdr2}`, padding: '11px' })}>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, letterSpacing: '0.08em', marginBottom: 7 })}>{sec.name}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginBottom: 7 })}>{sec.name}</div>
                 <div style={s({ display: 'flex', justifyContent: 'space-between', marginBottom: 4 })}>
                   <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>VL {sec.vl}%</span>
                   <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH })}>VH {sec.vh}%</span>
                 </div>
-                <div style={s({ height: 3, background: E.bdr3, position: 'relative', marginBottom: 4 })}>
-                  <div style={s({ position: 'absolute', left: 0, width: `${sec.vl}%`, height: '100%', background: E.VL, opacity: 0.7 })} />
-                </div>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>med {sec.median}</div>
+                <div style={s({ height: 3, background: E.bdr3 })} />
               </div>
             ))}
           </div>
-          {/* Archetype row teaser */}
-          <div style={s({ background: E.bg2, border: `1px solid ${E.bdr2}`, padding: '11px', display: 'flex', gap: 7, alignItems: 'center' })}>
-            <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.bdr3, flexShrink: 0 })}>18 Archetypes</span>
-            {Array.from({ length: 9 }, (_, i) => (
-              <div key={i} style={s({ flex: 1, height: 29, background: E.bdr2, opacity: 0.6 })} />
+          {/* Archetypes preview */}
+          <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body, marginBottom: 11 })}>18 · Structural Archetypes</div>
+          <div style={s({ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 5, marginBottom: 18 })}>
+            {Array.from({ length: 18 }, (_, i) => (
+              <div key={i} style={s({ height: 36, background: E.bg2, border: `1px solid ${E.bdr2}` })} />
             ))}
           </div>
-          {/* Company rows teaser */}
-          <div style={s({ marginTop: 7, display: 'flex', flexDirection: 'column', gap: 3 })}>
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} style={s({ height: 29, background: E.bg2, border: `1px solid ${E.bdr2}`, opacity: 0.5 })} />
+          {/* Company rows preview */}
+          <div style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body, marginBottom: 11 })}>29 · Individual Companies · 7-year history</div>
+          <div style={s({ display: 'flex', flexDirection: 'column', gap: 3 })}>
+            {Array.from({ length: 7 }, (_, i) => (
+              <div key={i} style={s({ height: 36, background: E.bg2, border: `1px solid ${E.bdr2}` })} />
             ))}
           </div>
         </div>
 
-        {/* Upgrade CTA — not blurred, centered over the blurred zone */}
-        <div style={s({
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: 11,
-        })}>
+        {/* Upgrade CTA — centered, not blurred */}
+        <div style={s({ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 11 })}>
           <div style={s({ textAlign: 'center' as const })}>
-            <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.sec, marginBottom: 7 })}>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.sec, marginBottom: 11 })}>
               Levels 11 · 18 · 29
             </div>
-            <div style={s({ fontFamily: E.sans, fontSize: 18, fontWeight: 700, color: E.text, marginBottom: 4, lineHeight: 1.2 })}>
+            <div style={s({ fontFamily: E.sans, fontSize: 22, fontWeight: 700, color: E.text, marginBottom: 4, lineHeight: 1.2 })}>
               Sector breakdown. Structural archetypes.
             </div>
-            <div style={s({ fontFamily: E.sans, fontSize: 18, color: E.body, marginBottom: 18 })}>
+            <div style={s({ fontFamily: E.sans, fontSize: 16, color: E.body, marginBottom: 22 })}>
               Company drilldowns with 7-year operational history.
             </div>
-            <a
-              href="/platform/subscribe"
-              style={s({
-                display: 'inline-block',
-                fontFamily: E.mono, fontSize: 11, fontWeight: 700,
-                letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-                padding: '11px 29px',
-                background: E.gold, color: E.bg,
-                textDecoration: 'none',
-              })}
-            >
-              Open full access
+            <a href="/platform/subscribe" style={s({
+              display: 'inline-block', fontFamily: E.mono, fontSize: 11, fontWeight: 700,
+              letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+              padding: '13px 36px', background: E.gold, color: E.bg, textDecoration: 'none',
+            })}>
+              Open full access →
             </a>
           </div>
           <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
@@ -563,21 +751,25 @@ function PaidBlur() {
   )
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Main platform page ────────────────────────────────────────────────────────
 
 export default function PlatformPage() {
   const { isLoaded, isSignedIn, user } = useUser()
   const isPaid = !!(isSignedIn && user?.publicMetadata?.subscription === 'active')
+  const isPaidRef = useRef(isPaid)
+  useEffect(() => { isPaidRef.current = isPaid }, [isPaid])
 
   const [selectedBand,  setSelectedBand]  = useState<Band>('all')
   const [selectedOal,   setSelectedOal]   = useState<OALKey>('all')
   const [activeLevel,   setActiveLevel]   = useState(1)
   const [tooltip,       setTooltip]       = useState<{ x: number; y: number; node: Node } | null>(null)
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
+  const [derivedNodes,  setDerivedNodes]  = useState<Node[]>([])
 
   const selectedBandRef   = useRef<Band>('all')
   const selectedOalRef    = useRef<OALKey>('all')
   const hoveredIdRef      = useRef<string | null>(null)
+  const rafIdRef          = useRef<number | null>(null)   // for RAF debounce
   const nodesRef          = useRef<Node[]>([])
   const d3ReadyRef        = useRef(false)
   const conSvgRef         = useRef<SVGSVGElement | null>(null)
@@ -588,25 +780,37 @@ export default function PlatformPage() {
   const positionsFetchRef = useRef<Promise<PositionRecord[] | null> | null>(null)
   const regimeFetchRef    = useRef<Promise<RegimeSummary | null> | null>(null)
 
+  // ── Opacity logic ────────────────────────────────────────────────────────────
+
   function effectiveOpacity(d: Node): number | null {
-    const bandOk   = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
-    const oalOk    = selectedOalRef.current  === 'all' || d.oal    === selectedOalRef.current
-    const hoverOk  = hoveredIdRef.current === null || d.id === hoveredIdRef.current
+    const bandOk  = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
+    const oalOk   = selectedOalRef.current  === 'all' || d.oal    === selectedOalRef.current
+    const hoverOk = hoveredIdRef.current === null || d.id === hoveredIdRef.current
     const filterOk = bandOk && oalOk
     if (!filterOk && !hoverOk) return 0.03
     if (!filterOk) return hoveredIdRef.current !== null && d.id === hoveredIdRef.current ? 0.9 : 0.04
     if (!hoverOk) return 0.13
-    if (d.bucket === 'Very High' || d.bucket === 'High') return null
+    if (d.bucket === 'Very High' || d.bucket === 'High') return null  // animated by CSS
     if (d.bucket === 'Very Low') return 0.90
     if (d.bucket === 'Low')      return 0.78
     return 0.38
   }
 
+  // ── refreshNodes — DEBOUNCED with requestAnimationFrame ───────────────────
+  // FIX: was calling d3.selectAll on every pixel of mousemove.
+  // Now batches to one animation frame — hover should feel instant.
+
   function refreshNodes() {
-    if (typeof window === 'undefined' || !(window as any).d3) return
-    const d3 = (window as any).d3
-    d3.selectAll('.cn,.sn').style('opacity', (d: Node) => effectiveOpacity(d))
+    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
+    rafIdRef.current = requestAnimationFrame(() => {
+      if (typeof window === 'undefined' || !(window as any).d3) return
+      const d3 = (window as any).d3
+      d3.selectAll('.cn,.sn').style('opacity', (d: Node) => effectiveOpacity(d))
+      rafIdRef.current = null
+    })
   }
+
+  // ── Filter selection ──────────────────────────────────────────────────────
 
   function selectBand(band: Band) {
     selectedBandRef.current = band; setSelectedBand(band)
@@ -629,23 +833,31 @@ export default function PlatformPage() {
   }
 
   function handleBreadcrumbClick(level: typeof DESCENT_LEVELS[number]) {
-    if (level.paid && !isPaid) { window.location.href = '/platform/subscribe'; return }
+    if (level.paid && !isPaidRef.current) { window.location.href = '/platform/subscribe'; return }
     if (level.n === 1) { resetAll(); return }
     if (level.n === 4) { setActiveLevel(4); oalRungRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return }
     if (level.n === 7) { setActiveLevel(7); evBandRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return }
   }
 
+  // ── D3 initialization ─────────────────────────────────────────────────────
+
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return
 
-    // Both fetches fire immediately on auth — parallel, independent of D3
+    // FILE PATH NOTE: fetch paths below use DATA_BASE env var for flexibility.
+    // If NEXT_PUBLIC_DATA_BASE is unset, paths resolve to /data/... from root.
+    // This is correct when Next.js project root = /osmr/capital-steward-dashboard/
+    // and files live at public/data/regime_summary.json etc.
+    // If fetches hit wrong app, set NEXT_PUBLIC_DATA_BASE=http://localhost:3000
+    // (or the correct origin) in your .env.local.
+
     if (!positionsFetchRef.current) {
-      positionsFetchRef.current = fetch('/data/constellation_positions.json')
+      positionsFetchRef.current = fetch(`${DATA_BASE}/data/constellation_positions.json`)
         .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<PositionRecord[]> })
         .catch(() => null)
     }
     if (!regimeFetchRef.current) {
-      regimeFetchRef.current = fetch('/data/regime_summary.json')
+      regimeFetchRef.current = fetch(`${DATA_BASE}/data/regime_summary.json`)
         .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<RegimeSummary> })
         .catch(() => null)
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
@@ -658,6 +870,7 @@ export default function PlatformPage() {
       const d3 = (window as any).d3
       const nodes = generateNodes(5200)
       nodesRef.current = nodes
+      setDerivedNodes([...nodes]) // expose to React for Sections 3 & 4
 
       const container = containerRef.current
       if (!container) return
@@ -675,20 +888,13 @@ export default function PlatformPage() {
       const positions = await positionsFetchRef.current
 
       if (positions && positions.length === nodesRef.current.length) {
-        // Fast path: static JSON
         const posMap = new Map(positions.map(p => [p.id, p]))
         nodesRef.current.forEach(n => {
           const p = posMap.get(n.id)
-          if (p) {
-            n.x = Math.max(4, Math.min(panelW - 4, p.nx * panelW))
-            n.y = Math.max(4, Math.min(panelH - 4, p.ny * panelH))
-          }
+          if (p) { n.x = Math.max(4, Math.min(panelW - 4, p.nx * panelW)); n.y = Math.max(4, Math.min(panelH - 4, p.ny * panelH)) }
         })
       } else {
-        // Fallback: client simulation.
-        // FIX: start forceNodes at cluster centers + small jitter, not at origin.
-        // Starting at origin caused Very High nodes to explode past panelW right edge
-        // before boundary clamping was applied, leaving them outside the SVG viewport.
+        // Client-side simulation fallback
         const jRng = makeLCG(42)
         const forceNodes = nodesRef.current.map(n => {
           const c = centers[n.bucket]
@@ -707,37 +913,36 @@ export default function PlatformPage() {
         })
       }
 
-      // ── Constellation ────────────────────────────────────────────────────────
+      // ── Constellation ──────────────────────────────────────────────────────
 
       const conSvg = d3.select(conSvgRef.current).attr('width', panelW).attr('height', panelH)
 
+      // Star field
       const stars = Array.from({ length: 180 }, (_, i) => ({
         x: (Math.sin(i * 3.7) * 0.5 + 0.5) * panelW,
         y: (Math.cos(i * 2.3) * 0.5 + 0.5) * panelH,
         r: 0.15 + (i % 4) * 0.12, o: 0.02 + (i % 5) * 0.012,
       }))
       conSvg.selectAll('.star').data(stars).join('circle')
-        .attr('class', 'star')
-        .attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y)
+        .attr('class', 'star').attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y)
         .attr('r',  (d: any) => d.r).attr('fill', '#EDE9E0').attr('opacity', (d: any) => d.o)
 
+      // Cluster region ellipses
       BUCKET_ORDER.forEach(b => {
         const c = centers[b]; const col = bucketColor(b)
         conSvg.append('ellipse').attr('cx', c.x).attr('cy', c.y).attr('rx', 46).attr('ry', 34)
-          .attr('fill', 'none').attr('stroke', col).attr('stroke-width', 0.35)
-          .attr('opacity', 0.12).attr('stroke-dasharray', '3,5')
-        conSvg.append('text').attr('x', c.x).attr('y', c.y - 38)
-          .attr('text-anchor', 'middle').attr('font-family', E.mono)
-          .attr('font-size', 11).attr('letter-spacing', '0.14em')
+          .attr('fill', 'none').attr('stroke', col).attr('stroke-width', 0.35).attr('opacity', 0.12).attr('stroke-dasharray', '3,5')
+        conSvg.append('text').attr('x', c.x).attr('y', c.y - 38).attr('text-anchor', 'middle')
+          .attr('font-family', E.mono).attr('font-size', 11).attr('letter-spacing', '0.14em')
           .attr('fill', col).attr('opacity', 0.40).text(b.toUpperCase())
       })
 
+      // Constellation nodes
       const cnGroups = conSvg.selectAll('.cn-wrap').data(nodesRef.current, (d: Node) => d.id)
         .join('g')
         .attr('class', (d: Node) => {
           const b = d.bucket
-          const cls = b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'
-          return `cn-wrap node-${cls}`
+          return `cn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
         .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
 
@@ -747,15 +952,20 @@ export default function PlatformPage() {
 
       cnGroups
         .on('mouseenter', function(event: MouseEvent, d: Node) {
-          hoveredIdRef.current = d.id; refreshNodes()
+          hoveredIdRef.current = d.id
+          refreshNodes()
+          // FIX: free users get cross-highlighting but NO tooltip content
+          // Individual company data (ticker, scores) is a paid feature
+          if (!isPaidRef.current) return
           setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
         })
         .on('mousemove', function(event: MouseEvent) {
+          if (!isPaidRef.current) return
           setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
 
-      // ── Structural Risk Map ──────────────────────────────────────────────────
+      // ── Structural Risk Map ────────────────────────────────────────────────
 
       const PAD    = { l: 47, r: 11, t: 11, b: 47 }
       const innerW = panelW - PAD.l - PAD.r
@@ -766,6 +976,7 @@ export default function PlatformPage() {
       const yScale  = d3.scaleLinear().domain([0, 100]).range([innerH, 0])
       const chart   = scatSvg.append('g').attr('transform', `translate(${PAD.l},${PAD.t})`)
 
+      // Quadrant fills
       ;[
         { x: 0,        y: innerH/2, w: innerW/2, h: innerH/2, fill: E.VL,      o: 0.025 },
         { x: innerW/2, y: innerH/2, w: innerW/2, h: innerH/2, fill: '#9E8A70', o: 0.018 },
@@ -785,27 +996,18 @@ export default function PlatformPage() {
       const xAxis = d3.axisBottom(xScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)
       const yAxis = d3.axisLeft(yScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)
 
-      chart.append('g').attr('transform', `translate(0,${innerH})`).call(xAxis)
-        .call((g: any) => {
-          g.select('.domain').attr('stroke', '#272420').attr('stroke-width', 0.4)
-          g.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono)
-          g.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4)
-        })
+      const applyAxisStyle = (g: any) => g
+        .call((gg: any) => gg.select('.domain').attr('stroke', '#272420').attr('stroke-width', 0.4))
+        .call((gg: any) => gg.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono))
+        .call((gg: any) => gg.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4))
 
-      chart.append('g').call(yAxis)
-        .call((g: any) => {
-          g.select('.domain').attr('stroke', '#272420').attr('stroke-width', 0.4)
-          g.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono)
-          g.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4)
-        })
+      chart.append('g').attr('transform', `translate(0,${innerH})`).call(xAxis).call(applyAxisStyle)
+      chart.append('g').call(yAxis).call(applyAxisStyle)
 
       chart.append('text').attr('x', innerW / 2).attr('y', innerH + 29)
-        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DETACHMENT →')
-
+        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DETACHMENT →')
       chart.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -29)
-        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
+        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
 
       ;[
         { x: 6,        y: innerH - 6, txt: 'Deep · Stable',        col: E.VL,      a: 'start' },
@@ -814,12 +1016,12 @@ export default function PlatformPage() {
         { x: innerW-6, y: 12,         txt: 'Stretched · Degrading', col: E.VH,      a: 'end' },
       ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', 0.35).text(q.txt))
 
+      // Scatter nodes
       const snGroups = chart.selectAll('.sn-wrap').data(nodesRef.current, (d: Node) => d.id)
         .join('g')
         .attr('class', (d: Node) => {
           const b = d.bucket
-          const cls = b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'
-          return `sn-wrap node-${cls}`
+          return `sn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
         .attr('transform', (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
 
@@ -829,10 +1031,13 @@ export default function PlatformPage() {
 
       snGroups
         .on('mouseenter', function(event: MouseEvent, d: Node) {
-          hoveredIdRef.current = d.id; refreshNodes()
+          hoveredIdRef.current = d.id
+          refreshNodes()
+          if (!isPaidRef.current) return
           setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
         })
         .on('mousemove', function(event: MouseEvent) {
+          if (!isPaidRef.current) return
           setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
@@ -864,8 +1069,6 @@ export default function PlatformPage() {
     </div>
   )
 
-  const hasFilter = selectedBand !== 'all' || selectedOal !== 'all'
-
   return (
     <div style={s({ minHeight: '100vh', background: E.bg, color: E.text, fontFamily: E.sans })} ref={containerRef}>
 
@@ -877,8 +1080,8 @@ export default function PlatformPage() {
         .node-vl  { opacity: 0.90; }
         .node-lo  { opacity: 0.78; }
         .node-mod { opacity: 0.38; }
-        .cn-wrap, .sn-wrap { cursor: default; }
-        .filter-strip-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
+        .cn-wrap, .sn-wrap { cursor: ${isPaid ? 'crosshair' : 'default'}; }
+        .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
       `}</style>
 
       {/* ── Nav ── */}
@@ -888,95 +1091,76 @@ export default function PlatformPage() {
           <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 18, color: E.gold, marginLeft: 7 })}>Steward</span>
         </a>
         <div style={s({ display: 'flex', alignItems: 'center', gap: 7 })}>
-          {hasFilter && (
-            <button onClick={resetAll} style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, background: 'transparent', border: `1px solid ${E.bdr3}`, padding: '4px 11px', cursor: 'pointer', letterSpacing: '0.06em' })}>Reset ×</button>
-          )}
-          <div style={s({ width: 7, height: 7, borderRadius: '50%', background: E.VL, opacity: 0.85 })} />
+          <div style={s({ width: 5, height: 5, borderRadius: '50%', background: E.VL, opacity: 0.8 })} />
           <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.sec })}>Live · Apr 2026</span>
           {!isPaid && (
-            <a href="/platform/subscribe" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '4px 11px', background: E.gold, color: E.bg, textDecoration: 'none', marginLeft: 4 })}>Upgrade</a>
+            <a href="/platform/subscribe" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '5px 13px', background: E.gold, color: E.bg, textDecoration: 'none', marginLeft: 7 })}>Upgrade</a>
           )}
         </div>
       </nav>
 
-      {/* ── Breadcrumb ── */}
-      <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', overflowX: 'auto' })}>
+      {/* ── Lucas breadcrumb ── */}
+      <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', overflowX: 'auto', position: 'sticky', top: 47, zIndex: 39 })}>
         {DESCENT_LEVELS.map((level, i) => {
           const isActive = level.n === activeLevel
-          const isFuture = level.n === 3
-          const textColor = isActive ? E.gold : level.paid ? E.bdr3 : E.sec
+          const textColor = isActive ? E.gold : level.paid ? E.ghost : E.sec
           return (
             <div key={level.n} style={s({ display: 'flex', alignItems: 'center', flexShrink: 0 })}>
               {i > 0 && <div style={s({ width: 18, height: 1, background: E.bdr2, margin: '0 2px', opacity: 0.6 })} />}
               <button
-                onClick={() => !isFuture && handleBreadcrumbClick(level)}
-                title={isFuture ? 'Coming in next sprint' : level.paid && !isPaid ? 'Paid tier' : undefined}
-                style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 11px', background: 'transparent', border: 'none', cursor: (level.paid && !isPaid) || isFuture ? 'default' : 'pointer', opacity: isFuture ? 0.4 : 1 })}
+                onClick={() => handleBreadcrumbClick(level)}
+                style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 11px', background: 'transparent', border: 'none', cursor: level.paid && !isPaid ? 'pointer' : 'pointer' })}
               >
                 <span style={s({ fontFamily: E.mono, fontSize: 18, color: textColor, lineHeight: 1, fontWeight: isActive ? 700 : 400 })}>{level.n}</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.bdr3 : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
-                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.bdr3, letterSpacing: '0.08em' })}>PAID</span>}
+                <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.ghost : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
+                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost, letterSpacing: '0.08em' })}>PAID</span>}
               </button>
             </div>
           )
         })}
       </div>
 
-      {/* ── Level 4 — OAL Rung filter ── */}
-      <div ref={oalRungRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 4 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', transition: 'background 0.2s' })}>
+      {/* ── OAL Rung filter strip ── */}
+      <div ref={oalRungRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 4 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', position: 'sticky', top: 94, zIndex: 38 })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: activeLevel === 4 ? E.gold : E.sec, letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginRight: 7, flexShrink: 0 })}>4 · Rungs</span>
         {OAL_RUNGS.map(({ key, label, sub }) => {
           const active = selectedOal === key
           return (
-            <button key={key} onClick={() => selectOal(key)} className="filter-strip-btn" style={s({
-              fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em',
-              padding: sub ? '4px 11px 3px' : '4px 11px',
-              border: `1px solid ${active ? E.gold : E.bdr3}`,
-              background: active ? 'rgba(197,162,74,0.09)' : 'transparent',
-              color: active ? E.gold : E.body, cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0,
-            })}>
+            <button key={key} onClick={() => selectOal(key)} className="filter-btn" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em', padding: sub ? '4px 11px 3px' : '4px 11px', border: `1px solid ${active ? E.gold : E.bdr3}`, background: active ? 'rgba(197,162,74,0.09)' : 'transparent', color: active ? E.gold : E.body, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 11, color: active ? E.gold : E.sec })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 9, color: active ? E.gold : E.sec })}>{sub}</span>}
             </button>
           )
         })}
       </div>
 
-      {/* ── Level 7 — EV Band filter ── */}
-      <div ref={evBandRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 7 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', transition: 'background 0.2s' })}>
+      {/* ── EV Band filter strip ── */}
+      <div ref={evBandRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 7 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', position: 'sticky', top: 141, zIndex: 37 })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: activeLevel === 7 ? E.gold : E.sec, letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginRight: 7, flexShrink: 0 })}>7 · EV Bands</span>
         {EV_BANDS.map(({ band, label, sub }) => {
           const active = selectedBand === band
           return (
-            <button key={String(band)} onClick={() => selectBand(band)} className="filter-strip-btn" style={s({
-              fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em',
-              padding: sub ? '4px 11px 3px' : '4px 11px',
-              border: `1px solid ${active ? E.gold : E.bdr3}`,
-              background: active ? 'rgba(197,162,74,0.09)' : 'transparent',
-              color: active ? E.gold : E.body, cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0,
-            })}>
+            <button key={String(band)} onClick={() => selectBand(band)} className="filter-btn" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em', padding: sub ? '4px 11px 3px' : '4px 11px', border: `1px solid ${active ? E.gold : E.bdr3}`, background: active ? 'rgba(197,162,74,0.09)' : 'transparent', color: active ? E.gold : E.body, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 11, color: active ? E.gold : E.sec })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 9, color: active ? E.gold : E.sec })}>{sub}</span>}
             </button>
           )
         })}
       </div>
 
-      {/* ── Panel headers ── */}
+      {/* ── Section 1: Panel headers ── */}
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Force-directed · No axes</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>Force-directed · No axes · Position encodes structural kinship</div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Two-axis · Precise coordinates</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>Two-axis · Precise risk coordinates</div>
         </div>
       </div>
 
-      {/* ── Dual panels ── */}
+      {/* ── Section 1: Dual visualization panels ── */}
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, borderBottom: `1px solid ${E.bdr2}` })}>
         <div style={s({ borderRight: `1px solid ${E.bdr2}`, background: E.bg, overflow: 'hidden' })}>
           <svg ref={conSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
@@ -996,26 +1180,42 @@ export default function PlatformPage() {
             </div>
           ))}
         </div>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec })}>
           Node size = market cap · Pulsation = degradation risk · Hover to cross-highlight
+          {!isPaid && ' · Company data visible at paid tier'}
         </span>
       </div>
 
-      {/* ── Section 2: Regime panels ── */}
-      {regimeSummary && <RegimePanels summary={regimeSummary} />}
+      {/* ── Section 2: Three Market Regime Summaries ── */}
+      {regimeSummary && <Section2Regimes summary={regimeSummary} />}
 
-      {/* ── Section 3+: Paid blur ── */}
-      {!isPaid && <PaidBlur />}
+      {/* ── Section 3: Four OAL Anchor Rung Views ── */}
+      {derivedNodes.length > 0 && (
+        <Section3OALRungs nodes={derivedNodes} selectedOal={selectedOal} />
+      )}
 
-      {/* ── Tooltip — fixed to viewport, not page ── */}
-      {tooltip && (
-        <div style={s({
-          position: 'fixed', left: tooltip.x, top: tooltip.y,
-          background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}`,
-          padding: '11px', fontFamily: E.mono, fontSize: 11, color: E.text,
-          lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none',
-        })}>
-          <div style={s({ color: E.gold, fontSize: 11, marginBottom: 4 })}>{tooltip.node.symbol}</div>
+      {/* ── Section 4: Seven EV Quantile Band Views ── */}
+      {derivedNodes.length > 0 && (
+        <Section4EVBands nodes={derivedNodes} selectedBand={selectedBand} />
+      )}
+
+      {/* ── Paid wall: Sections 5 (Sectors), 6 (Archetypes), 7 (Companies) ── */}
+      {!isPaid && <PaidWall />}
+
+      {/* ── Paid sections: placeholder for future sprints ── */}
+      {isPaid && (
+        <section style={s({ borderBottom: `1px solid ${E.bdr2}` })}>
+          <SectionHeader lucas={11} label="Sectors" sub="GICS sector breakdown · Coming in next sprint" />
+          <div style={s({ padding: '36px 18px', fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+            Sector-level structural risk analysis — in development.
+          </div>
+        </section>
+      )}
+
+      {/* ── Tooltip — paid users only, fixed to viewport ── */}
+      {tooltip && isPaid && (
+        <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}`, padding: '11px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
+          <div style={s({ color: E.gold, fontSize: 12, marginBottom: 4 })}>{tooltip.node.symbol}</div>
           <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
           <div style={s({ color: E.body })}>Composite: {tooltip.node.composite.toFixed(1)} · {tooltip.node.bucket}</div>
           <div style={s({ color: E.body })}>OAL: {tooltip.node.oal}</div>
@@ -1024,7 +1224,7 @@ export default function PlatformPage() {
       )}
 
       {/* ── Footer ── */}
-      <div style={s({ padding: '18px', textAlign: 'center' as const })}>
+      <div style={s({ padding: '22px 18px', textAlign: 'center' as const })}>
         <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
           © 2026 The Capital Steward, LLC · For informational purposes only · Not investment advice
         </p>
