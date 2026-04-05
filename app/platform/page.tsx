@@ -184,6 +184,15 @@ function fmtEV(v: unknown): string {
   return `$${n.toFixed(0)}`
 }
 
+// Map a market cap value (same order as EV, generated synthetic) to a node radius.
+// Log scale: small-cap ~2.5px, mega-cap ~6px. Keeps the constellation readable.
+function nodeRadius(mc: number): number {
+  const MIN_R = 2.5, MAX_R = 6.0
+  const LO = 1e8, HI = 2e12
+  const t = Math.max(0, Math.min(1, (Math.log(Math.max(mc, LO)) - Math.log(LO)) / (Math.log(HI) - Math.log(LO))))
+  return MIN_R + t * (MAX_R - MIN_R)
+}
+
 // ─── Synthetic data ───────────────────────────────────────────────────────────
 
 function generateNodes(n = 5200): Node[] {
