@@ -124,7 +124,7 @@ const EV_BANDS = [
 const OAL_RUNGS = [
   { key: 'all'     as OALKey, label: 'All Rungs', sub: undefined },
   { key: 'Revenue' as OALKey, label: 'Revenue',   sub: 'Shallowest' },
-  { key: 'EBIT'    as OALKey, label: 'EBIT',      sub: 'Operating' },
+  { key: 'EBIT'    as OALKey, label: 'EBIT',      sub: 'Op. Income' },
   { key: 'NI'      as OALKey, label: 'NI',        sub: 'Net Income' },
   { key: 'FCF'     as OALKey, label: 'FCF',       sub: 'Deepest' },
 ]
@@ -137,7 +137,7 @@ const OAL_RUNG_DEFS = [
     description: 'Companies that have not yet earned their way to profit, let alone cash generation.',
   },
   {
-    key: 'EBIT' as OALKey, label: 'EBIT', depth: 'Operating income',
+    key: 'EBIT' as OALKey, label: 'EBIT', depth: 'Operating income anchor',
     weight: 0.1, medianReturn: null, hasReturn: false,
     description: 'Companies generating operating income before financing and taxes.',
   },
@@ -386,7 +386,7 @@ function Section2Regimes({ summary }: { summary: RegimeSummary }) {
 
   return (
     <section>
-      <SectionHeader lucas={3} label="Market Regimes" sub="OSMR signal by market regime · 2010–2026 · ex ante classifier" />
+      <SectionHeader lucas={3} label="Market Regimes" sub="Structural risk signal by market regime · 2009–2026" />
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: `1px solid ${E.bdr2}` })}>
         {summary.regimes.map((regime, i) => {
           const isCurrent = regime.id === summary.current_regime
@@ -478,7 +478,7 @@ function Section3OALRungs({ nodes, selectedOal }: { nodes: Node[]; selectedOal: 
 
   return (
     <section>
-      <SectionHeader lucas={4} label="OAL Anchor Rungs" sub="Operational Anchor Ladder · What each company has actually demonstrated over 7 years" />
+      <SectionHeader lucas={4} label="Anchor Levels" sub="Operational Anchor Ladder · What each company has actually demonstrated over 7 years" />
       <div style={s({ borderBottom: `1px solid ${E.bdr2}` })}>
         {rungStats.map((rung, i) => {
           const isSelected = selectedOal === rung.key
@@ -594,7 +594,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
 
   return (
     <section>
-      <SectionHeader lucas={7} label="EV Quantile Bands" sub="Seven equal-population bands by enterprise value · Framework-native taxonomy" />
+      <SectionHeader lucas={7} label="EV Quantile Bands" sub="Seven equal-population quantiles by enterprise value" />
       <div style={s({ padding: '18px', borderBottom: `1px solid ${E.bdr2}` })}>
 
         {/* Context line */}
@@ -886,16 +886,24 @@ export default function PlatformPage() {
       setDerivedNodes([...nodes]) // expose to React for Sections 3 & 4
 
       const container = containerRef.current
-      if (!container) return
-      const panelW = container.clientWidth / 2
+      const conEl  = conSvgRef.current
+      const scatEl = scatSvgRef.current
+      if (!container || !conEl || !scatEl) return
+
+      // Read actual rendered width from the SVG element.
+      // More reliable than container.clientWidth / 2 because the element
+      // has CSS width:100% and is already in the DOM at this point.
+      const panelW = Math.max(300, conEl.getBoundingClientRect().width)
       const panelH = 440
 
+      // Cluster centers pulled inward so no cluster hugs the panel edge.
+      // Diagonal layout: Very Low bottom-left → Very High top-right.
       const centers: Record<string, { x: number; y: number }> = {
-        'Very Low':  { x: panelW * 0.15, y: panelH * 0.80 },
-        'Low':       { x: panelW * 0.32, y: panelH * 0.64 },
+        'Very Low':  { x: panelW * 0.20, y: panelH * 0.78 },
+        'Low':       { x: panelW * 0.35, y: panelH * 0.62 },
         'Moderate':  { x: panelW * 0.50, y: panelH * 0.48 },
-        'High':      { x: panelW * 0.68, y: panelH * 0.32 },
-        'Very High': { x: panelW * 0.85, y: panelH * 0.17 },
+        'High':      { x: panelW * 0.65, y: panelH * 0.34 },
+        'Very High': { x: panelW * 0.80, y: panelH * 0.22 },
       }
 
       const positions = await positionsFetchRef.current
@@ -914,21 +922,30 @@ export default function PlatformPage() {
           return { ...n, x: c.x + (jRng() - 0.5) * 20, y: c.y + (jRng() - 0.5) * 20 }
         })
         const simulation = d3.forceSimulation(forceNodes)
-          .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.42))
-          .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.42))
-          .force('charge',  d3.forceManyBody().strength(-6))
-          .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 0.8))
+          // Reduced strength: 0.28 instead of 0.42 — nodes spread more organically
+          // Increased charge: -14 instead of -6 — stronger repulsion between nodes
+          .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.28))
+          .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.28))
+          .force('charge',  d3.forceManyBody().strength(-14))
+          .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.4))
           .stop()
         simulation.tick(500)
+        // 8% margin on each side — prevents nodes piling at borders
+        const mx = panelW * 0.08
+        const my = panelH * 0.08
         forceNodes.forEach((fn: any, i: number) => {
-          nodesRef.current[i].x = Math.max(4, Math.min(panelW - 4, fn.x))
-          nodesRef.current[i].y = Math.max(4, Math.min(panelH - 4, fn.y))
+          nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
+          nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
         })
       }
 
       // ── Constellation ──────────────────────────────────────────────────────
 
-      const conSvg = d3.select(conSvgRef.current).attr('width', panelW).attr('height', panelH)
+      // Use viewBox so coordinate space exactly matches physical pixels.
+      // CSS width:100% handles responsive scaling; viewBox defines the coordinate system.
+      const conSvg = d3.select(conSvgRef.current)
+        .attr('viewBox', `0 0 ${panelW} ${panelH}`)
+        .attr('preserveAspectRatio', 'none')
 
       // Star field
       const stars = Array.from({ length: 180 }, (_, i) => ({
@@ -984,7 +1001,9 @@ export default function PlatformPage() {
       const innerW = panelW - PAD.l - PAD.r
       const innerH = panelH - PAD.t - PAD.b
 
-      const scatSvg = d3.select(scatSvgRef.current).attr('width', panelW).attr('height', panelH)
+      const scatSvg = d3.select(scatSvgRef.current)
+        .attr('viewBox', `0 0 ${panelW} ${panelH}`)
+        .attr('preserveAspectRatio', 'none')
       const xScale  = d3.scaleLinear().domain([0, 100]).range([0, innerW])
       const yScale  = d3.scaleLinear().domain([0, 100]).range([innerH, 0])
       const chart   = scatSvg.append('g').attr('transform', `translate(${PAD.l},${PAD.t})`)
@@ -1133,29 +1152,70 @@ export default function PlatformPage() {
         })}
       </div>
 
-      {/* ── OAL Rung filter strip ── */}
-      <div ref={oalRungRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 4 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', position: 'sticky', top: 94, zIndex: 38 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: activeLevel === 4 ? E.gold : E.sec, letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginRight: 7, flexShrink: 0 })}>4 · Rungs</span>
+      {/* ── Combined filter strip — OAL Anchor Levels + EV Bands on one row ── */}
+      <div
+        ref={(el: HTMLDivElement | null) => { oalRungRef.current = el; evBandRef.current = el }}
+        style={s({
+          borderBottom: `1px solid ${E.bdr2}`,
+          background: activeLevel === 4 ? '#0C0A08' : activeLevel === 7 ? '#0C0A08' : E.bg,
+          padding: '6px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+          overflowX: 'auto',
+          position: 'sticky',
+          top: 94,
+          zIndex: 38,
+          whiteSpace: 'nowrap' as const,
+        })}
+      >
+        {/* OAL Anchor Levels */}
+        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 4 ? E.gold : E.dim, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
+          4 · Anchor
+        </span>
         {OAL_RUNGS.map(({ key, label, sub }) => {
           const active = selectedOal === key
           return (
-            <button key={key} onClick={() => selectOal(key)} className="filter-btn" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em', padding: sub ? '4px 11px 3px' : '4px 11px', border: `1px solid ${active ? E.gold : E.bdr3}`, background: active ? 'rgba(197,162,74,0.09)' : 'transparent', color: active ? E.gold : E.body, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 })}>
+            <button key={key} onClick={() => selectOal(key)} className="filter-btn" style={s({
+              fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
+              letterSpacing: '0.05em',
+              padding: sub ? '3px 9px 2px' : '3px 9px',
+              border: `1px solid ${active ? E.gold : E.bdr3}`,
+              background: active ? 'rgba(197,162,74,0.09)' : 'transparent',
+              color: active ? E.gold : E.body,
+              cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+              flexShrink: 0,
+            })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 9, color: active ? E.gold : E.sec })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 8, color: active ? E.gold : E.sec })}>{sub}</span>}
             </button>
           )
         })}
-      </div>
 
-      {/* ── EV Band filter strip ── */}
-      <div ref={evBandRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 7 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', position: 'sticky', top: 141, zIndex: 37 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: activeLevel === 7 ? E.gold : E.sec, letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginRight: 7, flexShrink: 0 })}>7 · EV Bands</span>
+        {/* Separator */}
+        <div style={s({ width: 1, height: 24, background: E.bdr3, flexShrink: 0, margin: '0 6px' })} />
+
+        {/* EV Bands */}
+        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 7 ? E.gold : E.dim, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
+          7 · EV
+        </span>
         {EV_BANDS.map(({ band, label, sub }) => {
           const active = selectedBand === band
           return (
-            <button key={String(band)} onClick={() => selectBand(band)} className="filter-btn" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400, letterSpacing: '0.06em', padding: sub ? '4px 11px 3px' : '4px 11px', border: `1px solid ${active ? E.gold : E.bdr3}`, background: active ? 'rgba(197,162,74,0.09)' : 'transparent', color: active ? E.gold : E.body, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0 })}>
+            <button key={String(band)} onClick={() => selectBand(band)} className="filter-btn" style={s({
+              fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
+              letterSpacing: '0.05em',
+              padding: sub ? '3px 9px 2px' : '3px 9px',
+              border: `1px solid ${active ? E.gold : E.bdr3}`,
+              background: active ? 'rgba(197,162,74,0.09)' : 'transparent',
+              color: active ? E.gold : E.body,
+              cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+              flexShrink: 0,
+            })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 9, color: active ? E.gold : E.sec })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 8, color: active ? E.gold : E.sec })}>{sub}</span>}
             </button>
           )
         })}
@@ -1165,7 +1225,7 @@ export default function PlatformPage() {
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>Force-directed · No axes · Position encodes structural kinship</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>No axes · Position encodes structural kinship</div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
@@ -1195,7 +1255,7 @@ export default function PlatformPage() {
         </div>
         <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec })}>
           Node size = market cap · Pulsation = degradation risk · Hover to cross-highlight
-          {!isPaid && ' · Company data visible at paid tier'}
+          {!isPaid && ' · Company identity at paid tier'}
         </span>
       </div>
 
