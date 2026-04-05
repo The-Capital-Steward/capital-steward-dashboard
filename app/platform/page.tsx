@@ -83,8 +83,10 @@ const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as con
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function bucketColor(b: string): string {
-  return ({ 'Very Low': E.VL, 'Low': E.L, 'Moderate': E.M, 'High': E.H, 'Very High': E.VH }
-    as Record<string, string>)[b] ?? E.M
+  const map: Record<string, string> = {
+    'Very Low': E.VL, 'Low': E.L, 'Moderate': E.M, 'High': E.H, 'Very High': E.VH,
+  }
+  return map[b] ?? E.M
 }
 
 // FIX: log10 scale — was Math.sqrt(mc)*0.38+2 which gives r=12 for all real market caps
