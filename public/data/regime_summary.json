@@ -1,0 +1,30 @@
+{
+  "regimes": [
+    {
+      "id": "expansionary",
+      "label": "Expansionary",
+      "periods": ["[placeholder — populate from Number Swap List]"],
+      "oal_composition": { "FCF": 0.61, "NI": 0.33, "EBIT": 0.001, "Revenue": 0.059 },
+      "median_composite": 28.4,
+      "iqr": [16.1, 41.8]
+    },
+    {
+      "id": "neutral",
+      "label": "Neutral",
+      "periods": ["[placeholder — populate from Number Swap List]"],
+      "oal_composition": { "FCF": 0.518, "NI": 0.438, "EBIT": 0.001, "Revenue": 0.043 },
+      "median_composite": 47.6,
+      "iqr": [27.3, 66.9]
+    },
+    {
+      "id": "stress",
+      "label": "Stress",
+      "periods": ["[placeholder — populate from Number Swap List]"],
+      "oal_composition": { "FCF": 0.38, "NI": 0.49, "EBIT": 0.002, "Revenue": 0.128 },
+      "median_composite": 61.2,
+      "iqr": [41.4, 78.8]
+    }
+  ],
+  "current_regime": "neutral",
+  "filtered_overrides": {}
+}
