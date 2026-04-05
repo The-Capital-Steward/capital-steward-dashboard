@@ -1,13 +1,17 @@
 'use client'
 
 // app/platform/page.tsx
-// Fixes applied:
-//   1. nodeRadius() — log10 scale (was sqrt, gave r=12 for all nodes → solid blob)
-//   2. Contrast — E.muted (#554E44) is 2.43:1 on #0A0907, fails Lucas 3:1 minimum.
-//      Added E.sec (#90A297, 7.39:1) for secondary text. E.muted/dim used for
-//      borders/backgrounds only, never text.
-//   3. Descent — Level 4 adds OAL rung filter. Level 7 visually connects to
-//      EV band strip. Breadcrumb is fully interactive for free tiers.
+//
+// Changes from prior version:
+//   1. Font stack corrected: Syne → DM Sans, Instrument Serif → Playfair Display.
+//      (Locked decision: Syne and Instrument Serif removed — never reintroduce.)
+//   2. positionsFetchRef — fetch begins immediately on auth, parallel with D3 CDN load.
+//      initViz() awaits the precomputed positions before rendering; simulation.tick(500)
+//      runs only as a fallback if the fetch fails.
+//   3. PAD.b 29 → 47 (Lucas). Axis label y: innerH+18 → innerH+29.
+//      Root cause: D3 axisBottom places tick baselines at ≈ innerH+17, colliding with
+//      axis label at innerH+18. PAD.b=47 gives innerH=382; label at 382+29=411 clears
+//      tick labels by ≈18px. SVG-y = 11+411=422, well inside panelH=440.
 
 import { useEffect, useRef, useState } from 'react'
 import { useUser, SignIn, SignUp } from '@clerk/nextjs'
@@ -15,8 +19,8 @@ import Link from 'next/link'
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
 // Dark inverse palette. Contrast values on bg #0A0907 (L≈0.004):
-//   text  #EDE9E0 → 16.43:1   body #A89E8E → 7.53:1
-//   sec   #90A297 →  7.39:1   gold #C5A24A → 8.19:1
+//   text  #EDE9E0 → 16.43:1   body #A89E8E →  7.53:1
+//   sec   #90A297 →  7.39:1   gold #C5A24A →  8.19:1
 //   muted #554E44 →  2.43:1  (borders/backgrounds ONLY — never text)
 //   dim   #3A3530 →  1.64:1  (structural backgrounds ONLY)
 
@@ -29,7 +33,7 @@ const E = {
   bdr3:  '#272420',
   text:  '#EDE9E0',   // 16.43:1 — primary
   body:  '#A89E8E',   //  7.53:1 — body / important secondary
-  sec:   '#90A297',   //  7.39:1 — labels, breadcrumb, de-emphasis (NEW)
+  sec:   '#90A297',   //  7.39:1 — labels, breadcrumb, de-emphasis
   muted: '#554E44',   //  2.43:1 — borders/fills ONLY, never text
   dim:   '#3A3530',   //  1.64:1 — structural backgrounds ONLY
   ghost: '#2A2520',   //          — near-invisible dividers
@@ -40,8 +44,8 @@ const E = {
   H:     '#C07050',
   VH:    '#C5524A',
   mono:  "'IBM Plex Mono','Courier New',monospace",
-  sans:  "'Syne',system-ui,sans-serif",
-  serif: "'Instrument Serif',Georgia,serif",
+  sans:  "'DM Sans',system-ui,sans-serif",       // LOCKED: DM Sans only
+  serif: "'Playfair Display',Georgia,serif",      // LOCKED: Playfair Display only
 }
 
 const s = (x: object) => x as React.CSSProperties
@@ -61,6 +65,12 @@ interface Node {
   evBand: number
   x: number
   y: number
+}
+
+interface PositionRecord {
+  id: string
+  nx: number   // normalized x ∈ [0,1] relative to CANVAS_W=900
+  ny: number   // normalized y ∈ [0,1] relative to CANVAS_H=440
 }
 
 type Band   = 'all' | 1 | 2 | 3 | 4 | 5 | 6 | 7
@@ -89,12 +99,11 @@ function bucketColor(b: string): string {
   return map[b] ?? E.M
 }
 
-// FIX: log10 scale — was Math.sqrt(mc)*0.38+2 which gives r=12 for all real market caps
+// log10 scale: $1B→1.5px · $10B→2.8px · $100B→4.2px · $1T→5.6px
 function nodeRadius(mc: number): number {
   if (!mc || mc <= 0) return 1.5
   const log = Math.log10(mc)
   return Math.max(1.5, Math.min(6, (log - 8) * 1.4))
-  // $1B → 1.5px · $10B → 2.8px · $100B → 4.2px · $1T → 5.6px
 }
 
 function fmtEV(v: number): string {
@@ -110,17 +119,14 @@ function makeLCG(seed: number) {
   return () => { s = (1664525 * s + 1013904223) & 0x7fffffff; return s / 0x7fffffff }
 }
 
-// ─── Synthetic data — framework-accurate distributions ────────────────────────
+// ─── Synthetic data ───────────────────────────────────────────────────────────
 //
-// OAL weights reflect confirmed 7yr anchor composition:
-//   FCF=51.8%, NI=43.8%, EBIT≈0.1%, Revenue=4.3%
+// Axis architecture: axis1 and axis2 generated independently (OSMR).
+// composite = (axis1 + axis2) / 2, percentile-ranked for bucket assignment.
+// OAL weights: confirmed 7yr anchor figures.
 //
-// Axis/composite relationship matches OSMR:
-//   axis1 (Anchor Detachment) and axis2 (Anchor Degradation) are independent.
-//   composite = (axis1 + axis2) / 2, then percentile-ranked across universe.
-//   Bucket thresholds applied to composite percentile (0–20 VL, etc.)
-//
-// EV: log-normal, median ≈ $2.5B, seeded for consistency.
+// LCG call order per node — must match precompute-constellation.mjs:
+//   1: axis1, 2: axis2, 3–4: ev (gauss/Box-Muller), 5: oal, 6: mc coeff
 
 function generateNodes(n = 5200): Node[] {
   const rng = makeLCG(31337)
@@ -129,7 +135,6 @@ function generateNodes(n = 5200): Node[] {
     return Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2)
   }
 
-  // OAL: confirmed 7yr anchor composition
   const OAL_WEIGHTS: [Node['oal'], number][] = [
     ['FCF',     0.518],
     ['NI',      0.438],
@@ -137,18 +142,14 @@ function generateNodes(n = 5200): Node[] {
     ['Revenue', 0.043],
   ]
   function randOal(): Node['oal'] {
-    const r = rng()
-    let cum = 0
+    const r = rng(); let cum = 0
     for (const [oal, w] of OAL_WEIGHTS) { cum += w; if (r < cum) return oal }
     return 'Revenue'
   }
-
   function randEV(): number {
-    return Math.exp(gauss() * 1.6 + 21.5)  // median ≈ $2.5B
+    return Math.exp(gauss() * 1.6 + 21.5)
   }
 
-  // Generate axis1 and axis2 independently (OSMR signal architecture).
-  // Composite is their mean. Bucket is composite percentile rank.
   const raw = Array.from({ length: n }, (_, i) => {
     const axis1 = Math.min(100, Math.max(0, rng() * 100))
     const axis2 = Math.min(100, Math.max(0, rng() * 100))
@@ -157,7 +158,6 @@ function generateNodes(n = 5200): Node[] {
     return { i, axis1, axis2, composite, ev, oal: randOal(), mc: ev * (0.65 + rng() * 0.7) }
   })
 
-  // Percentile-rank composite across the universe for bucket assignment.
   const ranked = [...raw].sort((a, b) => a.composite - b.composite)
   const bucketOf = (rank: number): Node['bucket'] => {
     const pct = rank / n
@@ -179,7 +179,6 @@ function generateNodes(n = 5200): Node[] {
     evBand: 0, x: 0, y: 0,
   }))
 
-  // EV bands: 7 equal-population quantiles by EV rank
   const byEV = [...nodes].sort((a, b) => a.ev - b.ev)
   const bandSize = Math.ceil(byEV.length / 7)
   byEV.forEach((nd, i) => { nd.evBand = Math.min(7, Math.floor(i / bandSize) + 1) })
@@ -196,7 +195,7 @@ const CLERK_APPEARANCE = {
     colorTextOnPrimaryBackground: '#0A0907',
     colorInputBackground: '#0A0907', colorInputText: '#EDE9E0',
     colorNeutral: '#EDE9E0', borderRadius: '0px',
-    fontFamily: "'Syne',system-ui,sans-serif",
+    fontFamily: "'DM Sans',system-ui,sans-serif",   // LOCKED: DM Sans only
   },
   elements: {
     card: 'shadow-none bg-transparent', headerTitle: 'hidden', headerSubtitle: 'hidden',
@@ -227,7 +226,7 @@ function AuthModal() {
                 { tier: 'Free', cta: 'Create account', action: () => setMode('signup'), primary: false,
                   features: ['Full constellation map', 'EV band filter', 'OAL rung filter'] },
                 { tier: 'Full access · $159/mo', cta: 'Open full access', action: () => { window.location.href = '/platform/subscribe' }, primary: true,
-                  features: ['Everything free', 'Company drilldowns', 'Cohort grids (290K+ obs)', 'Weekly updates'] },
+                  features: ['Everything free', 'Company drilldowns', 'Cohort grids (285K+ obs)', 'Weekly updates'] },
               ].map(({ tier, cta, action, primary, features }) => (
                 <div key={tier} style={s({ border: `1px solid ${primary ? E.bdr3 : E.bdr2}`, background: primary ? 'rgba(197,162,74,0.05)' : 'transparent', padding: '18px' })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: primary ? E.gold : E.sec, marginBottom: 11 })}>{tier}</div>
@@ -267,7 +266,6 @@ function AuthModal() {
 
 // ─── Platform preview (auth gate background) ──────────────────────────────────
 
-// Seeded — does not re-randomize on render
 const PREVIEW_DOTS = Array.from({ length: 120 }, (_, i) => {
   const rng = makeLCG(i * 7 + 13)
   const colors = [E.VL, E.L, E.M, E.H, E.VH]
@@ -315,23 +313,25 @@ function PlatformPreview() {
 // ─── EV band labels ───────────────────────────────────────────────────────────
 
 const EV_BANDS = [
-  { band: 'all' as Band, label: 'All',       sub: undefined },
-  { band: 1 as Band,     label: 'Band I',    sub: '<$300M' },
-  { band: 2 as Band,     label: 'Band II',   sub: '$300M–$1B' },
-  { band: 3 as Band,     label: 'Band III',  sub: '$1B–$3B' },
-  { band: 4 as Band,     label: 'Band IV',   sub: '$3B–$10B' },
-  { band: 5 as Band,     label: 'Band V',    sub: '$10B–$30B' },
-  { band: 6 as Band,     label: 'Band VI',   sub: '$30B–$100B' },
-  { band: 7 as Band,     label: 'Band VII',  sub: '>$100B' },
+  { band: 'all' as Band, label: 'All',      sub: undefined },
+  { band: 1 as Band,     label: 'Band I',   sub: '<$300M' },
+  { band: 2 as Band,     label: 'Band II',  sub: '$300M–$1B' },
+  { band: 3 as Band,     label: 'Band III', sub: '$1B–$3B' },
+  { band: 4 as Band,     label: 'Band IV',  sub: '$3B–$10B' },
+  { band: 5 as Band,     label: 'Band V',   sub: '$10B–$30B' },
+  { band: 6 as Band,     label: 'Band VI',  sub: '$30B–$100B' },
+  { band: 7 as Band,     label: 'Band VII', sub: '>$100B' },
 ]
 
 const OAL_RUNGS = [
   { key: 'all' as OALKey,     label: 'All Rungs' },
-  { key: 'FCF' as OALKey,     label: 'FCF',       sub: 'Deepest anchor' },
-  { key: 'NI' as OALKey,      label: 'NI',         sub: 'Net Income' },
-  { key: 'EBIT' as OALKey,    label: 'EBIT',       sub: 'Operating' },
   { key: 'Revenue' as OALKey, label: 'Revenue',   sub: 'Shallowest' },
+  { key: 'EBIT' as OALKey,    label: 'EBIT',      sub: 'Operating' },
+  { key: 'NI' as OALKey,      label: 'NI',        sub: 'Net Income' },
+  { key: 'FCF' as OALKey,     label: 'FCF',       sub: 'Deepest anchor' },
 ]
+// OAL rung order: Revenue (shallowest) → FCF (deepest). Locked decision:
+// "ladder is a depth metaphor — deeper is better, shallower is riskier."
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
@@ -344,18 +344,20 @@ export default function PlatformPage() {
   const [activeLevel,  setActiveLevel]  = useState(1)
   const [tooltip, setTooltip] = useState<{ x: number; y: number; node: Node } | null>(null)
 
-  const selectedBandRef = useRef<Band>('all')
-  const selectedOalRef  = useRef<OALKey>('all')
-  const hoveredIdRef    = useRef<string | null>(null)
-  const nodesRef        = useRef<Node[]>([])
-  const d3ReadyRef      = useRef(false)
-  const conSvgRef       = useRef<SVGSVGElement | null>(null)
-  const scatSvgRef      = useRef<SVGSVGElement | null>(null)
-  const containerRef    = useRef<HTMLDivElement | null>(null)
-  const evBandRef       = useRef<HTMLDivElement | null>(null)
-  const oalRungRef      = useRef<HTMLDivElement | null>(null)
+  const selectedBandRef    = useRef<Band>('all')
+  const selectedOalRef     = useRef<OALKey>('all')
+  const hoveredIdRef       = useRef<string | null>(null)
+  const nodesRef           = useRef<Node[]>([])
+  const d3ReadyRef         = useRef(false)
+  const conSvgRef          = useRef<SVGSVGElement | null>(null)
+  const scatSvgRef         = useRef<SVGSVGElement | null>(null)
+  const containerRef       = useRef<HTMLDivElement | null>(null)
+  const evBandRef          = useRef<HTMLDivElement | null>(null)
+  const oalRungRef         = useRef<HTMLDivElement | null>(null)
+  // Fetch starts as soon as auth is confirmed, parallel with D3 CDN load.
+  const positionsFetchRef  = useRef<Promise<PositionRecord[] | null> | null>(null)
 
-  // ── effectiveOpacity — brief logic + OAL filter + bucket opacity hierarchy ────
+  // ── effectiveOpacity ──────────────────────────────────────────────────────
   //
   // Bucket hierarchy (base state, no filter, no hover):
   //   Very Low  0.90  — favorable: elevated to read clearly
@@ -364,7 +366,7 @@ export default function PlatformPage() {
   //   High      null  — CSS pulse-h controls (0.48–0.84 cycle)
   //   Very High null  — CSS pulse-vh controls (0.28–0.88 cycle)
   //
-  // null = remove inline style, allowing CSS animation to run.
+  // Returning null removes the inline style, allowing CSS animation to run.
 
   function effectiveOpacity(d: Node): number | null {
     const bandOk  = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
@@ -436,7 +438,6 @@ export default function PlatformPage() {
       evBandRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       return
     }
-    // levels 3, 11, 18, 29 — future sprints (3) or paid
   }
 
   // ── D3 initialization ──────────────────────────────────────────────────────
@@ -444,7 +445,17 @@ export default function PlatformPage() {
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return
 
-    function initViz() {
+    // Kick off positions fetch immediately — runs parallel with D3 CDN load.
+    if (!positionsFetchRef.current) {
+      positionsFetchRef.current = fetch('/data/constellation_positions.json')
+        .then(r => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`)
+          return r.json() as Promise<PositionRecord[]>
+        })
+        .catch(() => null)   // null triggers simulation fallback in initViz
+    }
+
+    async function initViz() {
       if (d3ReadyRef.current) return
       d3ReadyRef.current = true
 
@@ -457,8 +468,6 @@ export default function PlatformPage() {
       const panelW = container.clientWidth / 2
       const panelH = 440
 
-      // ── Constellation ────────────────────────────────────────────────────────
-
       const centers: Record<string, { x: number; y: number }> = {
         'Very Low':  { x: panelW * 0.15, y: panelH * 0.80 },
         'Low':       { x: panelW * 0.32, y: panelH * 0.64 },
@@ -467,25 +476,44 @@ export default function PlatformPage() {
         'Very High': { x: panelW * 0.85, y: panelH * 0.17 },
       }
 
-      const forceNodes = nodes.map(n => ({ ...n }))
+      // ── Position nodes — precomputed JSON first, simulation fallback ────────
 
-      const simulation = d3.forceSimulation(forceNodes)
-        .force('x', d3.forceX((d: Node) => centers[d.bucket].x).strength(0.42))
-        .force('y', d3.forceY((d: Node) => centers[d.bucket].y).strength(0.42))
-        .force('charge', d3.forceManyBody().strength(-6))
-        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 0.8))
-        .stop()
+      const positions = await positionsFetchRef.current
 
-      simulation.tick(500)
+      if (positions && positions.length === nodesRef.current.length) {
+        // Fast path: apply normalized positions from static JSON.
+        // nx/ny are normalized to [0,1] relative to CANVAS_W=900, CANVAS_H=440.
+        // Scale to actual panel dimensions.
+        const posMap = new Map(positions.map(p => [p.id, p]))
+        nodesRef.current.forEach(n => {
+          const p = posMap.get(n.id)
+          if (p) {
+            n.x = Math.max(4, Math.min(panelW - 4, p.nx * panelW))
+            n.y = Math.max(4, Math.min(panelH - 4, p.ny * panelH))
+          }
+        })
+      } else {
+        // Fallback: run simulation client-side (blocks main thread ~500ms–2s).
+        // This path runs only if the static JSON is missing or malformed.
+        const forceNodes = nodesRef.current.map(n => ({ ...n }))
+        const simulation = d3.forceSimulation(forceNodes)
+          .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.42))
+          .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.42))
+          .force('charge',  d3.forceManyBody().strength(-6))
+          .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 0.8))
+          .stop()
+        simulation.tick(500)
+        forceNodes.forEach((fn: any, i: number) => {
+          nodesRef.current[i].x = Math.max(4, Math.min(panelW - 4, fn.x))
+          nodesRef.current[i].y = Math.max(4, Math.min(panelH - 4, fn.y))
+        })
+      }
 
-      forceNodes.forEach((fn: any, i: number) => {
-        nodesRef.current[i].x = Math.max(4, Math.min(panelW - 4, fn.x))
-        nodesRef.current[i].y = Math.max(4, Math.min(panelH - 4, fn.y))
-      })
+      // ── Constellation SVG ──────────────────────────────────────────────────
 
       const conSvg = d3.select(conSvgRef.current).attr('width', panelW).attr('height', panelH)
 
-      // Background — subtle star field
+      // Background star field
       const stars = Array.from({ length: 180 }, (_, i) => ({
         x: (Math.sin(i * 3.7) * 0.5 + 0.5) * panelW,
         y: (Math.cos(i * 2.3) * 0.5 + 0.5) * panelH,
@@ -539,11 +567,15 @@ export default function PlatformPage() {
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
 
-      // ── Structural Risk Map ──────────────────────────────────────────────────
+      // ── Structural Risk Map ────────────────────────────────────────────────
+      //
+      // PAD.b 29 → 47 (Lucas). innerH = panelH - PAD.t - PAD.b = 440 - 11 - 47 = 382.
+      // Axis label y = innerH + 29 = 411, SVG-y = 11 + 411 = 422.
+      // D3 tick baselines: SVG-y ≈ 11 + 382 + 11 = 404. Clearance ≈ 18px. ✓
 
-      const PAD = { l: 47, r: 11, t: 11, b: 29 }
+      const PAD    = { l: 47, r: 11, t: 11, b: 47 }
       const innerW = panelW - PAD.l - PAD.r
-      const innerH = panelH - PAD.t - PAD.b
+      const innerH = panelH - PAD.t - PAD.b   // = 382
 
       const scatSvg = d3.select(scatSvgRef.current).attr('width', panelW).attr('height', panelH)
       const xScale  = d3.scaleLinear().domain([0, 100]).range([0, innerW])
@@ -552,10 +584,10 @@ export default function PlatformPage() {
 
       // Quadrant fills
       ;[
-        { x: 0,        y: innerH/2, w: innerW/2,  h: innerH/2, fill: E.VL,    o: 0.025 },
+        { x: 0,        y: innerH/2, w: innerW/2,  h: innerH/2, fill: E.VL,      o: 0.025 },
         { x: innerW/2, y: innerH/2, w: innerW/2,  h: innerH/2, fill: '#9E8A70', o: 0.018 },
         { x: 0,        y: 0,        w: innerW/2,  h: innerH/2, fill: '#9E8A70', o: 0.018 },
-        { x: innerW/2, y: 0,        w: innerW/2,  h: innerH/2, fill: E.VH,     o: 0.030 },
+        { x: innerW/2, y: 0,        w: innerW/2,  h: innerH/2, fill: E.VH,      o: 0.030 },
       ].forEach(q => chart.append('rect').attr('x', q.x).attr('y', q.y).attr('width', q.w).attr('height', q.h).attr('fill', q.fill).attr('opacity', q.o))
 
       // Grid lines
@@ -587,20 +619,32 @@ export default function PlatformPage() {
           g.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4)
         })
 
-      // Axis labels
-      chart.append('text').attr('x', innerW / 2).attr('y', innerH + 18)
-        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DETACHMENT →')
-      chart.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -29)
-        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
+      // Axis labels — y values relative to chart group (chart group offset = PAD.t = 11)
+      // X-axis label: innerH + 29 = 382 + 29 = 411 → SVG-y = 11 + 411 = 422 ✓
+      // Y-axis label: y: -29 → SVG-y = 11 + (-29) — rotated, so x/y swap; positions correctly
+      chart.append('text')
+        .attr('x', innerW / 2)
+        .attr('y', innerH + 29)           // was innerH + 18 — caused overlap with tick labels
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 11).attr('font-family', E.mono)
+        .attr('letter-spacing', '0.12em').attr('fill', E.sec)
+        .text('ANCHOR DETACHMENT →')
+
+      chart.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -innerH / 2)
+        .attr('y', -29)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 11).attr('font-family', E.mono)
+        .attr('letter-spacing', '0.12em').attr('fill', E.sec)
+        .text('ANCHOR DEGRADATION →')
 
       // Quadrant labels
       ;[
-        { x: 6,        y: innerH - 6, txt: 'Deep · Stable',           col: E.VL,    a: 'start' },
-        { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',      col: '#9E8A70', a: 'end' },
-        { x: 6,        y: 12,         txt: 'Deep · Degrading',         col: '#9E8A70', a: 'start' },
-        { x: innerW-6, y: 12,         txt: 'Stretched · Degrading',    col: E.VH,    a: 'end' },
+        { x: 6,        y: innerH - 6, txt: 'Deep · Stable',        col: E.VL,      a: 'start' },
+        { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',   col: '#9E8A70', a: 'end' },
+        { x: 6,        y: 12,         txt: 'Deep · Degrading',      col: '#9E8A70', a: 'start' },
+        { x: innerW-6, y: 12,         txt: 'Stretched · Degrading', col: E.VH,      a: 'end' },
       ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', 0.35).text(q.txt))
 
       // Scatter nodes
@@ -702,7 +746,7 @@ export default function PlatformPage() {
       {/* ── Lucas descent breadcrumb ── */}
       <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 0, overflowX: 'auto' })}>
         {DESCENT_LEVELS.map((level, i) => {
-          const isActive = level.n === activeLevel || (activeLevel === 1 && level.n === 1)
+          const isActive = level.n === activeLevel
           const isFuture = level.n === 3
           const textColor = isActive ? E.gold : level.paid ? E.bdr3 : E.sec
           return (
@@ -723,6 +767,7 @@ export default function PlatformPage() {
       </div>
 
       {/* ── Level 4 — OAL Rung filter ── */}
+      {/* OAL order: Revenue (shallowest) → FCF (deepest). Locked design decision. */}
       <div ref={oalRungRef} style={s({ borderBottom: `1px solid ${E.bdr2}`, background: activeLevel === 4 ? '#0C0A08' : E.bg, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', transition: 'background 0.2s' })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: activeLevel === 4 ? E.gold : E.sec, letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginRight: 7, flexShrink: 0 })}>4 · Rungs</span>
         {OAL_RUNGS.map(({ key, label, sub }) => {
