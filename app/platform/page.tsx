@@ -143,6 +143,47 @@ function makeLCG(seed: number) {
   }
 }
 
+
+// ─── Color and formatting helpers ─────────────────────────────────────────────
+// All helpers defined here so they're available to every component below.
+
+// Map bucket names to palette colors
+function bucketColor(bucket: string): string {
+  switch (bucket) {
+    case 'Very Low':  return '#4a9e6b'
+    case 'Low':       return '#7ec99a'
+    case 'Moderate':  return '#c8a84b'
+    case 'High':      return '#d97a4a'
+    case 'Very High': return '#c94a4a'
+    default:          return '#666666'
+  }
+}
+
+// Safe number formatters — guard against undefined/NaN from external JSON
+function safeFixed(v: unknown, d = 2): string {
+  const n = Number(v)
+  return isFinite(n) ? n.toFixed(d) : '—'
+}
+function safePct(v: unknown, d = 1): string {
+  const n = Number(v)
+  return isFinite(n) ? `${n.toFixed(d)}%` : '—'
+}
+function safeFwd(v: unknown): string {
+  const n = Number(v)
+  if (!isFinite(n)) return '—'
+  return n > 0 ? `+${n.toFixed(1)}%` : `${n.toFixed(1)}%`
+}
+
+// Format enterprise value (Axis 1 input) for display
+function fmtEV(v: unknown): string {
+  const n = Number(v)
+  if (!isFinite(n)) return '—'
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(1)}T`
+  if (n >= 1e9)  return `$${(n / 1e9).toFixed(1)}B`
+  if (n >= 1e6)  return `$${(n / 1e6).toFixed(0)}M`
+  return `$${n.toFixed(0)}`
+}
+
 // ─── Synthetic data ───────────────────────────────────────────────────────────
 
 function generateNodes(n = 5200): Node[] {
@@ -769,8 +810,13 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
   const refY = cy(universeVH)
 
   // Build polyline points
-  const dotPoints = bandData.map((bd, i) => ({ x: cx(i), y: cy(bd.vhPct), ...bd }))
-  const polyline  = dotPoints.map(p => `${p.x},${p.y}`).join(' ')
+  // yhPct and ylPct are y-coordinates (SVG space) for the two series
+  const dotPoints = bandData.map((bd, i) => ({
+    x: cx(i),
+    yhPct: cy(bd.vhPct),  // y-position of Very High dot
+    ylPct: cy(bd.vlPct),  // y-position of Very Low dot
+    ...bd,
+  }))
 
   const yTicks = [0, 10, 20, 30]
 
@@ -797,12 +843,13 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
         </span>
       </div>
 
-      {/* Dot plot */}
+      {/* Dot plot — VH% and VL% both plotted per band */}
+      {/* Two series: red = Very High risk, green = Very Low risk */}
+      {/* The shape of both lines is the insight: neither collapses by size */}
       <div style={s({ padding: '18px 22px 14px', borderBottom: `1px solid ${E.bdr2}` })}>
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          style={s({ width: '100%', height: 'auto', display: 'block', maxHeight: 200 })}
-          preserveAspectRatio="none"
+          style={s({ width: '100%', height: 'auto', display: 'block', maxHeight: 220 })}
         >
           {/* Y-axis grid lines + labels */}
           {yTicks.map(v => {
@@ -827,61 +874,62 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
             )
           })}
 
-          {/* Universe VH reference line */}
-          <line
-            x1={PAD.l} y1={refY} x2={W - PAD.r} y2={refY}
-            stroke={E.sec}
-            strokeWidth={0.8}
-            strokeDasharray="4,6"
-            opacity={0.55}
-          />
-          <text
-            x={W - PAD.r + 5} y={refY + 4}
-            fontFamily="IBM Plex Mono,monospace"
-            fontSize={10}
-            fill={E.sec}
-            opacity={0.7}
-          >
-            Universe
-          </text>
-
-          {/* Connecting line */}
+          {/* VH connecting line */}
           <polyline
-            points={polyline}
+            points={dotPoints.map(p => `${p.x},${p.yhPct}`).join(' ')}
             fill="none"
             stroke={E.VH}
-            strokeWidth={1.4}
-            opacity={0.45}
+            strokeWidth={1.2}
+            opacity={0.35}
           />
 
-          {/* Dots */}
-          {dotPoints.map((pt, i) => {
+          {/* VL connecting line */}
+          <polyline
+            points={dotPoints.map(p => `${p.x},${p.ylPct}`).join(' ')}
+            fill="none"
+            stroke={E.VL}
+            strokeWidth={1.2}
+            opacity={0.35}
+          />
+
+          {/* Dots — VH (red) and VL (green) per band */}
+          {dotPoints.map((pt) => {
             const isSelected = selectedBand === pt.band
             const isActive   = selectedBand === 'all' || isSelected
-            const r          = isSelected ? 7 : 5
+            const r          = isSelected ? 6 : 4.5
+
             return (
-              <g key={pt.band} opacity={isActive ? 1 : 0.28}>
-                <circle
-                  cx={pt.x} cy={pt.y} r={r + 4}
-                  fill="transparent"
-                />
-                <circle
-                  cx={pt.x} cy={pt.y} r={r}
-                  fill={isSelected ? E.gold : E.VH}
-                  opacity={isSelected ? 1 : 0.8}
-                />
-                {/* Dot value label */}
+              <g key={pt.band} opacity={isActive ? 1 : 0.22}>
+                {/* VH dot */}
+                <circle cx={pt.x} cy={pt.yhPct} r={r}
+                  fill={isSelected ? E.gold : E.VH} opacity={isSelected ? 1 : 0.82} />
                 <text
-                  x={pt.x} y={pt.y - 11}
+                  x={pt.x} y={pt.yhPct - 10}
                   textAnchor="middle"
                   fontFamily="IBM Plex Mono,monospace"
-                  fontSize={10}
+                  fontSize={9}
                   fill={isSelected ? E.gold : E.VH}
                   opacity={isSelected ? 1 : 0.7}
                   fontWeight={isSelected ? 700 : 400}
                 >
                   {pt.vhPct.toFixed(0)}%
                 </text>
+
+                {/* VL dot */}
+                <circle cx={pt.x} cy={pt.ylPct} r={r}
+                  fill={isSelected ? E.gold : E.VL} opacity={isSelected ? 1 : 0.82} />
+                <text
+                  x={pt.x} y={pt.ylPct + 17}
+                  textAnchor="middle"
+                  fontFamily="IBM Plex Mono,monospace"
+                  fontSize={9}
+                  fill={isSelected ? E.gold : E.VL}
+                  opacity={isSelected ? 1 : 0.7}
+                  fontWeight={isSelected ? 700 : 400}
+                >
+                  {pt.vlPct.toFixed(0)}%
+                </text>
+
                 {/* Band label below axis */}
                 <text
                   x={pt.x} y={PAD.t + iH + 16}
@@ -905,23 +953,23 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
             )
           })}
 
-          {/* Y-axis label */}
-          <text
-            transform={`rotate(-90)`}
-            x={-(PAD.t + iH / 2)}
-            y={13}
-            textAnchor="middle"
-            fontFamily="IBM Plex Mono,monospace"
-            fontSize={9}
-            letterSpacing="1.5"
-            fill={E.ghost}
-          >
-            % VERY HIGH RISK
-          </text>
+          {/* Legend — top right */}
+          <g>
+            <circle cx={W - PAD.r - 2} cy={PAD.t + 6} r={4} fill={E.VH} opacity={0.8} />
+            <text x={W - PAD.r - 10} y={PAD.t + 10} textAnchor="end"
+              fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VH} opacity={0.7}>
+              Very High
+            </text>
+            <circle cx={W - PAD.r - 2} cy={PAD.t + 22} r={4} fill={E.VL} opacity={0.8} />
+            <text x={W - PAD.r - 10} y={PAD.t + 26} textAnchor="end"
+              fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VL} opacity={0.7}>
+              Very Low
+            </text>
+          </g>
         </svg>
       </div>
 
-      {/* Finding callout */}
+      {/* Finding callout — adds what the visual can\'t say: the implication */}
       <div style={s({
         padding: '11px 22px',
         borderBottom: `1px solid ${E.bdr2}`,
@@ -931,9 +979,9 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
         background: E.bg2,
       })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.dim, lineHeight: 1.65, flex: 1 })}>
-          The dashed line marks the universe average. Each dot is a band. The signal does not collapse
-          at higher EV levels — structural conditions that produce severe losses are present in mega-cap
-          equities at rates that match or exceed smaller companies.
+          Both series remain present at every level of the EV spectrum. Size does not protect against
+          structural conditions — and size does not prevent structural soundness. The framework
+          identifies both regardless of company scale.
         </span>
       </div>
     </section>
