@@ -9,7 +9,7 @@
 //   3. Descent — Level 4 adds OAL rung filter. Level 7 visually connects to
 //      EV band strip. Breadcrumb is fully interactive for free tiers.
 
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useUser, SignIn, SignUp } from '@clerk/nextjs'
 import Link from 'next/link'
 
@@ -214,27 +214,27 @@ function AuthModal() {
     <div style={s({ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
       <div style={s({ position: 'absolute', inset: 0, background: 'rgba(8,7,6,0.82)', backdropFilter: 'blur(12px)' })} />
       <div style={s({ position: 'relative', width: '100%', maxWidth: 460, background: E.bg2, border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}` })}>
-        <div style={s({ padding: '28px 32px 20px' })}>
-          <div style={s({ display: 'flex', alignItems: 'baseline', marginBottom: 22 })}>
+        <div style={s({ padding: '29px 29px 18px' })}>
+          <div style={s({ display: 'flex', alignItems: 'baseline', marginBottom: 18 })}>
             <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.28em', textTransform: 'uppercase' as const, color: E.sec })}>The Capital</span>
-            <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
+            <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 18, color: E.gold, marginLeft: 7 })}>Steward</span>
           </div>
           {mode === 'prompt' && <>
-            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 8, lineHeight: 1.1 })}>The structural map.</h2>
-            <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body, marginBottom: 24 })}>~5,200 U.S. equities. Two independently validated dimensions of structural risk. Free to explore.</p>
-            <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 20 })}>
+            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 7, lineHeight: 1.1 })}>The structural map.</h2>
+            <p style={s({ fontFamily: E.sans, fontSize: 18, lineHeight: 1.75, color: E.body, marginBottom: 18 })}>~5,200 U.S. equities. Two independently validated dimensions of structural risk. Free to explore.</p>
+            <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 18 })}>
               {[
                 { tier: 'Free', cta: 'Create account', action: () => setMode('signup'), primary: false,
                   features: ['Full constellation map', 'EV band filter', 'OAL rung filter'] },
                 { tier: 'Full access · $159/mo', cta: 'Open full access', action: () => { window.location.href = '/platform/subscribe' }, primary: true,
                   features: ['Everything free', 'Company drilldowns', 'Cohort grids (290K+ obs)', 'Weekly updates'] },
               ].map(({ tier, cta, action, primary, features }) => (
-                <div key={tier} style={s({ border: `1px solid ${primary ? E.bdr3 : E.bdr2}`, background: primary ? 'rgba(197,162,74,0.05)' : 'transparent', padding: '16px' })}>
+                <div key={tier} style={s({ border: `1px solid ${primary ? E.bdr3 : E.bdr2}`, background: primary ? 'rgba(197,162,74,0.05)' : 'transparent', padding: '18px' })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: primary ? E.gold : E.sec, marginBottom: 11 })}>{tier}</div>
-                  <div style={s({ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 14 })}>
+                  <div style={s({ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 11 })}>
                     {features.map(f => <div key={f} style={s({ fontFamily: E.sans, fontSize: 18, color: E.body, lineHeight: 1.4 })}>{f}</div>)}
                   </div>
-                  <button onClick={action} style={s({ width: '100%', fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '10px 0', background: primary ? E.gold : 'transparent', color: primary ? E.bg : E.body, border: primary ? 'none' : `1px solid ${E.bdr3}`, cursor: 'pointer' })}>{cta}</button>
+                  <button onClick={action} style={s({ width: '100%', fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '11px 0', background: primary ? E.gold : 'transparent', color: primary ? E.bg : E.body, border: primary ? 'none' : `1px solid ${E.bdr3}`, cursor: 'pointer' })}>{cta}</button>
                 </div>
               ))}
             </div>
@@ -243,17 +243,17 @@ function AuthModal() {
             </div>
           </>}
           {mode === 'signin' && <>
-            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 20, lineHeight: 1.1 })}>Sign in to open the map.</h2>
+            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 18, lineHeight: 1.1 })}>Sign in to open the map.</h2>
             <SignIn forceRedirectUrl="/platform" appearance={CLERK_APPEARANCE} />
-            <div style={s({ textAlign: 'center' as const, marginTop: 16 })}><button onClick={() => setMode('prompt')} style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline' })}>← Back</button></div>
+            <div style={s({ textAlign: 'center' as const, marginTop: 18 })}><button onClick={() => setMode('prompt')} style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline' })}>← Back</button></div>
           </>}
           {mode === 'signup' && <>
-            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 20, lineHeight: 1.1 })}>Create free account</h2>
+            <h2 style={s({ fontFamily: E.sans, fontSize: 29, fontWeight: 700, color: E.text, letterSpacing: '-0.03em', marginBottom: 18, lineHeight: 1.1 })}>Create free account</h2>
             <SignUp forceRedirectUrl="/platform" appearance={CLERK_APPEARANCE} />
-            <div style={s({ textAlign: 'center' as const, marginTop: 16 })}><button onClick={() => setMode('prompt')} style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline' })}>← Back</button></div>
+            <div style={s({ textAlign: 'center' as const, marginTop: 18 })}><button onClick={() => setMode('prompt')} style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline' })}>← Back</button></div>
           </>}
         </div>
-        <div style={s({ padding: '12px 32px 20px', borderTop: `1px solid ${E.bdr2}` })}>
+        <div style={s({ padding: '11px 29px 18px', borderTop: `1px solid ${E.bdr2}` })}>
           <p style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, textAlign: 'center' as const })}>
             <Link href="/methodology" style={s({ color: E.gold, textDecoration: 'none' })}>Examine the evidence</Link>
             {' · '}
@@ -282,15 +282,15 @@ const PREVIEW_DOTS = Array.from({ length: 120 }, (_, i) => {
 function PlatformPreview() {
   return (
     <div style={s({ width: '100%', height: '100vh', overflow: 'hidden', pointerEvents: 'none', userSelect: 'none' })}>
-      <div style={s({ height: 52, borderBottom: `1px solid ${E.bdr2}`, display: 'flex', alignItems: 'center', padding: '0 18px', background: E.bg })}>
+      <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, display: 'flex', alignItems: 'center', padding: '0 18px', background: E.bg })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.28em', textTransform: 'uppercase' as const, color: E.sec })}>The Capital</span>
-        <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
+        <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 18, color: E.gold, marginLeft: 7 })}>Steward</span>
       </div>
-      <div style={s({ height: 44, borderBottom: `1px solid ${E.bdr2}`, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 24, background: E.bg2 })}>
+      <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 18, background: E.bg2 })}>
         {DESCENT_LEVELS.map(l => (
           <div key={l.n} style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: l.n === 1 ? 1 : 0.3 })}>
-            <span style={s({ fontFamily: E.mono, fontSize: 13, color: l.n === 1 ? E.gold : E.sec })}>{l.n}</span>
-            <span style={s({ fontFamily: E.mono, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.sec })}>{l.label}</span>
+            <span style={s({ fontFamily: E.mono, fontSize: 11, color: l.n === 1 ? E.gold : E.sec })}>{l.n}</span>
+            <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.sec })}>{l.label}</span>
           </div>
         ))}
       </div>
@@ -496,8 +496,8 @@ export default function PlatformPage() {
           .attr('opacity', 0.12).attr('stroke-dasharray', '3,5')
         conSvg.append('text').attr('x', c.x).attr('y', c.y - 38)
           .attr('text-anchor', 'middle').attr('font-family', E.mono)
-          .attr('font-size', 7.5).attr('letter-spacing', '0.14em')
-          .attr('fill', col).attr('opacity', 0.25).text(b.toUpperCase())
+          .attr('font-size', 11).attr('letter-spacing', '0.14em')
+          .attr('fill', col).attr('opacity', 0.40).text(b.toUpperCase())
       })
 
       // Nodes
@@ -528,7 +528,7 @@ export default function PlatformPage() {
 
       // ── Structural Risk Map ──────────────────────────────────────────────────
 
-      const PAD = { l: 44, r: 14, t: 14, b: 38 }
+      const PAD = { l: 47, r: 11, t: 11, b: 29 }
       const innerW = panelW - PAD.l - PAD.r
       const innerH = panelH - PAD.t - PAD.b
 
@@ -557,31 +557,30 @@ export default function PlatformPage() {
         .attr('stroke', '#2A2520').attr('stroke-width', 0.55).attr('stroke-dasharray', '4,5').attr('opacity', 0.55)
 
       // Axes
-      const tickStyle = { fill: '#3A3530', fontSize: 8, fontFamily: E.mono }
       const xAxis = d3.axisBottom(xScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)
       const yAxis = d3.axisLeft(yScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)
 
       chart.append('g').attr('transform', `translate(0,${innerH})`).call(xAxis)
         .call((g: any) => {
           g.select('.domain').attr('stroke', '#272420').attr('stroke-width', 0.4)
-          g.selectAll('.tick text').attr('fill', '#3A3530').attr('font-size', 8).attr('font-family', E.mono)
+          g.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono)
           g.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4)
         })
 
       chart.append('g').call(yAxis)
         .call((g: any) => {
           g.select('.domain').attr('stroke', '#272420').attr('stroke-width', 0.4)
-          g.selectAll('.tick text').attr('fill', '#3A3530').attr('font-size', 8).attr('font-family', E.mono)
+          g.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono)
           g.selectAll('.tick line').attr('stroke', '#272420').attr('stroke-width', 0.4)
         })
 
       // Axis labels
-      chart.append('text').attr('x', innerW / 2).attr('y', innerH + 32)
-        .attr('text-anchor', 'middle').attr('font-size', 8).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', '#3A3530').text('ANCHOR DETACHMENT →')
-      chart.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -34)
-        .attr('text-anchor', 'middle').attr('font-size', 8).attr('font-family', E.mono)
-        .attr('letter-spacing', '0.12em').attr('fill', '#3A3530').text('ANCHOR DEGRADATION →')
+      chart.append('text').attr('x', innerW / 2).attr('y', innerH + 18)
+        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
+        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DETACHMENT →')
+      chart.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -29)
+        .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono)
+        .attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
 
       // Quadrant labels
       ;[
@@ -589,7 +588,7 @@ export default function PlatformPage() {
         { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',      col: '#9E8A70', a: 'end' },
         { x: 6,        y: 12,         txt: 'Deep · Degrading',         col: '#9E8A70', a: 'start' },
         { x: innerW-6, y: 12,         txt: 'Stretched · Degrading',    col: E.VH,    a: 'end' },
-      ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 7.5).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', 0.22).text(q.txt))
+      ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', 0.35).text(q.txt))
 
       // Scatter nodes
       const snGroups = chart.selectAll('.sn-wrap').data(nodesRef.current, (d: Node) => d.id)
@@ -662,27 +661,27 @@ export default function PlatformPage() {
       `}</style>
 
       {/* ── Nav ── */}
-      <nav style={s({ height: 52, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 18px', borderBottom: `1px solid ${E.bdr2}`, background: E.bg, position: 'sticky', top: 0, zIndex: 40 })}>
+      <nav style={s({ height: 47, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 18px', borderBottom: `1px solid ${E.bdr2}`, background: E.bg, position: 'sticky', top: 0, zIndex: 40 })}>
         <a href="/" style={s({ textDecoration: 'none', display: 'flex', alignItems: 'baseline' })}>
           <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.28em', textTransform: 'uppercase' as const, color: E.sec })}>The Capital</span>
-          <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 15, color: E.gold, marginLeft: 6 })}>Steward</span>
+          <span style={s({ fontFamily: E.serif, fontStyle: 'italic', fontSize: 18, color: E.gold, marginLeft: 7 })}>Steward</span>
         </a>
-        <div style={s({ display: 'flex', alignItems: 'center', gap: 8 })}>
+        <div style={s({ display: 'flex', alignItems: 'center', gap: 7 })}>
           {hasFilter && (
             <button onClick={resetAll} style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, background: 'transparent', border: `1px solid ${E.bdr3}`, padding: '4px 11px', cursor: 'pointer', letterSpacing: '0.06em' })}>
               Reset ×
             </button>
           )}
-          <div style={s({ width: 5, height: 5, borderRadius: '50%', background: E.VL, opacity: 0.85 })} />
+          <div style={s({ width: 7, height: 7, borderRadius: '50%', background: E.VL, opacity: 0.85 })} />
           <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.sec })}>Live · Apr 2026</span>
           {!isPaid && (
-            <a href="/platform/subscribe" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '5px 12px', background: E.gold, color: E.bg, textDecoration: 'none', marginLeft: 4 })}>Upgrade</a>
+            <a href="/platform/subscribe" style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, padding: '4px 11px', background: E.gold, color: E.bg, textDecoration: 'none', marginLeft: 4 })}>Upgrade</a>
           )}
         </div>
       </nav>
 
       {/* ── Lucas descent breadcrumb ── */}
-      <div style={s({ height: 48, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 0, overflowX: 'auto' })}>
+      <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 0, overflowX: 'auto' })}>
         {DESCENT_LEVELS.map((level, i) => {
           const isActive = level.n === activeLevel || (activeLevel === 1 && level.n === 1)
           const isFuture = level.n === 3
@@ -693,11 +692,11 @@ export default function PlatformPage() {
               <button
                 onClick={() => !isFuture && handleBreadcrumbClick(level)}
                 title={isFuture ? 'Coming in next sprint' : level.paid && !isPaid ? 'Paid tier' : undefined}
-                style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 10px', background: 'transparent', border: 'none', cursor: (level.paid && !isPaid) || isFuture ? 'default' : 'pointer', opacity: isFuture ? 0.4 : 1 })}
+                style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 11px', background: 'transparent', border: 'none', cursor: (level.paid && !isPaid) || isFuture ? 'default' : 'pointer', opacity: isFuture ? 0.4 : 1 })}
               >
-                <span style={s({ fontFamily: E.mono, fontSize: 14, color: textColor, lineHeight: 1, fontWeight: isActive ? 700 : 400, letterSpacing: '-0.01em' })}>{level.n}</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.bdr3 : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
-                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 6.5, color: E.bdr3, letterSpacing: '0.08em' })}>PAID</span>}
+                <span style={s({ fontFamily: E.mono, fontSize: 18, color: textColor, lineHeight: 1, fontWeight: isActive ? 700 : 400 })}>{level.n}</span>
+                <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.bdr3 : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
+                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.bdr3, letterSpacing: '0.08em' })}>PAID</span>}
               </button>
             </div>
           )
@@ -721,7 +720,7 @@ export default function PlatformPage() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0,
             })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 7, color: active ? E.gold : E.sec, letterSpacing: '0.04em' })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 11, color: active ? E.gold : E.sec, letterSpacing: '0.04em' })}>{sub}</span>}
             </button>
           )
         })}
@@ -744,7 +743,7 @@ export default function PlatformPage() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flexShrink: 0,
             })}>
               <span>{label}</span>
-              {sub && <span style={s({ fontSize: 7, color: active ? E.gold : E.sec, letterSpacing: '0.04em' })}>{sub}</span>}
+              {sub && <span style={s({ fontSize: 11, color: active ? E.gold : E.sec, letterSpacing: '0.04em' })}>{sub}</span>}
             </button>
           )
         })}
@@ -754,11 +753,11 @@ export default function PlatformPage() {
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 7.5, color: E.sec, marginTop: 2 })}>Force-directed · No axes</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Force-directed · No axes</div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 7.5, color: E.sec, marginTop: 2 })}>Two-axis · Precise coordinates</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Two-axis · Precise coordinates</div>
         </div>
       </div>
 
@@ -773,16 +772,16 @@ export default function PlatformPage() {
       </div>
 
       {/* ── Legend strip ── */}
-      <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 })}>
-        <div style={s({ display: 'flex', alignItems: 'center', gap: 16 })}>
+      <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 7 })}>
+        <div style={s({ display: 'flex', alignItems: 'center', gap: 18 })}>
           {BUCKET_ORDER.map(b => (
-            <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 5 })}>
-              <div style={s({ width: 8, height: 8, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
+            <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 4 })}>
+              <div style={s({ width: 7, height: 7, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
               <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>{b}{b === 'Very High' ? ' ◈' : ''}</span>
             </div>
           ))}
         </div>
-        <span style={s({ fontFamily: E.mono, fontSize: 7.5, color: E.sec })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
           Node size = market cap · Pulsation = degradation risk · Hover to cross-highlight
         </span>
       </div>
@@ -792,10 +791,10 @@ export default function PlatformPage() {
         <div style={s({
           position: 'absolute', left: tooltip.x, top: tooltip.y,
           background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}`,
-          padding: '9px 13px', fontFamily: E.mono, fontSize: 11, color: E.text,
+          padding: '11px 11px', fontFamily: E.mono, fontSize: 11, color: E.text,
           lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 30, pointerEvents: 'none',
         })}>
-          <div style={s({ color: E.gold, fontSize: 12, marginBottom: 2 })}>{tooltip.node.symbol}</div>
+          <div style={s({ color: E.gold, fontSize: 11, marginBottom: 4 })}>{tooltip.node.symbol}</div>
           <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
           <div style={s({ color: E.body })}>Composite: {tooltip.node.composite.toFixed(1)} · {tooltip.node.bucket}</div>
           <div style={s({ color: E.body })}>OAL: {tooltip.node.oal}</div>
