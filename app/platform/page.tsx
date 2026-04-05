@@ -423,9 +423,9 @@ function Section2Regimes({ summary }: { summary: RegimeSummary }) {
                   <div key={key} style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 18, flexShrink: 0 })}>{key}</span>
                     <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
-                      <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(rate / MAX_LOSS) * 100}%`, background: color, opacity: key === 'All' ? 0.45 : 0.75 })} />
+                      <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${((rate ?? 0) / MAX_LOSS) * 100}%`, background: color, opacity: key === 'All' ? 0.45 : 0.75 })} />
                     </div>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(rate)}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{safePct(rate)}</span>
                   </div>
                 ))}
                 <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec, marginTop: 4 })}>{safeFixed(regime.rel_risk, 1)}× higher for Very High</div>
