@@ -355,26 +355,35 @@ export default function PlatformPage() {
   const evBandRef       = useRef<HTMLDivElement | null>(null)
   const oalRungRef      = useRef<HTMLDivElement | null>(null)
 
-  // ── effectiveOpacity — verbatim from brief + OAL rung filter added ──────────
+  // ── effectiveOpacity — brief logic + OAL filter + bucket opacity hierarchy ────
+  //
+  // Bucket hierarchy (base state, no filter, no hover):
+  //   Very Low  0.90  — favorable: elevated to read clearly
+  //   Low       0.78
+  //   Moderate  0.38  — population center, no signal: recede
+  //   High      null  — CSS pulse-h controls (0.48–0.84 cycle)
+  //   Very High null  — CSS pulse-vh controls (0.28–0.88 cycle)
+  //
+  // null = remove inline style, allowing CSS animation to run.
 
-  function effectiveOpacity(d: Node): number {
-    const bandOk = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
-    const oalOk  = selectedOalRef.current  === 'all' || d.oal    === selectedOalRef.current
+  function effectiveOpacity(d: Node): number | null {
+    const bandOk  = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
+    const oalOk   = selectedOalRef.current  === 'all' || d.oal    === selectedOalRef.current
     const hoverOk = hoveredIdRef.current === null || d.id === hoveredIdRef.current
     const filterOk = bandOk && oalOk
     if (!filterOk && !hoverOk) return 0.03
     if (!filterOk) return hoveredIdRef.current !== null && d.id === hoveredIdRef.current ? 0.9 : 0.04
     if (!hoverOk) return 0.13
-    return 0.86
+    if (d.bucket === 'Very High' || d.bucket === 'High') return null
+    if (d.bucket === 'Very Low')  return 0.90
+    if (d.bucket === 'Low')       return 0.78
+    return 0.38
   }
 
   function refreshNodes() {
     if (typeof window === 'undefined' || !(window as any).d3) return
     const d3 = (window as any).d3
-    d3.selectAll('.cn,.sn').style('opacity', (d: Node) => {
-      const v = effectiveOpacity(d)
-      return v === 0.86 ? null : v
-    })
+    d3.selectAll('.cn,.sn').style('opacity', (d: Node) => effectiveOpacity(d))
   }
 
   // ── Filter actions ─────────────────────────────────────────────────────────
@@ -503,7 +512,11 @@ export default function PlatformPage() {
       // Nodes
       const cnGroups = conSvg.selectAll('.cn-wrap').data(nodesRef.current, (d: Node) => d.id)
         .join('g')
-        .attr('class', (d: Node) => `cn-wrap node-${d.bucket === 'Very High' ? 'vh' : d.bucket === 'High' ? 'h' : 'base'}`)
+        .attr('class', (d: Node) => {
+          const b = d.bucket
+          const cls = b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'
+          return `cn-wrap node-${cls}`
+        })
         .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
 
       cnGroups.append('circle').attr('class', 'cn').datum((d: any) => d)
@@ -593,7 +606,11 @@ export default function PlatformPage() {
       // Scatter nodes
       const snGroups = chart.selectAll('.sn-wrap').data(nodesRef.current, (d: Node) => d.id)
         .join('g')
-        .attr('class', (d: Node) => `sn-wrap node-${d.bucket === 'Very High' ? 'vh' : d.bucket === 'High' ? 'h' : 'base'}`)
+        .attr('class', (d: Node) => {
+          const b = d.bucket
+          const cls = b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'
+          return `sn-wrap node-${cls}`
+        })
         .attr('transform', (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
 
       snGroups.append('circle').attr('class', 'sn').datum((d: any) => d)
@@ -653,9 +670,11 @@ export default function PlatformPage() {
       <style>{`
         @keyframes pulse-vh { 0%,100% { opacity: .88 } 50% { opacity: .28 } }
         @keyframes pulse-h  { 0%,100% { opacity: .84 } 50% { opacity: .48 } }
-        .node-vh { animation: pulse-vh 1.5s ease-in-out infinite; }
-        .node-h  { animation: pulse-h  2.7s ease-in-out infinite; }
-        .node-base { opacity: 0.86; }
+        .node-vh  { animation: pulse-vh 1.5s ease-in-out infinite; }
+        .node-h   { animation: pulse-h  2.7s ease-in-out infinite; }
+        .node-vl  { opacity: 0.90; }
+        .node-lo  { opacity: 0.78; }
+        .node-mod { opacity: 0.38; }
         .cn-wrap, .sn-wrap { cursor: default; }
         .filter-strip-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
       `}</style>
