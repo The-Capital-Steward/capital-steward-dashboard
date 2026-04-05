@@ -131,6 +131,18 @@ const OAL_RUNGS = [
 
 // OAL_RUNG_DEFS removed — superseded by RUNG_DEFS in Section3AnchorLevels
 
+// ─── Seeded LCG randomizer ────────────────────────────────────────────────────
+// Deterministic pseudo-random generator. Same seed = same node positions
+// across every render. Required for constellation stability.
+
+function makeLCG(seed: number) {
+  let s = seed >>> 0
+  return function () {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0
+    return s / 0x100000000
+  }
+}
+
 // ─── Synthetic data ───────────────────────────────────────────────────────────
 
 function generateNodes(n = 5200): Node[] {
