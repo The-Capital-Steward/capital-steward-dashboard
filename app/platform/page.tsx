@@ -4,23 +4,15 @@
 //
 // Changes in this version:
 //   1. HOVER DELAY FIXED — refreshNodes debounced with requestAnimationFrame.
-//      Was iterating 10,400 DOM nodes on every pixel of mousemove. Now batches
-//      to one frame. Hover should feel instant.
-//   2. FREE-TIER TOOLTIP REMOVED — individual company data (ticker, scores)
-//      is paid. Free users get cross-panel highlighting only, no tooltip content.
-//   3. SECTION 3 ADDED — Four OAL Anchor Rung Views. Derived from node data,
-//      no new JSON file needed. Shows bucket distribution, OAL weights, and
-//      confirmed median returns (FCF +10.2%, Revenue −17.3% only).
-//   4. SECTION 4 ADDED — Seven EV Quantile Band Views. Derived from node data.
-//      Stacked bar chart showing risk composition across the EV spectrum.
-//   5. PAID BLUR MOVED — now covers Sections 5–7 only. Sections 3 and 4 are
-//      free tier. The prior code blurred everything from Section 3 onward.
-//   6. FILE PATH NOTE — fetch('/data/...') is correct for Next.js when the
-//      project root is /osmr/capital-steward-dashboard/. If fetches hit the
-//      wrong app, set NEXT_PUBLIC_DATA_BASE in your .env.local. The canonical
-//      locations are:
-//        /osmr/capital-steward-dashboard/public/data/regime_summary.json
-//        /osmr/capital-steward-dashboard/public/data/constellation_positions.json
+//   2. FREE-TIER TOOLTIP REMOVED — company data is paid tier only.
+//   3. SECTION 3 ADDED — Four OAL Anchor Rung Views.
+//   4. SECTION 4 ADDED — Seven EV Quantile Band Views.
+//   5. PAID BLUR MOVED — now covers Sections 5–7 only.
+//   6. TOFIX CRASH FIXED — safe number formatters guard all .toFixed() calls.
+//      regime_summary.json may have null/undefined numeric fields. Every
+//      numeric display now falls back to '—' rather than crashing.
+//   7. FILE PATH — fetch('/data/...') resolves from Next.js project root.
+//      Set NEXT_PUBLIC_DATA_BASE in .env.local if fetches hit wrong app.
 
 import { useEffect, useRef, useState } from 'react'
 import { useUser, SignIn, SignUp } from '@clerk/nextjs'
@@ -182,6 +174,28 @@ function makeLCG(seed: number) {
   let s = seed
   return () => { s = (1664525 * s + 1013904223) & 0x7fffffff; return s / 0x7fffffff }
 }
+
+// ─── Safe number formatters ────────────────────────────────────────────────────
+// regime_summary.json may have null/undefined numeric fields anywhere.
+// All .toFixed() calls on external data go through these to prevent TypeError.
+
+function safeFixed(v: number | null | undefined, decimals: number): string {
+  if (v == null || !isFinite(v as number)) return '—'
+  return (v as number).toFixed(decimals)
+}
+
+function safePct(v: number | null | undefined): string {
+  if (v == null || !isFinite(v as number)) return '—'
+  return `${((v as number) * 100).toFixed(0)}%`
+}
+
+function safeFwd(v: number | null | undefined): string {
+  if (v == null || !isFinite(v as number)) return '—'
+  const n = v as number
+  return `${n >= 0 ? '+' : ''}${(n * 100).toFixed(1)}%`
+}
+
+
 
 // ─── Synthetic data ───────────────────────────────────────────────────────────
 
@@ -368,8 +382,7 @@ function SectionHeader({ lucas, label, sub }: { lucas: number; label: string; su
 
 function Section2Regimes({ summary }: { summary: RegimeSummary }) {
   const MAX_LOSS = 0.50
-  const fmtPct = (v: number) => `${(v * 100).toFixed(0)}%`
-  const fmtFwd = (v: number) => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(1)}%`
+  // Using global safePct / safeFwd for null-safe formatting
 
   return (
     <section>
@@ -393,7 +406,7 @@ function Section2Regimes({ summary }: { summary: RegimeSummary }) {
               {/* ICIR */}
               <div style={s({ marginBottom: 11 })}>
                 <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.12em', marginBottom: 4 })}>ICIR</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400, color: isCurrent ? E.text : E.body, lineHeight: 1 })}>{regime.icir.toFixed(2)}</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400, color: isCurrent ? E.text : E.body, lineHeight: 1 })}>{safeFixed(regime.icir, 2)}</div>
                 <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Signal consistency · r̄ / σ(r)</div>
               </div>
 
@@ -415,7 +428,7 @@ function Section2Regimes({ summary }: { summary: RegimeSummary }) {
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{fmtPct(rate)}</span>
                   </div>
                 ))}
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec, marginTop: 4 })}>{regime.rel_risk.toFixed(1)}× higher for Very High</div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec, marginTop: 4 })}>{safeFixed(regime.rel_risk, 1)}× higher for Very High</div>
               </div>
 
               <div style={s({ height: 1, background: E.bdr2, margin: '11px 0' })} />
@@ -425,13 +438,13 @@ function Section2Regimes({ summary }: { summary: RegimeSummary }) {
                 <div>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 4 })}>MEDIAN 12M FWD</div>
                   <div style={s({ display: 'flex', gap: 11 })}>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>VL {fmtFwd(regime.vl_median_fwd)}</span>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: regime.vh_median_fwd < 0 ? E.VH : E.sec })}>VH {fmtFwd(regime.vh_median_fwd)}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>VL {safeFwd(regime.vl_median_fwd)}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: (regime.vh_median_fwd ?? 0) < 0 ? E.VH : E.sec })}>VH {safeFwd(regime.vh_median_fwd)}</span>
                   </div>
                 </div>
                 <div style={s({ textAlign: 'right' as const })}>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 3 })}>r</div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 18, color: isCurrent ? E.body : E.sec })}>{regime.spearman_r.toFixed(3)}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 18, color: isCurrent ? E.body : E.sec })}>{safeFixed(regime.spearman_r, 3)}</div>
                 </div>
               </div>
             </div>
@@ -573,7 +586,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
     const pcts = Object.fromEntries(
       BUCKET_ORDER.map(b => [b, total > 0 ? (bandNodes.filter(n => n.bucket === b).length / total) * 100 : 0])
     ) as Record<string, number>
-    const pctVH = pcts['Very High'].toFixed(0)
+    const pctVH = ((pcts['Very High'] ?? 0)).toFixed(0)
     return { ...bd, total, pcts, pctVH }
   })
 
@@ -1217,9 +1230,9 @@ export default function PlatformPage() {
         <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}`, padding: '11px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
           <div style={s({ color: E.gold, fontSize: 12, marginBottom: 4 })}>{tooltip.node.symbol}</div>
           <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
-          <div style={s({ color: E.body })}>Composite: {tooltip.node.composite.toFixed(1)} · {tooltip.node.bucket}</div>
+          <div style={s({ color: E.body })}>Composite: {safeFixed(tooltip.node.composite, 1)} · {tooltip.node.bucket}</div>
           <div style={s({ color: E.body })}>OAL: {tooltip.node.oal}</div>
-          <div style={s({ color: E.sec })}>Detachment: {tooltip.node.axis1.toFixed(1)} · Degradation: {tooltip.node.axis2.toFixed(1)}</div>
+          <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
         </div>
       )}
 
