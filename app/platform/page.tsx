@@ -100,7 +100,7 @@ const DATA_BASE = process.env.NEXT_PUBLIC_DATA_BASE ?? ''
 const DESCENT_LEVELS = [
   { n: 1,  label: 'Universe',   paid: false },
   { n: 3,  label: 'Regimes',    paid: false },
-  { n: 4,  label: 'Rungs',      paid: false },
+  { n: 4,  label: 'Anchor Levels', paid: false },
   { n: 7,  label: 'EV Bands',   paid: false },
   { n: 11, label: 'Sectors',    paid: true  },
   { n: 18, label: 'Archetypes', paid: true  },
@@ -181,7 +181,7 @@ const EV_BANDS = [
 ]
 
 const OAL_RUNGS = [
-  { key: 'all'     as OALKey, label: 'All Rungs', sub: undefined },
+  { key: 'all'     as OALKey, label: 'All', sub: undefined },
   { key: 'Revenue' as OALKey, label: 'Revenue',   sub: 'Shallowest' },
   { key: 'EBIT'    as OALKey, label: 'EBIT',      sub: 'Op. Income' },
   { key: 'NI'      as OALKey, label: 'NI',        sub: 'Net Income' },
@@ -474,8 +474,8 @@ function Section1WellsPanel({
   selectedOal,
   trajectories,
 }: {
-  selectedBand: Band
-  selectedOal:  OALKey
+  selectedBand: Band[]
+  selectedOal:  OALKey[]
   trajectories: WellsNode[]
 }) {
   const svgRef  = useRef<SVGSVGElement | null>(null)
@@ -508,9 +508,12 @@ function Section1WellsPanel({
   // Adjust medians based on active filters
   const adjMedian = (b: typeof WELL_DATA[0]) => {
     let m = b.median
-    const oalAdj = OAL_MED_ADJ[selectedOal]?.[b.id] ?? 0
-    if (selectedBand !== 'all') {
-      const bandSpread = b.bandSpreads[+selectedBand]
+    // For multi-select, use the first specific selection or 'all'
+    const oalKey = selectedOal.length === 1 ? selectedOal[0] : 'all'
+    const bandKey = selectedBand.length === 1 ? selectedBand[0] : 'all'
+    const oalAdj = OAL_MED_ADJ[oalKey]?.[b.id] ?? 0
+    if (bandKey !== 'all') {
+      const bandSpread = b.bandSpreads[+bandKey]
       if (bandSpread !== null && bandSpread !== undefined) {
         const ratio = bandSpread / BAND_SPREADS_BASE
         m = b.id === 'VH' ? b.median * ratio * 1.1
@@ -671,10 +674,10 @@ function Section1WellsPanel({
                         letterSpacing="0.08em">
                         GRAVITATIONAL MASS {b.mass.toFixed(4)}
                       </text>
-                      {selectedBand !== 'all' && (
+                      {!selectedBand.includes('all') && (
                         <text x={W - PAD.r} y={PAD.t + 9} textAnchor="end"
                           fontFamily={E.mono} fontSize={9} fill={E.gold} opacity={0.75}>
-                          Band {selectedBand} · {b.bandSpreads[+selectedBand]}pp spread
+                          Band {bandKey} · {b.bandSpreads[+bandKey]}pp spread
                         </text>
                       )}
                     </>
@@ -1417,8 +1420,8 @@ export default function PlatformPage() {
   const isPaidRef = useRef(isPaid)
   useEffect(() => { isPaidRef.current = isPaid }, [isPaid])
 
-  const [selectedBand,  setSelectedBand]  = useState<Band>('all')
-  const [selectedOal,   setSelectedOal]   = useState<OALKey>('all')
+  const [selectedBand,  setSelectedBand]  = useState<Band[]>(['all'])
+  const [selectedOal,   setSelectedOal]   = useState<OALKey[]>(['all'])
   const [activeLevel,   setActiveLevel]   = useState(1)
   const [tooltip,       setTooltip]       = useState<{ x: number; y: number; node: Node } | null>(null)
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
@@ -1426,8 +1429,8 @@ export default function PlatformPage() {
   const [vizReady,      setVizReady]      = useState(false)
   const [trajectories,  setTrajectories]  = useState<{symbol:string;bucket:string;score:number;dwell:number;dir:string}[]>([])
 
-  const selectedBandRef   = useRef<Band>('all')
-  const selectedOalRef    = useRef<OALKey>('all')
+  const selectedBandRef   = useRef<Band[]>(['all'])
+  const selectedOalRef    = useRef<OALKey[]>(['all'])
   const hoveredIdRef      = useRef<string | null>(null)
   const rafIdRef          = useRef<number | null>(null)   // for RAF debounce
   const nodesRef          = useRef<Node[]>([])
@@ -1442,8 +1445,8 @@ export default function PlatformPage() {
   // ── Opacity logic ────────────────────────────────────────────────────────────
 
   function effectiveOpacity(d: Node): number | null {
-    const bandOk  = selectedBandRef.current === 'all' || d.evBand === selectedBandRef.current
-    const oalOk   = selectedOalRef.current  === 'all' || d.oal    === selectedOalRef.current
+    const bandOk  = selectedBandRef.current.includes('all') || selectedBandRef.current.includes(d.evBand as Band)
+    const oalOk   = selectedOalRef.current.includes('all')  || selectedOalRef.current.includes(d.oal as OALKey)
     const hoverOk = hoveredIdRef.current === null || d.id === hoveredIdRef.current
     const filterOk = bandOk && oalOk
     if (!filterOk && !hoverOk) return 0.03
@@ -1471,7 +1474,7 @@ export default function PlatformPage() {
     const hId  = hoveredIdRef.current
     const oal  = selectedOalRef.current
     const band = selectedBandRef.current
-    const filterActive = oal !== 'all' || band !== 'all'
+    const filterActive = !oal.includes('all') || !band.includes('all')
 
     const svgs = [scatSvgRef.current]
     svgs.forEach(svg => {
@@ -1491,12 +1494,17 @@ export default function PlatformPage() {
         svg.classList.add('filter-active')
         svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
         // Build selector for matching nodes
-        const oalOk  = oal  === 'all' ? null : `[data-oal="${oal}"]`
-        const bandOk = band === 'all' ? null : `[data-evband="${band}"]`
+        // Build multi-attribute selectors — match any selected value
+        const oalOk  = oal.includes('all')  ? null : oal.map(o => `[data-oal="${o}"]`).join(',')
+        const bandOk = band.includes('all') ? null : band.map(b => `[data-evband="${b}"]`).join(',')
         const sel = [oalOk, bandOk].filter(Boolean).join('')
         if (sel) {
-          svg.querySelectorAll(`.sn-wrap${sel}`)
-            .forEach(el => el.classList.add('filter-match'))
+          // Multi-select: sel may be comma-separated. Split and query each.
+          const sels = sel.split(',').flatMap(s => [`.sn-wrap${s.trim()}`])
+          sels.forEach(s => {
+            try { svg.querySelectorAll(s).forEach(el => el.classList.add('filter-match')) }
+            catch(e) { /* invalid selector — skip */ }
+          })
         }
       } else {
         svg.classList.remove('filter-active')
@@ -1508,22 +1516,49 @@ export default function PlatformPage() {
   // ── Filter selection ──────────────────────────────────────────────────────
 
   function selectBand(band: Band) {
-    selectedBandRef.current = band; setSelectedBand(band)
-    if (band !== 'all') { setActiveLevel(7); selectedOalRef.current = 'all'; setSelectedOal('all') }
-    else if (selectedOalRef.current === 'all') setActiveLevel(1)
+    // Toggle logic: 'all' clears others; specific values toggle in/out
+    let next: Band[]
+    if (band === 'all') {
+      next = ['all']
+    } else {
+      const cur = selectedBandRef.current.filter(b => b !== 'all')
+      next = cur.includes(band)
+        ? cur.filter(b => b !== band).length === 0 ? ['all'] : cur.filter(b => b !== band)
+        : [...cur, band]
+    }
+    selectedBandRef.current = next
+    setSelectedBand(next)
+    if (!next.includes('all')) {
+      setActiveLevel(7)
+    } else if (selectedOalRef.current.includes('all')) {
+      setActiveLevel(1)
+    }
     refreshNodes()
   }
 
   function selectOal(oal: OALKey) {
-    selectedOalRef.current = oal; setSelectedOal(oal)
-    if (oal !== 'all') { setActiveLevel(4); selectedBandRef.current = 'all'; setSelectedBand('all') }
-    else if (selectedBandRef.current === 'all') setActiveLevel(1)
+    let next: OALKey[]
+    if (oal === 'all') {
+      next = ['all']
+    } else {
+      const cur = selectedOalRef.current.filter(o => o !== 'all')
+      next = cur.includes(oal)
+        ? cur.filter(o => o !== oal).length === 0 ? ['all'] : cur.filter(o => o !== oal)
+        : [...cur, oal]
+    }
+    selectedOalRef.current = next
+    setSelectedOal(next)
+    if (!next.includes('all')) {
+      setActiveLevel(4)
+    } else if (selectedBandRef.current.includes('all')) {
+      setActiveLevel(1)
+    }
     refreshNodes()
   }
 
   function resetAll() {
-    selectedBandRef.current = 'all'; selectedOalRef.current = 'all'
-    setSelectedBand('all'); setSelectedOal('all'); setActiveLevel(1)
+    selectedBandRef.current = ['all']; selectedOalRef.current = ['all']
+    setSelectedBand(['all']); setSelectedOal(['all']); setActiveLevel(1)
     refreshNodes()
   }
 
@@ -1749,9 +1784,12 @@ export default function PlatformPage() {
         /* Hover — instant CSS, zero JS traversal */
         .has-hover .sn-wrap { opacity: 0.06 !important; animation: none !important; }
         .has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
+        /* Dimmed nodes: suppress opacity and animation */
         .filter-active .sn-wrap { opacity: 0.05 !important; animation: none !important; }
+        /* Matched nodes: restore opacity AND let CSS animation class run again */
         .filter-active .sn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
-        .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.18 !important; }
+        /* Hover over matched: dim slightly but preserve animation */
+        .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.20 !important; animation: unset !important; }
         .filter-active.has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
       `}</style>
 
@@ -1810,10 +1848,10 @@ export default function PlatformPage() {
       >
         {/* OAL Anchor Levels */}
         <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 4 ? E.gold : E.dim, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
-          4 · Anchor
+          4 · Anchor Levels
         </span>
         {OAL_RUNGS.map(({ key, label, sub }) => {
-          const active = selectedOal === key
+          const active = selectedOal.includes(key)
           return (
             <button key={key} onClick={() => selectOal(key)} className="filter-btn" style={s({
               fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
@@ -1840,7 +1878,7 @@ export default function PlatformPage() {
           7 · EV
         </span>
         {EV_BANDS.map(({ band, label, sub }) => {
-          const active = selectedBand === band
+          const active = selectedBand.includes(band)
           return (
             <button key={String(band)} onClick={() => selectBand(band)} className="filter-btn" style={s({
               fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
@@ -1969,7 +2007,8 @@ export default function PlatformPage() {
             }
             return (
               <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 4 })}>
-                <div style={s({ width: 7, height: 7, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
+                <div className={`node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`}
+                  style={s({ width: 7, height: 7, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
                 <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
                   {b}{b === 'Very High' ? ' ◈' : ''}
                 </span>
@@ -1990,12 +2029,12 @@ export default function PlatformPage() {
 
       {/* ── Section 3: Anchor Levels ── */}
       {derivedNodes.length > 0 && (
-        <Section3AnchorLevels nodes={derivedNodes} selectedOal={selectedOal} />
+        <Section3AnchorLevels nodes={derivedNodes} selectedOal={selectedOal.length === 1 ? selectedOal[0] : 'all'} />
       )}
 
       {/* ── Section 4: Seven EV Quantile Band Views ── */}
       {derivedNodes.length > 0 && (
-        <Section4EVBands nodes={derivedNodes} selectedBand={selectedBand} />
+        <Section4EVBands nodes={derivedNodes} selectedBand={selectedBand.length === 1 ? selectedBand[0] : 'all'} />
       )}
 
       {/* ── Paid wall: Sections 5 (Sectors), 6 (Archetypes), 7 (Companies) ── */}
