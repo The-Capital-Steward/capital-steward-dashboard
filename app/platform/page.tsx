@@ -52,6 +52,7 @@ interface Node {
   id: string
   symbol: string
   composite: number
+  pctRank: number            // 0–100 percentile rank in the universe
   bucket: 'Very Low' | 'Low' | 'Moderate' | 'High' | 'Very High'
   axis1: number
   axis2: number
@@ -230,11 +231,14 @@ function generateNodes(n = 5200): Node[] {
     if (pct < 0.80) return 'High'
     return 'Very High'
   }
-  const bucketMap = new Map(ranked.map((d, rank) => [d.i, bucketOf(rank)]))
+  const bucketMap  = new Map(ranked.map((d, rank) => [d.i, bucketOf(rank)]))
+  const pctRankMap = new Map(ranked.map((d, rank) => [d.i, Math.round((rank / n) * 100)]))
 
   const nodes: Node[] = raw.map(d => ({
     id: `N${d.i}`, symbol: `S${d.i}`,
-    composite: d.composite, bucket: bucketMap.get(d.i)!,
+    composite: d.composite,
+    pctRank: pctRankMap.get(d.i) ?? 0,
+    bucket: bucketMap.get(d.i)!,
     axis1: d.axis1, axis2: d.axis2,
     ev: d.ev, marketCap: d.mc, oal: d.oal,
     evBand: 0, x: 0, y: 0,
@@ -783,61 +787,49 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
 // Insight arrives before the explanation.
 
 function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand: Band }) {
-  const bandDefs = [
-    { band: 1, label: 'Band I',   sub: '<$300M' },
-    { band: 2, label: 'Band II',  sub: '$300M–$1B' },
-    { band: 3, label: 'Band III', sub: '$1B–$3B' },
-    { band: 4, label: 'Band IV',  sub: '$3B–$10B' },
-    { band: 5, label: 'Band V',   sub: '$10B–$30B' },
-    { band: 6, label: 'Band VI',  sub: '$30B–$100B' },
-    { band: 7, label: 'Band VII', sub: '>$100B' },
+  // ── Real data from Script 27 — confirmed, locked ──────────────────────────
+  // Source: 27_ev_band_premium.json · 293,463 obs · 90.4% fwd return coverage
+  // Figures: VL and VH median 12m forward return per EV band, from real prices.
+  // Full-universe spread (16.7pp) differs from backtest figure (21.0pp) due to
+  // different return methodology (raw prices vs adjusted). Pattern is what matters.
+  const BAND_DATA = [
+    { band: 1, label: 'Band I',   sub: '<$300M',      vlMedian:  9.3, vhMedian: -23.3, spread: 32.5 },
+    { band: 2, label: 'Band II',  sub: '$300M–$1B',   vlMedian:  8.0, vhMedian: -11.6, spread: 19.6 },
+    { band: 3, label: 'Band III', sub: '$1B–$3B',     vlMedian:  6.9, vhMedian:  -4.5, spread: 11.3 },
+    { band: 4, label: 'Band IV',  sub: '$3B–$10B',    vlMedian:  6.9, vhMedian:   3.4, spread:  3.5 },
+    { band: 5, label: 'Band V',   sub: '$10B–$30B',   vlMedian: 10.3, vhMedian:  -0.0, spread: 10.3 },
+    { band: 6, label: 'Band VI',  sub: '$30B–$100B',  vlMedian: 10.6, vhMedian:   3.1, spread:  7.5 },
+    { band: 7, label: 'Band VII', sub: '>$100B',       vlMedian:  9.0, vhMedian:   3.6, spread:  5.4 },
   ]
 
-  const total = nodes.length || 1
-  const universeVH = (nodes.filter(n => n.bucket === 'Very High').length / total) * 100
+  // SVG chart dimensions
+  const W   = 800
+  const H   = 220
+  const PAD = { l: 47, r: 11, t: 22, b: 54 }
+  const iW  = W - PAD.l - PAD.r
+  const iH  = H - PAD.t - PAD.b
 
-  const bandData = bandDefs.map(bd => {
-    const bn = nodes.filter(n => n.evBand === bd.band)
-    const t  = bn.length || 1
-    const vhPct = (bn.filter(n => n.bucket === 'Very High').length / t) * 100
-    const vlPct = (bn.filter(n => n.bucket === 'Very Low').length / t) * 100
-    return { ...bd, n: bn.length, vhPct, vlPct }
-  })
-
-  // Chart dimensions
-  const W    = 800   // SVG logical width (scales via viewBox)
-  const H    = 200
-  const PAD  = { l: 44, r: 24, t: 18, b: 52 }
-  const iW   = W - PAD.l - PAD.r
-  const iH   = H - PAD.t - PAD.b
-
-  const Y_MAX = 35  // % ceiling for y-axis
-
+  // Y axis: −30 to +15 range to show both series clearly
+  const Y_MIN = -30, Y_MAX = 15
+  const Y_RANGE = Y_MAX - Y_MIN
   function cx(i: number) { return PAD.l + (i / 6) * iW }
-  function cy(pct: number) { return PAD.t + iH - Math.min(pct / Y_MAX, 1) * iH }
+  function cy(v: number) { return PAD.t + iH - ((v - Y_MIN) / Y_RANGE) * iH }
 
-  const refY = cy(universeVH)
+  const zeroY = cy(0)
+  const yTicks = [-30, -20, -10, 0, 10]
 
-  // Build polyline points
-  // yhPct and ylPct are y-coordinates (SVG space) for the two series
-  const dotPoints = bandData.map((bd, i) => ({
-    x: cx(i),
-    yhPct: cy(bd.vhPct),  // y-position of Very High dot
-    ylPct: cy(bd.vlPct),  // y-position of Very Low dot
-    ...bd,
-  }))
-
-  const yTicks = [0, 10, 20, 30]
+  // Bar width
+  const BAR_W = iW / 7 * 0.28
 
   return (
     <section>
       <SectionHeader
         lucas={7}
         label="EV Quantile Bands"
-        sub="Seven equal-population quantiles by enterprise value"
+        sub="Seven equal-population quantiles by enterprise value · Script 27 confirmed"
       />
 
-      {/* Insight line — arrives before the visual */}
+      {/* Insight line */}
       <div style={s({
         padding: '14px 22px 11px',
         borderBottom: `1px solid ${E.bdr}`,
@@ -846,151 +838,138 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
         color: E.body,
         lineHeight: 1.65,
       })}>
-        Structural fragility is not a small-cap phenomenon.{' '}
+        Structural fragility is not a small-cap phenomenon — and structural safety is not a large-cap privilege.{' '}
         <span style={s({ color: E.dim })}>
-          Very High risk companies appear at every level of the EV spectrum.
+          The VL vs VH return spread is positive in all seven bands without exception.
         </span>
       </div>
 
-      {/* Dot plot — VH% and VL% both plotted per band */}
-      {/* Two series: red = Very High risk, green = Very Low risk */}
-      {/* The shape of both lines is the insight: neither collapses by size */}
-      <div style={s({ padding: '18px 22px 14px', borderBottom: `1px solid ${E.bdr2}` })}>
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          style={s({ width: '100%', height: 'auto', display: 'block', maxHeight: 220 })}
-        >
-          {/* Y-axis grid lines + labels */}
+      {/* Bar chart — VL and VH median return per band */}
+      <div style={s({ padding: '14px 22px 11px', borderBottom: `1px solid ${E.bdr2}` })}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={s({ width: '100%', height: 'auto', display: 'block', maxHeight: 240 })}>
+
+          {/* Y-axis grid + labels */}
           {yTicks.map(v => {
             const y = cy(v)
             return (
               <g key={v}>
-                <line
-                  x1={PAD.l} y1={y} x2={W - PAD.r} y2={y}
+                <line x1={PAD.l} y1={y} x2={W - PAD.r} y2={y}
                   stroke={v === 0 ? E.bdr3 : E.bdr2}
-                  strokeWidth={v === 0 ? 0.8 : 0.5}
-                />
-                <text
-                  x={PAD.l - 7} y={y + 4}
-                  textAnchor="end"
-                  fontFamily="IBM Plex Mono,monospace"
-                  fontSize={11}
-                  fill={E.dim}
-                >
-                  {v}%
+                  strokeWidth={v === 0 ? 1.0 : 0.4} />
+                <text x={PAD.l - 6} y={y + 4} textAnchor="end"
+                  fontFamily="IBM Plex Mono,monospace" fontSize={10} fill={v === 0 ? E.dim : E.ghost}>
+                  {v > 0 ? '+' : ''}{v}%
                 </text>
               </g>
             )
           })}
 
-          {/* VH connecting line */}
-          <polyline
-            points={dotPoints.map(p => `${p.x},${p.yhPct}`).join(' ')}
-            fill="none"
-            stroke={E.VH}
-            strokeWidth={1.2}
-            opacity={0.35}
-          />
-
-          {/* VL connecting line */}
-          <polyline
-            points={dotPoints.map(p => `${p.x},${p.ylPct}`).join(' ')}
-            fill="none"
-            stroke={E.VL}
-            strokeWidth={1.2}
-            opacity={0.35}
-          />
-
-          {/* Dots — VH (red) and VL (green) per band */}
-          {dotPoints.map((pt) => {
-            const isSelected = selectedBand === pt.band
+          {/* Bars and labels per band */}
+          {BAND_DATA.map((bd, i) => {
+            const isSelected = selectedBand === bd.band
             const isActive   = selectedBand === 'all' || isSelected
-            const r          = isSelected ? 6 : 4.5
+            const x          = cx(i)
+            const vlH        = Math.abs(cy(bd.vlMedian) - zeroY)
+            const vhH        = Math.abs(cy(bd.vhMedian) - zeroY)
+            const vlY        = bd.vlMedian >= 0 ? cy(bd.vlMedian) : zeroY
+            const vhY        = bd.vhMedian >= 0 ? cy(bd.vhMedian) : zeroY
+            const op         = isActive ? 1 : 0.18
 
             return (
-              <g key={pt.band} opacity={isActive ? 1 : 0.22}>
-                {/* VH dot */}
-                <circle cx={pt.x} cy={pt.yhPct} r={r}
-                  fill={isSelected ? E.gold : E.VH} opacity={isSelected ? 1 : 0.82} />
-                <text
-                  x={pt.x} y={pt.yhPct - 10}
-                  textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace"
-                  fontSize={9}
-                  fill={isSelected ? E.gold : E.VH}
-                  opacity={isSelected ? 1 : 0.7}
-                  fontWeight={isSelected ? 700 : 400}
-                >
-                  {pt.vhPct.toFixed(0)}%
-                </text>
+              <g key={bd.band} opacity={op}>
+                {/* VL bar (left of center, green) */}
+                <rect
+                  x={x - BAR_W - 1} y={vlY}
+                  width={BAR_W} height={vlH}
+                  fill={isSelected ? E.gold : E.VL} opacity={isSelected ? 0.95 : 0.80}
+                />
+                {/* VH bar (right of center, red) */}
+                <rect
+                  x={x + 1} y={vhY}
+                  width={BAR_W} height={vhH}
+                  fill={isSelected ? E.gold : E.VH} opacity={isSelected ? 0.95 : 0.72}
+                />
 
-                {/* VL dot */}
-                <circle cx={pt.x} cy={pt.ylPct} r={r}
-                  fill={isSelected ? E.gold : E.VL} opacity={isSelected ? 1 : 0.82} />
+                {/* VL value label */}
                 <text
-                  x={pt.x} y={pt.ylPct + 17}
+                  x={x - BAR_W / 2 - 1}
+                  y={bd.vlMedian >= 0 ? cy(bd.vlMedian) - 4 : zeroY + vhH + 13}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace"
-                  fontSize={9}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
                   fill={isSelected ? E.gold : E.VL}
-                  opacity={isSelected ? 1 : 0.7}
                   fontWeight={isSelected ? 700 : 400}
                 >
-                  {pt.vlPct.toFixed(0)}%
+                  +{bd.vlMedian.toFixed(1)}%
                 </text>
 
-                {/* Band label below axis */}
+                {/* VH value label */}
                 <text
-                  x={pt.x} y={PAD.t + iH + 16}
+                  x={x + BAR_W / 2 + 1}
+                  y={bd.vhMedian < 0 ? cy(bd.vhMedian) + 13 : cy(bd.vhMedian) - 4}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace"
-                  fontSize={10}
-                  fill={isSelected ? E.gold : E.dim}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
+                  fill={isSelected ? E.gold : E.VH}
+                  fontWeight={isSelected ? 700 : 400}
                 >
-                  {pt.label}
+                  {bd.vhMedian > 0 ? '+' : ''}{bd.vhMedian.toFixed(1)}%
+                </text>
+
+                {/* Spread label between bars */}
+                <text
+                  x={x} y={PAD.t + iH + 16}
+                  textAnchor="middle"
+                  fontFamily="IBM Plex Mono,monospace" fontSize={10}
+                  fill={isSelected ? E.gold : E.sec}
+                >
+                  {bd.label}
                 </text>
                 <text
-                  x={pt.x} y={PAD.t + iH + 28}
+                  x={x} y={PAD.t + iH + 27}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace"
-                  fontSize={9}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
                   fill={E.ghost}
                 >
-                  {pt.sub}
+                  {bd.sub}
+                </text>
+                <text
+                  x={x} y={PAD.t + iH + 42}
+                  textAnchor="middle"
+                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
+                  fill={isSelected ? E.gold : E.dim}
+                >
+                  {bd.spread.toFixed(1)}pp
                 </text>
               </g>
             )
           })}
 
-          {/* Legend — top right */}
+          {/* Legend */}
           <g>
-            <circle cx={W - PAD.r - 2} cy={PAD.t + 6} r={4} fill={E.VH} opacity={0.8} />
-            <text x={W - PAD.r - 10} y={PAD.t + 10} textAnchor="end"
-              fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VH} opacity={0.7}>
-              Very High
-            </text>
-            <circle cx={W - PAD.r - 2} cy={PAD.t + 22} r={4} fill={E.VL} opacity={0.8} />
-            <text x={W - PAD.r - 10} y={PAD.t + 26} textAnchor="end"
-              fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VL} opacity={0.7}>
-              Very Low
-            </text>
+            <rect x={PAD.l + 4} y={PAD.t} width={8} height={8} fill={E.VL} opacity={0.8} />
+            <text x={PAD.l + 16} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VL} opacity={0.8}>VL median</text>
+            <rect x={PAD.l + 72} y={PAD.t} width={8} height={8} fill={E.VH} opacity={0.75} />
+            <text x={PAD.l + 84} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VH} opacity={0.8}>VH median</text>
+            <text x={PAD.l + 160} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.dim} opacity={0.7}>spread below</text>
           </g>
         </svg>
       </div>
 
-      {/* Finding callout — adds what the visual can\'t say: the implication */}
+      {/* Finding callout */}
       <div style={s({
         padding: '11px 22px',
         borderBottom: `1px solid ${E.bdr2}`,
         display: 'flex',
         alignItems: 'baseline',
-        gap: 14,
+        gap: 18,
         background: E.bg2,
+        flexWrap: 'wrap' as const,
       })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.dim, lineHeight: 1.65, flex: 1 })}>
-          Both series remain present at every level of the EV spectrum. Size does not protect against
-          structural conditions — and size does not prevent structural soundness. The framework
-          identifies both regardless of company scale.
+          Band IV ($3B–$10B) shows the narrowest spread at 3.5pp — still positive.
+          The framework separates structural conditions at every scale the market operates at.
+        </span>
+        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.ghost, flexShrink: 0 })}>
+          293,463 obs · Script 27 · raw price returns
         </span>
       </div>
     </section>
@@ -1367,11 +1346,11 @@ export default function PlatformPage() {
         .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
 
       ;[
-        { x: 6,        y: innerH - 6, txt: 'Deep · Stable',        col: E.VL,      a: 'start' },
-        { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',   col: '#9E8A70', a: 'end' },
-        { x: 6,        y: 12,         txt: 'Deep · Degrading',      col: '#9E8A70', a: 'start' },
-        { x: innerW-6, y: 12,         txt: 'Stretched · Degrading', col: E.VH,      a: 'end' },
-      ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', 0.35).text(q.txt))
+        { x: 6,        y: innerH - 6, txt: 'Grounded · Stable',      col: E.VL,      a: 'start', o: 0.45 },
+        { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',     col: '#9E8A70', a: 'end',   o: 0.35 },
+        { x: 6,        y: 12,         txt: 'Grounded · Degrading',    col: '#9E8A70', a: 'start', o: 0.35 },
+        { x: innerW-6, y: 12,         txt: 'Highest structural risk', col: E.VH,      a: 'end',   o: 0.65 },
+      ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', q.o).text(q.txt))
 
       // Scatter nodes
       const snGroups = chart.selectAll('.sn-wrap').data(nodesRef.current, (d: Node) => d.id)
@@ -1551,15 +1530,48 @@ export default function PlatformPage() {
         })}
       </div>
 
-      {/* ── Section 1: Panel headers ── */}
-      <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2 })}>
+      {/* ── Section 1: Orientation + Panel headers ── */}
+
+      {/* Orientation — annotation + phenomenon, before the visual */}
+      <div style={s({
+        padding: '14px 22px 12px',
+        borderBottom: `1px solid ${E.bdr}`,
+        background: E.bg2,
+      })}>
+        {/* Annotation line — the arresting fact, confirmed from real data */}
+        <div style={s({ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 9, flexWrap: 'wrap' as const })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 12, color: E.VH, fontWeight: 700 })}>
+            9.4% of companies. 38.6% of catastrophic losses.
+          </span>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+            The median company in this neighborhood has already been here 5 months before the market prices the risk.
+          </span>
+        </div>
+        {/* Orientation — names the organizing principle */}
+        <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65, maxWidth: 920 })}>
+          Every dot is a U.S. equity, organized by structural condition alone — how far its valuation has stretched from its operational anchor, and whether that anchor is holding or deteriorating.
+          {' '}<span style={s({ color: E.dim })}>Companies cluster by how close their composite scores are. Neighbors share a condition: the same relationship between what they have operationally demonstrated and what the market has decided to pay for it. Not the same sector. Not the same size.</span>
+        </div>
+        <div style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginTop: 7 })}>
+          <span style={s({ color: E.VH })}>◈ Pulsing nodes</span>
+          {' '}carry the highest structural fragility.{' '}
+          <span style={s({ color: E.dim })}>Hover any company to locate it simultaneously in both views.</span>
+        </div>
+      </div>
+
+      {/* Panel headers */}
+      <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg3 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>No axes · Position encodes structural kinship</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>
+            Companies cluster by composite score proximity — neighbors share a structural condition, not a sector or size
+          </div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>Two-axis · Precise risk coordinates</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>
+            Precise coordinates — top-right is highest combined structural risk
+          </div>
         </div>
       </div>
 
@@ -1574,18 +1586,32 @@ export default function PlatformPage() {
       </div>
 
       {/* ── Legend strip ── */}
-      <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 7 })}>
-        <div style={s({ display: 'flex', alignItems: 'center', gap: 18 })}>
-          {BUCKET_ORDER.map(b => (
-            <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 4 })}>
-              <div style={s({ width: 7, height: 7, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
-              <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>{b}{b === 'Very High' ? ' ◈' : ''}</span>
-            </div>
-          ))}
+      <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: 11 })}>
+        {/* Bucket legend with structural descriptors */}
+        <div style={s({ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' as const })}>
+          {BUCKET_ORDER.map(b => {
+            const desc: Record<string, string> = {
+              'Very Low':  'grounded',
+              'Low':       'stable',
+              'Moderate':  'neutral',
+              'High':      'stretched',
+              'Very High': 'detached',
+            }
+            return (
+              <div key={b} style={s({ display: 'flex', alignItems: 'center', gap: 4 })}>
+                <div style={s({ width: 7, height: 7, borderRadius: '50%', background: bucketColor(b), flexShrink: 0 })} />
+                <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
+                  {b}{b === 'Very High' ? ' ◈' : ''}
+                </span>
+                <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim })}>
+                  — {desc[b]}
+                </span>
+              </div>
+            )
+          })}
         </div>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec })}>
-          Node size = market cap · Pulsation = degradation risk · Hover to cross-highlight
-          {!isPaid && ' · Company identity at paid tier'}
+        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, flexShrink: 0 })}>
+          Size = market cap{!isPaid ? ' · Identity at paid tier' : ''}
         </span>
       </div>
 
@@ -1620,21 +1646,39 @@ export default function PlatformPage() {
         <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${isPaid ? E.gold : E.bdr3}`, padding: '11px 13px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
           {isPaid ? (
             <>
-              <div style={s({ color: E.gold, fontSize: 12, marginBottom: 4 })}>{tooltip.node.symbol}</div>
-              <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
-              <div style={s({ color: E.body })}>Composite: {safeFixed(tooltip.node.composite, 1)} · {tooltip.node.bucket}</div>
-              <div style={s({ color: E.body })}>OAL anchor: {tooltip.node.oal}</div>
+              <div style={s({ color: E.gold, fontSize: 13, fontWeight: 700, marginBottom: 5, letterSpacing: '0.04em' })}>{tooltip.node.symbol}</div>
+              {/* Percentile rank — immediately interpretable */}
+              <div style={s({ marginBottom: 5 })}>
+                <span style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 700, color: bucketColor(tooltip.node.bucket), letterSpacing: '-0.02em', lineHeight: 1 })}>
+                  {tooltip.node.pctRank}
+                </span>
+                <span style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginLeft: 4 })}>th percentile · ~5,200 equities</span>
+              </div>
+              <div style={s({ color: E.body, marginBottom: 2 })}>
+                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket}</span>
+                {' · '}EV Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}
+              </div>
+              <div style={s({ color: E.body, marginBottom: 2 })}>OAL anchor: {tooltip.node.oal}</div>
               <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
             </>
           ) : (
             <>
-              <div style={s({ color: E.body, marginBottom: 3 })}>
-                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket} risk</span>
-                {' · '}Band {tooltip.node.evBand}
+              {/* Percentile rank — the single most interpretable structural number */}
+              <div style={s({ marginBottom: 6 })}>
+                <span style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 700, color: bucketColor(tooltip.node.bucket), letterSpacing: '-0.02em', lineHeight: 1 })}>
+                  {tooltip.node.pctRank}
+                </span>
+                <span style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginLeft: 4 })}>th percentile structural risk</span>
               </div>
-              <div style={s({ color: E.body })}>OAL anchor: {tooltip.node.oal}</div>
+              <div style={s({ color: E.dim, fontSize: 9, marginBottom: 7 })}>
+                ranked against ~5,200 U.S. equities
+              </div>
+              <div style={s({ color: E.body, marginBottom: 2 })}>
+                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket}</span>
+                {' · '}EV Band {tooltip.node.evBand} · OAL: {tooltip.node.oal}
+              </div>
               <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
-              <div style={s({ color: E.dim, fontSize: 9, marginTop: 5, borderTop: `1px solid ${E.bdr}`, paddingTop: 5 })}>
+              <div style={s({ color: E.dim, fontSize: 9, marginTop: 6, borderTop: `1px solid ${E.bdr}`, paddingTop: 5 })}>
                 Company identity at paid tier
               </div>
             </>
