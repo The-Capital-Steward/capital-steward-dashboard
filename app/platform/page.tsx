@@ -481,7 +481,7 @@ function Section1WellsPanel({
   const svgRef  = useRef<SVGSVGElement | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [dims, setDims] = useState({ w: 600, h: 440 })
-  const [wellsView, setWellsView] = useState<'curves' | 'companies' | 'both'>('curves')
+  const [wellsView, setWellsView] = useState<'curves' | 'companies'>('curves')
 
   // Measure panel on mount and resize
   useEffect(() => {
@@ -552,7 +552,6 @@ function Section1WellsPanel({
         {([
           { v: 'curves' as const,    label: 'Distributions' },
           { v: 'companies' as const, label: 'Companies' },
-          { v: 'both' as const,      label: 'Both' },
         ]).map(({ v, label }) => (
           <button key={v} onClick={() => setWellsView(v)} style={{
             flex: 1,
@@ -607,7 +606,7 @@ function Section1WellsPanel({
         {/* X axis label */}
         <text x={PAD.l + iW / 2} y={H - 8} textAnchor="middle"
           fontFamily={E.mono} fontSize={11} letterSpacing="0.12em" fill={E.sec}>
-          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE →' : '12-MONTH FORWARD RETURN →'}
+          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE (0 = LOW RISK) →' : '12-MONTH FORWARD RETURN →'}
         </text>
 
         {/* ── Distribution curves ── */}
@@ -706,65 +705,50 @@ function Section1WellsPanel({
         )}
 
         {/* ── Company dots ── */}
-        {(wellsView === 'companies' || wellsView === 'both') && (() => {
-          // In 'both' mode: dots appear within their bucket's curve.
-          // X = curve median (the well center) + small jitter by symbol hash
-          // Y = within the curve's vertical extent, depth by dwell time
-          //     (longer dwell = sits lower = deeper in the well)
-          // In 'companies' mode: X = composite score, Y = dwell (different coord space)
+        {/* Companies view: composite score × dwell time scatter */}
+        {wellsView === 'companies' && trajectories.map(t => {
+          const x = dotX(t.score)
+          const y = dotY(t.dwell)
+          const col = DIR_COLOR[t.dir] ?? E.sec
+          const bCol = bucketColor(t.bucket)
+          return (
+            <g key={t.symbol}>
+              <circle cx={x} cy={y} r={3.5} fill="none"
+                stroke={bCol} strokeWidth={0.7} opacity={0.35} />
+              <circle cx={x} cy={y} r={2} fill={col} opacity={0.75} />
+            </g>
+          )
+        })}
 
-          // Deterministic jitter from symbol string
-          const jitter = (sym: string, range: number) => {
-            let h = 0
-            for (let i = 0; i < sym.length; i++) h = (h * 31 + sym.charCodeAt(i)) & 0xffffffff
-            return ((h % 1000) / 1000 - 0.5) * range
-          }
-
-          return trajectories.map(t => {
-            const bData = curves.find(c => c.label === t.bucket)
-            let x: number, y: number
-
-            if (wellsView === 'both' && bData) {
-              // Position within the curve
-              const medX = xPx(bData.adjMedian)
-              // Jitter width proportional to curve std (wider wells allow more spread)
-              const jitterPx = (bData.std / 100) * iW * 0.18
-              x = medX + jitter(t.symbol, jitterPx * 2)
-
-              // Y: top of curve area = peak, bottom = baseline
-              // Dwell maps from baseline (short dwell) to peak (long dwell)
-              const peakIdx = bData.ys.indexOf(Math.max(...bData.ys))
-              const curveTopY = yPx(bData.ys[peakIdx])
-              const maxDwell = Math.max(1, ...trajectories.filter(tt => tt.bucket === t.bucket).map(tt => tt.dwell))
-              const dwellT = Math.min(t.dwell / maxDwell, 1)
-              // Long dwell = near peak (high density); short dwell = near base
-              y = baseY - (baseY - curveTopY) * dwellT * 0.88 + jitter(t.symbol + 'y', 8)
-            } else {
-              // Companies-only view: composite × dwell
-              x = dotX(t.score)
-              y = dotY(t.dwell)
-            }
-
-            const col = DIR_COLOR[t.dir] ?? E.sec
-            const bCol = bucketColor(t.bucket)
-            return (
-              <g key={t.symbol}>
-                <circle cx={x} cy={y} r={3.5} fill="none"
-                  stroke={bCol} strokeWidth={0.7} opacity={0.35} />
-                <circle cx={x} cy={y} r={2} fill={col} opacity={0.75} />
-              </g>
-            )
-          })
+        {/* Y axis ticks + label for companies view */}
+        {wellsView === 'companies' && (() => {
+          const ticks = [1, 6, 12, 24, 48, 100]
+          return (
+            <>
+              {ticks.map(mo => {
+                const y = dotY(mo)
+                if (y < PAD.t || y > PAD.t + iH) return null
+                return (
+                  <g key={mo}>
+                    <line x1={PAD.l - 4} y1={y} x2={PAD.l} y2={y}
+                      stroke={E.sec} strokeWidth={0.5} opacity={0.5} />
+                    <line x1={PAD.l} y1={y} x2={PAD.l + iW} y2={y}
+                      stroke={E.bdr2} strokeWidth={0.4} />
+                    <text x={PAD.l - 7} y={y + 4} textAnchor="end"
+                      fontFamily={E.mono} fontSize={11} fill={E.sec}>
+                      {mo}mo
+                    </text>
+                  </g>
+                )
+              })}
+              <text transform="rotate(-90)"
+                x={-(PAD.t + iH / 2)} y={13} textAnchor="middle"
+                fontFamily={E.mono} fontSize={11} letterSpacing="0.1em" fill={E.sec}>
+                MONTHS IN CURRENT BUCKET
+              </text>
+            </>
+          )
         })()}
-
-        {/* Y axis label for companies view */}
-        {wellsView === 'companies' && (
-          <text transform="rotate(-90)"
-            x={-(PAD.t + iH / 2)} y={13} textAnchor="middle"
-            fontFamily={E.mono} fontSize={11} letterSpacing="1.2" fill={E.sec}>
-            DWELL MONTHS
-          </text>
-        )}
 
       </svg>
     </div>
@@ -2149,7 +2133,7 @@ export default function PlatformPage() {
             {/* Divider */}
             <div style={s({ height: 1, background: E.bdr, marginBottom: 8 })} />
 
-            {/* OSMR Composite Score — primary metric */}
+            {/* Composite Risk Score — primary metric */}
             <div style={s({ marginBottom: 6 })}>
               <span style={s({
                 fontSize: 26, fontWeight: 700, color: bucketCol,
@@ -2158,7 +2142,7 @@ export default function PlatformPage() {
                 {n.pctRank}
               </span>
               <span style={s({ fontSize: 10, color: E.sec, marginLeft: 5 })}>
-                OSMR Composite Score
+                Composite Risk Score
               </span>
             </div>
 
