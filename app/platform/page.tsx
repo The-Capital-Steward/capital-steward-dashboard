@@ -135,12 +135,12 @@ const WELL_DATA = [
   { id: 'M',  label: 'Moderate', col: '#9E8A70',
     median:  4.5,  std: 28, skew: -0.1,
     mass: 0, dwell_med: 5, dwell_p90: 19, count: 960,
-    lossRate: 19.0, desc: 'Balanced · Neutral',
+    lossRate: 19.0, desc: 'Moderate · Mixed',
     bandSpreads: [null, 12, 9, 6, 2, 5, 4, 3] as (number|null)[] },
   { id: 'L',  label: 'Low',      col: '#4B8A70',
     median:  7.5,  std: 24, skew:  0.1,
     mass: 0, dwell_med: 4, dwell_p90: 13, count: 794,
-    lossRate: 14.0, desc: 'Stable · Improving',
+    lossRate: 14.0, desc: 'Stable · Positive returns',
     bandSpreads: [null, 8, 6, 4, 1.5, 3, 3, 2] as (number|null)[] },
   { id: 'VL', label: 'Very Low', col: '#5A9870',
     median: 11.4,  std: 20, skew:  0.2,
@@ -543,25 +543,35 @@ function Section1WellsPanel({
   const dotX = (score: number) => PAD.l + score * iW
 
   return (
-    <div ref={wrapRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {/* View mode toggle — top-right of panel */}
+    <div ref={wrapRef} style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' as const }}>
+      {/* View mode toggle — full-width bar at top of panel, prominent */}
       <div style={{
-        position: 'absolute', top: 7, right: 11, display: 'flex', gap: 2, zIndex: 2,
+        display: 'flex', borderBottom: `1px solid ${E.bdr2}`,
+        background: E.bg2,
       }}>
-        {(['curves', 'companies', 'both'] as const).map(v => (
+        {([
+          { v: 'curves' as const,    label: 'Distributions' },
+          { v: 'companies' as const, label: 'Companies' },
+          { v: 'both' as const,      label: 'Both' },
+        ]).map(({ v, label }) => (
           <button key={v} onClick={() => setWellsView(v)} style={{
-            fontFamily: E.mono, fontSize: 11, letterSpacing: '0.1em', padding: '2px 7px',
-            border: `1px solid ${wellsView === v ? E.gold : E.dim}`,
-            background: wellsView === v ? 'rgba(197,162,74,0.10)' : 'transparent',
-            color: wellsView === v ? E.gold : E.sec, cursor: 'pointer',
-            textTransform: 'uppercase' as const,
+            flex: 1,
+            fontFamily: E.mono, fontSize: 11, fontWeight: wellsView === v ? 700 : 400,
+            letterSpacing: '0.12em', padding: '7px 0',
+            border: 'none',
+            borderBottom: `2px solid ${wellsView === v ? E.gold : 'transparent'}`,
+            borderRight: v !== 'both' ? `1px solid ${E.bdr2}` : 'none',
+            background: wellsView === v ? 'rgba(197,162,74,0.06)' : 'transparent',
+            color: wellsView === v ? E.gold : E.sec,
+            cursor: 'pointer', textTransform: 'uppercase' as const,
+            transition: 'color 0.15s, border-color 0.15s',
           }}>
-            {v}
+            {label}
           </button>
         ))}
       </div>
 
-      <svg ref={svgRef} style={{ display: 'block', width: '100%', height: '100%' }}
+      <svg ref={svgRef} style={{ display: 'block', width: '100%', flex: 1 }}
            viewBox={`0 0 ${W} ${H}`}>
 
         {/* BG */}
@@ -591,7 +601,7 @@ function Section1WellsPanel({
           stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
         <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end"
           fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>
-          ← −25% threshold
+          −25% severe loss threshold
         </text>
 
         {/* X axis label */}
@@ -668,7 +678,7 @@ function Section1WellsPanel({
                     <>
                       <text x={peakX} y={lY + 13} textAnchor="middle"
                         fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                        {b.count} cos · med dwell {b.dwell_med}mo · {b.lossRate}% severe loss
+                        {b.count} companies · median {b.dwell_med}mo in bucket · {b.lossRate}% severe loss
                       </text>
                       <text x={peakX} y={lY + 24} textAnchor="middle"
                         fontFamily={E.mono} fontSize={7.5} fill={b.col} opacity={0.32}
@@ -686,7 +696,7 @@ function Section1WellsPanel({
                   {b.id === 'VL' && (
                     <text x={peakX} y={lY + 13} textAnchor="middle"
                       fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                      {b.count} cos · {b.lossRate}% severe loss · 0 deteriorating
+                      {b.count} companies · {b.lossRate}% severe loss · none currently deteriorating
                     </text>
                   )}
                 </g>
@@ -696,23 +706,56 @@ function Section1WellsPanel({
         )}
 
         {/* ── Company dots ── */}
-        {(wellsView === 'companies' || wellsView === 'both') && trajectories.map(t => {
-          const x  = wellsView === 'both'
-            ? xPx(t.score * (X_MAX - X_MIN) + X_MIN)  // map score to return space
-            : dotX(t.score)
-          const y  = wellsView === 'both'
-            ? dotY(t.dwell)
-            : dotY(t.dwell)
-          const col = DIR_COLOR[t.dir] ?? E.sec
-          const bCol = bucketColor(t.bucket)
-          return (
-            <g key={t.symbol}>
-              <circle cx={x} cy={y} r={4.5} fill="none"
-                stroke={bCol} strokeWidth={0.8} opacity={0.40} />
-              <circle cx={x} cy={y} r={2.5} fill={col} opacity={0.80} />
-            </g>
-          )
-        })}
+        {(wellsView === 'companies' || wellsView === 'both') && (() => {
+          // In 'both' mode: dots appear within their bucket's curve.
+          // X = curve median (the well center) + small jitter by symbol hash
+          // Y = within the curve's vertical extent, depth by dwell time
+          //     (longer dwell = sits lower = deeper in the well)
+          // In 'companies' mode: X = composite score, Y = dwell (different coord space)
+
+          // Deterministic jitter from symbol string
+          const jitter = (sym: string, range: number) => {
+            let h = 0
+            for (let i = 0; i < sym.length; i++) h = (h * 31 + sym.charCodeAt(i)) & 0xffffffff
+            return ((h % 1000) / 1000 - 0.5) * range
+          }
+
+          return trajectories.map(t => {
+            const bData = curves.find(c => c.label === t.bucket)
+            let x: number, y: number
+
+            if (wellsView === 'both' && bData) {
+              // Position within the curve
+              const medX = xPx(bData.adjMedian)
+              // Jitter width proportional to curve std (wider wells allow more spread)
+              const jitterPx = (bData.std / 100) * iW * 0.18
+              x = medX + jitter(t.symbol, jitterPx * 2)
+
+              // Y: top of curve area = peak, bottom = baseline
+              // Dwell maps from baseline (short dwell) to peak (long dwell)
+              const peakIdx = bData.ys.indexOf(Math.max(...bData.ys))
+              const curveTopY = yPx(bData.ys[peakIdx])
+              const maxDwell = Math.max(1, ...trajectories.filter(tt => tt.bucket === t.bucket).map(tt => tt.dwell))
+              const dwellT = Math.min(t.dwell / maxDwell, 1)
+              // Long dwell = near peak (high density); short dwell = near base
+              y = baseY - (baseY - curveTopY) * dwellT * 0.88 + jitter(t.symbol + 'y', 8)
+            } else {
+              // Companies-only view: composite × dwell
+              x = dotX(t.score)
+              y = dotY(t.dwell)
+            }
+
+            const col = DIR_COLOR[t.dir] ?? E.sec
+            const bCol = bucketColor(t.bucket)
+            return (
+              <g key={t.symbol}>
+                <circle cx={x} cy={y} r={3.5} fill="none"
+                  stroke={bCol} strokeWidth={0.7} opacity={0.35} />
+                <circle cx={x} cy={y} r={2} fill={col} opacity={0.75} />
+              </g>
+            )
+          })
+        })()}
 
         {/* Y axis label for companies view */}
         {wellsView === 'companies' && (
@@ -1696,7 +1739,7 @@ export default function PlatformPage() {
         .attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
 
       ;[
-        { x: 6,        y: innerH - 6, txt: 'Grounded · Stable',      col: E.VL,      a: 'start', o: 0.45 },
+        { x: 6,        y: innerH - 6, txt: 'Grounded · Stable',     col: E.VL,      a: 'start', o: 0.45 },
         { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',     col: '#9E8A70', a: 'end',   o: 0.35 },
         { x: 6,        y: 12,         txt: 'Grounded · Degrading',    col: '#9E8A70', a: 'start', o: 0.35 },
         { x: innerW-6, y: 12,         txt: 'Highest structural risk', col: E.VH,      a: 'end',   o: 0.65 },
@@ -1926,7 +1969,7 @@ export default function PlatformPage() {
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Gravitational Field · Return Distributions</div>
           <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>
-            Well depth = dwell probability × median loss · Filter reshapes the wells
+            Structural conditions differ in their pull. VH companies have the deepest well — highest retention, worst median outcome.
           </div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
