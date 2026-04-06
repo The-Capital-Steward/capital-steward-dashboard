@@ -57,7 +57,6 @@ interface Node {
   axis1: number
   axis2: number
   ev: number
-  marketCap: number
   oal: 'FCF' | 'NI' | 'EBIT' | 'Revenue'
   evBand: number
   x: number
@@ -184,12 +183,13 @@ function fmtEV(v: unknown): string {
   return `$${n.toFixed(0)}`
 }
 
-// Map a market cap value (same order as EV, generated synthetic) to a node radius.
-// Log scale: small-cap ~2.5px, mega-cap ~6px. Keeps the constellation readable.
-function nodeRadius(mc: number): number {
+// Node radius scaled by Enterprise Value — EV is the Axis 1 numerator and
+// the correct measure of acquisition cost. Log scale: ~2.5px at $100M EV,
+// ~6px at $2T EV. Node footprint in the constellation = structural cost at scale.
+function nodeRadius(ev: number): number {
   const MIN_R = 2.5, MAX_R = 6.0
   const LO = 1e8, HI = 2e12
-  const t = Math.max(0, Math.min(1, (Math.log(Math.max(mc, LO)) - Math.log(LO)) / (Math.log(HI) - Math.log(LO))))
+  const t = Math.max(0, Math.min(1, (Math.log(Math.max(ev, LO)) - Math.log(LO)) / (Math.log(HI) - Math.log(LO))))
   return MIN_R + t * (MAX_R - MIN_R)
 }
 
@@ -239,7 +239,7 @@ function generateNodes(n = 5200): Node[] {
     pctRank: pctRankMap.get(d.i) ?? 0,
     bucket: bucketMap.get(d.i)!,
     axis1: d.axis1, axis2: d.axis2,
-    ev: d.ev, marketCap: d.mc, oal: d.oal,
+    ev: d.ev, oal: d.oal,
     evBand: 0, x: 0, y: 0,
   }))
 
@@ -1183,9 +1183,13 @@ export default function PlatformPage() {
     // Generated from oal_scores.csv · public/data/osmr_snapshot.json.
     // Falls back to generateNodes() if file is unavailable.
     if (!snapshotFetchRef.current) {
-      snapshotFetchRef.current = fetch(`${DATA_BASE}/data/osmr_snapshot.json`)
-        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<Node[]> })
-        .catch(() => null)
+      // 8-second timeout — if osmr_snapshot.json isn't deployed yet,
+      // fail fast and fall back to generateNodes() rather than hanging.
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 8000)
+      snapshotFetchRef.current = fetch(`${DATA_BASE}/data/osmr_snapshot.json`, { signal: ctrl.signal })
+        .then(r => { clearTimeout(timer); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<Node[]> })
+        .catch(() => { clearTimeout(timer); return null })
     }
 
     // initViz is async so it can await the snapshot fetch before the
@@ -1200,7 +1204,7 @@ export default function PlatformPage() {
       // Real data if available, synthetic fallback otherwise
       const snapshot = await snapshotFetchRef.current
       const nodes: Node[] = snapshot && snapshot.length > 0
-        ? snapshot.map(n => ({ ...n, x: 0, y: 0, marketCap: n.ev ?? 1e9 }))
+        ? snapshot.map(n => ({ ...n, x: 0, y: 0 }))
         : generateNodes(5200)
 
       nodesRef.current = nodes
@@ -1244,13 +1248,16 @@ export default function PlatformPage() {
         const spreadY = (jRng() - 0.5) * panelH * 0.15
         return { ...n, x: c.x + spreadX, y: c.y + spreadY }
       })
+      // 120 ticks — enough for clusters to separate visually.
+      // Full convergence (500 ticks) at -28 charge was taking 60+ seconds.
+      // Clusters form clearly by tick 120; diminishing returns beyond that.
       const simulation = d3.forceSimulation(forceNodes)
         .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.08))
         .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.08))
-        .force('charge',  d3.forceManyBody().strength(-28))
-        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.2))
+        .force('charge',  d3.forceManyBody().strength(-20))
+        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.ev ?? 1e9) + 1.2))
         .stop()
-      simulation.tick(500)
+      simulation.tick(120)
       // No hard clamping — let simulation physics determine final positions.
       // Soft boundary: add a light pull back toward the panel interior for any
       // nodes that drifted beyond the visible area.
@@ -1301,7 +1308,7 @@ export default function PlatformPage() {
         .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
 
       cnGroups.append('circle').attr('class', 'cn').datum((d: any) => d)
-        .attr('r', (d: Node) => nodeRadius(d.marketCap))
+        .attr('r', (d: Node) => nodeRadius(d.ev ?? 1e9))
         .attr('fill', (d: Node) => bucketColor(d.bucket))
 
       cnGroups
@@ -1379,7 +1386,7 @@ export default function PlatformPage() {
         .attr('transform', (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
 
       snGroups.append('circle').attr('class', 'sn').datum((d: any) => d)
-        .attr('r', (d: Node) => nodeRadius(d.marketCap))
+        .attr('r', (d: Node) => nodeRadius(d.ev ?? 1e9))
         .attr('fill', (d: Node) => bucketColor(d.bucket))
 
       snGroups
@@ -1678,7 +1685,7 @@ export default function PlatformPage() {
           })}
         </div>
         <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, flexShrink: 0 })}>
-          Size = market cap{!isPaid ? ' · Identity at paid tier' : ''}
+          Size = enterprise value{!isPaid ? ' · Identity at paid tier' : ''}
         </span>
       </div>
 
