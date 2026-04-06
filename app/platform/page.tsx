@@ -1279,12 +1279,15 @@ export default function PlatformPage() {
         .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.ev ?? 1e9) + 1.2))
         .stop()
       simulation.tick(120)
-      // No hard clamping — let simulation physics determine final positions.
-      // Soft boundary: add a light pull back toward the panel interior for any
-      // nodes that drifted beyond the visible area.
+      // Clamp to viewBox with 3% margin — prevents nodes disappearing off-edge.
+      // The border-stacking problem from earlier was caused by too-strong forces
+      // pushing thousands of nodes to the same clamped position. Current parameters
+      // (strength 0.08, charge -20) produce organic layouts that rarely hit the wall.
+      const mx = panelW * 0.03
+      const my = panelH * 0.03
       forceNodes.forEach((fn: any, i: number) => {
-        nodesRef.current[i].x = fn.x
-        nodesRef.current[i].y = fn.y
+        nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
+        nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
       })
 
       // Expose computed nodes to React (Sections 3 & 4) after positions are set
@@ -1308,14 +1311,55 @@ export default function PlatformPage() {
         .attr('class', 'star').attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y)
         .attr('r',  (d: any) => d.r).attr('fill', '#EDE9E0').attr('opacity', (d: any) => d.o)
 
-      // Cluster region ellipses
+      // Gravitational markers — explicit centers of structural tendency.
+      // Each marker communicates what the cluster is attracted toward,
+      // not just where its boundary is.
+      const GRAVITY_LABELS: Record<string, string> = {
+        'Very High': 'Detached · Degrading',
+        'High':      'Stretched · Unstable',
+        'Moderate':  'Balanced · Neutral',
+        'Low':       'Stable · Improving',
+        'Very Low':  'Grounded · Stable',
+      }
       BUCKET_ORDER.forEach(b => {
-        const c = centers[b]; const col = bucketColor(b)
-        conSvg.append('ellipse').attr('cx', c.x).attr('cy', c.y).attr('rx', 46).attr('ry', 34)
-          .attr('fill', 'none').attr('stroke', col).attr('stroke-width', 0.35).attr('opacity', 0.12).attr('stroke-dasharray', '3,5')
-        conSvg.append('text').attr('x', c.x).attr('y', c.y - 38).attr('text-anchor', 'middle')
-          .attr('font-family', E.mono).attr('font-size', 11).attr('letter-spacing', '0.14em')
-          .attr('fill', col).attr('opacity', 0.40).text(b.toUpperCase())
+        const c = centers[b]
+        const col = bucketColor(b)
+        const g = conSvg.append('g').attr('transform', `translate(${c.x},${c.y})`)
+
+        // Outer field ring — faint, wide
+        g.append('circle').attr('r', 38)
+          .attr('fill', 'none')
+          .attr('stroke', col).attr('stroke-width', 0.5)
+          .attr('opacity', 0.08)
+
+        // Inner field ring — slightly more present
+        g.append('circle').attr('r', 18)
+          .attr('fill', 'none')
+          .attr('stroke', col).attr('stroke-width', 0.8)
+          .attr('opacity', 0.16)
+
+        // Focal point — the gravitational center
+        g.append('circle').attr('r', 4)
+          .attr('fill', col)
+          .attr('opacity', 0.55)
+
+        // Crosshair — communicates attractor, not just position
+        g.append('line').attr('x1', -9).attr('y1', 0).attr('x2', 9).attr('y2', 0)
+          .attr('stroke', col).attr('stroke-width', 0.6).attr('opacity', 0.35)
+        g.append('line').attr('x1', 0).attr('y1', -9).attr('x2', 0).attr('y2', 9)
+          .attr('stroke', col).attr('stroke-width', 0.6).attr('opacity', 0.35)
+
+        // Structural descriptor — names what this center represents
+        g.append('text').attr('y', -52).attr('text-anchor', 'middle')
+          .attr('font-family', E.mono).attr('font-size', 9.5)
+          .attr('letter-spacing', '0.12em').attr('fill', col).attr('opacity', 0.55)
+          .text(GRAVITY_LABELS[b] || b.toUpperCase())
+
+        // Bucket label — smaller, below descriptor
+        g.append('text').attr('y', -41).attr('text-anchor', 'middle')
+          .attr('font-family', E.mono).attr('font-size', 8)
+          .attr('letter-spacing', '0.08em').attr('fill', col).attr('opacity', 0.30)
+          .text(b.toUpperCase())
       })
 
       // Constellation nodes
