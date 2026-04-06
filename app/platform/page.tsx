@@ -576,37 +576,54 @@ function Section1WellsPanel({
         {/* BG */}
         <rect width={W} height={H} fill={E.bg} />
 
-        {/* ── Grid ── */}
-        {[-75, -50, -25, 0, 25, 50, 75].map(v => (
-          <g key={v}>
-            <line x1={xPx(v)} y1={PAD.t} x2={xPx(v)} y2={PAD.t + iH}
-              stroke={v === 0 ? '#272420' : '#1E1C18'}
-              strokeWidth={v === 0 ? 1 : 0.4} />
-            {v !== 0 && (
+        {/* ── Grid — different for each view ── */}
+        {wellsView === 'companies' ? (
+          // Companies view: composite score axis 0–100
+          [0, 25, 50, 75, 100].map(v => {
+            const x = PAD.l + (v / 100) * iW
+            return (
+              <g key={v}>
+                <line x1={x} y1={PAD.t} x2={x} y2={PAD.t + iH}
+                  stroke={v === 50 ? '#272420' : '#1E1C18'}
+                  strokeWidth={v === 50 ? 1 : 0.4} />
+                <text x={x} y={PAD.t + iH + 14} textAnchor="middle"
+                  fontFamily={E.mono} fontSize={11} fill={E.sec}>
+                  {v}
+                </text>
+              </g>
+            )
+          })
+        ) : (
+          // Distributions / Both view: return percentage axis
+          [-75, -50, -25, 0, 25, 50, 75].map(v => (
+            <g key={v}>
+              <line x1={xPx(v)} y1={PAD.t} x2={xPx(v)} y2={PAD.t + iH}
+                stroke={v === 0 ? '#272420' : '#1E1C18'}
+                strokeWidth={v === 0 ? 1 : 0.4} />
               <text x={xPx(v)} y={PAD.t + iH + 14} textAnchor="middle"
                 fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                {v}%
+                {v === 0 ? '0%' : `${v}%`}
               </text>
-            )}
-          </g>
-        ))}
+            </g>
+          ))
+        )}
 
-        {/* Zero label */}
-        <text x={xPx(0)} y={PAD.t + iH + 14} textAnchor="middle"
-          fontFamily={E.mono} fontSize={11} fill={E.sec}>0%</text>
-
-        {/* Event horizon — −25% severe loss threshold */}
-        <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH}
-          stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
-        <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end"
-          fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>
-          −25% severe loss threshold
-        </text>
+        {/* −25% severe loss threshold — distributions/both only */}
+        {wellsView !== 'companies' && (
+          <>
+            <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH}
+              stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
+            <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end"
+              fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>
+              −25% severe loss threshold
+            </text>
+          </>
+        )}
 
         {/* X axis label */}
         <text x={PAD.l + iW / 2} y={H - 8} textAnchor="middle"
           fontFamily={E.mono} fontSize={11} letterSpacing="0.12em" fill={E.sec}>
-          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE (0 = LOW RISK) →' : '12-MONTH FORWARD RETURN →'}
+          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE →' : '12-MONTH FORWARD RETURN →'}
         </text>
 
         {/* ── Distribution curves ── */}
@@ -630,14 +647,12 @@ function Section1WellsPanel({
               ).join(' ')
               return (
                 <g key={`curve-${b.id}`}>
-                  {/* Glow shadow */}
                   {(b.id === 'VH' || b.id === 'VL') && (
                     <path d={d} fill="none" stroke={b.col}
                       strokeWidth={b.id === 'VH' ? 5 : 3}
                       opacity={b.id === 'VH' ? 0.12 : 0.08}
                       strokeLinecap="round" />
                   )}
-                  {/* Main curve */}
                   <path d={d} fill="none" stroke={b.col}
                     strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3}
                     opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55}
@@ -646,43 +661,54 @@ function Section1WellsPanel({
               )
             })}
 
-            {/* Curve labels + median ticks */}
-            {curves.map(b => {
+            {/* Curve labels — anchored above each peak, spread vertically so they don't collide */}
+            {curves.map((b, idx) => {
               const peakIdx = b.ys.indexOf(Math.max(...b.ys))
               const peakX   = xPx(xs[peakIdx])
               const peakY   = yPx(b.ys[peakIdx])
-              const medX    = xPx(b.adjMedian)
-              const lY      = Math.min(peakY - 12, PAD.t + iH - 44)
+              // Stagger: VH and VL get labels near their peaks (well separated).
+              // H, M, L peaks cluster in the center — assign fixed vertical slots
+              // spaced 22px apart so they never collide regardless of peak proximity.
+              const LABEL_SLOTS = [
+                PAD.t + 18,          // VH — top (leftmost peak, highest curve)
+                PAD.t + iH * 0.28,   // H
+                PAD.t + iH * 0.18,   // M
+                PAD.t + iH * 0.10,   // L
+                PAD.t + 18,          // VL — top (rightmost peak)
+              ]
+              const lY = Math.min(peakY - 16, LABEL_SLOTS[idx])
 
               return (
                 <g key={`label-${b.id}`}>
-                  {/* Median tick */}
-                  <line x1={medX} y1={PAD.t + iH - 5} x2={medX} y2={PAD.t + iH + 4}
-                    stroke={b.col} strokeWidth={1} opacity={0.5} />
-                  <text x={medX} y={PAD.t + iH + 26} textAnchor="middle"
-                    fontFamily={E.mono} fontSize={11} fill={b.col}>
+                  {/* Median tick — short vertical mark at baseline */}
+                  <line x1={xPx(b.adjMedian)} y1={PAD.t + iH - 5}
+                    x2={xPx(b.adjMedian)} y2={PAD.t + iH + 4}
+                    stroke={b.col} strokeWidth={1} opacity={0.6} />
+                  {/* Median value — staggered above/below baseline alternately */}
+                  <text
+                    x={xPx(b.adjMedian)}
+                    y={PAD.t + iH + (idx % 2 === 0 ? 26 : 40)}
+                    textAnchor="middle" fontFamily={E.mono} fontSize={11} fill={b.col}>
                     {b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}%
                   </text>
 
-                  {/* Curve label */}
+                  {/* Leader line from label to peak */}
+                  <line x1={peakX} y1={lY + 3} x2={peakX} y2={peakY - 4}
+                    stroke={b.col} strokeWidth={0.4} opacity={0.25} strokeDasharray="2,4" />
+
+                  {/* Bucket descriptor */}
                   <text x={peakX} y={lY} textAnchor="middle" fontFamily={E.mono}
-                    fontSize={11}
-                    fontWeight={b.id === 'VH' ? '700' : '400'}
-                    fill={b.col} opacity={1}>
+                    fontSize={11} fontWeight={b.id === 'VH' ? '700' : '400'}
+                    fill={b.col}>
                     {b.desc}
                   </text>
 
-                  {/* VH annotations */}
+                  {/* VH annotation — single line only */}
                   {b.id === 'VH' && (
                     <>
-                      <text x={peakX} y={lY + 13} textAnchor="middle"
+                      <text x={peakX} y={lY + 14} textAnchor="middle"
                         fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                        {b.count} companies · median {b.dwell_med}mo in bucket · {b.lossRate}% severe loss
-                      </text>
-                      <text x={peakX} y={lY + 24} textAnchor="middle"
-                        fontFamily={E.mono} fontSize={7.5} fill={b.col} opacity={0.32}
-                        letterSpacing="0.08em">
-                        GRAVITATIONAL MASS {b.mass.toFixed(4)}
+                        {b.count} companies · median {b.dwell_med}mo · {b.lossRate}% severe loss
                       </text>
                       {!selectedBand.includes('all') && (
                         <text x={W - PAD.r} y={PAD.t + 9} textAnchor="end"
@@ -692,10 +718,11 @@ function Section1WellsPanel({
                       )}
                     </>
                   )}
+                  {/* VL annotation — single line */}
                   {b.id === 'VL' && (
-                    <text x={peakX} y={lY + 13} textAnchor="middle"
+                    <text x={peakX} y={lY + 14} textAnchor="middle"
                       fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                      {b.count} companies · {b.lossRate}% severe loss · none currently deteriorating
+                      {b.count} companies · {b.lossRate}% severe loss · none deteriorating
                     </text>
                   )}
                 </g>
