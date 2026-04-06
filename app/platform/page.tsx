@@ -109,6 +109,66 @@ const DESCENT_LEVELS = [
 
 const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as const
 
+// ── Gravitational wells data ──────────────────────────────────────────────────
+// Confirmed from Scripts 25, 26, 27. These are the parameters of each well.
+// Distribution parameters derived from real backtest output.
+
+interface TrajectoryRecord {
+  symbol:          string
+  current_bucket:  string
+  composite_score: number | null
+  dwell_months:    number
+  direction:       'improving' | 'stable' | 'deteriorating'
+}
+
+const WELL_DATA = [
+  { id: 'VH', label: 'Very High', col: '#C5524A',
+    median: -9.6,  std: 42, skew: -0.8,
+    mass: 0.0628, dwell_med: 16, dwell_p90: 64, count: 362,
+    lossRate: 39.6, desc: 'Detached · Degrading',
+    bandSpreads: [null, 32.5, 19.6, 11.3, 3.5, 10.3, 7.5, 5.4] as (number|null)[] },
+  { id: 'H',  label: 'High',     col: '#C07050',
+    median: -2.0,  std: 32, skew: -0.4,
+    mass: 0.010, dwell_med: 5, dwell_p90: 24, count: 424,
+    lossRate: 28.0, desc: 'Stretched · Unstable',
+    bandSpreads: [null, 18, 14, 9, 3, 7, 5, 3.5] as (number|null)[] },
+  { id: 'M',  label: 'Moderate', col: '#9E8A70',
+    median:  4.5,  std: 28, skew: -0.1,
+    mass: 0, dwell_med: 5, dwell_p90: 19, count: 960,
+    lossRate: 19.0, desc: 'Balanced · Neutral',
+    bandSpreads: [null, 12, 9, 6, 2, 5, 4, 3] as (number|null)[] },
+  { id: 'L',  label: 'Low',      col: '#4B8A70',
+    median:  7.5,  std: 24, skew:  0.1,
+    mass: 0, dwell_med: 4, dwell_p90: 13, count: 794,
+    lossRate: 14.0, desc: 'Stable · Improving',
+    bandSpreads: [null, 8, 6, 4, 1.5, 3, 3, 2] as (number|null)[] },
+  { id: 'VL', label: 'Very Low', col: '#5A9870',
+    median: 11.4,  std: 20, skew:  0.2,
+    mass: 0, dwell_med: 4, dwell_p90: 16, count: 198,
+    lossRate: 10.5, desc: 'Grounded · Stable',
+    bandSpreads: [null, 6, 4, 3, 1, 2, 2, 1.5] as (number|null)[] },
+]
+
+const BAND_SPREADS_BASE = 21.0
+const DIR_COLOR: Record<string, string> = {
+  improving:    '#5A9870',
+  stable:       '#A89E8E',
+  deteriorating: '#C5524A',
+}
+
+// Skewed-normal PDF for distribution curves
+function erfApprox(x: number): number {
+  const t = 1 / (1 + 0.3275911 * Math.abs(x))
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x)
+  return x >= 0 ? y : -y
+}
+function skewedPdf(x: number, mean: number, std: number, skew: number): number {
+  const z = (x - mean) / std
+  const phi = Math.exp(-0.5 * z * z) / (std * Math.sqrt(2 * Math.PI))
+  const Phi = 0.5 * (1 + erfApprox((skew * z) / Math.sqrt(2)))
+  return 2 * phi * Phi
+}
+
 const EV_BANDS = [
   { band: 'all' as Band, label: 'All',       sub: undefined },
   { band: 1 as Band,     label: 'Band I',    sub: '<$300M' },
@@ -378,6 +438,291 @@ function SectionHeader({ lucas, label, sub }: { lucas: number; label: string; su
 }
 
 // ─── Section 2: Three Market Regime Summaries ─────────────────────────────────
+
+// ─── Section 1 Left Panel: Gravitational Potential Wells ─────────────────────
+//
+// Replaces the force-directed constellation. Five return distribution curves
+// rendered as gravitational wells. The depth of each well = dwell probability
+// × |negative return| (confirmed from Scripts 25, 26, 27).
+//
+// Three view modes:
+//   'curves'    — distribution curves only
+//   'companies' — real company dots (composite × dwell, colored by direction)
+//   'both'      — curves + dots overlaid
+//
+// Filter integration: selectedBand adjusts well shapes using Script 27
+// per-band spread data. selectedOal adjusts medians directionally.
+
+interface WellsNode {
+  symbol: string
+  bucket: string
+  score:  number
+  dwell:  number
+  dir:    string
+}
+
+const OAL_MED_ADJ: Record<string, Record<string, number>> = {
+  FCF:     { VH: +2.5, VL: +3.2 },
+  NI:      { VH: +0.5, VL: +0.8 },
+  EBIT:    { VH: -0.5, VL: -0.2 },
+  Revenue: { VH: -5.0, VL: -4.5 },
+  all:     {},
+}
+
+function Section1WellsPanel({
+  selectedBand,
+  selectedOal,
+  trajectories,
+}: {
+  selectedBand: Band
+  selectedOal:  OALKey
+  trajectories: WellsNode[]
+}) {
+  const svgRef  = useRef<SVGSVGElement | null>(null)
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const [dims, setDims] = React.useState({ w: 600, h: 440 })
+  const [wellsView, setWellsView] = React.useState<'curves' | 'companies' | 'both'>('curves')
+
+  // Measure panel on mount and resize
+  React.useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const obs = new ResizeObserver(entries => {
+      const r = entries[0].contentRect
+      setDims({ w: Math.round(r.width), h: Math.round(r.height) })
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  const { w: W, h: H } = dims
+  const PAD = { l: 52, r: 14, t: 36, b: 58 }
+  const iW  = W - PAD.l - PAD.r
+  const iH  = H - PAD.t - PAD.b
+
+  const X_MIN = -90, X_MAX = 80, X_RANGE = X_MAX - X_MIN
+  const xPx = (r: number) => PAD.l + ((r - X_MIN) / X_RANGE) * iW
+  const STEPS = 300
+  const xs = Array.from({ length: STEPS }, (_, i) => X_MIN + (i / (STEPS - 1)) * X_RANGE)
+
+  // Adjust medians based on active filters
+  const adjMedian = (b: typeof WELL_DATA[0]) => {
+    let m = b.median
+    const oalAdj = OAL_MED_ADJ[selectedOal]?.[b.id] ?? 0
+    if (selectedBand !== 'all') {
+      const bandSpread = b.bandSpreads[+selectedBand]
+      if (bandSpread !== null && bandSpread !== undefined) {
+        const ratio = bandSpread / BAND_SPREADS_BASE
+        m = b.id === 'VH' ? b.median * ratio * 1.1
+          : b.id === 'VL' ? b.median * ratio * 0.9
+          : b.median
+      }
+    }
+    return m + oalAdj
+  }
+
+  // Build curves
+  const curves = WELL_DATA.map(b => {
+    const m = adjMedian(b)
+    return { ...b, adjMedian: m, ys: xs.map(x => skewedPdf(x, m, b.std, b.skew)) }
+  })
+  const maxD = Math.max(...curves.flatMap(c => c.ys))
+  const yPx  = (d: number) => PAD.t + iH - (d / maxD) * iH * 0.86
+  const baseY = PAD.t + iH
+
+  // Company dots for scatter views
+  const MAX_DWELL = Math.max(1, ...trajectories.map(t => t.dwell))
+  const dotY = (dwell: number) => {
+    const t = Math.log(dwell + 1) / Math.log(MAX_DWELL + 1)
+    return PAD.t + iH - t * iH * 0.88
+  }
+  const dotX = (score: number) => PAD.l + score * iW
+
+  return (
+    <div ref={wrapRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {/* View mode toggle — top-right of panel */}
+      <div style={{
+        position: 'absolute', top: 7, right: 11, display: 'flex', gap: 2, zIndex: 2,
+      }}>
+        {(['curves', 'companies', 'both'] as const).map(v => (
+          <button key={v} onClick={() => setWellsView(v)} style={{
+            fontFamily: E.mono, fontSize: 8, letterSpacing: '0.1em', padding: '2px 7px',
+            border: `1px solid ${wellsView === v ? E.gold : E.dim}`,
+            background: wellsView === v ? 'rgba(197,162,74,0.10)' : 'transparent',
+            color: wellsView === v ? E.gold : E.dim, cursor: 'pointer',
+            textTransform: 'uppercase' as const,
+          }}>
+            {v}
+          </button>
+        ))}
+      </div>
+
+      <svg ref={svgRef} style={{ display: 'block', width: '100%', height: '100%' }}
+           viewBox={`0 0 ${W} ${H}`}>
+
+        {/* BG */}
+        <rect width={W} height={H} fill={E.bg} />
+
+        {/* ── Grid ── */}
+        {[-75, -50, -25, 0, 25, 50, 75].map(v => (
+          <g key={v}>
+            <line x1={xPx(v)} y1={PAD.t} x2={xPx(v)} y2={PAD.t + iH}
+              stroke={v === 0 ? '#272420' : '#1E1C18'}
+              strokeWidth={v === 0 ? 1 : 0.4} />
+            {v !== 0 && (
+              <text x={xPx(v)} y={PAD.t + iH + 14} textAnchor="middle"
+                fontFamily={E.mono} fontSize={9} fill="#3A3530">
+                {v}%
+              </text>
+            )}
+          </g>
+        ))}
+
+        {/* Zero label */}
+        <text x={xPx(0)} y={PAD.t + iH + 14} textAnchor="middle"
+          fontFamily={E.mono} fontSize={9} fill="#3A3530">0%</text>
+
+        {/* Event horizon — −25% severe loss threshold */}
+        <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH}
+          stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
+        <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end"
+          fontFamily={E.mono} fontSize={8.5} fill={E.VH} opacity={0.55}>
+          ← −25% threshold
+        </text>
+
+        {/* X axis label */}
+        <text x={PAD.l + iW / 2} y={H - 8} textAnchor="middle"
+          fontFamily={E.mono} fontSize={9} letterSpacing="0.12em" fill="#2A2520">
+          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE →' : '12-MONTH FORWARD RETURN →'}
+        </text>
+
+        {/* ── Distribution curves ── */}
+        {(wellsView === 'curves' || wellsView === 'both') && (
+          <>
+            {/* Area fills */}
+            {[...curves].reverse().map(b => {
+              const pts = xs.map((x, i) => `${xPx(x)},${yPx(b.ys[i])}`).join(' ')
+              return (
+                <polygon key={`fill-${b.id}`}
+                  points={`${xPx(xs[0])},${baseY} ${pts} ${xPx(xs[xs.length-1])},${baseY}`}
+                  fill={b.col}
+                  opacity={b.id === 'VH' ? 0.10 : 0.07} />
+              )
+            })}
+
+            {/* Curve lines */}
+            {[...curves].reverse().map(b => {
+              const d = xs.map((x, i) =>
+                `${i === 0 ? 'M' : 'L'}${xPx(x)},${yPx(b.ys[i])}`
+              ).join(' ')
+              return (
+                <g key={`curve-${b.id}`}>
+                  {/* Glow shadow */}
+                  {(b.id === 'VH' || b.id === 'VL') && (
+                    <path d={d} fill="none" stroke={b.col}
+                      strokeWidth={b.id === 'VH' ? 5 : 3}
+                      opacity={b.id === 'VH' ? 0.12 : 0.08}
+                      strokeLinecap="round" />
+                  )}
+                  {/* Main curve */}
+                  <path d={d} fill="none" stroke={b.col}
+                    strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3}
+                    opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55}
+                    strokeLinecap="round" />
+                </g>
+              )
+            })}
+
+            {/* Curve labels + median ticks */}
+            {curves.map(b => {
+              const peakIdx = b.ys.indexOf(Math.max(...b.ys))
+              const peakX   = xPx(xs[peakIdx])
+              const peakY   = yPx(b.ys[peakIdx])
+              const medX    = xPx(b.adjMedian)
+              const lY      = Math.min(peakY - 12, PAD.t + iH - 44)
+
+              return (
+                <g key={`label-${b.id}`}>
+                  {/* Median tick */}
+                  <line x1={medX} y1={PAD.t + iH - 5} x2={medX} y2={PAD.t + iH + 4}
+                    stroke={b.col} strokeWidth={1} opacity={0.5} />
+                  <text x={medX} y={PAD.t + iH + 26} textAnchor="middle"
+                    fontFamily={E.mono} fontSize={9} fill={b.col} opacity={0.72}>
+                    {b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}%
+                  </text>
+
+                  {/* Curve label */}
+                  <text x={peakX} y={lY} textAnchor="middle" fontFamily={E.mono}
+                    fontSize={b.id === 'VH' ? 10.5 : 9}
+                    fontWeight={b.id === 'VH' ? '700' : '400'}
+                    fill={b.col} opacity={b.id === 'VH' ? 1 : 0.75}>
+                    {b.desc}
+                  </text>
+
+                  {/* VH annotations */}
+                  {b.id === 'VH' && (
+                    <>
+                      <text x={peakX} y={lY + 13} textAnchor="middle"
+                        fontFamily={E.mono} fontSize={8.5} fill={b.col} opacity={0.50}>
+                        {b.count} cos · med dwell {b.dwell_med}mo · {b.lossRate}% severe loss
+                      </text>
+                      <text x={peakX} y={lY + 24} textAnchor="middle"
+                        fontFamily={E.mono} fontSize={7.5} fill={b.col} opacity={0.32}
+                        letterSpacing="0.08em">
+                        GRAVITATIONAL MASS {b.mass.toFixed(4)}
+                      </text>
+                      {selectedBand !== 'all' && (
+                        <text x={W - PAD.r} y={PAD.t + 9} textAnchor="end"
+                          fontFamily={E.mono} fontSize={9} fill={E.gold} opacity={0.75}>
+                          Band {selectedBand} · {b.bandSpreads[+selectedBand]}pp spread
+                        </text>
+                      )}
+                    </>
+                  )}
+                  {b.id === 'VL' && (
+                    <text x={peakX} y={lY + 13} textAnchor="middle"
+                      fontFamily={E.mono} fontSize={8.5} fill={b.col} opacity={0.50}>
+                      {b.count} cos · {b.lossRate}% severe loss · 0 deteriorating
+                    </text>
+                  )}
+                </g>
+              )
+            })}
+          </>
+        )}
+
+        {/* ── Company dots ── */}
+        {(wellsView === 'companies' || wellsView === 'both') && trajectories.map(t => {
+          const x  = wellsView === 'both'
+            ? xPx(t.score * (X_MAX - X_MIN) + X_MIN)  // map score to return space
+            : dotX(t.score)
+          const y  = wellsView === 'both'
+            ? dotY(t.dwell)
+            : dotY(t.dwell)
+          const col = DIR_COLOR[t.dir] ?? E.sec
+          const bCol = bucketColor(t.bucket)
+          return (
+            <g key={t.symbol}>
+              <circle cx={x} cy={y} r={4.5} fill="none"
+                stroke={bCol} strokeWidth={0.8} opacity={0.40} />
+              <circle cx={x} cy={y} r={2.5} fill={col} opacity={0.80} />
+            </g>
+          )
+        })}
+
+        {/* Y axis label for companies view */}
+        {wellsView === 'companies' && (
+          <text transform="rotate(-90)"
+            x={-(PAD.t + iH / 2)} y={13} textAnchor="middle"
+            fontFamily={E.mono} fontSize={9} letterSpacing="1.2" fill="#2A2520">
+            DWELL MONTHS
+          </text>
+        )}
+
+      </svg>
+    </div>
+  )
+}
 
 function Section2Regimes({ summary }: { summary: RegimeSummary }) {
   const MAX_LOSS = 0.50
@@ -1079,6 +1424,7 @@ export default function PlatformPage() {
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
   const [derivedNodes,  setDerivedNodes]  = useState<Node[]>([])
   const [vizReady,      setVizReady]      = useState(false)
+  const [trajectories,  setTrajectories]  = useState<{symbol:string;bucket:string;score:number;dwell:number;dir:string}[]>([])
 
   const selectedBandRef   = useRef<Band>('all')
   const selectedOalRef    = useRef<OALKey>('all')
@@ -1086,12 +1432,12 @@ export default function PlatformPage() {
   const rafIdRef          = useRef<number | null>(null)   // for RAF debounce
   const nodesRef          = useRef<Node[]>([])
   const d3ReadyRef        = useRef(false)
-  const conSvgRef         = useRef<SVGSVGElement | null>(null)
   const scatSvgRef        = useRef<SVGSVGElement | null>(null)
   const containerRef      = useRef<HTMLDivElement | null>(null)
   const evBandRef         = useRef<HTMLDivElement | null>(null)
   const oalRungRef        = useRef<HTMLDivElement | null>(null)
-  const regimeFetchRef    = useRef<Promise<RegimeSummary | null> | null>(null)
+  const regimeFetchRef      = useRef<Promise<RegimeSummary | null> | null>(null)
+  const trajectoryFetchRef  = useRef<Promise<{symbol:string;current_bucket:string;composite_score:number|null;dwell_months:number;direction:string}[] | null> | null>(null)
 
   // ── Opacity logic ────────────────────────────────────────────────────────────
 
@@ -1127,7 +1473,7 @@ export default function PlatformPage() {
     const band = selectedBandRef.current
     const filterActive = oal !== 'all' || band !== 'all'
 
-    const svgs = [conSvgRef.current, scatSvgRef.current]
+    const svgs = [scatSvgRef.current]
     svgs.forEach(svg => {
       if (!svg) return
 
@@ -1149,7 +1495,7 @@ export default function PlatformPage() {
         const bandOk = band === 'all' ? null : `[data-evband="${band}"]`
         const sel = [oalOk, bandOk].filter(Boolean).join('')
         if (sel) {
-          svg.querySelectorAll(`.cn-wrap${sel},.sn-wrap${sel}`)
+          svg.querySelectorAll(`.sn-wrap${sel}`)
             .forEach(el => el.classList.add('filter-match'))
         }
       } else {
@@ -1208,6 +1554,33 @@ export default function PlatformPage() {
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
     }
 
+    // Trajectory data fetch — 28_company_trajectories.json
+    // Powers the companies/both views in the gravitational wells panel.
+    if (!trajectoryFetchRef.current) {
+      trajectoryFetchRef.current = fetch(`${DATA_BASE}/data/28_company_trajectories.json`)
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
+        .catch(() => null)
+      trajectoryFetchRef.current.then(data => {
+        if (!data) return
+        // Sample to max 400 dots per bucket for performance
+        const by_bucket: Record<string, typeof data> = {}
+        for (const r of data) {
+          if (!by_bucket[r.current_bucket]) by_bucket[r.current_bucket] = []
+          by_bucket[r.current_bucket].push(r)
+        }
+        const sampled = Object.values(by_bucket).flatMap(arr =>
+          arr.sort((a: any, b: any) => b.dwell_months - a.dwell_months).slice(0, 80)
+        )
+        setTrajectories(sampled.map((r: any) => ({
+          symbol: r.symbol,
+          bucket: r.current_bucket,
+          score:  r.composite_score ?? 0.5,
+          dwell:  r.dwell_months,
+          dir:    r.direction,
+        })))
+      })
+    }
+
     // initViz: synchronous, no external fetch dependency.
     // Real OSMR data (osmr_snapshot.json) loads separately via a script tag
     // once deployed to public/data/ — for now, synthetic nodes are used.
@@ -1224,170 +1597,21 @@ export default function PlatformPage() {
           return
         }
 
+        // Generate nodes for Sections 3 & 4 (OAL rungs, EV bands).
+        // No force simulation needed — the left panel is now the gravitational
+        // wells visualization (pure SVG, no D3). generateNodes is fast (<50ms).
         const nodes: Node[] = generateNodes(5200)
         nodesRef.current = nodes
+        setDerivedNodes([...nodes])
 
-        const conEl  = conSvgRef.current
         const scatEl = scatSvgRef.current
-        if (!conEl || !scatEl) {
-          console.error('[TCS] SVG refs null — constellation cannot render')
+        if (!scatEl) {
+          console.error('[TCS] Scatter SVG ref null')
           return
         }
 
-        // Read actual rendered width — getBoundingClientRect at this point
-        // returns the real layout width since the loading overlay is visible.
-        const panelW = Math.max(300, conEl.getBoundingClientRect().width)
+        const panelW = Math.max(300, scatEl.getBoundingClientRect().width)
         const panelH = 440
-
-      // Cluster centers: percentages of actual panel dimensions.
-      // Diagonal layout: Very Low bottom-left → Very High top-right.
-      const centers: Record<string, { x: number; y: number }> = {
-        'Very Low':  { x: panelW * 0.20, y: panelH * 0.78 },
-        'Low':       { x: panelW * 0.35, y: panelH * 0.62 },
-        'Moderate':  { x: panelW * 0.50, y: panelH * 0.48 },
-        'High':      { x: panelW * 0.65, y: panelH * 0.34 },
-        'Very High': { x: panelW * 0.80, y: panelH * 0.22 },
-      }
-
-      // Force simulation — always client-side at actual dimensions.
-      // Geometry is correct by construction. No precomputed JSON dependency.
-      //
-      // Parameter rationale:
-      //   strength(0.08) — gentle pull toward cluster centers so nodes spread
-      //     organically rather than compressing into stripes.
-      //   forceManyBody(-28) — stronger repulsion keeps nodes separated and
-      //     forces each cluster into a rounded neighborhood, not a stripe.
-      //   Initial spread ±15% of panel — nodes start dispersed so repulsion
-      //     forces have room to act before the directional pull takes over.
-      //   No hard clamping — the boundary force (forceX/Y toward center at
-      //     very low strength) handles drift naturally without creating
-      //     edge pile-ups that produce visible colored borders.
-      const jRng = makeLCG(42)
-      const forceNodes = nodesRef.current.map(n => {
-        const c = centers[n.bucket]
-        const spreadX = (jRng() - 0.5) * panelW * 0.15
-        const spreadY = (jRng() - 0.5) * panelH * 0.15
-        return { ...n, x: c.x + spreadX, y: c.y + spreadY }
-      })
-      // 120 ticks — enough for clusters to separate visually.
-      // Full convergence (500 ticks) at -28 charge was taking 60+ seconds.
-      // Clusters form clearly by tick 120; diminishing returns beyond that.
-      const simulation = d3.forceSimulation(forceNodes)
-        .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.08))
-        .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.08))
-        .force('charge',  d3.forceManyBody().strength(-20))
-        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.ev ?? 1e9) + 1.2))
-        .stop()
-      simulation.tick(120)
-      // Clamp to viewBox with 3% margin — prevents nodes disappearing off-edge.
-      // The border-stacking problem from earlier was caused by too-strong forces
-      // pushing thousands of nodes to the same clamped position. Current parameters
-      // (strength 0.08, charge -20) produce organic layouts that rarely hit the wall.
-      const mx = panelW * 0.03
-      const my = panelH * 0.03
-      forceNodes.forEach((fn: any, i: number) => {
-        nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
-        nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
-      })
-
-      // Expose computed nodes to React (Sections 3 & 4) after positions are set
-      setDerivedNodes([...nodesRef.current])
-
-      // ── Constellation ──────────────────────────────────────────────────────
-
-      // Use viewBox so coordinate space exactly matches physical pixels.
-      // CSS width:100% handles responsive scaling; viewBox defines the coordinate system.
-      const conSvg = d3.select(conSvgRef.current)
-        .attr('viewBox', `0 0 ${panelW} ${panelH}`)
-        .attr('preserveAspectRatio', 'none')
-
-      // Star field
-      const stars = Array.from({ length: 180 }, (_, i) => ({
-        x: (Math.sin(i * 3.7) * 0.5 + 0.5) * panelW,
-        y: (Math.cos(i * 2.3) * 0.5 + 0.5) * panelH,
-        r: 0.15 + (i % 4) * 0.12, o: 0.02 + (i % 5) * 0.012,
-      }))
-      conSvg.selectAll('.star').data(stars).join('circle')
-        .attr('class', 'star').attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y)
-        .attr('r',  (d: any) => d.r).attr('fill', '#EDE9E0').attr('opacity', (d: any) => d.o)
-
-      // Gravitational markers — explicit centers of structural tendency.
-      // Each marker communicates what the cluster is attracted toward,
-      // not just where its boundary is.
-      const GRAVITY_LABELS: Record<string, string> = {
-        'Very High': 'Detached · Degrading',
-        'High':      'Stretched · Unstable',
-        'Moderate':  'Balanced · Neutral',
-        'Low':       'Stable · Improving',
-        'Very Low':  'Grounded · Stable',
-      }
-      BUCKET_ORDER.forEach(b => {
-        const c = centers[b]
-        const col = bucketColor(b)
-        const g = conSvg.append('g').attr('transform', `translate(${c.x},${c.y})`)
-
-        // Outer field ring — faint, wide
-        g.append('circle').attr('r', 38)
-          .attr('fill', 'none')
-          .attr('stroke', col).attr('stroke-width', 0.5)
-          .attr('opacity', 0.08)
-
-        // Inner field ring — slightly more present
-        g.append('circle').attr('r', 18)
-          .attr('fill', 'none')
-          .attr('stroke', col).attr('stroke-width', 0.8)
-          .attr('opacity', 0.16)
-
-        // Focal point — the gravitational center
-        g.append('circle').attr('r', 4)
-          .attr('fill', col)
-          .attr('opacity', 0.55)
-
-        // Crosshair — communicates attractor, not just position
-        g.append('line').attr('x1', -9).attr('y1', 0).attr('x2', 9).attr('y2', 0)
-          .attr('stroke', col).attr('stroke-width', 0.6).attr('opacity', 0.35)
-        g.append('line').attr('x1', 0).attr('y1', -9).attr('x2', 0).attr('y2', 9)
-          .attr('stroke', col).attr('stroke-width', 0.6).attr('opacity', 0.35)
-
-        // Structural descriptor — names what this center represents
-        g.append('text').attr('y', -52).attr('text-anchor', 'middle')
-          .attr('font-family', E.mono).attr('font-size', 9.5)
-          .attr('letter-spacing', '0.12em').attr('fill', col).attr('opacity', 0.55)
-          .text(GRAVITY_LABELS[b] || b.toUpperCase())
-
-        // Bucket label — smaller, below descriptor
-        g.append('text').attr('y', -41).attr('text-anchor', 'middle')
-          .attr('font-family', E.mono).attr('font-size', 8)
-          .attr('letter-spacing', '0.08em').attr('fill', col).attr('opacity', 0.30)
-          .text(b.toUpperCase())
-      })
-
-      // Constellation nodes
-      const cnGroups = conSvg.selectAll('.cn-wrap').data(nodesRef.current, (d: Node) => d.id)
-        .join('g')
-        .attr('class', (d: Node) => {
-          const b = d.bucket
-          return `cn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
-        })
-        .attr('data-id',     (d: Node) => d.id)
-        .attr('data-oal',    (d: Node) => d.oal)
-        .attr('data-evband', (d: Node) => String(d.evBand))
-        .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
-
-      cnGroups.append('circle').attr('class', 'cn').datum((d: any) => d)
-        .attr('r', (d: Node) => nodeRadius(d.ev ?? 1e9))
-        .attr('fill', (d: Node) => bucketColor(d.bucket))
-
-      cnGroups
-        .on('mouseenter', function(event: MouseEvent, d: Node) {
-          hoveredIdRef.current = d.id
-          refreshNodes()
-          setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
-        })
-        .on('mousemove', function(event: MouseEvent) {
-          setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
-        })
-        .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
 
       // ── Structural Risk Map ────────────────────────────────────────────────
 
@@ -1519,25 +1743,15 @@ export default function PlatformPage() {
         .node-mod { animation: pulse-mod 789ms  ease-in-out infinite; }
         .node-lo  { animation: pulse-lo  1277ms ease-in-out infinite; }
         .node-vl  { animation: pulse-vl  2069ms ease-in-out infinite; }
-        .cn-wrap, .sn-wrap { cursor: crosshair; }
+        .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
         /* Hover — instant CSS, zero JS traversal */
-        .has-hover .cn-wrap,
         .has-hover .sn-wrap { opacity: 0.06 !important; animation: none !important; }
-        .has-hover .cn-wrap.is-hovered,
         .has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
-
-        /* Filter — CSS class toggle on button click (low frequency) */
-        .filter-active .cn-wrap,
         .filter-active .sn-wrap { opacity: 0.05 !important; animation: none !important; }
-        .filter-active .cn-wrap.filter-match,
         .filter-active .sn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
-
-        /* Hover overrides filter — hovered node always fully visible */
-        .filter-active.has-hover .cn-wrap.filter-match,
         .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.18 !important; }
-        .filter-active.has-hover .cn-wrap.is-hovered,
         .filter-active.has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
       `}</style>
 
@@ -1648,39 +1862,32 @@ export default function PlatformPage() {
 
       {/* ── Section 1: Orientation + Panel headers ── */}
 
-      {/* Orientation — annotation + phenomenon, before the visual */}
+      {/* Orientation paragraph */}
       <div style={s({
         padding: '14px 22px 12px',
         borderBottom: `1px solid ${E.bdr}`,
         background: E.bg2,
       })}>
-        {/* Annotation line — the arresting fact, confirmed from real data */}
         <div style={s({ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 9, flexWrap: 'wrap' as const })}>
           <span style={s({ fontFamily: E.mono, fontSize: 12, color: E.VH, fontWeight: 700 })}>
             9.4% of companies. 38.6% of catastrophic losses.
           </span>
           <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
-            The median company in this neighborhood has already been here 5 months before the market prices the risk.
+            The median VH company has been in this condition 5 months before the market prices the risk.
           </span>
         </div>
-        {/* Orientation — names the organizing principle */}
         <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65, maxWidth: 920 })}>
-          Every dot is a U.S. equity, organized by structural condition alone — how far its valuation has stretched from its operational anchor, and whether that anchor is holding or deteriorating.
-          {' '}<span style={s({ color: E.dim })}>Companies cluster by how close their composite scores are. Neighbors share a condition: the same relationship between what they have operationally demonstrated and what the market has decided to pay for it. Not the same sector. Not the same size.</span>
-        </div>
-        <div style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginTop: 7 })}>
-          <span style={s({ color: E.VH })}>◈ Pulsing nodes</span>
-          {' '}carry the highest structural fragility.{' '}
-          <span style={s({ color: E.dim })}>Hover any company to locate it simultaneously in both views.</span>
+          Left: return distributions by structural bucket — the shape of each well is the gravitational field.
+          {' '}<span style={s({ color: E.dim })}>Right: precise structural coordinates. Together: where each company is and what that position costs.</span>
         </div>
       </div>
 
       {/* Panel headers */}
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg3 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Constellation · Structural neighborhoods</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Gravitational Field · Return Distributions</div>
           <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>
-            Companies cluster by composite score proximity — neighbors share a structural condition, not a sector or size
+            Well depth = dwell probability × median loss · Filter reshapes the wells
           </div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
@@ -1693,9 +1900,15 @@ export default function PlatformPage() {
 
       {/* ── Section 1: Dual visualization panels ── */}
       <div style={s({ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, borderBottom: `1px solid ${E.bdr2}` })}>
+        {/* Left: Gravitational potential wells — pure React SVG, no D3 */}
         <div style={s({ borderRight: `1px solid ${E.bdr2}`, background: E.bg, overflow: 'hidden' })}>
-          <svg ref={conSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
+          <Section1WellsPanel
+            selectedBand={selectedBand}
+            selectedOal={selectedOal}
+            trajectories={trajectories}
+          />
         </div>
+        {/* Right: Structural Risk Map — D3 scatter */}
         <div style={s({ background: E.bg, overflow: 'hidden' })}>
           <svg ref={scatSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
         </div>
