@@ -1111,21 +1111,51 @@ export default function PlatformPage() {
   }
 
   // ── refreshNodes — CSS class toggle, zero JS traversal ──────────────────
-  // Adds .has-hover to SVG containers and .is-hovered to the active node.
-  // The browser's CSS engine handles opacity instantly — no D3 selectAll needed.
-  // selectBand/selectOal still call this to re-evaluate filter state via CSS.
+  // Two separate concerns, both handled via CSS classes:
+  //
+  // HOVER: .has-hover on SVG + .is-hovered on the active node.
+  //   → triggered on every mouseenter/mouseleave (high frequency)
+  //   → pure CSS, browser paint engine, zero JS cost
+  //
+  // FILTER: .filter-active on SVG + .filter-match on matching nodes.
+  //   → triggered on filter button clicks (low frequency)
+  //   → querySelectorAll by data-oal / data-evband attribute
+  //   → single DOM pass per filter change, not per frame
 
   function refreshNodes() {
-    const hId = hoveredIdRef.current
+    const hId  = hoveredIdRef.current
+    const oal  = selectedOalRef.current
+    const band = selectedBandRef.current
+    const filterActive = oal !== 'all' || band !== 'all'
+
     const svgs = [conSvgRef.current, scatSvgRef.current]
     svgs.forEach(svg => {
       if (!svg) return
+
+      // ── Hover state ──
       svg.querySelectorAll('.is-hovered').forEach(el => el.classList.remove('is-hovered'))
       if (hId) {
         svg.classList.add('has-hover')
         svg.querySelectorAll(`[data-id="${hId}"]`).forEach(el => el.classList.add('is-hovered'))
       } else {
         svg.classList.remove('has-hover')
+      }
+
+      // ── Filter state ──
+      if (filterActive) {
+        svg.classList.add('filter-active')
+        svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
+        // Build selector for matching nodes
+        const oalOk  = oal  === 'all' ? null : `[data-oal="${oal}"]`
+        const bandOk = band === 'all' ? null : `[data-evband="${band}"]`
+        const sel = [oalOk, bandOk].filter(Boolean).join('')
+        if (sel) {
+          svg.querySelectorAll(`.cn-wrap${sel},.sn-wrap${sel}`)
+            .forEach(el => el.classList.add('filter-match'))
+        }
+      } else {
+        svg.classList.remove('filter-active')
+        svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
       }
     })
   }
@@ -1304,7 +1334,9 @@ export default function PlatformPage() {
           const b = d.bucket
           return `cn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
-        .attr('data-id', (d: Node) => d.id)
+        .attr('data-id',     (d: Node) => d.id)
+        .attr('data-oal',    (d: Node) => d.oal)
+        .attr('data-evband', (d: Node) => String(d.evBand))
         .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
 
       cnGroups.append('circle').attr('class', 'cn').datum((d: any) => d)
@@ -1382,7 +1414,9 @@ export default function PlatformPage() {
           const b = d.bucket
           return `sn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
-        .attr('data-id', (d: Node) => d.id)
+        .attr('data-id',     (d: Node) => d.id)
+        .attr('data-oal',    (d: Node) => d.oal)
+        .attr('data-evband', (d: Node) => String(d.evBand))
         .attr('transform', (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
 
       snGroups.append('circle').attr('class', 'sn').datum((d: any) => d)
@@ -1451,11 +1485,23 @@ export default function PlatformPage() {
         .cn-wrap, .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
-        /* CSS-driven hover — instant, zero JS traversal */
+        /* Hover — instant CSS, zero JS traversal */
         .has-hover .cn-wrap,
         .has-hover .sn-wrap { opacity: 0.06 !important; animation: none !important; }
         .has-hover .cn-wrap.is-hovered,
         .has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
+
+        /* Filter — CSS class toggle on button click (low frequency) */
+        .filter-active .cn-wrap,
+        .filter-active .sn-wrap { opacity: 0.05 !important; animation: none !important; }
+        .filter-active .cn-wrap.filter-match,
+        .filter-active .sn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
+
+        /* Hover overrides filter — hovered node always fully visible */
+        .filter-active.has-hover .cn-wrap.filter-match,
+        .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.18 !important; }
+        .filter-active.has-hover .cn-wrap.is-hovered,
+        .filter-active.has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
       `}</style>
 
       {/* ── Nav ── */}
