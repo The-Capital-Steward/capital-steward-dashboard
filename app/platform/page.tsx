@@ -1131,17 +1131,23 @@ export default function PlatformPage() {
     return 0.38
   }
 
-  // ── refreshNodes — DEBOUNCED with requestAnimationFrame ───────────────────
-  // FIX: was calling d3.selectAll on every pixel of mousemove.
-  // Now batches to one animation frame — hover should feel instant.
+  // ── refreshNodes — CSS class toggle, zero JS traversal ──────────────────
+  // Adds .has-hover to SVG containers and .is-hovered to the active node.
+  // The browser's CSS engine handles opacity instantly — no D3 selectAll needed.
+  // selectBand/selectOal still call this to re-evaluate filter state via CSS.
 
   function refreshNodes() {
-    if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current)
-    rafIdRef.current = requestAnimationFrame(() => {
-      if (typeof window === 'undefined' || !(window as any).d3) return
-      const d3 = (window as any).d3
-      d3.selectAll('.cn,.sn').style('opacity', (d: Node) => effectiveOpacity(d))
-      rafIdRef.current = null
+    const hId = hoveredIdRef.current
+    const svgs = [conSvgRef.current, scatSvgRef.current]
+    svgs.forEach(svg => {
+      if (!svg) return
+      svg.querySelectorAll('.is-hovered').forEach(el => el.classList.remove('is-hovered'))
+      if (hId) {
+        svg.classList.add('has-hover')
+        svg.querySelectorAll(`[data-id="${hId}"]`).forEach(el => el.classList.add('is-hovered'))
+      } else {
+        svg.classList.remove('has-hover')
+      }
     })
   }
 
@@ -1296,6 +1302,7 @@ export default function PlatformPage() {
           const b = d.bucket
           return `cn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
+        .attr('data-id', (d: Node) => d.id)
         .attr('transform', (d: Node) => `translate(${d.x},${d.y})`)
 
       cnGroups.append('circle').attr('class', 'cn').datum((d: any) => d)
@@ -1306,13 +1313,9 @@ export default function PlatformPage() {
         .on('mouseenter', function(event: MouseEvent, d: Node) {
           hoveredIdRef.current = d.id
           refreshNodes()
-          // FIX: free users get cross-highlighting but NO tooltip content
-          // Individual company data (ticker, scores) is a paid feature
-          if (!isPaidRef.current) return
           setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
         })
         .on('mousemove', function(event: MouseEvent) {
-          if (!isPaidRef.current) return
           setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
@@ -1377,6 +1380,7 @@ export default function PlatformPage() {
           const b = d.bucket
           return `sn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
         })
+        .attr('data-id', (d: Node) => d.id)
         .attr('transform', (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
 
       snGroups.append('circle').attr('class', 'sn').datum((d: any) => d)
@@ -1387,11 +1391,9 @@ export default function PlatformPage() {
         .on('mouseenter', function(event: MouseEvent, d: Node) {
           hoveredIdRef.current = d.id
           refreshNodes()
-          if (!isPaidRef.current) return
           setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
         })
         .on('mousemove', function(event: MouseEvent) {
-          if (!isPaidRef.current) return
           setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
@@ -1434,8 +1436,14 @@ export default function PlatformPage() {
         .node-vl  { opacity: 0.90; }
         .node-lo  { opacity: 0.78; }
         .node-mod { opacity: 0.38; }
-        .cn-wrap, .sn-wrap { cursor: ${isPaid ? 'crosshair' : 'default'}; }
+        .cn-wrap, .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
+
+        /* CSS-driven hover — instant, zero JS traversal */
+        .has-hover .cn-wrap,
+        .has-hover .sn-wrap { opacity: 0.06 !important; animation: none !important; }
+        .has-hover .cn-wrap.is-hovered,
+        .has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
       `}</style>
 
       {/* ── Nav ── */}
