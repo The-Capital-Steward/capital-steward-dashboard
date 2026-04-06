@@ -1607,14 +1607,30 @@ export default function PlatformPage() {
         </section>
       )}
 
-      {/* ── Tooltip — paid users only, fixed to viewport ── */}
-      {tooltip && isPaid && (
-        <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${E.gold}`, padding: '11px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
-          <div style={s({ color: E.gold, fontSize: 12, marginBottom: 4 })}>{tooltip.node.symbol}</div>
-          <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
-          <div style={s({ color: E.body })}>Composite: {safeFixed(tooltip.node.composite, 1)} · {tooltip.node.bucket}</div>
-          <div style={s({ color: E.body })}>OAL: {tooltip.node.oal}</div>
-          <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
+      {/* ── Tooltip — free tier gets structural data, paid adds company identity ── */}
+      {tooltip && (
+        <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${isPaid ? E.gold : E.bdr3}`, padding: '11px 13px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
+          {isPaid ? (
+            <>
+              <div style={s({ color: E.gold, fontSize: 12, marginBottom: 4 })}>{tooltip.node.symbol}</div>
+              <div style={s({ color: E.body })}>Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}</div>
+              <div style={s({ color: E.body })}>Composite: {safeFixed(tooltip.node.composite, 1)} · {tooltip.node.bucket}</div>
+              <div style={s({ color: E.body })}>OAL anchor: {tooltip.node.oal}</div>
+              <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
+            </>
+          ) : (
+            <>
+              <div style={s({ color: E.body, marginBottom: 3 })}>
+                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket} risk</span>
+                {' · '}Band {tooltip.node.evBand}
+              </div>
+              <div style={s({ color: E.body })}>OAL anchor: {tooltip.node.oal}</div>
+              <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
+              <div style={s({ color: E.dim, fontSize: 9, marginTop: 5, borderTop: `1px solid ${E.bdr}`, paddingTop: 5 })}>
+                Company identity at paid tier
+              </div>
+            </>
+          )}
         </div>
       )}
 
