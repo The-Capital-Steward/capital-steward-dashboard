@@ -64,7 +64,6 @@ interface Node {
   y: number
 }
 
-interface PositionRecord { id: string; nx: number; ny: number }
 
 interface RegimeData {
   id: string
@@ -1079,6 +1078,7 @@ export default function PlatformPage() {
   const [tooltip,       setTooltip]       = useState<{ x: number; y: number; node: Node } | null>(null)
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
   const [derivedNodes,  setDerivedNodes]  = useState<Node[]>([])
+  const [vizReady,      setVizReady]      = useState(false)
 
   const selectedBandRef   = useRef<Band>('all')
   const selectedOalRef    = useRef<OALKey>('all')
@@ -1091,7 +1091,6 @@ export default function PlatformPage() {
   const containerRef      = useRef<HTMLDivElement | null>(null)
   const evBandRef         = useRef<HTMLDivElement | null>(null)
   const oalRungRef        = useRef<HTMLDivElement | null>(null)
-  const positionsFetchRef = useRef<Promise<PositionRecord[] | null> | null>(null)
   const regimeFetchRef    = useRef<Promise<RegimeSummary | null> | null>(null)
 
   // ── Opacity logic ────────────────────────────────────────────────────────────
@@ -1171,11 +1170,7 @@ export default function PlatformPage() {
     // If fetches hit wrong app, set NEXT_PUBLIC_DATA_BASE=http://localhost:3000
     // (or the correct origin) in your .env.local.
 
-    if (!positionsFetchRef.current) {
-      positionsFetchRef.current = fetch(`${DATA_BASE}/data/constellation_positions.json`)
-        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<PositionRecord[]> })
-        .catch(() => null)
-    }
+    // Regime data fetch — still needed
     if (!regimeFetchRef.current) {
       regimeFetchRef.current = fetch(`${DATA_BASE}/data/regime_summary.json`)
         .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<RegimeSummary> })
@@ -1183,27 +1178,28 @@ export default function PlatformPage() {
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
     }
 
-    async function initViz() {
+    // initViz is synchronous — always runs the force simulation at actual
+    // panel dimensions, so geometry is correct regardless of viewport.
+    // Wrapped in setTimeout(fn, 50) so the loading state paints before
+    // the simulation blocks the main thread.
+    function initViz() {
       if (d3ReadyRef.current) return
       d3ReadyRef.current = true
 
       const d3 = (window as any).d3
       const nodes = generateNodes(5200)
       nodesRef.current = nodes
-      setDerivedNodes([...nodes]) // expose to React for Sections 3 & 4
 
-      const container = containerRef.current
       const conEl  = conSvgRef.current
       const scatEl = scatSvgRef.current
-      if (!container || !conEl || !scatEl) return
+      if (!conEl || !scatEl) return
 
-      // Read actual rendered width from the SVG element.
-      // More reliable than container.clientWidth / 2 because the element
-      // has CSS width:100% and is already in the DOM at this point.
+      // Read actual rendered width — getBoundingClientRect at this point
+      // returns the real layout width since the loading overlay is visible.
       const panelW = Math.max(300, conEl.getBoundingClientRect().width)
       const panelH = 440
 
-      // Cluster centers pulled inward so no cluster hugs the panel edge.
+      // Cluster centers: percentages of actual panel dimensions.
       // Diagonal layout: Very Low bottom-left → Very High top-right.
       const centers: Record<string, { x: number; y: number }> = {
         'Very Low':  { x: panelW * 0.20, y: panelH * 0.78 },
@@ -1213,38 +1209,29 @@ export default function PlatformPage() {
         'Very High': { x: panelW * 0.80, y: panelH * 0.22 },
       }
 
-      const positions = await positionsFetchRef.current
+      // Force simulation — always client-side at actual dimensions.
+      // Geometry is correct by construction. No precomputed JSON dependency.
+      const jRng = makeLCG(42)
+      const forceNodes = nodesRef.current.map(n => {
+        const c = centers[n.bucket]
+        return { ...n, x: c.x + (jRng() - 0.5) * 20, y: c.y + (jRng() - 0.5) * 20 }
+      })
+      const simulation = d3.forceSimulation(forceNodes)
+        .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.28))
+        .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.28))
+        .force('charge',  d3.forceManyBody().strength(-14))
+        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.4))
+        .stop()
+      simulation.tick(500)
+      const mx = panelW * 0.08
+      const my = panelH * 0.08
+      forceNodes.forEach((fn: any, i: number) => {
+        nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
+        nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
+      })
 
-      if (positions && positions.length === nodesRef.current.length) {
-        const posMap = new Map(positions.map(p => [p.id, p]))
-        nodesRef.current.forEach(n => {
-          const p = posMap.get(n.id)
-          if (p) { n.x = Math.max(4, Math.min(panelW - 4, p.nx * panelW)); n.y = Math.max(4, Math.min(panelH - 4, p.ny * panelH)) }
-        })
-      } else {
-        // Client-side simulation fallback
-        const jRng = makeLCG(42)
-        const forceNodes = nodesRef.current.map(n => {
-          const c = centers[n.bucket]
-          return { ...n, x: c.x + (jRng() - 0.5) * 20, y: c.y + (jRng() - 0.5) * 20 }
-        })
-        const simulation = d3.forceSimulation(forceNodes)
-          // Reduced strength: 0.28 instead of 0.42 — nodes spread more organically
-          // Increased charge: -14 instead of -6 — stronger repulsion between nodes
-          .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.28))
-          .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.28))
-          .force('charge',  d3.forceManyBody().strength(-14))
-          .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.4))
-          .stop()
-        simulation.tick(500)
-        // 8% margin on each side — prevents nodes piling at borders
-        const mx = panelW * 0.08
-        const my = panelH * 0.08
-        forceNodes.forEach((fn: any, i: number) => {
-          nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
-          nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
-        })
-      }
+      // Expose computed nodes to React (Sections 3 & 4) after positions are set
+      setDerivedNodes([...nodesRef.current])
 
       // ── Constellation ──────────────────────────────────────────────────────
 
@@ -1376,12 +1363,19 @@ export default function PlatformPage() {
           setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
         })
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
+
+      // Signal React that the constellation is ready — removes loading overlay
+      setVizReady(true)
     }
 
-    if ((window as any).d3) { initViz(); return }
+    // Defer initViz by 50ms so the loading state paints before the simulation
+    // blocks the main thread. Both paths (D3 already loaded / CDN load) defer.
+    function runInit() { setTimeout(initViz, 50) }
+
+    if ((window as any).d3) { runInit(); return }
     const script = document.createElement('script')
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'
-    script.onload = initViz
+    script.onload = runInit
     document.head.appendChild(script)
   }, [isLoaded, isSignedIn])
 
@@ -1408,13 +1402,16 @@ export default function PlatformPage() {
     <div style={s({ minHeight: '100vh', background: E.bg, color: E.text, fontFamily: E.sans })} ref={containerRef}>
 
       <style>{`
-        @keyframes pulse-vh { 0%,100% { opacity: .88 } 50% { opacity: .28 } }
-        @keyframes pulse-h  { 0%,100% { opacity: .84 } 50% { opacity: .48 } }
-        .node-vh  { animation: pulse-vh 1.5s ease-in-out infinite; }
-        .node-h   { animation: pulse-h  2.7s ease-in-out infinite; }
-        .node-vl  { opacity: 0.90; }
-        .node-lo  { opacity: 0.78; }
-        .node-mod { opacity: 0.38; }
+        @keyframes pulse-vh  { 0%,100% { opacity: .88 } 50% { opacity: .22 } }
+        @keyframes pulse-h   { 0%,100% { opacity: .84 } 50% { opacity: .42 } }
+        @keyframes pulse-mod { 0%,100% { opacity: .72 } 50% { opacity: .50 } }
+        @keyframes pulse-lo  { 0%,100% { opacity: .80 } 50% { opacity: .68 } }
+        @keyframes pulse-vl  { 0%,100% { opacity: .90 } 50% { opacity: .82 } }
+        .node-vh  { animation: pulse-vh  302ms  ease-in-out infinite; }
+        .node-h   { animation: pulse-h   488ms  ease-in-out infinite; }
+        .node-mod { animation: pulse-mod 789ms  ease-in-out infinite; }
+        .node-lo  { animation: pulse-lo  1277ms ease-in-out infinite; }
+        .node-vl  { animation: pulse-vl  2069ms ease-in-out infinite; }
         .cn-wrap, .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
@@ -1576,13 +1573,54 @@ export default function PlatformPage() {
       </div>
 
       {/* ── Section 1: Dual visualization panels ── */}
-      <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, borderBottom: `1px solid ${E.bdr2}` })}>
+      <div style={s({ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, borderBottom: `1px solid ${E.bdr2}` })}>
         <div style={s({ borderRight: `1px solid ${E.bdr2}`, background: E.bg, overflow: 'hidden' })}>
           <svg ref={conSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
         </div>
         <div style={s({ background: E.bg, overflow: 'hidden' })}>
           <svg ref={scatSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
         </div>
+
+        {/* Loading overlay — visible until force simulation completes */}
+        {!vizReady && (
+          <div style={s({
+            position: 'absolute', inset: 0,
+            background: E.bg,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            zIndex: 5,
+          })}>
+            {/* Five pulsing dots — one per risk bucket, left to right */}
+            <div style={s({ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 18 })}>
+              {BUCKET_ORDER.map((b, i) => {
+                const anim = b === 'Very High' ? 'pulse-vh'
+                  : b === 'High'     ? 'pulse-h'
+                  : b === 'Moderate' ? 'pulse-mod'
+                  : b === 'Low'      ? 'pulse-lo'
+                  : 'pulse-vl'
+                const dur = b === 'Very High' ? '302ms'
+                  : b === 'High'     ? '488ms'
+                  : b === 'Moderate' ? '789ms'
+                  : b === 'Low'      ? '1277ms'
+                  : '2069ms'
+                return (
+                  <div key={b} style={s({
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: bucketColor(b),
+                    animation: `${anim} ${dur} ease-in-out infinite`,
+                    animationDelay: `${i * 40}ms`,
+                  })} />
+                )
+              })}
+            </div>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.14em' })}>
+              Mapping structural field · ~5,200 equities
+            </div>
+            <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, marginTop: 5, letterSpacing: '0.1em' })}>
+              Computing structural neighborhoods
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Legend strip ── */}
