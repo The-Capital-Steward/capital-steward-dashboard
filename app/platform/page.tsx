@@ -1226,31 +1226,28 @@ export default function PlatformPage() {
     // force simulation runs. The loading overlay is already visible at
     // this point (painted during the 50ms setTimeout delay).
     async function initViz() {
-      // Guard prevents re-running the simulation on re-renders.
-      // But always call setVizReady(true) — if D3 already rendered,
-      // the overlay just needs to clear. vizReady resets on re-render
-      // while d3ReadyRef persists, so without this the overlay is permanent.
       if (d3ReadyRef.current) { setVizReady(true); return }
       d3ReadyRef.current = true
 
-      const d3 = (window as any).d3
+      try {
+        const d3 = (window as any).d3
 
-      // Real data if available, synthetic fallback otherwise
-      const snapshot = await snapshotFetchRef.current
-      const nodes: Node[] = snapshot && snapshot.length > 0
-        ? snapshot.map(n => ({ ...n, x: 0, y: 0 }))
-        : generateNodes(5200)
+        // Real data if available, synthetic fallback otherwise
+        const snapshot = await snapshotFetchRef.current
+        const nodes: Node[] = snapshot && snapshot.length > 0
+          ? snapshot.map(n => ({ ...n, x: 0, y: 0 }))
+          : generateNodes(5200)
 
-      nodesRef.current = nodes
+        nodesRef.current = nodes
 
-      const conEl  = conSvgRef.current
-      const scatEl = scatSvgRef.current
-      if (!conEl || !scatEl) return
+        const conEl  = conSvgRef.current
+        const scatEl = scatSvgRef.current
+        if (!conEl || !scatEl) return   // finally still fires
 
-      // Read actual rendered width — getBoundingClientRect at this point
-      // returns the real layout width since the loading overlay is visible.
-      const panelW = Math.max(300, conEl.getBoundingClientRect().width)
-      const panelH = 440
+        // Read actual rendered width — getBoundingClientRect at this point
+        // returns the real layout width since the loading overlay is visible.
+        const panelW = Math.max(300, conEl.getBoundingClientRect().width)
+        const panelH = 440
 
       // Cluster centers: percentages of actual panel dimensions.
       // Diagonal layout: Very Low bottom-left → Very High top-right.
@@ -1439,7 +1436,9 @@ export default function PlatformPage() {
         .on('mouseleave', function() { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
 
       // Signal React that the constellation is ready — removes loading overlay
-      setVizReady(true)
+      } finally {
+        setVizReady(true)
+      }
     }
 
     // Defer initViz by 50ms so the loading state paints before the simulation
