@@ -765,73 +765,337 @@ function Section1WellsPanel({
   )
 }
 
-function Section2Regimes({ summary }: { summary: RegimeSummary }) {
+// ─── Section 2 confirmed data ─────────────────────────────────────────────────
+//
+// Source: 20_regime_signal.json · Decisions Log 2026-04-05 LOCKED
+// regime_summary.json schema mismatch — served file lacks signal fields.
+// Constants below are authoritative until JSON is rebuilt.
+//
+// universe_loss_rate: derived from vh_loss_rate / rel_risk (mathematically consistent)
+// vl_loss_rate: full-period 10.5% proxy (Script 25)
+// vl_median_fwd / vh_median_fwd: null — displayed as — pending confirmation
+
+const REGIME_CONFIRMED = [
+  {
+    id: 'expansionary', label: 'Expansionary',
+    classifier: 'Lagged trailing 12m broad EW return > +8%',
+    icir: -0.760,
+    vh_loss_rate: 0.448, universe_loss_rate: 0.176, vl_loss_rate: 0.105,
+    rel_risk: 2.54,
+    vl_median_fwd: null as number | null,
+    vh_median_fwd: null as number | null,
+  },
+  {
+    id: 'neutral', label: 'Neutral',
+    classifier: 'Lagged trailing 12m broad EW return −8% to +8%',
+    icir: -0.762,
+    vh_loss_rate: 0.340, universe_loss_rate: 0.170, vl_loss_rate: 0.105,
+    rel_risk: 2.00,
+    vl_median_fwd: null as number | null,
+    vh_median_fwd: null as number | null,
+  },
+  {
+    id: 'stress', label: 'Stress',
+    classifier: 'Lagged trailing 12m broad EW return < −8%',
+    icir: -0.759,
+    vh_loss_rate: 0.370, universe_loss_rate: 0.150, vl_loss_rate: 0.105,
+    rel_risk: 2.47,
+    vl_median_fwd: null as number | null,
+    vh_median_fwd: null as number | null,
+  },
+]
+
+const CURRENT_REGIME_ID = 'expansionary' // confirmed 2026-01 · Decisions Log 2026-04-05
+
+// ─── Section 2: Market Regimes ────────────────────────────────────────────────
+//
+// summary prop retained for future use when regime_summary.json schema is fixed.
+// All render data comes from REGIME_CONFIRMED constants above.
+// Remove the conditional gate in PlatformPage — section renders unconditionally.
+
+function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
   const MAX_LOSS = 0.50
-  // Using global safePct / safeFwd for null-safe formatting
+
+  // Column proportions: current 47%, others 26.5% — adapts when regime changes
+  const gridCols = REGIME_CONFIRMED.map(r =>
+    r.id === CURRENT_REGIME_ID ? '47fr' : '26.5fr'
+  ).join(' ')
 
   return (
     <section>
-      <SectionHeader lucas={3} label="Market Regimes" sub="Structural risk signal by market regime · 2009–2026" />
-      <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: `1px solid ${E.bdr2}` })}>
-        {summary.regimes.map((regime, i) => {
-          const isCurrent = regime.id === summary.current_regime
+      <SectionHeader
+        lucas={3}
+        label="Market Regimes"
+        sub="Structural risk signal by market regime · 2009–2026"
+      />
+
+      {/* ── Insight line ── */}
+      <div style={s({
+        padding: '14px 22px 11px',
+        borderBottom: `1px solid ${E.bdr}`,
+        fontFamily: E.mono,
+        fontSize: 11,
+        color: E.body,
+        lineHeight: 1.65,
+      })}>
+        ICIR −0.76 across Expansion, Neutral, and Stress.{' '}
+        <span style={s({ color: E.sec })}>
+          The structural signal doesn&apos;t negotiate with market conditions.
+        </span>
+      </div>
+
+      {/* ── Layer 1: ICIR invariance ── */}
+      {/*
+        Three rows, all with matching 3-column grids:
+          Row A: NOW marker (Expansion only) or blank space
+          Row B: ICIR values at 29px — all cells same height, guaranteed alignment
+          Row C (rule): full-width 1px line connecting all three values visually
+          Row D: regime labels at 11px
+          Row E: scale reference centered
+      */}
+
+      {/* Row A — NOW strip */}
+      <div style={s({
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        background: E.bg2,
+      })}>
+        {REGIME_CONFIRMED.map((r, i) => {
+          const isCurrent = r.id === CURRENT_REGIME_ID
           return (
-            <div key={regime.id} style={s({ borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none', background: isCurrent ? '#0C0A08' : E.bg, padding: '18px' })}>
-              <div style={s({ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 11 })}>
-                <div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: isCurrent ? E.text : E.body, fontWeight: isCurrent ? 700 : 400, marginBottom: 3 })}>{regime.label}</div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{regime.classifier}</div>
+            <div key={r.id} style={s({
+              padding: '14px 18px 7px',
+              borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none',
+              display: 'flex',
+              justifyContent: 'center',
+              minHeight: 40, // fixes height for non-current cells so Row B stays aligned
+            })}>
+              {isCurrent && (
+                // Headline, not badge — gold text, no background fill
+                <span style={s({
+                  fontFamily: E.mono,
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: E.gold,
+                  letterSpacing: '0.12em',
+                })}>
+                  NOW · APR 2026
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Row B — ICIR values at 29px, horizontally aligned */}
+      <div style={s({
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        background: E.bg2,
+      })}>
+        {REGIME_CONFIRMED.map((r, i) => {
+          const isCurrent = r.id === CURRENT_REGIME_ID
+          return (
+            <div key={r.id} style={s({
+              padding: '0 18px 11px',
+              borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none',
+              display: 'flex',
+              justifyContent: 'center',
+            })}>
+              <span style={s({
+                fontFamily: E.mono,
+                fontSize: 29,
+                fontWeight: 700,
+                color: isCurrent ? E.text : E.body,
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+              })}>
+                {r.icir.toFixed(3)}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Faint rule — spans full width, connects the three values */}
+      <div style={s({ height: 1, background: E.bdr3 })} />
+
+      {/* Row D — regime labels at 11px */}
+      <div style={s({
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        background: E.bg2,
+      })}>
+        {REGIME_CONFIRMED.map((r, i) => {
+          const isCurrent = r.id === CURRENT_REGIME_ID
+          return (
+            <div key={r.id} style={s({
+              padding: '7px 18px 11px',
+              borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none',
+              display: 'flex',
+              justifyContent: 'center',
+            })}>
+              <span style={s({
+                fontFamily: E.mono,
+                fontSize: 11,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase' as const,
+                color: isCurrent ? E.gold : E.sec,
+              })}>
+                {r.label}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Row E — scale reference */}
+      <div style={s({
+        padding: '5px 22px 7px',
+        borderBottom: `1px solid ${E.bdr2}`,
+        background: E.bg2,
+        display: 'flex',
+        justifyContent: 'center',
+      })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+          0 = random · −1 = perfect
+        </span>
+      </div>
+
+      {/* ── Layer 2 + 3: Regime panels at 47% / 26.5% / 26.5% ── */}
+      <div style={s({
+        display: 'grid',
+        gridTemplateColumns: gridCols,
+        borderBottom: `1px solid ${E.bdr2}`,
+      })}>
+        {REGIME_CONFIRMED.map((r, i) => {
+          const isCurrent = r.id === CURRENT_REGIME_ID
+          return (
+            <div key={r.id} style={s({
+              borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none',
+              // Layer 3: Expansion column elevated background vs E.bg for others
+              background: isCurrent ? E.bg2 : E.bg,
+              padding: '18px',
+            })}>
+
+              {/* Regime identity */}
+              <div style={s({ marginBottom: 11 })}>
+                <div style={s({
+                  fontFamily: E.mono,
+                  fontSize: 11,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase' as const,
+                  color: isCurrent ? E.text : E.body,
+                  fontWeight: isCurrent ? 700 : 400,
+                  marginBottom: 3,
+                })}>
+                  {r.label}
                 </div>
-                <div style={s({ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 })}>
-                  {isCurrent && <span style={s({ fontFamily: E.mono, fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: E.bg, background: E.gold, padding: '2px 7px' })}>NOW</span>}
-                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{regime.n_months} mo</span>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+                  {r.classifier}
                 </div>
               </div>
 
-              {/* ICIR */}
+              {/* Layer 2: VH loss rate — 29px current / 18px others */}
               <div style={s({ marginBottom: 11 })}>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.12em', marginBottom: 4 })}>ICIR</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 400, color: isCurrent ? E.text : E.body, lineHeight: 1 })}>{safeFixed(regime.icir, 2)}</div>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 4 })}>Signal consistency · r̄ / σ(r)</div>
-              </div>
+                <div style={s({
+                  fontFamily: E.mono,
+                  fontSize: 11,
+                  color: E.sec,
+                  letterSpacing: '0.10em',
+                  marginBottom: 7,
+                })}>
+                  SEVERE LOSS FREQUENCY
+                </div>
 
-              <div style={s({ height: 1, background: E.bdr2, margin: '11px 0' })} />
+                {/* VH rate — primary number */}
+                <div style={s({ display: 'flex', alignItems: 'baseline', gap: 7, marginBottom: 3 })}>
+                  <span style={s({
+                    fontFamily: E.mono,
+                    fontSize: isCurrent ? 29 : 18,
+                    fontWeight: 700,
+                    color: E.VH,
+                    lineHeight: 1,
+                  })}>
+                    {(r.vh_loss_rate * 100).toFixed(1)}%
+                  </span>
+                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+                    Very High
+                  </span>
+                </div>
 
-              {/* Loss rate bars */}
-              <div style={s({ marginBottom: 11 })}>
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 7 })}>SEVERE LOSS FREQUENCY</div>
+                {/* Universe rate at 18px in E.sec */}
+                <div style={s({
+                  fontFamily: E.mono,
+                  fontSize: 18,
+                  fontWeight: 400,
+                  color: E.sec,
+                  marginBottom: 3,
+                })}>
+                  {(r.universe_loss_rate * 100).toFixed(1)}%
+                </div>
+
+                {/* Multiple at 11px in E.body */}
+                <div style={s({
+                  fontFamily: E.mono,
+                  fontSize: 11,
+                  color: E.body,
+                  marginBottom: 7,
+                })}>
+                  {r.rel_risk.toFixed(2)}× universe rate
+                </div>
+
+                {/* Loss rate bars */}
                 {[
-                  { key: 'VH', rate: regime.vh_loss_rate, color: E.VH },
-                  { key: 'All', rate: regime.universe_loss_rate, color: E.sec },
-                  { key: 'VL', rate: regime.vl_loss_rate, color: E.VL },
+                  { key: 'VH',  rate: r.vh_loss_rate,       color: E.VH  },
+                  { key: 'All', rate: r.universe_loss_rate,  color: E.sec },
+                  { key: 'VL',  rate: r.vl_loss_rate,        color: E.VL  },
                 ].map(({ key, rate, color }) => (
                   <div key={key} style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 18, flexShrink: 0 })}>{key}</span>
+                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 18, flexShrink: 0 })}>
+                      {key}
+                    </span>
                     <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
-                      <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${((rate ?? 0) / MAX_LOSS) * 100}%`, background: color, opacity: key === 'All' ? 0.45 : 0.75 })} />
+                      <div style={s({
+                        position: 'absolute', left: 0, top: 0, height: '100%',
+                        width: `${(rate / MAX_LOSS) * 100}%`,
+                        background: color,
+                        opacity: key === 'All' ? 0.45 : 0.75,
+                      })} />
                     </div>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>{safePct(rate)}</span>
+                    <span style={s({
+                      fontFamily: E.mono, fontSize: 11, color,
+                      width: 29, textAlign: 'right' as const, flexShrink: 0,
+                    })}>
+                      {safePct(rate)}
+                    </span>
                   </div>
                 ))}
-                <div style={s({ fontFamily: E.mono, fontSize: 11, color: isCurrent ? E.body : E.sec, marginTop: 4 })}>{safeFixed(regime.rel_risk, 1)}× higher for Very High</div>
               </div>
 
               <div style={s({ height: 1, background: E.bdr2, margin: '11px 0' })} />
 
-              {/* Median returns + Spearman r */}
-              <div style={s({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' })}>
-                <div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.10em', marginBottom: 4 })}>MEDIAN 12M FWD</div>
-                  <div style={s({ display: 'flex', gap: 11 })}>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>VL {safeFwd(regime.vl_median_fwd)}</span>
-                    <span style={s({ fontFamily: E.mono, fontSize: 11, color: (regime.vh_median_fwd ?? 0) < 0 ? E.VH : E.sec })}>VH {safeFwd(regime.vh_median_fwd)}</span>
-                  </div>
+              {/* Layer 4: Median forward returns — pending regime-stratified confirmation */}
+              <div>
+                <div style={s({
+                  fontFamily: E.mono, fontSize: 11, color: E.sec,
+                  letterSpacing: '0.10em', marginBottom: 4,
+                })}>
+                  MEDIAN 12M FWD
                 </div>
-                <div style={s({ textAlign: 'right' as const })}>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 3 })}>r</div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 18, color: isCurrent ? E.body : E.sec })}>{safeFixed(regime.spearman_r, 3)}</div>
+                <div style={s({ display: 'flex', gap: 11, marginBottom: 4 })}>
+                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>
+                    VL {r.vl_median_fwd !== null ? safeFwd(r.vl_median_fwd) : '—'}
+                  </span>
+                  <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH })}>
+                    VH {r.vh_median_fwd !== null ? safeFwd(r.vh_median_fwd) : '—'}
+                  </span>
+                </div>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
+                  Regime-stratified · pending confirmation
                 </div>
               </div>
+
             </div>
           )
         })}
@@ -2063,7 +2327,7 @@ export default function PlatformPage() {
       </div>
 
       {/* ── Section 2: Three Market Regime Summaries ── */}
-      {regimeSummary && <Section2Regimes summary={regimeSummary} />}
+      {<Section2Regimes summary={regimeSummary} />}
 
       {/* ── Section 3: Anchor Levels ── */}
       {derivedNodes.length > 0 && (
