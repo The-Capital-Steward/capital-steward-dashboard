@@ -2051,50 +2051,110 @@ export default function PlatformPage() {
         </section>
       )}
 
-      {/* ── Tooltip — free tier gets structural data, paid adds company identity ── */}
-      {tooltip && (
-        <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: '#0E0C0A', border: `1px solid ${E.bdr3}`, borderTop: `2px solid ${isPaid ? E.gold : E.bdr3}`, padding: '11px 13px', fontFamily: E.mono, fontSize: 11, color: E.text, lineHeight: 1.85, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none' })}>
-          {isPaid ? (
-            <>
-              <div style={s({ color: E.gold, fontSize: 13, fontWeight: 700, marginBottom: 5, letterSpacing: '0.04em' })}>{tooltip.node.symbol}</div>
-              {/* Percentile rank — immediately interpretable */}
-              <div style={s({ marginBottom: 5 })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 700, color: bucketColor(tooltip.node.bucket), letterSpacing: '-0.02em', lineHeight: 1 })}>
-                  {tooltip.node.pctRank}
-                </span>
-                <span style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginLeft: 4 })}>th percentile · ~5,200 equities</span>
+      {/* ── Tooltip ── */}
+      {tooltip && (() => {
+        const n = tooltip.node
+        const oalFull: Record<string, string> = {
+          FCF: 'Free Cash Flow', NI: 'Net Income',
+          EBIT: 'Operating Income', Revenue: 'Revenue',
+        }
+        const bucketCol = bucketColor(n.bucket)
+
+        return (
+          <div style={s({
+            position: 'fixed', left: tooltip.x, top: tooltip.y,
+            background: '#0E0C0A',
+            border: `1px solid ${E.bdr3}`,
+            borderTop: `2px solid ${isPaid ? E.gold : bucketCol}`,
+            padding: '11px 14px',
+            fontFamily: E.mono, fontSize: 11, color: E.text,
+            lineHeight: 1.8, whiteSpace: 'nowrap' as const,
+            zIndex: 50, pointerEvents: 'none',
+            minWidth: 210,
+          })}>
+
+            {/* Company identity — blurred on free tier */}
+            <div style={s({ marginBottom: 7, position: 'relative' as const })}>
+              {isPaid ? (
+                <>
+                  <div style={s({ fontSize: 13, fontWeight: 700, color: E.gold, letterSpacing: '0.02em', lineHeight: 1.2 })}>
+                    COMPANY
+                  </div>
+                  <div style={s({ fontSize: 10, color: E.sec, marginTop: 2 })}>
+                    {n.symbol}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={s({
+                    fontSize: 13, fontWeight: 700, color: E.gold,
+                    filter: 'blur(5px)', userSelect: 'none' as const,
+                    lineHeight: 1.2,
+                  })}>
+                    COMPANY NAME
+                  </div>
+                  <div style={s({
+                    fontSize: 10, color: E.sec, marginTop: 2,
+                    filter: 'blur(4px)', userSelect: 'none' as const,
+                  })}>
+                    TICKER
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div style={s({ height: 1, background: E.bdr, marginBottom: 8 })} />
+
+            {/* OSMR Composite Score — primary metric */}
+            <div style={s({ marginBottom: 6 })}>
+              <span style={s({
+                fontSize: 26, fontWeight: 700, color: bucketCol,
+                letterSpacing: '-0.03em', lineHeight: 1,
+              })}>
+                {n.pctRank}
+              </span>
+              <span style={s({ fontSize: 10, color: E.sec, marginLeft: 5 })}>
+                OSMR Composite Score
+              </span>
+            </div>
+
+            {/* Bucket */}
+            <div style={s({ marginBottom: 4 })}>
+              <span style={s({ color: bucketCol, fontWeight: 700 })}>{n.bucket}</span>
+              <span style={s({ color: E.dim })}> · EV Band {n.evBand}</span>
+            </div>
+
+            {/* Anchor */}
+            <div style={s({ color: E.body, marginBottom: 7 })}>
+              {oalFull[n.oal] ?? n.oal} anchor
+            </div>
+
+            {/* Axis values — numbers only, no units needed */}
+            <div style={s({ display: 'flex', gap: 14 })}>
+              <div>
+                <div style={s({ fontSize: 9, color: E.dim, letterSpacing: '0.1em', marginBottom: 1 })}>DETACHMENT</div>
+                <div style={s({ fontSize: 14, color: E.body })}>{safeFixed(n.axis1, 0)}</div>
               </div>
-              <div style={s({ color: E.body, marginBottom: 2 })}>
-                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket}</span>
-                {' · '}EV Band {tooltip.node.evBand} · {fmtEV(tooltip.node.ev)}
+              <div>
+                <div style={s({ fontSize: 9, color: E.dim, letterSpacing: '0.1em', marginBottom: 1 })}>DEGRADATION</div>
+                <div style={s({ fontSize: 14, color: E.body })}>{safeFixed(n.axis2, 0)}</div>
               </div>
-              <div style={s({ color: E.body, marginBottom: 2 })}>OAL anchor: {tooltip.node.oal}</div>
-              <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
-            </>
-          ) : (
-            <>
-              {/* Percentile rank — the single most interpretable structural number */}
-              <div style={s({ marginBottom: 6 })}>
-                <span style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 700, color: bucketColor(tooltip.node.bucket), letterSpacing: '-0.02em', lineHeight: 1 })}>
-                  {tooltip.node.pctRank}
-                </span>
-                <span style={s({ fontFamily: E.mono, fontSize: 10, color: E.sec, marginLeft: 4 })}>th percentile structural risk</span>
+            </div>
+
+            {/* Free tier note — framed as a feature, not a restriction */}
+            {!isPaid && (
+              <div style={s({
+                marginTop: 8, paddingTop: 6,
+                borderTop: `1px solid ${E.bdr}`,
+                fontSize: 9, color: E.dim,
+              })}>
+                Full profile · paid tier
               </div>
-              <div style={s({ color: E.dim, fontSize: 9, marginBottom: 7 })}>
-                ranked against ~5,200 U.S. equities
-              </div>
-              <div style={s({ color: E.body, marginBottom: 2 })}>
-                <span style={s({ color: bucketColor(tooltip.node.bucket) })}>{tooltip.node.bucket}</span>
-                {' · '}EV Band {tooltip.node.evBand} · OAL: {tooltip.node.oal}
-              </div>
-              <div style={s({ color: E.sec })}>Detachment: {safeFixed(tooltip.node.axis1, 1)} · Degradation: {safeFixed(tooltip.node.axis2, 1)}</div>
-              <div style={s({ color: E.dim, fontSize: 9, marginTop: 6, borderTop: `1px solid ${E.bdr}`, paddingTop: 5 })}>
-                Company identity at paid tier
-              </div>
-            </>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )
+      })()}
 
       {/* ── Footer ── */}
       <div style={s({ padding: '22px 18px', textAlign: 'center' as const })}>
