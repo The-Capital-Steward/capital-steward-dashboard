@@ -1092,7 +1092,6 @@ export default function PlatformPage() {
   const evBandRef         = useRef<HTMLDivElement | null>(null)
   const oalRungRef        = useRef<HTMLDivElement | null>(null)
   const regimeFetchRef    = useRef<Promise<RegimeSummary | null> | null>(null)
-  const snapshotFetchRef  = useRef<Promise<Node[] | null> | null>(null)
 
   // ── Opacity logic ────────────────────────────────────────────────────────────
 
@@ -1209,40 +1208,31 @@ export default function PlatformPage() {
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
     }
 
-    // Real OSMR snapshot — 3,771 companies with live structural scores.
-    // Generated from oal_scores.csv · public/data/osmr_snapshot.json.
-    // Falls back to generateNodes() if file is unavailable.
-    if (!snapshotFetchRef.current) {
-      // 8-second timeout — if osmr_snapshot.json isn't deployed yet,
-      // fail fast and fall back to generateNodes() rather than hanging.
-      const ctrl = new AbortController()
-      const timer = setTimeout(() => ctrl.abort(), 8000)
-      snapshotFetchRef.current = fetch(`${DATA_BASE}/data/osmr_snapshot.json`, { signal: ctrl.signal })
-        .then(r => { clearTimeout(timer); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<Node[]> })
-        .catch(() => { clearTimeout(timer); return null })
-    }
-
-    // initViz is async so it can await the snapshot fetch before the
-    // force simulation runs. The loading overlay is already visible at
-    // this point (painted during the 50ms setTimeout delay).
-    async function initViz() {
+    // initViz: synchronous, no external fetch dependency.
+    // Real OSMR data (osmr_snapshot.json) loads separately via a script tag
+    // once deployed to public/data/ — for now, synthetic nodes are used.
+    // The try/finally guarantees setVizReady(true) fires on every exit path.
+    function initViz() {
       if (d3ReadyRef.current) { setVizReady(true); return }
       d3ReadyRef.current = true
 
       try {
         const d3 = (window as any).d3
 
-        // Real data if available, synthetic fallback otherwise
-        const snapshot = await snapshotFetchRef.current
-        const nodes: Node[] = snapshot && snapshot.length > 0
-          ? snapshot.map(n => ({ ...n, x: 0, y: 0 }))
-          : generateNodes(5200)
+        if (!d3) {
+          console.error('[TCS] D3 not available — constellation cannot render')
+          return
+        }
 
+        const nodes: Node[] = generateNodes(5200)
         nodesRef.current = nodes
 
         const conEl  = conSvgRef.current
         const scatEl = scatSvgRef.current
-        if (!conEl || !scatEl) return   // finally still fires
+        if (!conEl || !scatEl) {
+          console.error('[TCS] SVG refs null — constellation cannot render')
+          return
+        }
 
         // Read actual rendered width — getBoundingClientRect at this point
         // returns the real layout width since the loading overlay is visible.
