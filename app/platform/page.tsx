@@ -480,11 +480,11 @@ function Section1WellsPanel({
 }) {
   const svgRef  = useRef<SVGSVGElement | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
-  const [dims, setDims] = React.useState({ w: 600, h: 440 })
-  const [wellsView, setWellsView] = React.useState<'curves' | 'companies' | 'both'>('curves')
+  const [dims, setDims] = useState({ w: 600, h: 440 })
+  const [wellsView, setWellsView] = useState<'curves' | 'companies' | 'both'>('curves')
 
   // Measure panel on mount and resize
-  React.useEffect(() => {
+  useEffect(() => {
     const el = wrapRef.current
     if (!el) return
     const obs = new ResizeObserver(entries => {
