@@ -550,10 +550,10 @@ function Section1WellsPanel({
       }}>
         {(['curves', 'companies', 'both'] as const).map(v => (
           <button key={v} onClick={() => setWellsView(v)} style={{
-            fontFamily: E.mono, fontSize: 8, letterSpacing: '0.1em', padding: '2px 7px',
+            fontFamily: E.mono, fontSize: 11, letterSpacing: '0.1em', padding: '2px 7px',
             border: `1px solid ${wellsView === v ? E.gold : E.dim}`,
             background: wellsView === v ? 'rgba(197,162,74,0.10)' : 'transparent',
-            color: wellsView === v ? E.gold : E.dim, cursor: 'pointer',
+            color: wellsView === v ? E.gold : E.sec, cursor: 'pointer',
             textTransform: 'uppercase' as const,
           }}>
             {v}
@@ -575,7 +575,7 @@ function Section1WellsPanel({
               strokeWidth={v === 0 ? 1 : 0.4} />
             {v !== 0 && (
               <text x={xPx(v)} y={PAD.t + iH + 14} textAnchor="middle"
-                fontFamily={E.mono} fontSize={9} fill="#3A3530">
+                fontFamily={E.mono} fontSize={11} fill={E.sec}>
                 {v}%
               </text>
             )}
@@ -584,19 +584,19 @@ function Section1WellsPanel({
 
         {/* Zero label */}
         <text x={xPx(0)} y={PAD.t + iH + 14} textAnchor="middle"
-          fontFamily={E.mono} fontSize={9} fill="#3A3530">0%</text>
+          fontFamily={E.mono} fontSize={11} fill={E.sec}>0%</text>
 
         {/* Event horizon — −25% severe loss threshold */}
         <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH}
           stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
         <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end"
-          fontFamily={E.mono} fontSize={8.5} fill={E.VH} opacity={0.55}>
+          fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>
           ← −25% threshold
         </text>
 
         {/* X axis label */}
         <text x={PAD.l + iW / 2} y={H - 8} textAnchor="middle"
-          fontFamily={E.mono} fontSize={9} letterSpacing="0.12em" fill="#2A2520">
+          fontFamily={E.mono} fontSize={11} letterSpacing="0.12em" fill={E.sec}>
           {wellsView === 'companies' ? 'COMPOSITE RISK SCORE →' : '12-MONTH FORWARD RETURN →'}
         </text>
 
@@ -651,15 +651,15 @@ function Section1WellsPanel({
                   <line x1={medX} y1={PAD.t + iH - 5} x2={medX} y2={PAD.t + iH + 4}
                     stroke={b.col} strokeWidth={1} opacity={0.5} />
                   <text x={medX} y={PAD.t + iH + 26} textAnchor="middle"
-                    fontFamily={E.mono} fontSize={9} fill={b.col} opacity={0.72}>
+                    fontFamily={E.mono} fontSize={11} fill={b.col}>
                     {b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}%
                   </text>
 
                   {/* Curve label */}
                   <text x={peakX} y={lY} textAnchor="middle" fontFamily={E.mono}
-                    fontSize={b.id === 'VH' ? 10.5 : 9}
+                    fontSize={11}
                     fontWeight={b.id === 'VH' ? '700' : '400'}
-                    fill={b.col} opacity={b.id === 'VH' ? 1 : 0.75}>
+                    fill={b.col} opacity={1}>
                     {b.desc}
                   </text>
 
@@ -667,7 +667,7 @@ function Section1WellsPanel({
                   {b.id === 'VH' && (
                     <>
                       <text x={peakX} y={lY + 13} textAnchor="middle"
-                        fontFamily={E.mono} fontSize={8.5} fill={b.col} opacity={0.50}>
+                        fontFamily={E.mono} fontSize={11} fill={E.sec}>
                         {b.count} cos · med dwell {b.dwell_med}mo · {b.lossRate}% severe loss
                       </text>
                       <text x={peakX} y={lY + 24} textAnchor="middle"
@@ -677,7 +677,7 @@ function Section1WellsPanel({
                       </text>
                       {!selectedBand.includes('all') && (
                         <text x={W - PAD.r} y={PAD.t + 9} textAnchor="end"
-                          fontFamily={E.mono} fontSize={9} fill={E.gold} opacity={0.75}>
+                          fontFamily={E.mono} fontSize={11} fill={E.gold}>
                           Band {bandKey} · {b.bandSpreads[+bandKey]}pp spread
                         </text>
                       )}
@@ -685,7 +685,7 @@ function Section1WellsPanel({
                   )}
                   {b.id === 'VL' && (
                     <text x={peakX} y={lY + 13} textAnchor="middle"
-                      fontFamily={E.mono} fontSize={8.5} fill={b.col} opacity={0.50}>
+                      fontFamily={E.mono} fontSize={11} fill={E.sec}>
                       {b.count} cos · {b.lossRate}% severe loss · 0 deteriorating
                     </text>
                   )}
@@ -718,7 +718,7 @@ function Section1WellsPanel({
         {wellsView === 'companies' && (
           <text transform="rotate(-90)"
             x={-(PAD.t + iH / 2)} y={13} textAnchor="middle"
-            fontFamily={E.mono} fontSize={9} letterSpacing="1.2" fill="#2A2520">
+            fontFamily={E.mono} fontSize={11} letterSpacing="1.2" fill={E.sec}>
             DWELL MONTHS
           </text>
         )}
@@ -908,7 +908,7 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
         {' '}
         <span style={s({ color: E.VL })}>FCF-anchored: +10.2% median.</span>
         {' '}
-        <span style={s({ color: E.dim })}>Same universe. Same period. Different structures.</span>
+        <span style={s({ color: E.sec })}>Same universe. Same period. Different structures.</span>
       </div>
 
       {/* The ladder — four rows, Revenue top to FCF bottom */}
@@ -960,25 +960,25 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                   </div>
                   <div style={s({
                     fontFamily: E.mono,
-                    fontSize: 8,
+                    fontSize: 11,
                     letterSpacing: '0.16em',
                     textTransform: 'uppercase' as const,
-                    color: isSelected ? E.gold : E.dim,
+                    color: isSelected ? E.gold : E.sec,
                     marginBottom: 4,
                   })}>
                     {rung.depth}
                   </div>
                   <div style={s({
                     fontFamily: E.mono,
-                    fontSize: 14,
-                    fontWeight: isFCF || isSelected ? 600 : 400,
-                    color: isSelected ? E.text : isFCF ? E.body : E.muted,
+                    fontSize: 18,
+                    fontWeight: isFCF || isSelected ? 700 : 400,
+                    color: isSelected ? E.text : isFCF ? E.body : E.body,
                     marginBottom: 5,
                     letterSpacing: '-0.01em',
                   })}>
                     {rung.label}
                   </div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim })}>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
                     {rung.weight}% of composite weight
                   </div>
                 </div>
@@ -987,10 +987,10 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                 <div style={s({ padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' })}>
                   <div style={s({
                     fontFamily: E.mono,
-                    fontSize: 8,
+                    fontSize: 11,
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase' as const,
-                    color: E.dim,
+                    color: E.sec,
                     marginBottom: 8,
                   })}>
                     Risk fingerprint
@@ -1035,10 +1035,10 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                             gap: 2,
                           })}
                         >
-                          <span style={s({ fontFamily: E.mono, fontSize: 10, color: bucketColor(b), fontWeight: isFCF && b === 'Very Low' || isRevenue && b === 'Very High' ? 600 : 400 })}>
+                          <span style={s({ fontFamily: E.mono, fontSize: 10, color: bucketColor(b), fontWeight: isFCF && b === 'Very Low' || isRevenue && b === 'Very High' ? 700 : 400 })}>
                             {pct.toFixed(0)}%
                           </span>
-                          <span style={s({ fontFamily: E.mono, fontSize: 7, color: E.dim, letterSpacing: '0.06em' })}>
+                          <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.06em' })}>
                             {short}
                           </span>
                         </div>
@@ -1063,7 +1063,7 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                         fontSize: 7,
                         letterSpacing: '0.16em',
                         textTransform: 'uppercase' as const,
-                        color: E.dim,
+                        color: E.sec,
                         marginBottom: 5,
                       })}>
                         Median 12m
@@ -1079,20 +1079,20 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                       })}>
                         {rung.ret! > 0 ? '+' : ''}{rung.ret}%
                       </div>
-                      <div style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost })}>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
                         confirmed · 285K obs
                       </div>
                     </>
                   ) : (
                     /* The honest indicator: between the two confirmed endpoints */
                     <div style={s({ textAlign: 'right' as const })}>
-                      <div style={s({ fontFamily: E.mono, fontSize: 8, color: E.dim, marginBottom: 6, letterSpacing: '0.1em' })}>
+                      <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 6, letterSpacing: '0.1em' })}>
                         BETWEEN
                       </div>
                       <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH, marginBottom: 2 })}>−17.3%</div>
-                      <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, marginBottom: 2 })}>↓</div>
+                      <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginBottom: 2 })}>↓</div>
                       <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.VL })}>+10.2%</div>
-                      <div style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost, marginTop: 5 })}>
+                <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 5 })}>
                         not confirmed<br />for this rung
                       </div>
                     </div>
@@ -1113,13 +1113,13 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
         gap: 11,
         background: E.bg2,
       })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.muted })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
           Spread:
         </span>
-        <span style={s({ fontFamily: E.mono, fontSize: 22, fontWeight: 700, color: E.gold, letterSpacing: '-0.02em' })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 700, color: E.gold, letterSpacing: '-0.02em' })}>
           27.6pp
         </span>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.dim })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
           FCF vs Revenue · held in every market regime in the dataset
         </span>
       </div>
@@ -1187,7 +1187,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
         lineHeight: 1.65,
       })}>
         Structural fragility is not a small-cap phenomenon — and structural safety is not a large-cap privilege.{' '}
-        <span style={s({ color: E.dim })}>
+        <span style={s({ color: E.sec })}>
           The VL vs VH return spread is positive in all seven bands without exception.
         </span>
       </div>
@@ -1205,7 +1205,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
                   stroke={v === 0 ? E.bdr3 : E.bdr2}
                   strokeWidth={v === 0 ? 1.0 : 0.4} />
                 <text x={PAD.l - 6} y={y + 4} textAnchor="end"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={10} fill={v === 0 ? E.dim : E.ghost}>
+                  fontFamily="IBM Plex Mono,monospace" fontSize={10} fill={E.sec}>
                   {v > 0 ? '+' : ''}{v}%
                 </text>
               </g>
@@ -1243,7 +1243,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
                   x={x - BAR_W / 2 - 1}
                   y={bd.vlMedian >= 0 ? cy(bd.vlMedian) - 4 : zeroY + vhH + 13}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={11}
                   fill={isSelected ? E.gold : E.VL}
                   fontWeight={isSelected ? 700 : 400}
                 >
@@ -1255,7 +1255,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
                   x={x + BAR_W / 2 + 1}
                   y={bd.vhMedian < 0 ? cy(bd.vhMedian) + 13 : cy(bd.vhMedian) - 4}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={11}
                   fill={isSelected ? E.gold : E.VH}
                   fontWeight={isSelected ? 700 : 400}
                 >
@@ -1266,7 +1266,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
                 <text
                   x={x} y={PAD.t + iH + 16}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={10}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={11}
                   fill={isSelected ? E.gold : E.sec}
                 >
                   {bd.label}
@@ -1274,16 +1274,16 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
                 <text
                   x={x} y={PAD.t + iH + 27}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
-                  fill={E.ghost}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={11}
+                  fill={E.sec}
                 >
                   {bd.sub}
                 </text>
                 <text
                   x={x} y={PAD.t + iH + 42}
                   textAnchor="middle"
-                  fontFamily="IBM Plex Mono,monospace" fontSize={9}
-                  fill={isSelected ? E.gold : E.dim}
+                  fontFamily="IBM Plex Mono,monospace" fontSize={11}
+                  fill={isSelected ? E.gold : E.sec}
                 >
                   {bd.spread.toFixed(1)}pp
                 </text>
@@ -1297,7 +1297,7 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
             <text x={PAD.l + 16} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VL} opacity={0.8}>VL median</text>
             <rect x={PAD.l + 72} y={PAD.t} width={8} height={8} fill={E.VH} opacity={0.75} />
             <text x={PAD.l + 84} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.VH} opacity={0.8}>VH median</text>
-            <text x={PAD.l + 160} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.dim} opacity={0.7}>spread below</text>
+            <text x={PAD.l + 160} y={PAD.t + 8} fontFamily="IBM Plex Mono,monospace" fontSize={9} fill={E.sec}>spread below</text>
           </g>
         </svg>
       </div>
@@ -1312,11 +1312,11 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
         background: E.bg2,
         flexWrap: 'wrap' as const,
       })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.dim, lineHeight: 1.65, flex: 1 })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65, flex: 1 })}>
           Band IV ($3B–$10B) shows the narrowest spread at 3.5pp — still positive.
           The framework separates structural conditions at every scale the market operates at.
         </span>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.ghost, flexShrink: 0 })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, flexShrink: 0 })}>
           293,463 obs · Script 27 · raw price returns
         </span>
       </div>
@@ -1346,9 +1346,9 @@ function PaidWall() {
     <section style={s({ position: 'relative', borderBottom: `1px solid ${E.bdr2}` })}>
       {/* Header — visible, not blurred */}
       <div style={s({ borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 18px', display: 'flex', alignItems: 'baseline', gap: 11 })}>
-        <span style={s({ fontFamily: E.mono, fontSize: 18, color: E.ghost, fontWeight: 700 })}>11 · 18 · 29</span>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.ghost })}>Sectors · Archetypes · Companies</span>
-        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.ghost })}>Full subscription required</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 18, color: E.sec, fontWeight: 700 })}>11 · 18 · 29</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.sec })}>Sectors · Archetypes · Companies</span>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>Full subscription required</span>
       </div>
 
       {/* Blurred content — shape only, no real data */}
@@ -1813,7 +1813,7 @@ export default function PlatformPage() {
       <div style={s({ height: 47, borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', alignItems: 'center', padding: '0 18px', overflowX: 'auto', position: 'sticky', top: 47, zIndex: 39 })}>
         {DESCENT_LEVELS.map((level, i) => {
           const isActive = level.n === activeLevel
-          const textColor = isActive ? E.gold : level.paid ? E.ghost : E.sec
+          const textColor = isActive ? E.gold : level.paid ? E.sec : E.sec
           return (
             <div key={level.n} style={s({ display: 'flex', alignItems: 'center', flexShrink: 0 })}>
               {i > 0 && <div style={s({ width: 18, height: 1, background: E.bdr2, margin: '0 2px', opacity: 0.6 })} />}
@@ -1822,8 +1822,8 @@ export default function PlatformPage() {
                 style={s({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 11px', background: 'transparent', border: 'none', cursor: level.paid && !isPaid ? 'pointer' : 'pointer' })}
               >
                 <span style={s({ fontFamily: E.mono, fontSize: 18, color: textColor, lineHeight: 1, fontWeight: isActive ? 700 : 400 })}>{level.n}</span>
-                <span style={s({ fontFamily: E.mono, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.ghost : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
-                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 8, color: E.ghost, letterSpacing: '0.08em' })}>PAID</span>}
+                <span style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: level.paid ? E.sec : isActive ? E.gold : E.sec, lineHeight: 1.5 })}>{level.label}</span>
+                {level.paid && !isPaid && <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.08em' })}>PAID</span>}
               </button>
             </div>
           )
@@ -1848,14 +1848,14 @@ export default function PlatformPage() {
         })}
       >
         {/* OAL Anchor Levels */}
-        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 4 ? E.gold : E.dim, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 4 ? E.gold : E.sec, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
           4 · Anchor Levels
         </span>
         {OAL_RUNGS.map(({ key, label, sub }) => {
           const active = selectedOal.includes(key)
           return (
             <button key={key} onClick={() => selectOal(key)} className="filter-btn" style={s({
-              fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
+              fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400,
               letterSpacing: '0.05em',
               padding: sub ? '3px 9px 2px' : '3px 9px',
               border: `1px solid ${active ? E.gold : E.bdr3}`,
@@ -1875,14 +1875,14 @@ export default function PlatformPage() {
         <div style={s({ width: 1, height: 24, background: E.bdr3, flexShrink: 0, margin: '0 6px' })} />
 
         {/* EV Bands */}
-        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 7 ? E.gold : E.dim, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 10, color: activeLevel === 7 ? E.gold : E.sec, letterSpacing: '0.16em', textTransform: 'uppercase' as const, marginRight: 4, flexShrink: 0 })}>
           7 · EV
         </span>
         {EV_BANDS.map(({ band, label, sub }) => {
           const active = selectedBand.includes(band)
           return (
             <button key={String(band)} onClick={() => selectBand(band)} className="filter-btn" style={s({
-              fontFamily: E.mono, fontSize: 10, fontWeight: active ? 700 : 400,
+              fontFamily: E.mono, fontSize: 11, fontWeight: active ? 700 : 400,
               letterSpacing: '0.05em',
               padding: sub ? '3px 9px 2px' : '3px 9px',
               border: `1px solid ${active ? E.gold : E.bdr3}`,
@@ -1917,7 +1917,7 @@ export default function PlatformPage() {
         </div>
         <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65, maxWidth: 920 })}>
           Left: return distributions by structural bucket — the shape of each well is the gravitational field.
-          {' '}<span style={s({ color: E.dim })}>Right: precise structural coordinates. Together: where each company is and what that position costs.</span>
+          {' '}<span style={s({ color: E.sec })}>Right: precise structural coordinates. Together: where each company is and what that position costs.</span>
         </div>
       </div>
 
@@ -1925,13 +1925,13 @@ export default function PlatformPage() {
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg3 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Gravitational Field · Return Distributions</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>
             Well depth = dwell probability × median loss · Filter reshapes the wells
           </div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.sec, marginTop: 3 })}>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>
             Precise coordinates — top-right is highest combined structural risk
           </div>
         </div>
@@ -1987,7 +1987,7 @@ export default function PlatformPage() {
             <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.14em' })}>
               Mapping structural field · ~5,200 equities
             </div>
-            <div style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, marginTop: 5, letterSpacing: '0.1em' })}>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 5, letterSpacing: '0.1em' })}>
               Computing structural neighborhoods
             </div>
           </div>
@@ -2013,14 +2013,14 @@ export default function PlatformPage() {
                 <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>
                   {b}{b === 'Very High' ? ' ◈' : ''}
                 </span>
-                <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim })}>
+          <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>
                   — {desc[b]}
                 </span>
               </div>
             )
           })}
         </div>
-        <span style={s({ fontFamily: E.mono, fontSize: 9, color: E.dim, flexShrink: 0 })}>
+        <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, flexShrink: 0 })}>
           Size = enterprise value{!isPaid ? ' · Identity at paid tier' : ''}
         </span>
       </div>
@@ -2122,7 +2122,7 @@ export default function PlatformPage() {
             {/* Bucket */}
             <div style={s({ marginBottom: 4 })}>
               <span style={s({ color: bucketCol, fontWeight: 700 })}>{n.bucket}</span>
-              <span style={s({ color: E.dim })}> · EV Band {n.evBand}</span>
+              <span style={s({ color: E.sec })}> · EV Band {n.evBand}</span>
             </div>
 
             {/* Anchor */}
@@ -2133,11 +2133,11 @@ export default function PlatformPage() {
             {/* Axis values — numbers only, no units needed */}
             <div style={s({ display: 'flex', gap: 14 })}>
               <div>
-                <div style={s({ fontSize: 9, color: E.dim, letterSpacing: '0.1em', marginBottom: 1 })}>DETACHMENT</div>
+                <div style={s({ fontSize: 11, color: E.sec, letterSpacing: '0.1em', marginBottom: 1 })}>DETACHMENT</div>
                 <div style={s({ fontSize: 14, color: E.body })}>{safeFixed(n.axis1, 0)}</div>
               </div>
               <div>
-                <div style={s({ fontSize: 9, color: E.dim, letterSpacing: '0.1em', marginBottom: 1 })}>DEGRADATION</div>
+                <div style={s({ fontSize: 11, color: E.sec, letterSpacing: '0.1em', marginBottom: 1 })}>DEGRADATION</div>
                 <div style={s({ fontSize: 14, color: E.body })}>{safeFixed(n.axis2, 0)}</div>
               </div>
             </div>
@@ -2147,7 +2147,7 @@ export default function PlatformPage() {
               <div style={s({
                 marginTop: 8, paddingTop: 6,
                 borderTop: `1px solid ${E.bdr}`,
-                fontSize: 9, color: E.dim,
+                fontSize: 11, color: E.sec,
               })}>
                 Full profile · paid tier
               </div>
