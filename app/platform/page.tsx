@@ -640,7 +640,7 @@ function Section1WellsPanel({
               )
             })}
 
-            {/* Curve lines */}
+            {/* Curve lines only — no labels in SVG, legend below handles identification */}
             {[...curves].reverse().map(b => {
               const d = xs.map((x, i) =>
                 `${i === 0 ? 'M' : 'L'}${xPx(x)},${yPx(b.ys[i])}`
@@ -657,74 +657,6 @@ function Section1WellsPanel({
                     strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3}
                     opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55}
                     strokeLinecap="round" />
-                </g>
-              )
-            })}
-
-            {/* Curve labels — anchored above each peak, spread vertically so they don't collide */}
-            {curves.map((b, idx) => {
-              const peakIdx = b.ys.indexOf(Math.max(...b.ys))
-              const peakX   = xPx(xs[peakIdx])
-              const peakY   = yPx(b.ys[peakIdx])
-              // Stagger: VH and VL get labels near their peaks (well separated).
-              // H, M, L peaks cluster in the center — assign fixed vertical slots
-              // spaced 22px apart so they never collide regardless of peak proximity.
-              const LABEL_SLOTS = [
-                PAD.t + 18,          // VH — top (leftmost peak, highest curve)
-                PAD.t + iH * 0.28,   // H
-                PAD.t + iH * 0.18,   // M
-                PAD.t + iH * 0.10,   // L
-                PAD.t + 18,          // VL — top (rightmost peak)
-              ]
-              const lY = Math.min(peakY - 16, LABEL_SLOTS[idx])
-
-              return (
-                <g key={`label-${b.id}`}>
-                  {/* Median tick — short vertical mark at baseline */}
-                  <line x1={xPx(b.adjMedian)} y1={PAD.t + iH - 5}
-                    x2={xPx(b.adjMedian)} y2={PAD.t + iH + 4}
-                    stroke={b.col} strokeWidth={1} opacity={0.6} />
-                  {/* Median value — staggered above/below baseline alternately */}
-                  <text
-                    x={xPx(b.adjMedian)}
-                    y={PAD.t + iH + (idx % 2 === 0 ? 26 : 40)}
-                    textAnchor="middle" fontFamily={E.mono} fontSize={11} fill={b.col}>
-                    {b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}%
-                  </text>
-
-                  {/* Leader line from label to peak */}
-                  <line x1={peakX} y1={lY + 3} x2={peakX} y2={peakY - 4}
-                    stroke={b.col} strokeWidth={0.4} opacity={0.25} strokeDasharray="2,4" />
-
-                  {/* Bucket descriptor */}
-                  <text x={peakX} y={lY} textAnchor="middle" fontFamily={E.mono}
-                    fontSize={11} fontWeight={b.id === 'VH' ? '700' : '400'}
-                    fill={b.col}>
-                    {b.desc}
-                  </text>
-
-                  {/* VH annotation — single line only */}
-                  {b.id === 'VH' && (
-                    <>
-                      <text x={peakX} y={lY + 14} textAnchor="middle"
-                        fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                        {b.count} companies · median {b.dwell_med}mo · {b.lossRate}% severe loss
-                      </text>
-                      {!selectedBand.includes('all') && (
-                        <text x={W - PAD.r} y={PAD.t + 9} textAnchor="end"
-                          fontFamily={E.mono} fontSize={11} fill={E.gold}>
-                          Band {bandKey} · {b.bandSpreads[+bandKey]}pp spread
-                        </text>
-                      )}
-                    </>
-                  )}
-                  {/* VL annotation — single line */}
-                  {b.id === 'VL' && (
-                    <text x={peakX} y={lY + 14} textAnchor="middle"
-                      fontFamily={E.mono} fontSize={11} fill={E.sec}>
-                      {b.count} companies · {b.lossRate}% severe loss · none deteriorating
-                    </text>
-                  )}
                 </g>
               )
             })}
@@ -778,6 +710,57 @@ function Section1WellsPanel({
         })()}
 
       </svg>
+
+      {/* ── Distributions legend — below SVG, replaces all in-graph labels ── */}
+      {(wellsView === 'curves' || wellsView === 'both') && (
+        <div style={{
+          borderTop: `1px solid ${E.bdr2}`,
+          background: E.bg2,
+          padding: '7px 14px',
+          display: 'flex',
+          flexWrap: 'wrap' as const,
+          gap: '0px 18px',
+          alignItems: 'stretch',
+        }}>
+          {/* Band annotation if filtered */}
+          {!selectedBand.includes('all') && (
+            <div style={{ width: '100%', marginBottom: 4, fontFamily: E.mono, fontSize: 11, color: E.gold }}>
+              Band {bandKey} · {WELL_DATA[0].bandSpreads[+bandKey]}pp spread
+            </div>
+          )}
+          {curves.map(b => (
+            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '2px 0' }}>
+              {/* Colored line segment matching curve style */}
+              <svg width={22} height={11} style={{ flexShrink: 0 }}>
+                <line x1={0} y1={5.5} x2={22} y2={5.5}
+                  stroke={b.col}
+                  strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3}
+                  opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55} />
+              </svg>
+              {/* Bucket descriptor */}
+              <span style={{ fontFamily: E.mono, fontSize: 11,
+                fontWeight: b.id === 'VH' ? 700 : 400, color: b.col }}>
+                {b.desc}
+              </span>
+              {/* Median return */}
+              <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>
+                {b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}% median
+              </span>
+              {/* Key stat for VH and VL */}
+              {b.id === 'VH' && (
+                <span style={{ fontFamily: E.mono, fontSize: 11, color: E.dim }}>
+                  · {b.lossRate}% severe loss · {b.count} cos
+                </span>
+              )}
+              {b.id === 'VL' && (
+                <span style={{ fontFamily: E.mono, fontSize: 11, color: E.dim }}>
+                  · none deteriorating
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
