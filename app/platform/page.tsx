@@ -506,11 +506,12 @@ function Section1WellsPanel({
   const xs = Array.from({ length: STEPS }, (_, i) => X_MIN + (i / (STEPS - 1)) * X_RANGE)
 
   // Adjust medians based on active filters
+  // Hoist filter keys to component scope — used in both adjMedian() and JSX annotations
+  const oalKey  = selectedOal.length  === 1 ? selectedOal[0]  : 'all'
+  const bandKey = selectedBand.length === 1 ? selectedBand[0] : 'all'
+
   const adjMedian = (b: typeof WELL_DATA[0]) => {
     let m = b.median
-    // For multi-select, use the first specific selection or 'all'
-    const oalKey = selectedOal.length === 1 ? selectedOal[0] : 'all'
-    const bandKey = selectedBand.length === 1 ? selectedBand[0] : 'all'
     const oalAdj = OAL_MED_ADJ[oalKey]?.[b.id] ?? 0
     if (bandKey !== 'all') {
       const bandSpread = b.bandSpreads[+bandKey]
