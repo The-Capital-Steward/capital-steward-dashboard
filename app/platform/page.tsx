@@ -559,7 +559,7 @@ function Section1WellsPanel({
             letterSpacing: '0.12em', padding: '7px 0',
             border: 'none',
             borderBottom: `2px solid ${wellsView === v ? E.gold : 'transparent'}`,
-            borderRight: v !== 'both' ? `1px solid ${E.bdr2}` : 'none',
+            borderRight: label !== 'Both' ? `1px solid ${E.bdr2}` : 'none',
             background: wellsView === v ? 'rgba(197,162,74,0.06)' : 'transparent',
             color: wellsView === v ? E.gold : E.sec,
             cursor: 'pointer', textTransform: 'uppercase' as const,
