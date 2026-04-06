@@ -1226,7 +1226,11 @@ export default function PlatformPage() {
     // force simulation runs. The loading overlay is already visible at
     // this point (painted during the 50ms setTimeout delay).
     async function initViz() {
-      if (d3ReadyRef.current) return
+      // Guard prevents re-running the simulation on re-renders.
+      // But always call setVizReady(true) — if D3 already rendered,
+      // the overlay just needs to clear. vizReady resets on re-render
+      // while d3ReadyRef persists, so without this the overlay is permanent.
+      if (d3ReadyRef.current) { setVizReady(true); return }
       d3ReadyRef.current = true
 
       const d3 = (window as any).d3
