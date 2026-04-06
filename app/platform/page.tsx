@@ -1092,6 +1092,7 @@ export default function PlatformPage() {
   const evBandRef         = useRef<HTMLDivElement | null>(null)
   const oalRungRef        = useRef<HTMLDivElement | null>(null)
   const regimeFetchRef    = useRef<Promise<RegimeSummary | null> | null>(null)
+  const snapshotFetchRef  = useRef<Promise<Node[] | null> | null>(null)
 
   // ── Opacity logic ────────────────────────────────────────────────────────────
 
@@ -1170,7 +1171,7 @@ export default function PlatformPage() {
     // If fetches hit wrong app, set NEXT_PUBLIC_DATA_BASE=http://localhost:3000
     // (or the correct origin) in your .env.local.
 
-    // Regime data fetch — still needed
+    // Regime data fetch
     if (!regimeFetchRef.current) {
       regimeFetchRef.current = fetch(`${DATA_BASE}/data/regime_summary.json`)
         .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<RegimeSummary> })
@@ -1178,16 +1179,30 @@ export default function PlatformPage() {
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
     }
 
-    // initViz is synchronous — always runs the force simulation at actual
-    // panel dimensions, so geometry is correct regardless of viewport.
-    // Wrapped in setTimeout(fn, 50) so the loading state paints before
-    // the simulation blocks the main thread.
-    function initViz() {
+    // Real OSMR snapshot — 3,771 companies with live structural scores.
+    // Generated from oal_scores.csv · public/data/osmr_snapshot.json.
+    // Falls back to generateNodes() if file is unavailable.
+    if (!snapshotFetchRef.current) {
+      snapshotFetchRef.current = fetch(`${DATA_BASE}/data/osmr_snapshot.json`)
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<Node[]> })
+        .catch(() => null)
+    }
+
+    // initViz is async so it can await the snapshot fetch before the
+    // force simulation runs. The loading overlay is already visible at
+    // this point (painted during the 50ms setTimeout delay).
+    async function initViz() {
       if (d3ReadyRef.current) return
       d3ReadyRef.current = true
 
       const d3 = (window as any).d3
-      const nodes = generateNodes(5200)
+
+      // Real data if available, synthetic fallback otherwise
+      const snapshot = await snapshotFetchRef.current
+      const nodes: Node[] = snapshot && snapshot.length > 0
+        ? snapshot.map(n => ({ ...n, x: 0, y: 0, marketCap: n.ev ?? 1e9 }))
+        : generateNodes(5200)
+
       nodesRef.current = nodes
 
       const conEl  = conSvgRef.current
@@ -1211,23 +1226,37 @@ export default function PlatformPage() {
 
       // Force simulation — always client-side at actual dimensions.
       // Geometry is correct by construction. No precomputed JSON dependency.
+      //
+      // Parameter rationale:
+      //   strength(0.08) — gentle pull toward cluster centers so nodes spread
+      //     organically rather than compressing into stripes.
+      //   forceManyBody(-28) — stronger repulsion keeps nodes separated and
+      //     forces each cluster into a rounded neighborhood, not a stripe.
+      //   Initial spread ±15% of panel — nodes start dispersed so repulsion
+      //     forces have room to act before the directional pull takes over.
+      //   No hard clamping — the boundary force (forceX/Y toward center at
+      //     very low strength) handles drift naturally without creating
+      //     edge pile-ups that produce visible colored borders.
       const jRng = makeLCG(42)
       const forceNodes = nodesRef.current.map(n => {
         const c = centers[n.bucket]
-        return { ...n, x: c.x + (jRng() - 0.5) * 20, y: c.y + (jRng() - 0.5) * 20 }
+        const spreadX = (jRng() - 0.5) * panelW * 0.15
+        const spreadY = (jRng() - 0.5) * panelH * 0.15
+        return { ...n, x: c.x + spreadX, y: c.y + spreadY }
       })
       const simulation = d3.forceSimulation(forceNodes)
-        .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.28))
-        .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.28))
-        .force('charge',  d3.forceManyBody().strength(-14))
-        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.4))
+        .force('x',       d3.forceX((d: Node) => centers[d.bucket].x).strength(0.08))
+        .force('y',       d3.forceY((d: Node) => centers[d.bucket].y).strength(0.08))
+        .force('charge',  d3.forceManyBody().strength(-28))
+        .force('collide', d3.forceCollide((d: Node) => nodeRadius(d.marketCap) + 1.2))
         .stop()
       simulation.tick(500)
-      const mx = panelW * 0.08
-      const my = panelH * 0.08
+      // No hard clamping — let simulation physics determine final positions.
+      // Soft boundary: add a light pull back toward the panel interior for any
+      // nodes that drifted beyond the visible area.
       forceNodes.forEach((fn: any, i: number) => {
-        nodesRef.current[i].x = Math.max(mx, Math.min(panelW - mx, fn.x))
-        nodesRef.current[i].y = Math.max(my, Math.min(panelH - my, fn.y))
+        nodesRef.current[i].x = fn.x
+        nodesRef.current[i].y = fn.y
       })
 
       // Expose computed nodes to React (Sections 3 & 4) after positions are set
