@@ -426,7 +426,7 @@ function Section1WellsPanel({
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [dims, setDims] = useState({ w: 600, h: 440 })
   // Fix 3: 'both' view restored
-  const [wellsView, setWellsView] = useState<'curves' | 'companies' | 'both'>('curves')
+  const [wellsView, setWellsView] = useState<'curves' | 'companies'>('curves')
 
   useEffect(() => {
     const el = wrapRef.current
@@ -482,7 +482,6 @@ function Section1WellsPanel({
   const TABS = [
     { v: 'curves'    as const, label: 'Distributions' },
     { v: 'companies' as const, label: 'Companies' },
-    { v: 'both'      as const, label: 'Both' },
   ]
 
   return (
@@ -538,7 +537,7 @@ function Section1WellsPanel({
         </text>
 
         {/* Curves — shown in 'curves' and 'both' */}
-        {(wellsView === 'curves' || wellsView === 'both') && (
+        {(wellsView === 'curves') && (
           <>
             {[...curves].reverse().map(b => {
               const pts = xs.map((x, i) => `${xPx(x)},${yPx(b.ys[i])}`).join(' ')
@@ -557,7 +556,7 @@ function Section1WellsPanel({
         )}
 
         {/* Dots — shown in 'companies' and 'both' */}
-        {(wellsView === 'companies' || wellsView === 'both') && trajectories.map(t => {
+        {(wellsView === 'companies') && trajectories.map(t => {
           const x   = dotX(t.score)
           const y   = dotY(t.dwell)
           const col = DIR_COLOR[t.dir] ?? E.sec
@@ -592,7 +591,7 @@ function Section1WellsPanel({
       </svg>
 
       {/* Distributions legend */}
-      {(wellsView === 'curves' || wellsView === 'both') && (
+      {(wellsView === 'curves') && (
         <div style={{ borderTop: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 14px', display: 'flex', flexWrap: 'wrap' as const, gap: '0px 18px', alignItems: 'stretch' }}>
           {!selectedBand.includes('all') && (
             <div style={{ width: '100%', marginBottom: 4, fontFamily: E.mono, fontSize: 11, color: E.gold }}>
@@ -1288,8 +1287,8 @@ export default function PlatformPage() {
 
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg3 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Gravitational Field · Return Distributions</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>Structural conditions differ in their pull. VH companies have the deepest well — highest retention, worst median outcome.</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Field</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>Return distributions by structural bucket · Company positioning by composite score and dwell</div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
