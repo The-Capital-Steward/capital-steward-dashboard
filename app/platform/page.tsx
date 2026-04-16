@@ -1164,8 +1164,8 @@ export default function PlatformPage() {
         @keyframes pulse-lo  { 0%,100% { opacity: .99 } 50% { opacity: .615 } }
         @keyframes pulse-vl  { 0%,100% { opacity: 1.00 } 50% { opacity: .76 } }
         .node-vh  { animation: pulse-vh  843ms  ease-in-out infinite; }
-        .node-h   { animation: pulse-h   1364ms  ease-in-out infinite; }
-        .node-mod { animation: pulse-mod 2207ms  ease-in-out infinite; }
+        .node-h   { animation: pulse-h   1364ms ease-in-out infinite; }
+        .node-mod { animation: pulse-mod 2207ms ease-in-out infinite; }
         .node-lo  { animation: pulse-lo  3571ms ease-in-out infinite; }
         .node-vl  { animation: pulse-vl  5778ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
@@ -1180,13 +1180,25 @@ export default function PlatformPage() {
         .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.20 !important; animation: unset !important; }
         .filter-active.has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
 
-        /* Gravitational Field hover sync
-           When a constellation node is hovered, the corresponding bucket curve
-           elevates to full opacity; all others recede to near-invisible.
-           Transition is instant — class toggle fires synchronously on mouseenter. */
+        /* Gravitational Field — curve breathing animation
+           Each bucket breathes at the same Lucas timing as its constellation nodes
+           but with tighter opacity ranges. The constellation declares urgency;
+           the curves confirm it quietly.
+           VH: 0.92→0.78 (843ms)  ·  VL: 0.85→0.80 (5778ms) */
+        @keyframes gf-pulse-vh  { 0%,100% { opacity: .92 } 50% { opacity: .78 } }
+        @keyframes gf-pulse-h   { 0%,100% { opacity: .93 } 50% { opacity: .79 } }
+        @keyframes gf-pulse-mod { 0%,100% { opacity: .94 } 50% { opacity: .80 } }
+        @keyframes gf-pulse-lo  { 0%,100% { opacity: .95 } 50% { opacity: .80 } }
+        @keyframes gf-pulse-vl  { 0%,100% { opacity: .85 } 50% { opacity: .80 } }
+        .gf-curve[data-bucket="VH"] { animation: gf-pulse-vh  843ms  ease-in-out infinite; }
+        .gf-curve[data-bucket="H"]  { animation: gf-pulse-h   1364ms ease-in-out infinite; }
+        .gf-curve[data-bucket="M"]  { animation: gf-pulse-mod 2207ms ease-in-out infinite; }
+        .gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  3571ms ease-in-out infinite; }
+        .gf-curve[data-bucket="VL"] { animation: gf-pulse-vl  5778ms ease-in-out infinite; }
+        /* Hover sync — pause animation, apply opacity override, active curve holds steady */
         .gf-curve { transition: opacity 80ms ease; }
-        .gf-has-hover .gf-curve { opacity: 0.10 !important; }
-        .gf-has-hover .gf-curve.gf-active { opacity: 1 !important; }
+        .gf-has-hover .gf-curve { opacity: 0.10 !important; animation-play-state: paused !important; }
+        .gf-has-hover .gf-curve.gf-active { opacity: 1 !important; animation-play-state: paused !important; }
       `}</style>
 
       <nav style={s({ height: 47, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 18px', borderBottom: `1px solid ${E.bdr2}`, background: E.bg, position: 'sticky', top: 0, zIndex: 40 })}>
