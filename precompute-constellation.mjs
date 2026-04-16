@@ -5,9 +5,8 @@
 import { forceSimulation, forceManyBody, forceCollide, forceX, forceY } from 'd3-force'
 import { writeFileSync } from 'fs'
 
-const W = 542, H = 440
+const W = 843, H = 521
 
-// 24%/76% margins — composite 0 → bottom-left, composite 100 → top-right
 function diagonalX(composite) { return W * (0.24 + 0.52 * (composite / 100)) }
 function diagonalY(composite) { return H * (0.76 - 0.52 * (composite / 100)) }
 
@@ -67,12 +66,25 @@ nodes.forEach(n => {
   n.y = diagonalY(n.composite)
 })
 
+const WALL = 30
+function boundaryForce() {
+  return function() {
+    for (const n of nodes) {
+      if (n.x < WALL)     n.vx += (WALL - n.x)     * 0.1
+      if (n.x > W - WALL) n.vx -= (n.x - (W-WALL)) * 0.1
+      if (n.y < WALL)     n.vy += (WALL - n.y)     * 0.1
+      if (n.y > H - WALL) n.vy -= (n.y - (H-WALL)) * 0.1
+    }
+  }
+}
+
 console.log('Running force simulation (800 ticks)...')
 const sim = forceSimulation(nodes)
-  .force('charge',  forceManyBody().strength(-0.4))
-  .force('collide', forceCollide(4.2).strength(1.0).iterations(3))
-  .force('x', forceX(n => diagonalX(n.composite)).strength(0.29))
-  .force('y', forceY(n => diagonalY(n.composite)).strength(0.29))
+  .force('charge',   forceManyBody().strength(-0.4))
+  .force('collide',  forceCollide(4.2).strength(1.0).iterations(3))
+  .force('x',        forceX(n => diagonalX(n.composite)).strength(0.29))
+  .force('y',        forceY(n => diagonalY(n.composite)).strength(0.29))
+  .force('boundary', boundaryForce())
   .alphaDecay(0.008)
   .stop()
 
@@ -81,7 +93,7 @@ for (let i = 0; i < 800; i++) {
   if (i % 100 === 99) console.log(`  ${i + 1} ticks complete`)
 }
 
-const MARGIN = 20
+const MARGIN = 30
 const positions = nodes.map(n => ({
   id: n.id,
   x: Math.round(Math.max(MARGIN, Math.min(W - MARGIN, n.x)) * 10) / 10,
