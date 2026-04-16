@@ -1034,7 +1034,7 @@ export default function PlatformPage() {
         const scatterY = (v: number) => SH - PAD - (v / 100) * (SH - PAD * 2)
 
         d3.select(conEl)
-          .attr('viewBox', \`0 0 \${SW} \${SH}\`)
+          .attr('viewBox', `0 0 ${SW} ${SH}`)
           .attr('preserveAspectRatio', 'xMidYMid meet')
 
         // Compute 3rd/97th percentile EV for size encoding
