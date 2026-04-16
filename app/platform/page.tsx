@@ -2,36 +2,14 @@
 
 // app/platform/page.tsx
 //
-// CUB fixes applied 2026-04-06 (round 1 — prior session):
-//   S1  · "cos" → "companies" in distribution legend
-//   S1  · E.dim → E.sec in legend annotation spans
-//   S1  · "none deteriorating" → "None deteriorating"
-//   S1  · Panel sub-header: "Top-right = highest structural risk"
-//   S1  · Legend descriptors: Low "structurally sound", Moderate "mixed signals", High "structurally stretched"
-//   S1  · "Identity at paid tier" → "Company name at paid tier"
-//   S2  · Bar chart decimal bug: (rate * 100).toFixed(1)% not safePct(rate)
-//   S2  · Universe rate labeled inline: "Universe avg."
-//   S2  · Forward returns row omitted
-//   S2  · Classifier removed from regime cards
-//   S2  · "SEVERE LOSS RATE"
-//   S2  · Section renders unconditionally
-//   S3  · EBIT "Second anchor", NI "Third anchor"
-//   S3  · "BETWEEN" → "RANGE" with FCF/Revenue labeled
-//   S3  · Spread callout reordered
-//   S3  · Fingerprint labels 11px
-//   S4  · "293,463 observations" replaces "Script 27 confirmed"
-//   S4  · "Spread (VL − VH)" replaces "spread below"
-//   PAY · Invited CTA tone
-//
-// CUB fixes applied 2026-04-06 (round 2 — this file):
-//   1.  · bucketColor() unified with E tokens — split color system resolved
-//   2.  · Section 2: gridCols applied to ALL rows (NOW, ICIR, labels) — alignment fixed
-//   3.  · 'Both' view restored to WellsPanel (type + tab + rendering)
-//   4.  · Tooltip: ticker/symbol line restored in both paid and free tiers
-//   5.  · Revenue rung descriptor corrected (factual accuracy)
-//   6.  · Band V vhMedian: -0.0 → 0.0
-//   7.  · Section 3 header sub-label differentiated from insight line
-//   9.  · Last WellsPanel tab border: 'none' on final tab
+// Section 1 redesign — 2026-04-16:
+//   LEFT  · Constellation Map — force-directed spatial field, positions from
+//           constellation_positions.json (precomputed, static fetch, no simulation)
+//   RIGHT · Gravitational Field (placeholder name) — distribution curves only,
+//           no tabs, no Companies view, unconditional render
+//   SYNC  · Hovering a constellation node immediately elevates the corresponding
+//           bucket curve in the Gravitational Field via CSS class toggle (no setState)
+//   RETIRED · Companies scatter view, trajectory data fetch, Structural Risk Map
 
 import { useEffect, useRef, useState } from 'react'
 import { useUser, SignIn, SignUp } from '@clerk/nextjs'
@@ -68,18 +46,11 @@ const s = (x: object) => x as React.CSSProperties
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface Node {
-  id: string
-  symbol: string
-  composite: number
-  pctRank: number
+  id: string; symbol: string; composite: number; pctRank: number
   bucket: 'Very Low' | 'Low' | 'Moderate' | 'High' | 'Very High'
-  axis1: number
-  axis2: number
-  ev: number
+  axis1: number; axis2: number; ev: number
   oal: 'FCF' | 'NI' | 'EBIT' | 'Revenue'
-  evBand: number
-  x: number
-  y: number
+  evBand: number; x: number; y: number
 }
 
 interface RegimeData {
@@ -116,46 +87,31 @@ const DESCENT_LEVELS = [
 
 const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as const
 
-interface TrajectoryRecord {
-  symbol: string; current_bucket: string
-  composite_score: number | null; dwell_months: number
-  direction: 'improving' | 'stable' | 'deteriorating'
-}
-
+// WELL_DATA — confirmed from Scripts 25, 26, 27
 const WELL_DATA = [
   { id: 'VH', label: 'Very High', col: E.VH,
-    median: -9.6,  std: 42, skew: -0.8,
-    mass: 0.0628, dwell_med: 16, dwell_p90: 64, count: 362,
+    median: -9.6,  std: 42, skew: -0.8, count: 362,
     lossRate: 39.6, desc: 'Detached · Degrading',
     bandSpreads: [null, 32.5, 19.6, 11.3, 3.5, 10.3, 7.5, 5.4] as (number|null)[] },
   { id: 'H',  label: 'High',     col: E.H,
-    median: -2.0,  std: 32, skew: -0.4,
-    mass: 0.010, dwell_med: 5, dwell_p90: 24, count: 424,
+    median: -2.0,  std: 32, skew: -0.4, count: 424,
     lossRate: 28.0, desc: 'Stretched · Unstable',
     bandSpreads: [null, 18, 14, 9, 3, 7, 5, 3.5] as (number|null)[] },
   { id: 'M',  label: 'Moderate', col: E.M,
-    median:  4.5,  std: 28, skew: -0.1,
-    mass: 0, dwell_med: 5, dwell_p90: 19, count: 960,
+    median:  4.5,  std: 28, skew: -0.1, count: 960,
     lossRate: 19.0, desc: 'Moderate · Mixed',
     bandSpreads: [null, 12, 9, 6, 2, 5, 4, 3] as (number|null)[] },
   { id: 'L',  label: 'Low',      col: E.L,
-    median:  7.5,  std: 24, skew:  0.1,
-    mass: 0, dwell_med: 4, dwell_p90: 13, count: 794,
+    median:  7.5,  std: 24, skew:  0.1, count: 794,
     lossRate: 14.0, desc: 'Stable · Positive returns',
     bandSpreads: [null, 8, 6, 4, 1.5, 3, 3, 2] as (number|null)[] },
   { id: 'VL', label: 'Very Low', col: E.VL,
-    median: 11.4,  std: 20, skew:  0.2,
-    mass: 0, dwell_med: 4, dwell_p90: 16, count: 198,
+    median: 11.4,  std: 20, skew:  0.2, count: 198,
     lossRate: 10.5, desc: 'Grounded · Stable',
     bandSpreads: [null, 6, 4, 3, 1, 2, 2, 1.5] as (number|null)[] },
 ]
 
 const BAND_SPREADS_BASE = 21.0
-const DIR_COLOR: Record<string, string> = {
-  improving:     E.VL,
-  stable:        E.body,
-  deteriorating: E.VH,
-}
 
 function erfApprox(x: number): number {
   const t = 1 / (1 + 0.3275911 * Math.abs(x))
@@ -170,14 +126,14 @@ function skewedPdf(x: number, mean: number, std: number, skew: number): number {
 }
 
 const EV_BANDS = [
-  { band: 'all' as Band, label: 'All',       sub: undefined },
-  { band: 1 as Band,     label: 'Band I',    sub: '<$300M' },
-  { band: 2 as Band,     label: 'Band II',   sub: '$300M–$1B' },
-  { band: 3 as Band,     label: 'Band III',  sub: '$1B–$3B' },
-  { band: 4 as Band,     label: 'Band IV',   sub: '$3B–$10B' },
-  { band: 5 as Band,     label: 'Band V',    sub: '$10B–$30B' },
-  { band: 6 as Band,     label: 'Band VI',   sub: '$30B–$100B' },
-  { band: 7 as Band,     label: 'Band VII',  sub: '>$100B' },
+  { band: 'all' as Band, label: 'All',      sub: undefined },
+  { band: 1 as Band,     label: 'Band I',   sub: '<$300M' },
+  { band: 2 as Band,     label: 'Band II',  sub: '$300M–$1B' },
+  { band: 3 as Band,     label: 'Band III', sub: '$1B–$3B' },
+  { band: 4 as Band,     label: 'Band IV',  sub: '$3B–$10B' },
+  { band: 5 as Band,     label: 'Band V',   sub: '$10B–$30B' },
+  { band: 6 as Band,     label: 'Band VI',  sub: '$30B–$100B' },
+  { band: 7 as Band,     label: 'Band VII', sub: '>$100B' },
 ]
 
 const OAL_RUNGS = [
@@ -188,6 +144,15 @@ const OAL_RUNGS = [
   { key: 'FCF'     as OALKey, label: 'FCF',     sub: 'Deepest' },
 ]
 
+// OAL median adjustments for Gravitational Field filter integration
+const OAL_MED_ADJ: Record<string, Record<string, number>> = {
+  FCF:     { VH: +2.5, VL: +3.2 },
+  NI:      { VH: +0.5, VL: +0.8 },
+  EBIT:    { VH: -0.5, VL: -0.2 },
+  Revenue: { VH: -5.0, VL: -4.5 },
+  all:     {},
+}
+
 function makeLCG(seed: number) {
   let s = seed >>> 0
   return function () {
@@ -196,7 +161,6 @@ function makeLCG(seed: number) {
   }
 }
 
-// Fix 1: bucketColor() unified with E tokens — eliminates split color system
 function bucketColor(bucket: string): string {
   switch (bucket) {
     case 'Very Low':  return E.VL
@@ -205,6 +169,18 @@ function bucketColor(bucket: string): string {
     case 'High':      return E.H
     case 'Very High': return E.VH
     default:          return E.sec
+  }
+}
+
+// Maps Node.bucket to WELL_DATA id — used for GF hover sync
+function bucketToId(bucket: string): string {
+  switch (bucket) {
+    case 'Very High': return 'VH'
+    case 'High':      return 'H'
+    case 'Moderate':  return 'M'
+    case 'Low':       return 'L'
+    case 'Very Low':  return 'VL'
+    default:          return 'M'
   }
 }
 
@@ -405,28 +381,28 @@ function SectionHeader({ lucas, label, sub }: { lucas: number; label: string; su
   )
 }
 
-// ─── Section 1 Left Panel: Gravitational Potential Wells ─────────────────────
+// ─── Gravitational Field Panel (right panel) ──────────────────────────────────
+//
+// Distribution curves only — no tabs, no Companies view.
+// svgRef: passed from PlatformPage so constellation hover can toggle classes
+//         on this SVG directly (zero React state involvement).
+//
+// Hover CSS pattern:
+//   .gf-has-hover .gf-curve            { opacity: 0.12 !important }
+//   .gf-has-hover .gf-curve.gf-active  { opacity: 1.0  !important }
+//
+// Each curve group has: className="gf-curve" data-bucket={b.id}
+// Constellation mouseenter fires: add .gf-has-hover to SVG + .gf-active to bucket group
 
-interface WellsNode { symbol: string; bucket: string; score: number; dwell: number; dir: string }
-
-const OAL_MED_ADJ: Record<string, Record<string, number>> = {
-  FCF:     { VH: +2.5, VL: +3.2 },
-  NI:      { VH: +0.5, VL: +0.8 },
-  EBIT:    { VH: -0.5, VL: -0.2 },
-  Revenue: { VH: -5.0, VL: -4.5 },
-  all:     {},
-}
-
-function Section1WellsPanel({
-  selectedBand, selectedOal, trajectories,
+function GravitationalFieldPanel({
+  selectedBand, selectedOal, svgRef,
 }: {
-  selectedBand: Band[]; selectedOal: OALKey[]; trajectories: WellsNode[]
+  selectedBand: Band[]
+  selectedOal:  OALKey[]
+  svgRef: React.RefObject<SVGSVGElement | null>
 }) {
-  const svgRef  = useRef<SVGSVGElement | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
-  const [dims, setDims] = useState({ w: 600, h: 440 })
-  // Fix 3: 'both' view restored
-  const [wellsView, setWellsView] = useState<'curves' | 'companies'>('curves')
+  const [dims, setDims] = useState({ w: 600, h: 400 })
 
   useEffect(() => {
     const el = wrapRef.current
@@ -443,10 +419,12 @@ function Section1WellsPanel({
   const PAD = { l: 52, r: 14, t: 36, b: 58 }
   const iW  = W - PAD.l - PAD.r
   const iH  = H - PAD.t - PAD.b
+
   const X_MIN = -90, X_MAX = 80, X_RANGE = X_MAX - X_MIN
   const xPx = (r: number) => PAD.l + ((r - X_MIN) / X_RANGE) * iW
   const STEPS = 300
   const xs = Array.from({ length: STEPS }, (_, i) => X_MIN + (i / (STEPS - 1)) * X_RANGE)
+
   const oalKey  = selectedOal.length  === 1 ? selectedOal[0]  : 'all'
   const bandKey = selectedBand.length === 1 ? selectedBand[0] : 'all'
 
@@ -471,146 +449,87 @@ function Section1WellsPanel({
   const yPx   = (d: number) => PAD.t + iH - (d / maxD) * iH * 0.86
   const baseY = PAD.t + iH
 
-  const MAX_DWELL = Math.max(1, ...trajectories.map(t => t.dwell))
-  const dotY = (dwell: number) => {
-    const t = Math.log(dwell + 1) / Math.log(MAX_DWELL + 1)
-    return PAD.t + iH - t * iH * 0.88
-  }
-  const dotX = (score: number) => PAD.l + score * iW
-
-  // Fix 3: three tabs restored — Fix 9: last tab gets borderRight: 'none'
-  const TABS = [
-    { v: 'curves'    as const, label: 'Distributions' },
-    { v: 'companies' as const, label: 'Companies' },
-  ]
-
   return (
     <div ref={wrapRef} style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' as const }}>
-      <div style={{ display: 'flex', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2 }}>
-        {TABS.map(({ v, label }, idx) => (
-          <button key={v} onClick={() => setWellsView(v)} style={{
-            flex: 1, fontFamily: E.mono, fontSize: 11, fontWeight: wellsView === v ? 700 : 400,
-            letterSpacing: '0.12em', padding: '7px 0', border: 'none',
-            borderBottom: `2px solid ${wellsView === v ? E.gold : 'transparent'}`,
-            // Fix 9: no right border on last tab
-            borderRight: idx < TABS.length - 1 ? `1px solid ${E.bdr2}` : 'none',
-            background: wellsView === v ? 'rgba(197,162,74,0.06)' : 'transparent',
-            color: wellsView === v ? E.gold : E.sec,
-            cursor: 'pointer', textTransform: 'uppercase' as const,
-          }}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <svg ref={svgRef} style={{ display: 'block', width: '100%', flex: 1 }} viewBox={`0 0 ${W} ${H}`}>
+      <svg
+        ref={svgRef}
+        style={{ display: 'block', width: '100%', flex: 1 }}
+        viewBox={`0 0 ${W} ${H}`}
+      >
         <rect width={W} height={H} fill={E.bg} />
 
-        {wellsView === 'companies' ? (
-          [0, 25, 50, 75, 100].map(v => {
-            const x = PAD.l + (v / 100) * iW
-            return (
-              <g key={v}>
-                <line x1={x} y1={PAD.t} x2={x} y2={PAD.t + iH} stroke={v === 50 ? E.bdr3 : E.bdr2} strokeWidth={v === 50 ? 1 : 0.4} />
-                <text x={x} y={PAD.t + iH + 14} textAnchor="middle" fontFamily={E.mono} fontSize={11} fill={E.sec}>{v}</text>
-              </g>
-            )
-          })
-        ) : (
-          [-75, -50, -25, 0, 25, 50, 75].map(v => (
-            <g key={v}>
-              <line x1={xPx(v)} y1={PAD.t} x2={xPx(v)} y2={PAD.t + iH} stroke={v === 0 ? E.bdr3 : E.bdr2} strokeWidth={v === 0 ? 1 : 0.4} />
-              <text x={xPx(v)} y={PAD.t + iH + 14} textAnchor="middle" fontFamily={E.mono} fontSize={11} fill={E.sec}>{v === 0 ? '0%' : `${v}%`}</text>
-            </g>
-          ))
-        )}
+        {/* Return axis grid */}
+        {[-75, -50, -25, 0, 25, 50, 75].map(v => (
+          <g key={v}>
+            <line x1={xPx(v)} y1={PAD.t} x2={xPx(v)} y2={PAD.t + iH} stroke={v === 0 ? E.bdr3 : E.bdr2} strokeWidth={v === 0 ? 1 : 0.4} />
+            <text x={xPx(v)} y={PAD.t + iH + 14} textAnchor="middle" fontFamily={E.mono} fontSize={11} fill={E.sec}>{v === 0 ? '0%' : `${v}%`}</text>
+          </g>
+        ))}
 
-        {wellsView !== 'companies' && (
-          <>
-            <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH} stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
-            <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end" fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>−25% severe loss threshold</text>
-          </>
-        )}
+        {/* −25% severe loss threshold */}
+        <line x1={xPx(-25)} y1={PAD.t} x2={xPx(-25)} y2={PAD.t + iH} stroke={E.VH} strokeWidth={0.7} strokeDasharray="2,5" opacity={0.4} />
+        <text x={xPx(-25) - 5} y={PAD.t + 13} textAnchor="end" fontFamily={E.mono} fontSize={11} fill={E.VH} opacity={0.55}>−25% severe loss threshold</text>
 
+        {/* X axis label */}
         <text x={PAD.l + iW / 2} y={H - 8} textAnchor="middle" fontFamily={E.mono} fontSize={11} letterSpacing="0.12em" fill={E.sec}>
-          {wellsView === 'companies' ? 'COMPOSITE RISK SCORE →' : '12-MONTH FORWARD RETURN →'}
+          12-MONTH FORWARD RETURN →
         </text>
 
-        {/* Curves — shown in 'curves' and 'both' */}
-        {(wellsView === 'curves') && (
-          <>
-            {[...curves].reverse().map(b => {
-              const pts = xs.map((x, i) => `${xPx(x)},${yPx(b.ys[i])}`).join(' ')
-              return <polygon key={`fill-${b.id}`} points={`${xPx(xs[0])},${baseY} ${pts} ${xPx(xs[xs.length-1])},${baseY}`} fill={b.col} opacity={b.id === 'VH' ? 0.10 : 0.07} />
-            })}
-            {[...curves].reverse().map(b => {
-              const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xPx(x)},${yPx(b.ys[i])}`).join(' ')
-              return (
-                <g key={`curve-${b.id}`}>
-                  {(b.id === 'VH' || b.id === 'VL') && <path d={d} fill="none" stroke={b.col} strokeWidth={b.id === 'VH' ? 5 : 3} opacity={b.id === 'VH' ? 0.12 : 0.08} strokeLinecap="round" />}
-                  <path d={d} fill="none" stroke={b.col} strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3} opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55} strokeLinecap="round" />
-                </g>
-              )
-            })}
-          </>
+        {/* Band filter annotation */}
+        {bandKey !== 'all' && (
+          <text x={W - PAD.r} y={PAD.t + 13} textAnchor="end" fontFamily={E.mono} fontSize={11} fill={E.gold}>
+            Band {bandKey} · {WELL_DATA[0].bandSpreads[+bandKey]}pp spread
+          </text>
         )}
 
-        {/* Dots — shown in 'companies' and 'both' */}
-        {(wellsView === 'companies') && trajectories.map(t => {
-          const x   = dotX(t.score)
-          const y   = dotY(t.dwell)
-          const col = DIR_COLOR[t.dir] ?? E.sec
+        {/* Distribution curves — each group carries gf-curve class + data-bucket for hover sync */}
+        {/* Area fills — reversed so VH renders over others */}
+        {[...curves].reverse().map(b => {
+          const pts = xs.map((x, i) => `${xPx(x)},${yPx(b.ys[i])}`).join(' ')
           return (
-            <g key={t.symbol}>
-              <circle cx={x} cy={y} r={3.5} fill="none" stroke={bucketColor(t.bucket)} strokeWidth={0.7} opacity={0.35} />
-              <circle cx={x} cy={y} r={2} fill={col} opacity={0.75} />
-            </g>
+            <polygon
+              key={`fill-${b.id}`}
+              className="gf-curve"
+              data-bucket={b.id}
+              points={`${xPx(xs[0])},${baseY} ${pts} ${xPx(xs[xs.length-1])},${baseY}`}
+              fill={b.col}
+              opacity={b.id === 'VH' ? 0.10 : 0.07}
+              style={{ pointerEvents: 'none' }}
+            />
           )
         })}
 
-        {/* Y axis ticks — companies view only */}
-        {wellsView === 'companies' && (() => {
-          const ticks = [1, 6, 12, 24, 48, 100]
+        {/* Curve lines — each is a gf-curve group so opacity transitions apply cleanly */}
+        {[...curves].reverse().map(b => {
+          const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xPx(x)},${yPx(b.ys[i])}`).join(' ')
+          const baseOpacity = b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55
+          const baseWidth   = b.id === 'VH' ? 2.2  : b.id === 'VL' ? 1.8  : 1.3
           return (
-            <>
-              {ticks.map(mo => {
-                const y = dotY(mo)
-                if (y < PAD.t || y > PAD.t + iH) return null
-                return (
-                  <g key={mo}>
-                    <line x1={PAD.l - 4} y1={y} x2={PAD.l} y2={y} stroke={E.sec} strokeWidth={0.5} opacity={0.5} />
-                    <line x1={PAD.l} y1={y} x2={PAD.l + iW} y2={y} stroke={E.bdr2} strokeWidth={0.4} />
-                    <text x={PAD.l - 7} y={y + 4} textAnchor="end" fontFamily={E.mono} fontSize={11} fill={E.sec}>{mo}mo</text>
-                  </g>
-                )
-              })}
-              <text transform="rotate(-90)" x={-(PAD.t + iH / 2)} y={13} textAnchor="middle" fontFamily={E.mono} fontSize={11} letterSpacing="0.1em" fill={E.sec}>MONTHS IN CURRENT BUCKET</text>
-            </>
+            <g key={`curve-${b.id}`} className="gf-curve" data-bucket={b.id}>
+              {/* Glow for VH and VL */}
+              {(b.id === 'VH' || b.id === 'VL') && (
+                <path d={d} fill="none" stroke={b.col} strokeWidth={b.id === 'VH' ? 5 : 3} opacity={b.id === 'VH' ? 0.12 : 0.08} strokeLinecap="round" />
+              )}
+              <path d={d} fill="none" stroke={b.col} strokeWidth={baseWidth} opacity={baseOpacity} strokeLinecap="round" />
+            </g>
           )
-        })()}
+        })}
       </svg>
 
-      {/* Distributions legend */}
-      {(wellsView === 'curves') && (
-        <div style={{ borderTop: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 14px', display: 'flex', flexWrap: 'wrap' as const, gap: '0px 18px', alignItems: 'stretch' }}>
-          {!selectedBand.includes('all') && (
-            <div style={{ width: '100%', marginBottom: 4, fontFamily: E.mono, fontSize: 11, color: E.gold }}>
-              Band {bandKey} · {WELL_DATA[0].bandSpreads[+bandKey]}pp spread
-            </div>
-          )}
-          {curves.map(b => (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '2px 0' }}>
-              <svg width={22} height={11} style={{ flexShrink: 0 }}>
-                <line x1={0} y1={5.5} x2={22} y2={5.5} stroke={b.col} strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3} opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55} />
-              </svg>
-              <span style={{ fontFamily: E.mono, fontSize: 11, fontWeight: b.id === 'VH' ? 700 : 400, color: b.col }}>{b.desc}</span>
-              <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>{b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}% median</span>
-              {b.id === 'VH' && <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>· {b.lossRate}% severe loss · {b.count} companies</span>}
-              {b.id === 'VL' && <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>· None deteriorating</span>}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Legend */}
+      <div style={{ borderTop: `1px solid ${E.bdr2}`, background: E.bg2, padding: '7px 14px', display: 'flex', flexWrap: 'wrap' as const, gap: '0px 18px', alignItems: 'stretch' }}>
+        {curves.map(b => (
+          <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '2px 0' }}>
+            <svg width={22} height={11} style={{ flexShrink: 0 }}>
+              <line x1={0} y1={5.5} x2={22} y2={5.5} stroke={b.col} strokeWidth={b.id === 'VH' ? 2.2 : b.id === 'VL' ? 1.8 : 1.3} opacity={b.id === 'VH' ? 0.92 : b.id === 'VL' ? 0.85 : 0.55} />
+            </svg>
+            <span style={{ fontFamily: E.mono, fontSize: 11, fontWeight: b.id === 'VH' ? 700 : 400, color: b.col }}>{b.desc}</span>
+            <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>{b.adjMedian > 0 ? '+' : ''}{b.adjMedian.toFixed(1)}% median</span>
+            {b.id === 'VH' && <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>· {b.lossRate}% severe loss · {b.count} companies</span>}
+            {b.id === 'VL' && <span style={{ fontFamily: E.mono, fontSize: 11, color: E.sec }}>· None deteriorating</span>}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -627,8 +546,6 @@ const CURRENT_REGIME_ID = 'expansionary'
 
 function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
   const MAX_LOSS = 0.50
-  // Fix 2: gridCols applied to ALL rows — NOW strip, ICIR values, and labels
-  // align with their regime panels below
   const gridCols = REGIME_CONFIRMED.map(r =>
     r.id === CURRENT_REGIME_ID ? '47fr' : '26.5fr'
   ).join(' ')
@@ -641,23 +558,17 @@ function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
         <span style={s({ color: E.sec })}>The structural signal doesn&apos;t negotiate with market conditions.</span>
       </div>
 
-      {/* Row A — NOW strip — Fix 2: proportional columns */}
       <div style={s({ display: 'grid', gridTemplateColumns: gridCols, background: E.bg2 })}>
         {REGIME_CONFIRMED.map((r, i) => {
           const isCurrent = r.id === CURRENT_REGIME_ID
           return (
             <div key={r.id} style={s({ padding: '14px 18px 7px', borderRight: i < 2 ? `1px solid ${E.bdr2}` : 'none', display: 'flex', justifyContent: 'center', minHeight: 40 })}>
-              {isCurrent && (
-                <span style={s({ fontFamily: E.mono, fontSize: 18, fontWeight: 700, color: E.gold, letterSpacing: '0.12em' })}>
-                  NOW · APR 2026
-                </span>
-              )}
+              {isCurrent && <span style={s({ fontFamily: E.mono, fontSize: 18, fontWeight: 700, color: E.gold, letterSpacing: '0.12em' })}>NOW · APR 2026</span>}
             </div>
           )
         })}
       </div>
 
-      {/* Row B — ICIR values — Fix 2: proportional columns */}
       <div style={s({ display: 'grid', gridTemplateColumns: gridCols, background: E.bg2 })}>
         {REGIME_CONFIRMED.map((r, i) => {
           const isCurrent = r.id === CURRENT_REGIME_ID
@@ -671,10 +582,8 @@ function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
         })}
       </div>
 
-      {/* Faint connecting rule */}
       <div style={s({ height: 1, background: E.bdr3 })} />
 
-      {/* Row D — labels — Fix 2: proportional columns */}
       <div style={s({ display: 'grid', gridTemplateColumns: gridCols, background: E.bg2 })}>
         {REGIME_CONFIRMED.map((r, i) => {
           const isCurrent = r.id === CURRENT_REGIME_ID
@@ -688,12 +597,10 @@ function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
         })}
       </div>
 
-      {/* Row E — scale reference */}
       <div style={s({ padding: '5px 22px 7px', borderBottom: `1px solid ${E.bdr2}`, background: E.bg2, display: 'flex', justifyContent: 'center' })}>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>0 = random · −1 = perfect</span>
       </div>
 
-      {/* Regime panels — 47% / 26.5% / 26.5% */}
       <div style={s({ display: 'grid', gridTemplateColumns: gridCols, borderBottom: `1px solid ${E.bdr2}` })}>
         {REGIME_CONFIRMED.map((r, i) => {
           const isCurrent = r.id === CURRENT_REGIME_ID
@@ -720,16 +627,15 @@ function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
                 </div>
                 <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, marginBottom: 7 })}>{r.rel_risk.toFixed(2)}× universe rate</div>
                 {[
-                  { key: 'VH',  rate: r.vh_loss_rate,       color: E.VH },
-                  { key: 'All', rate: r.universe_loss_rate,  color: E.sec },
-                  { key: 'VL',  rate: r.vl_loss_rate,        color: E.VL },
+                  { key: 'VH', rate: r.vh_loss_rate, color: E.VH },
+                  { key: 'All', rate: r.universe_loss_rate, color: E.sec },
+                  { key: 'VL', rate: r.vl_loss_rate, color: E.VL },
                 ].map(({ key, rate, color }) => (
                   <div key={key} style={s({ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 })}>
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 18, flexShrink: 0 })}>{key}</span>
                     <div style={s({ flex: 1, height: 4, background: E.bdr3, position: 'relative' })}>
                       <div style={s({ position: 'absolute', left: 0, top: 0, height: '100%', width: `${(rate / MAX_LOSS) * 100}%`, background: color, opacity: key === 'All' ? 0.45 : 0.75 })} />
                     </div>
-                    {/* Fix from prior round: (rate * 100).toFixed(1) not safePct(rate) */}
                     <span style={s({ fontFamily: E.mono, fontSize: 11, color, width: 29, textAlign: 'right' as const, flexShrink: 0 })}>
                       {(rate * 100).toFixed(1)}%
                     </span>
@@ -746,22 +652,19 @@ function Section2Regimes({ summary }: { summary: RegimeSummary | null }) {
 
 // ─── Section 3: Anchor Levels ────────────────────────────────────────────────
 
-// Fix 5: Revenue descriptor corrected — "Has not yet earned its way to profit" was
-// factually wrong for many Revenue-anchored companies (many are profitable; they simply
-// haven't sustained FCF/NI as the dominant 7yr anchor). Replaced with structural description.
 const RUNG_DEFS = [
   { key: 'Revenue' as OALKey, label: 'Revenue', depth: 'Shallowest anchor',
     desc: 'Valuation rests on top-line growth, not sustained cash generation.',
-    weight: 4.3,  ret: -17.3, hasRet: true,  strokeW: 1.5, widthPct: 42 },
-  { key: 'EBIT'    as OALKey, label: 'EBIT',           depth: 'Second anchor',
+    weight: 4.3, ret: -17.3, hasRet: true, strokeW: 1.5, widthPct: 42 },
+  { key: 'EBIT' as OALKey, label: 'EBIT', depth: 'Second anchor',
     desc: 'Generating operating income before financing and taxes.',
-    weight: 0.1,  ret: null,  hasRet: false, strokeW: 2.4, widthPct: 58 },
-  { key: 'NI'      as OALKey, label: 'Net Income',     depth: 'Third anchor',
+    weight: 0.1, ret: null, hasRet: false, strokeW: 2.4, widthPct: 58 },
+  { key: 'NI' as OALKey, label: 'Net Income', depth: 'Third anchor',
     desc: 'Sustained profitability after all obligations — earnings, not promises.',
-    weight: 43.8, ret: null,  hasRet: false, strokeW: 3.8, widthPct: 76 },
-  { key: 'FCF'     as OALKey, label: 'Free Cash Flow', depth: 'Deepest anchor',
+    weight: 43.8, ret: null, hasRet: false, strokeW: 3.8, widthPct: 76 },
+  { key: 'FCF' as OALKey, label: 'Free Cash Flow', depth: 'Deepest anchor',
     desc: 'Actual cash generated after capital expenditure. Gravity.',
-    weight: 51.8, ret: 10.2, hasRet: true,  strokeW: 6.0, widthPct: 100 },
+    weight: 51.8, ret: 10.2, hasRet: true, strokeW: 6.0, widthPct: 100 },
 ]
 
 function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedOal: OALKey }) {
@@ -774,16 +677,13 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
 
   return (
     <section>
-      {/* Fix 7: header sub-label differentiated from insight line */}
       <SectionHeader lucas={4} label="Anchor Levels" sub="Seven years of operational history. One dominant anchor." />
-
       <div style={s({ padding: '14px 22px 12px', borderBottom: `1px solid ${E.bdr}`, fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65 })}>
         The operational anchor a company has built predicts the shape of its returns.{' '}
         <span style={s({ color: E.VH })}>Revenue-anchored: −17.3% median.</span>{' '}
         <span style={s({ color: E.VL })}>FCF-anchored: +10.2% median.</span>{' '}
         <span style={s({ color: E.sec })}>Same universe. Same period. Different structures.</span>
       </div>
-
       <div>
         {rungs.map((rung, i) => {
           const isSelected = selectedOal === rung.key
@@ -797,12 +697,8 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                   <div style={s({ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 })}>
                     <div style={s({ height: `${rung.strokeW}px`, width: `${rung.widthPct * 0.72}px`, background: isSelected ? E.gold : isFCF ? '#8a7234' : E.bdr3, borderRadius: '1px', flexShrink: 0, transition: 'background 0.22s' })} />
                   </div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: isSelected ? E.gold : E.sec, marginBottom: 4 })}>
-                    {rung.depth}
-                  </div>
-                  <div style={s({ fontFamily: E.mono, fontSize: 18, fontWeight: isFCF || isSelected ? 700 : 400, color: isSelected ? E.text : E.body, marginBottom: 5, letterSpacing: '-0.01em' })}>
-                    {rung.label}
-                  </div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: isSelected ? E.gold : E.sec, marginBottom: 4 })}>{rung.depth}</div>
+                  <div style={s({ fontFamily: E.mono, fontSize: 18, fontWeight: isFCF || isSelected ? 700 : 400, color: isSelected ? E.text : E.body, marginBottom: 5, letterSpacing: '-0.01em' })}>{rung.label}</div>
                   <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>{rung.weight}% of composite weight</div>
                 </div>
                 <div style={s({ padding: '16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' })}>
@@ -819,9 +715,7 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
                       const short = b === 'Very Low' ? 'VL' : b === 'Low' ? 'L' : b === 'Moderate' ? 'M' : b === 'High' ? 'H' : 'VH'
                       return (
                         <div key={b} style={s({ flex: pct, display: 'flex', flexDirection: 'column', alignItems: bi === 0 ? 'flex-start' : bi === 4 ? 'flex-end' : 'center', gap: 2 })}>
-                          <span style={s({ fontFamily: E.mono, fontSize: 11, color: bucketColor(b), fontWeight: (isFCF && b === 'Very Low') || (isRevenue && b === 'Very High') ? 700 : 400 })}>
-                            {pct.toFixed(0)}%
-                          </span>
+                          <span style={s({ fontFamily: E.mono, fontSize: 11, color: bucketColor(b), fontWeight: (isFCF && b === 'Very Low') || (isRevenue && b === 'Very High') ? 700 : 400 })}>{pct.toFixed(0)}%</span>
                           <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.06em' })}>{short}</span>
                         </div>
                       )
@@ -857,7 +751,6 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
           )
         })}
       </div>
-
       <div style={s({ padding: '12px 22px', borderBottom: `1px solid ${E.bdr2}`, display: 'flex', alignItems: 'baseline', gap: 11, background: E.bg2 })}>
         <span style={s({ fontFamily: E.mono, fontSize: 29, fontWeight: 700, color: E.gold, letterSpacing: '-0.02em' })}>27.6pp</span>
         <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.body })}>spread · FCF vs Revenue · consistent across all market regimes</span>
@@ -869,7 +762,6 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
 // ─── Section 4: EV Quantile Bands ────────────────────────────────────────────
 
 function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand: Band }) {
-  // Fix 6: Band V vhMedian -0.0 → 0.0 (source clarity; -0.0 is a valid float but confusing)
   const BAND_DATA = [
     { band: 1, label: 'Band I',   sub: '<$300M',      vlMedian:  9.3, vhMedian: -23.3, spread: 32.5 },
     { band: 2, label: 'Band II',  sub: '$300M–$1B',   vlMedian:  8.0, vhMedian: -11.6, spread: 19.6 },
@@ -879,7 +771,6 @@ function Section4EVBands({ nodes, selectedBand }: { nodes: Node[]; selectedBand:
     { band: 6, label: 'Band VI',  sub: '$30B–$100B',  vlMedian: 10.6, vhMedian:   3.1, spread:  7.5 },
     { band: 7, label: 'Band VII', sub: '>$100B',       vlMedian:  9.0, vhMedian:   3.6, spread:  5.4 },
   ]
-
   const W = 800, H = 220
   const PAD = { l: 47, r: 11, t: 22, b: 54 }
   const iW  = W - PAD.l - PAD.r
@@ -1016,47 +907,49 @@ export default function PlatformPage() {
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
   const [derivedNodes,  setDerivedNodes]  = useState<Node[]>([])
   const [vizReady,      setVizReady]      = useState(false)
-  const [trajectories,  setTrajectories]  = useState<{symbol:string;bucket:string;score:number;dwell:number;dir:string}[]>([])
 
-  const selectedBandRef    = useRef<Band[]>(['all'])
-  const selectedOalRef     = useRef<OALKey[]>(['all'])
-  const hoveredIdRef       = useRef<string | null>(null)
-  const nodesRef           = useRef<Node[]>([])
-  const d3ReadyRef         = useRef(false)
-  const scatSvgRef         = useRef<SVGSVGElement | null>(null)
-  const containerRef       = useRef<HTMLDivElement | null>(null)
-  const evBandRef          = useRef<HTMLDivElement | null>(null)
-  const oalRungRef         = useRef<HTMLDivElement | null>(null)
-  const regimeFetchRef     = useRef<Promise<RegimeSummary | null> | null>(null)
-  const trajectoryFetchRef = useRef<Promise<any[] | null> | null>(null)
+  const selectedBandRef  = useRef<Band[]>(['all'])
+  const selectedOalRef   = useRef<OALKey[]>(['all'])
+  const hoveredIdRef     = useRef<string | null>(null)
+  const nodesRef         = useRef<Node[]>([])
+  const d3ReadyRef       = useRef(false)
+  // Constellation SVG — D3 places nodes here, filter/hover CSS applied here
+  const conSvgRef        = useRef<SVGSVGElement | null>(null)
+  // Gravitational Field SVG — hover sync class toggle fired from constellation events
+  const gfSvgRef         = useRef<SVGSVGElement | null>(null)
+  const containerRef     = useRef<HTMLDivElement | null>(null)
+  const evBandRef        = useRef<HTMLDivElement | null>(null)
+  const oalRungRef       = useRef<HTMLDivElement | null>(null)
+  const regimeFetchRef   = useRef<Promise<RegimeSummary | null> | null>(null)
 
+  // refreshNodes — CSS class toggle on constellation SVG (same pattern as prior scatter)
   function refreshNodes() {
     const hId  = hoveredIdRef.current
     const oal  = selectedOalRef.current
     const band = selectedBandRef.current
     const filterActive = !oal.includes('all') || !band.includes('all')
-    const svgs = [scatSvgRef.current]
-    svgs.forEach(svg => {
-      if (!svg) return
-      svg.querySelectorAll('.is-hovered').forEach(el => el.classList.remove('is-hovered'))
-      if (hId) { svg.classList.add('has-hover'); svg.querySelectorAll(`[data-id="${hId}"]`).forEach(el => el.classList.add('is-hovered')) }
-      else { svg.classList.remove('has-hover') }
-      if (filterActive) {
-        svg.classList.add('filter-active')
-        svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
-        const oalOk  = oal.includes('all')  ? null : oal.map(o => `[data-oal="${o}"]`).join(',')
-        const bandOk = band.includes('all') ? null : band.map(b => `[data-evband="${b}"]`).join(',')
-        const sel = [oalOk, bandOk].filter(Boolean).join('')
-        if (sel) {
-          sel.split(',').flatMap(s => [`.sn-wrap${s.trim()}`]).forEach(s => {
-            try { svg.querySelectorAll(s).forEach(el => el.classList.add('filter-match')) } catch(e) {}
-          })
-        }
-      } else {
-        svg.classList.remove('filter-active')
-        svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
+    const svg = conSvgRef.current
+    if (!svg) return
+
+    svg.querySelectorAll('.is-hovered').forEach(el => el.classList.remove('is-hovered'))
+    if (hId) { svg.classList.add('has-hover'); svg.querySelectorAll(`[data-id="${hId}"]`).forEach(el => el.classList.add('is-hovered')) }
+    else { svg.classList.remove('has-hover') }
+
+    if (filterActive) {
+      svg.classList.add('filter-active')
+      svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
+      const oalOk  = oal.includes('all')  ? null : oal.map(o => `[data-oal="${o}"]`).join(',')
+      const bandOk = band.includes('all') ? null : band.map(b => `[data-evband="${b}"]`).join(',')
+      const sel = [oalOk, bandOk].filter(Boolean).join('')
+      if (sel) {
+        sel.split(',').flatMap(s => [`.sn-wrap${s.trim()}`]).forEach(s => {
+          try { svg.querySelectorAll(s).forEach(el => el.classList.add('filter-match')) } catch(e) {}
+        })
       }
-    })
+    } else {
+      svg.classList.remove('filter-active')
+      svg.querySelectorAll('.filter-match').forEach(el => el.classList.remove('filter-match'))
+    }
   }
 
   function selectBand(band: Band) {
@@ -1104,78 +997,90 @@ export default function PlatformPage() {
       regimeFetchRef.current.then(data => { if (data) setRegimeSummary(data) })
     }
 
-    if (!trajectoryFetchRef.current) {
-      trajectoryFetchRef.current = fetch(`${DATA_BASE}/data/28_company_trajectories.json`)
-        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
-        .catch(() => null)
-      trajectoryFetchRef.current.then(data => {
-        if (!data) return
-        const by_bucket: Record<string, any[]> = {}
-        for (const r of data) { if (!by_bucket[r.current_bucket]) by_bucket[r.current_bucket] = []; by_bucket[r.current_bucket].push(r) }
-        const sampled = Object.values(by_bucket).flatMap(arr => arr.sort((a: any, b: any) => b.dwell_months - a.dwell_months).slice(0, 80))
-        setTrajectories(sampled.map((r: any) => ({ symbol: r.symbol, bucket: r.current_bucket, score: r.composite_score ?? 0.5, dwell: r.dwell_months, dir: r.direction })))
-      })
-    }
-
-    function initViz() {
+    async function initViz() {
       if (d3ReadyRef.current) { setVizReady(true); return }
       d3ReadyRef.current = true
+
       try {
         const d3 = (window as any).d3
         if (!d3) { console.error('[TCS] D3 not available'); return }
+
+        // Generate synthetic nodes — used by Sections 3 & 4 (OAL rungs, EV bands)
         const nodes: Node[] = generateNodes(5200)
-        nodesRef.current = nodes; setDerivedNodes([...nodes])
-        const scatEl = scatSvgRef.current
-        if (!scatEl) { console.error('[TCS] Scatter SVG ref null'); return }
-        const panelW = Math.max(300, scatEl.getBoundingClientRect().width)
-        const panelH = 440
-        const PAD    = { l: 47, r: 11, t: 11, b: 47 }
-        const innerW = panelW - PAD.l - PAD.r
-        const innerH = panelH - PAD.t - PAD.b
-        const scatSvg = d3.select(scatSvgRef.current).attr('viewBox', `0 0 ${panelW} ${panelH}`).attr('preserveAspectRatio', 'none')
-        const xScale  = d3.scaleLinear().domain([0, 100]).range([0, innerW])
-        const yScale  = d3.scaleLinear().domain([0, 100]).range([innerH, 0])
-        const chart   = scatSvg.append('g').attr('transform', `translate(${PAD.l},${PAD.t})`)
-        ;[
-          { x: 0,        y: innerH/2, w: innerW/2, h: innerH/2, fill: E.VL,  o: 0.025 },
-          { x: innerW/2, y: innerH/2, w: innerW/2, h: innerH/2, fill: E.M,   o: 0.018 },
-          { x: 0,        y: 0,        w: innerW/2, h: innerH/2, fill: E.M,   o: 0.018 },
-          { x: innerW/2, y: 0,        w: innerW/2, h: innerH/2, fill: E.VH,  o: 0.030 },
-        ].forEach(q => chart.append('rect').attr('x', q.x).attr('y', q.y).attr('width', q.w).attr('height', q.h).attr('fill', q.fill).attr('opacity', q.o))
-        ;[25, 50, 75].forEach(v => {
-          chart.append('line').attr('x1', xScale(v)).attr('y1', 0).attr('x2', xScale(v)).attr('y2', innerH).attr('stroke', E.bdr2).attr('stroke-width', 0.5)
-          chart.append('line').attr('x1', 0).attr('y1', yScale(v)).attr('x2', innerW).attr('y2', yScale(v)).attr('stroke', E.bdr2).attr('stroke-width', 0.5)
-        })
-        chart.append('line').attr('x1', xScale(0)).attr('y1', yScale(0)).attr('x2', xScale(100)).attr('y2', yScale(100)).attr('stroke', E.ghost).attr('stroke-width', 0.55).attr('stroke-dasharray', '4,5').attr('opacity', 0.55)
-        const applyAxisStyle = (g: any) => g
-          .call((gg: any) => gg.select('.domain').attr('stroke', E.bdr3).attr('stroke-width', 0.4))
-          .call((gg: any) => gg.selectAll('.tick text').attr('fill', E.sec).attr('font-size', 11).attr('font-family', E.mono))
-          .call((gg: any) => gg.selectAll('.tick line').attr('stroke', E.bdr3).attr('stroke-width', 0.4))
-        chart.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(xScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)).call(applyAxisStyle)
-        chart.append('g').call(d3.axisLeft(yScale).tickValues([0, 25, 50, 75, 100]).tickSize(3)).call(applyAxisStyle)
-        chart.append('text').attr('x', innerW / 2).attr('y', innerH + 29).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DETACHMENT →')
-        chart.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -29).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-family', E.mono).attr('letter-spacing', '0.12em').attr('fill', E.sec).text('ANCHOR DEGRADATION →')
-        ;[
-          { x: 6,        y: innerH - 6, txt: 'Grounded · Stable',      col: E.VL,  a: 'start', o: 0.45 },
-          { x: innerW-6, y: innerH - 6, txt: 'Stretched · Stable',     col: E.M,   a: 'end',   o: 0.35 },
-          { x: 6,        y: 12,         txt: 'Grounded · Degrading',    col: E.M,   a: 'start', o: 0.35 },
-          { x: innerW-6, y: 12,         txt: 'Highest structural risk', col: E.VH,  a: 'end',   o: 0.65 },
-        ].forEach(q => chart.append('text').attr('x', q.x).attr('y', q.y).attr('text-anchor', q.a).attr('font-size', 11).attr('font-family', E.mono).attr('fill', q.col).attr('opacity', q.o).text(q.txt))
-        const snGroups = chart.selectAll('.sn-wrap').data(nodesRef.current, (d: Node) => d.id)
+        nodesRef.current = nodes
+        setDerivedNodes([...nodes])
+
+        // Fetch precomputed constellation positions (W=542, H=440)
+        const posRes = await fetch(`${DATA_BASE}/data/constellation_positions.json`).catch(() => null)
+        const posData: { id: string; x: number; y: number }[] | null =
+          posRes?.ok ? await posRes.json().catch(() => null) : null
+
+        if (!posData) { console.error('[TCS] constellation_positions.json missing or invalid'); return }
+
+        const posMap = new Map(posData.map(p => [p.id, { x: p.x, y: p.y }]))
+
+        const conEl = conSvgRef.current
+        if (!conEl) { console.error('[TCS] Constellation SVG ref null'); return }
+
+        // Constellation SVG — viewBox matches precompute canvas (W=542, H=440)
+        d3.select(conEl)
+          .attr('viewBox', '0 0 542 440')
+          .attr('preserveAspectRatio', 'xMidYMid meet')
+
+        // Place nodes at precomputed positions
+        const cnGroups = d3.select(conEl).selectAll('.sn-wrap')
+          .data(nodesRef.current.filter(n => posMap.has(n.id)), (d: Node) => d.id)
           .join('g')
-          .attr('class', (d: Node) => { const b = d.bucket; return `sn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}` })
+          .attr('class', (d: Node) => {
+            const b = d.bucket
+            return `sn-wrap node-${b === 'Very High' ? 'vh' : b === 'High' ? 'h' : b === 'Very Low' ? 'vl' : b === 'Low' ? 'lo' : 'mod'}`
+          })
           .attr('data-id',     (d: Node) => d.id)
           .attr('data-oal',    (d: Node) => d.oal)
           .attr('data-evband', (d: Node) => String(d.evBand))
-          .attr('transform',   (d: Node) => `translate(${xScale(d.axis1)},${yScale(d.axis2)})`)
-        snGroups.append('circle').attr('class', 'sn').datum((d: any) => d)
+          .attr('transform',   (d: Node) => {
+            const p = posMap.get(d.id)!
+            return `translate(${p.x},${p.y})`
+          })
+
+        cnGroups.append('circle')
           .attr('r',    (d: Node) => nodeRadius(d.ev ?? 1e9))
           .attr('fill', (d: Node) => bucketColor(d.bucket))
-        snGroups
-          .on('mouseenter', function(event: MouseEvent, d: Node) { hoveredIdRef.current = d.id; refreshNodes(); setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d }) })
-          .on('mousemove',  function(event: MouseEvent)           { setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null) })
-          .on('mouseleave', function()                             { hoveredIdRef.current = null; refreshNodes(); setTooltip(null) })
-      } finally { setVizReady(true) }
+
+        cnGroups
+          .on('mouseenter', function(event: MouseEvent, d: Node) {
+            hoveredIdRef.current = d.id
+            refreshNodes()
+            setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
+
+            // GF hover sync — elevate the bucket's curve, recede others
+            const bid   = bucketToId(d.bucket)
+            const gfEl  = gfSvgRef.current
+            if (gfEl) {
+              gfEl.classList.add('gf-has-hover')
+              gfEl.querySelectorAll('.gf-active').forEach(el => el.classList.remove('gf-active'))
+              gfEl.querySelectorAll(`.gf-curve[data-bucket="${bid}"]`).forEach(el => el.classList.add('gf-active'))
+            }
+          })
+          .on('mousemove', function(event: MouseEvent) {
+            setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
+          })
+          .on('mouseleave', function() {
+            hoveredIdRef.current = null
+            refreshNodes()
+            setTooltip(null)
+
+            // GF hover sync — restore all curves
+            const gfEl = gfSvgRef.current
+            if (gfEl) {
+              gfEl.classList.remove('gf-has-hover')
+              gfEl.querySelectorAll('.gf-active').forEach(el => el.classList.remove('gf-active'))
+            }
+          })
+
+      } finally {
+        setVizReady(true)
+      }
     }
 
     function runInit() { setTimeout(initViz, 50) }
@@ -1213,12 +1118,23 @@ export default function PlatformPage() {
         .node-vl  { animation: pulse-vl  2069ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
+
+        /* Constellation hover */
         .has-hover .sn-wrap { opacity: 0.06 !important; animation: none !important; }
         .has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
+        /* Constellation filter */
         .filter-active .sn-wrap { opacity: 0.05 !important; animation: none !important; }
         .filter-active .sn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
         .filter-active.has-hover .sn-wrap.filter-match { opacity: 0.20 !important; animation: unset !important; }
         .filter-active.has-hover .sn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
+
+        /* Gravitational Field hover sync
+           When a constellation node is hovered, the corresponding bucket curve
+           elevates to full opacity; all others recede to near-invisible.
+           Transition is instant — class toggle fires synchronously on mouseenter. */
+        .gf-curve { transition: opacity 80ms ease; }
+        .gf-has-hover .gf-curve { opacity: 0.10 !important; }
+        .gf-has-hover .gf-curve.gf-active { opacity: 1 !important; }
       `}</style>
 
       <nav style={s({ height: 47, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 18px', borderBottom: `1px solid ${E.bdr2}`, background: E.bg, position: 'sticky', top: 0, zIndex: 40 })}>
@@ -1274,35 +1190,51 @@ export default function PlatformPage() {
         })}
       </div>
 
+      {/* Section 1 orientation */}
       <div style={s({ padding: '14px 22px 12px', borderBottom: `1px solid ${E.bdr}`, background: E.bg2 })}>
         <div style={s({ display: 'flex', alignItems: 'baseline', gap: 18, marginBottom: 9, flexWrap: 'wrap' as const })}>
           <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.VH, fontWeight: 700 })}>9.4% of companies. 38.6% of catastrophic losses.</span>
           <span style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec })}>The median VH company has been in this condition 5 months before the market prices the risk.</span>
         </div>
         <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.body, lineHeight: 1.65, maxWidth: 920 })}>
-          Left: return distributions by structural bucket — the shape of each well is the gravitational field.{' '}
-          <span style={s({ color: E.sec })}>Right: precise structural coordinates. Together: where each company is and what that position costs.</span>
+          Left: every U.S. equity placed by structural condition. Right: the return each condition has produced.{' '}
+          <span style={s({ color: E.sec })}>The same reality from two sides — where a company sits, and what sitting there has cost.</span>
         </div>
       </div>
 
+      {/* Panel headers */}
       <div style={s({ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1px solid ${E.bdr2}`, background: E.bg3 })}>
         <div style={s({ padding: '7px 18px', borderRight: `1px solid ${E.bdr2}` })}>
           <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Field</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>Return distributions by structural bucket · Company positioning by composite score and dwell</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>
+            The full U.S. equity universe, organized by structural condition · Neighbors share a condition, not a sector
+          </div>
         </div>
         <div style={s({ padding: '7px 18px' })}>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Structural Risk Map · Detachment × Degradation</div>
-          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>Top-right = highest structural risk</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' as const, color: E.body })}>Return Field</div>
+          <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 3 })}>
+            Realized 12-month forward return by structural bucket · 17 years, 285,245 observations
+          </div>
         </div>
       </div>
 
+      {/* Section 1: Dual panels — Constellation Map (left) + Gravitational Field (right) */}
       <div style={s({ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, borderBottom: `1px solid ${E.bdr2}` })}>
+        {/* Left — Constellation Map: D3 places nodes from constellation_positions.json */}
         <div style={s({ borderRight: `1px solid ${E.bdr2}`, background: E.bg, overflow: 'hidden' })}>
-          <Section1WellsPanel selectedBand={selectedBand} selectedOal={selectedOal} trajectories={trajectories} />
+          <svg ref={conSvgRef} style={s({ display: 'block', width: '100%', height: '100%', cursor: 'crosshair' })} />
         </div>
+
+        {/* Right — Gravitational Field: React renders curves, hover sync via gfSvgRef */}
         <div style={s({ background: E.bg, overflow: 'hidden' })}>
-          <svg ref={scatSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
+          <GravitationalFieldPanel
+            selectedBand={selectedBand}
+            selectedOal={selectedOal}
+            svgRef={gfSvgRef}
+          />
         </div>
+
+        {/* Loading overlay */}
         {!vizReady && (
           <div style={s({ position: 'absolute', inset: 0, background: E.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 5 })}>
             <div style={s({ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 18 })}>
@@ -1313,7 +1245,7 @@ export default function PlatformPage() {
               })}
             </div>
             <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, letterSpacing: '0.14em' })}>Mapping structural field · ~5,200 equities</div>
-            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 5, letterSpacing: '0.1em' })}>Computing structural neighborhoods</div>
+            <div style={s({ fontFamily: E.mono, fontSize: 11, color: E.sec, marginTop: 5, letterSpacing: '0.1em' })}>Loading constellation positions</div>
           </div>
         )}
       </div>
@@ -1343,14 +1275,10 @@ export default function PlatformPage() {
         </span>
       </div>
 
-      {/* Section 2 — unconditional */}
       <Section2Regimes summary={regimeSummary} />
-
       {derivedNodes.length > 0 && <Section3AnchorLevels nodes={derivedNodes} selectedOal={selectedOal.length === 1 ? selectedOal[0] : 'all'} />}
       {derivedNodes.length > 0 && <Section4EVBands nodes={derivedNodes} selectedBand={selectedBand.length === 1 ? selectedBand[0] : 'all'} />}
-
       {!isPaid && <PaidWall />}
-
       {isPaid && (
         <section style={s({ borderBottom: `1px solid ${E.bdr2}` })}>
           <SectionHeader lucas={11} label="Sectors" sub="GICS sector breakdown · Coming in next sprint" />
@@ -1358,7 +1286,7 @@ export default function PlatformPage() {
         </section>
       )}
 
-      {/* Fix 4: Tooltip — ticker/symbol restored in both paid and free tiers */}
+      {/* Tooltip */}
       {tooltip && (() => {
         const n = tooltip.node
         const oalFull: Record<string, string> = { FCF: 'Free Cash Flow', NI: 'Net Income', EBIT: 'Operating Income', Revenue: 'Revenue' }
