@@ -14,21 +14,22 @@
 import { forceSimulation, forceManyBody, forceCollide, forceX, forceY } from 'd3-force'
 import { writeFileSync } from 'fs'
 
-const W = 843, H = 521
+const W = 690, H = 440
 
 // ─── Per-bucket attraction — skew-derived, strong enough to hold diagonal ─────
 // Golden ratio decay — each step ≈ 0.618× previous. VH/VL ratio = 6.9×.
+// Golden ratio decay — each step ≈ 0.618× previous
 const BUCKET_ATTRACTION = {
   'Very High': 0.76,
-  'High':      0.76,
-  'Moderate':  0.47,
-  'Low':       0.29,
-  'Very Low':  0.29,
+  'High':      0.47,
+  'Moderate':  0.29,
+  'Low':       0.18,
+  'Very Low':  0.11,
 }
 
 // ─── nodeRadius — must match page.tsx exactly ─────────────────────────────────
 function makeNodeRadius(evLo, evHi) {
-  const MIN_R = 1.8, MAX_R = 7.6
+  const MIN_R = 1.1, MAX_R = 4.7
   return function(ev) {
     const t = Math.max(0, Math.min(1,
       (Math.log(Math.max(ev, evLo)) - Math.log(evLo)) /
@@ -39,8 +40,8 @@ function makeNodeRadius(evLo, evHi) {
 }
 
 // ─── Diagonal mapping ─────────────────────────────────────────────────────────
-function diagonalX(composite) { return W * (0.24 + 0.52 * (composite / 100)) }
-function diagonalY(composite) { return H * (0.76 - 0.52 * (composite / 100)) }
+function diagonalX(composite) { return W * (0.07 + 0.86 * (composite / 100)) }
+function diagonalY(composite) { return H * (0.93 - 0.86 * (composite / 100)) }
 
 // ─── LCG + node generation — must match page.tsx exactly ─────────────────────
 function makeLCG(seed) {
@@ -105,7 +106,7 @@ const nodeRadius = makeNodeRadius(evLo, evHi)
 nodes.forEach(n => {
   n.x  = diagonalX(n.composite)
   n.y  = diagonalY(n.composite)
-  n.cr = nodeRadius(n.ev) + 0.76  // collision radius = visual radius + fixed gap (0.76 = 10% of MAX_R)
+  n.cr = nodeRadius(n.ev)  // collision radius = visual radius only — keeps fill at ~82% of canvas
 })
 
 console.log(`  EV bounds: $${(evLo/1e9).toFixed(1)}B → $${(evHi/1e9).toFixed(1)}B`)
@@ -116,15 +117,15 @@ Object.entries(BUCKET_ATTRACTION).forEach(([b, a]) => {
   console.log(`    ${b.padEnd(12)}: ${a.toFixed(2)}`)
 })
 
-// Soft boundary — push nodes away from walls
-const WALL = 28
+// Soft boundary — wider zone, stronger push
+const WALL = 44
 function boundaryForce() {
   return function() {
     for (const n of nodes) {
-      if (n.x < WALL)     n.vx += (WALL - n.x)     * 0.15
-      if (n.x > W - WALL) n.vx -= (n.x - (W-WALL)) * 0.15
-      if (n.y < WALL)     n.vy += (WALL - n.y)     * 0.15
-      if (n.y > H - WALL) n.vy -= (n.y - (H-WALL)) * 0.15
+      if (n.x < WALL)     n.vx += (WALL - n.x)     * 0.42
+      if (n.x > W - WALL) n.vx -= (n.x - (W-WALL)) * 0.42
+      if (n.y < WALL)     n.vy += (WALL - n.y)     * 0.42
+      if (n.y > H - WALL) n.vy -= (n.y - (H-WALL)) * 0.42
     }
   }
 }
@@ -145,7 +146,7 @@ for (let i = 0; i < 800; i++) {
   if (i % 100 === 99) console.log(`  ${i + 1} ticks complete`)
 }
 
-const MARGIN = 28
+const MARGIN = 8
 const positions = nodes.map(n => ({
   id: n.id,
   x: Math.round(Math.max(MARGIN, Math.min(W - MARGIN, n.x)) * 10) / 10,
