@@ -1011,13 +1011,36 @@ export default function PlatformPage() {
         setDerivedNodes([...nodes])
 
         // Fetch precomputed constellation positions (W=542, H=440)
+        // Falls back to bucket-cluster layout if JSON unavailable — run npm run precompute to fix.
         const posRes = await fetch(`${DATA_BASE}/data/constellation_positions.json`).catch(() => null)
         const posData: { id: string; x: number; y: number }[] | null =
           posRes?.ok ? await posRes.json().catch(() => null) : null
 
-        if (!posData) { console.error('[TCS] constellation_positions.json missing or invalid'); return }
+        const posMap = new Map<string, { x: number; y: number }>()
 
-        const posMap = new Map(posData.map(p => [p.id, { x: p.x, y: p.y }]))
+        if (posData) {
+          posData.forEach(p => posMap.set(p.id, { x: p.x, y: p.y }))
+        } else {
+          // Fallback cluster layout — VL bottom-left, VH top-right diagonal
+          console.warn('[TCS] constellation_positions.json unavailable — using fallback layout. Run: npm run precompute')
+          const CW = 542, CH = 440
+          const CENTERS: Record<string, [number, number]> = {
+            'Very Low':  [CW * 0.18, CH * 0.78],
+            'Low':       [CW * 0.35, CH * 0.62],
+            'Moderate':  [CW * 0.50, CH * 0.50],
+            'High':      [CW * 0.65, CH * 0.38],
+            'Very High': [CW * 0.82, CH * 0.22],
+          }
+          const fbRng = makeLCG(42)
+          nodesRef.current.forEach(n => {
+            const [cx, cy] = CENTERS[n.bucket] ?? [CW * 0.5, CH * 0.5]
+            const spread = 60
+            posMap.set(n.id, {
+              x: Math.max(8, Math.min(CW - 8, cx + (fbRng() - 0.5) * spread * 2)),
+              y: Math.max(8, Math.min(CH - 8, cy + (fbRng() - 0.5) * spread * 2)),
+            })
+          })
+        }
 
         const conEl = conSvgRef.current
         if (!conEl) { console.error('[TCS] Constellation SVG ref null'); return }
