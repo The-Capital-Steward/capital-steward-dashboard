@@ -203,9 +203,9 @@ function fmtEV(v: unknown): string {
   if (n >= 1e6)  return `$${(n / 1e6).toFixed(0)}M`
   return `$${n.toFixed(0)}`
 }
-function nodeRadius(ev: number): number {
-  const MIN_R = 2.5, MAX_R = 6.0, LO = 1e8, HI = 2e12
-  const t = Math.max(0, Math.min(1, (Math.log(Math.max(ev, LO)) - Math.log(LO)) / (Math.log(HI) - Math.log(LO))))
+function nodeRadius(ev: number, lo = 1e8, hi = 2e12): number {
+  const MIN_R = 1.8, MAX_R = 7.6
+  const t = Math.max(0, Math.min(1, (Math.log(Math.max(ev, lo)) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))))
   return MIN_R + t * (MAX_R - MIN_R)
 }
 
@@ -1018,11 +1018,9 @@ export default function PlatformPage() {
 
         const posMap = new Map<string, { x: number; y: number }>()
 
-        if (posData) {
-          posData.forEach(p => posMap.set(p.id, { x: p.x, y: p.y }))
-        } else {
-          // Fallback cluster layout — VL bottom-left, VH top-right diagonal
-          console.warn('[TCS] constellation_positions.json unavailable — using fallback layout. Run: npm run precompute')
+        // Helper: generate fallback cluster positions when JSON is missing or IDs don't match
+        const buildFallback = (reason: string) => {
+          console.warn(`[TCS] ${reason} — using fallback layout. Rerun: npm run precompute`)
           const CW = 542, CH = 440
           const CENTERS: Record<string, [number, number]> = {
             'Very Low':  [CW * 0.18, CH * 0.78],
@@ -1042,6 +1040,19 @@ export default function PlatformPage() {
           })
         }
 
+        if (!posData) {
+          buildFallback('constellation_positions.json unavailable')
+        } else {
+          posData.forEach(p => posMap.set(p.id, { x: p.x, y: p.y }))
+          // Detect ID mismatch: if none of our generated node IDs appear in the JSON,
+          // the precompute was run with a different node generation — fall back.
+          const matchCount = nodesRef.current.filter(n => posMap.has(n.id)).length
+          if (matchCount === 0) {
+            posMap.clear()
+            buildFallback('constellation_positions.json IDs don\'t match current nodes')
+          }
+        }
+
         const conEl = conSvgRef.current
         if (!conEl) { console.error('[TCS] Constellation SVG ref null'); return }
 
@@ -1049,6 +1060,12 @@ export default function PlatformPage() {
         d3.select(conEl)
           .attr('viewBox', '0 0 542 440')
           .attr('preserveAspectRatio', 'xMidYMid meet')
+
+        // Compute 3rd/97th percentile EV from actual node distribution
+        // This makes the size encoding relative to the universe rather than fixed constants
+        const evSorted = [...nodesRef.current].map(n => n.ev).sort((a, b) => a - b)
+        const evLo = evSorted[Math.floor(evSorted.length * 0.03)]
+        const evHi = evSorted[Math.floor(evSorted.length * 0.97)]
 
         // Place nodes at precomputed positions
         const cnGroups = d3.select(conEl).selectAll('.sn-wrap')
@@ -1067,7 +1084,7 @@ export default function PlatformPage() {
           })
 
         cnGroups.append('circle')
-          .attr('r',    (d: Node) => nodeRadius(d.ev ?? 1e9))
+          .attr('r',    (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
           .attr('fill', (d: Node) => bucketColor(d.bucket))
 
         cnGroups
