@@ -184,6 +184,17 @@ function bucketToId(bucket: string): string {
   }
 }
 
+// Encoding C: base node opacity derived from severe loss rate (logarithmic scale)
+// lossRate range 0.105→0.396, opacity range 0.42→0.92
+// Confirms: VH is visually heavy (39.6% severe loss). VL is lighter (10.5%).
+const BUCKET_OPACITY: Record<string, number> = {
+  'Very High': 0.92,
+  'High':      0.75,
+  'Moderate':  0.58,
+  'Low':       0.50,
+  'Very Low':  0.42,
+}
+
 function safeFixed(v: unknown, d = 2): string {
   const n = Number(v); return isFinite(n) ? n.toFixed(d) : '—'
 }
@@ -1084,8 +1095,9 @@ export default function PlatformPage() {
           })
 
         cnGroups.append('circle')
-          .attr('r',    (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
-          .attr('fill', (d: Node) => bucketColor(d.bucket))
+          .attr('r',       (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
+          .attr('fill',    (d: Node) => bucketColor(d.bucket))
+          .attr('opacity', (d: Node) => BUCKET_OPACITY[d.bucket] ?? 0.65)
 
         cnGroups
           .on('mouseenter', function(event: MouseEvent, d: Node) {
@@ -1146,16 +1158,16 @@ export default function PlatformPage() {
   return (
     <div style={s({ minHeight: '100vh', background: E.bg, color: E.text, fontFamily: E.sans })} ref={containerRef}>
       <style>{`
-        @keyframes pulse-vh  { 0%,100% { opacity: .88 } 50% { opacity: .22 } }
-        @keyframes pulse-h   { 0%,100% { opacity: .84 } 50% { opacity: .42 } }
-        @keyframes pulse-mod { 0%,100% { opacity: .72 } 50% { opacity: .50 } }
-        @keyframes pulse-lo  { 0%,100% { opacity: .80 } 50% { opacity: .68 } }
-        @keyframes pulse-vl  { 0%,100% { opacity: .90 } 50% { opacity: .82 } }
-        .node-vh  { animation: pulse-vh  302ms  ease-in-out infinite; }
-        .node-h   { animation: pulse-h   488ms  ease-in-out infinite; }
-        .node-mod { animation: pulse-mod 789ms  ease-in-out infinite; }
-        .node-lo  { animation: pulse-lo  1277ms ease-in-out infinite; }
-        .node-vl  { animation: pulse-vl  2069ms ease-in-out infinite; }
+        @keyframes pulse-vh  { 0%,100% { opacity: .97 } 50% { opacity: .47 } }
+        @keyframes pulse-h   { 0%,100% { opacity: .96 } 50% { opacity: .47 } }
+        @keyframes pulse-mod { 0%,100% { opacity: .93 } 50% { opacity: .47 } }
+        @keyframes pulse-lo  { 0%,100% { opacity: .89 } 50% { opacity: .47 } }
+        @keyframes pulse-vl  { 0%,100% { opacity: .82 } 50% { opacity: .47 } }
+        .node-vh  { animation: pulse-vh  521ms  ease-in-out infinite; }
+        .node-h   { animation: pulse-h   843ms  ease-in-out infinite; }
+        .node-mod { animation: pulse-mod 1364ms  ease-in-out infinite; }
+        .node-lo  { animation: pulse-lo  2207ms ease-in-out infinite; }
+        .node-vl  { animation: pulse-vl  3571ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
