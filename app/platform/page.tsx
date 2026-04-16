@@ -1021,66 +1021,30 @@ export default function PlatformPage() {
         nodesRef.current = nodes
         setDerivedNodes([...nodes])
 
-        // Fetch precomputed constellation positions (W=542, H=440)
-        // Falls back to bucket-cluster layout if JSON unavailable — run npm run precompute to fix.
-        const posRes = await fetch(`${DATA_BASE}/data/constellation_positions.json`).catch(() => null)
-        const posData: { id: string; x: number; y: number }[] | null =
-          posRes?.ok ? await posRes.json().catch(() => null) : null
-
-        const posMap = new Map<string, { x: number; y: number }>()
-
-        // Helper: generate fallback cluster positions when JSON is missing or IDs don't match
-        const buildFallback = (reason: string) => {
-          console.warn(`[TCS] ${reason} — using fallback layout. Rerun: npm run precompute`)
-          const CW = 542, CH = 440
-          const CENTERS: Record<string, [number, number]> = {
-            'Very Low':  [CW * 0.18, CH * 0.78],
-            'Low':       [CW * 0.35, CH * 0.62],
-            'Moderate':  [CW * 0.50, CH * 0.50],
-            'High':      [CW * 0.65, CH * 0.38],
-            'Very High': [CW * 0.82, CH * 0.22],
-          }
-          const fbRng = makeLCG(42)
-          nodesRef.current.forEach(n => {
-            const [cx, cy] = CENTERS[n.bucket] ?? [CW * 0.5, CH * 0.5]
-            const spread = 60
-            posMap.set(n.id, {
-              x: Math.max(50, Math.min(CW - 50, cx + (fbRng() - 0.5) * spread * 2)),
-              y: Math.max(50, Math.min(CH - 50, cy + (fbRng() - 0.5) * spread * 2)),
-            })
-          })
-        }
-
-        if (!posData) {
-          buildFallback('constellation_positions.json unavailable')
-        } else {
-          posData.forEach(p => posMap.set(p.id, { x: p.x, y: p.y }))
-          // Detect ID mismatch: if none of our generated node IDs appear in the JSON,
-          // the precompute was run with a different node generation — fall back.
-          const matchCount = nodesRef.current.filter(n => posMap.has(n.id)).length
-          if (matchCount === 0) {
-            posMap.clear()
-            buildFallback('constellation_positions.json IDs don\'t match current nodes')
-          }
-        }
-
         const conEl = conSvgRef.current
-        if (!conEl) { console.error('[TCS] Constellation SVG ref null'); return }
+        if (!conEl) { console.error('[TCS] Scatter SVG ref null'); return }
 
-        // Constellation SVG — viewBox matches precompute canvas (W=542, H=440)
+        // Scatter plot — Anchor Detachment (x) × Anchor Degradation (y)
+        // axis1 = Detachment (0–100), axis2 = Degradation (0–100)
+        // High values on both axes = top-right = VH cluster
+        // Low values on both axes = bottom-left = VL cluster
+        const SW = 500, SH = 440
+        const PAD = 24
+        const scatterX = (v: number) => PAD + (v / 100) * (SW - PAD * 2)
+        const scatterY = (v: number) => SH - PAD - (v / 100) * (SH - PAD * 2)
+
         d3.select(conEl)
-          .attr('viewBox', '0 0 690 440')
+          .attr('viewBox', \`0 0 \${SW} \${SH}\`)
           .attr('preserveAspectRatio', 'xMidYMid meet')
 
-        // Compute 3rd/97th percentile EV from actual node distribution
-        // This makes the size encoding relative to the universe rather than fixed constants
+        // Compute 3rd/97th percentile EV for size encoding
         const evSorted = [...nodesRef.current].map(n => n.ev).sort((a, b) => a - b)
         const evLo = evSorted[Math.floor(evSorted.length * 0.03)]
         const evHi = evSorted[Math.floor(evSorted.length * 0.97)]
 
-        // Place nodes at precomputed positions
+        // Place each node at its (axis1, axis2) structural risk coordinates
         const cnGroups = d3.select(conEl).selectAll('.sn-wrap')
-          .data(nodesRef.current.filter(n => posMap.has(n.id)), (d: Node) => d.id)
+          .data(nodesRef.current, (d: Node) => d.id)
           .join('g')
           .attr('class', (d: Node) => {
             const b = d.bucket
@@ -1089,10 +1053,7 @@ export default function PlatformPage() {
           .attr('data-id',     (d: Node) => d.id)
           .attr('data-oal',    (d: Node) => d.oal)
           .attr('data-evband', (d: Node) => String(d.evBand))
-          .attr('transform',   (d: Node) => {
-            const p = posMap.get(d.id)!
-            return `translate(${p.x},${p.y})`
-          })
+          .attr('transform',   (d: Node) => `translate(${scatterX(d.axis1)},${scatterY(d.axis2)})`)
 
         cnGroups.append('circle')
           .attr('r',       (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
