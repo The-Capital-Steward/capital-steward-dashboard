@@ -1163,11 +1163,11 @@ export default function PlatformPage() {
         @keyframes pulse-mod { 0%,100% { opacity: .93 } 50% { opacity: .47 } }
         @keyframes pulse-lo  { 0%,100% { opacity: .89 } 50% { opacity: .47 } }
         @keyframes pulse-vl  { 0%,100% { opacity: .82 } 50% { opacity: .47 } }
-        .node-vh  { animation: pulse-vh  521ms  ease-in-out infinite; }
-        .node-h   { animation: pulse-h   843ms  ease-in-out infinite; }
-        .node-mod { animation: pulse-mod 1364ms  ease-in-out infinite; }
-        .node-lo  { animation: pulse-lo  2207ms ease-in-out infinite; }
-        .node-vl  { animation: pulse-vl  3571ms ease-in-out infinite; }
+        .node-vh  { animation: pulse-vh  843ms  ease-in-out infinite; }
+        .node-h   { animation: pulse-h   1364ms  ease-in-out infinite; }
+        .node-mod { animation: pulse-mod 2207ms  ease-in-out infinite; }
+        .node-lo  { animation: pulse-lo  3571ms ease-in-out infinite; }
+        .node-vl  { animation: pulse-vl  57781ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
