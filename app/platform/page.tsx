@@ -48,7 +48,7 @@ const s = (x: object) => x as React.CSSProperties
 interface Node {
   id: string; symbol: string; composite: number; pctRank: number
   bucket: 'Very Low' | 'Low' | 'Moderate' | 'High' | 'Very High'
-  axis1: number; axis2: number; ev: number
+  axis1: number; axis2: number; axis1Pct: number; axis2Pct: number; ev: number
   oal: 'FCF' | 'NI' | 'EBIT' | 'Revenue'
   evBand: number; x: number; y: number
 }
@@ -215,7 +215,7 @@ function fmtEV(v: unknown): string {
   return `$${n.toFixed(0)}`
 }
 function nodeRadius(ev: number, lo = 1e8, hi = 2e12): number {
-  const MIN_R = 1.1, MAX_R = 4.7
+  const MIN_R = 1.8, MAX_R = 5.0
   const t = Math.max(0, Math.min(1, (Math.log(Math.max(ev, lo)) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))))
   return MIN_R + t * (MAX_R - MIN_R)
 }
@@ -254,10 +254,16 @@ function generateNodes(n = 5200): Node[] {
   }
   const bucketMap  = new Map(ranked.map((d, rank) => [d.i, bucketOf(rank)]))
   const pctRankMap = new Map(ranked.map((d, rank) => [d.i, Math.round((rank / n) * 100)]))
+  // Compute independent percentile ranks for each axis — used by scatter plot
+  const axis1Ranked = [...raw].sort((a, b) => a.axis1 - b.axis1)
+  const axis2Ranked = [...raw].sort((a, b) => a.axis2 - b.axis2)
+  const axis1PctMap = new Map(axis1Ranked.map((d, rank) => [d.i, Math.round((rank / n) * 100)]))
+  const axis2PctMap = new Map(axis2Ranked.map((d, rank) => [d.i, Math.round((rank / n) * 100)]))
   const nodes: Node[] = raw.map(d => ({
     id: `N${d.i}`, symbol: `S${d.i}`,
     composite: d.composite, pctRank: pctRankMap.get(d.i) ?? 0,
     bucket: bucketMap.get(d.i)!, axis1: d.axis1, axis2: d.axis2,
+    axis1Pct: axis1PctMap.get(d.i) ?? 0, axis2Pct: axis2PctMap.get(d.i) ?? 0,
     ev: d.ev, oal: d.oal, evBand: 0, x: 0, y: 0,
   }))
   const byEV = [...nodes].sort((a, b) => a.ev - b.ev)
@@ -1053,7 +1059,7 @@ export default function PlatformPage() {
           .attr('data-id',     (d: Node) => d.id)
           .attr('data-oal',    (d: Node) => d.oal)
           .attr('data-evband', (d: Node) => String(d.evBand))
-          .attr('transform',   (d: Node) => `translate(${scatterX(d.axis1)},${scatterY(d.axis2)})`)
+          .attr('transform',   (d: Node) => `translate(${scatterX(d.axis1Pct)},${scatterY(d.axis2Pct)})`)
 
         cnGroups.append('circle')
           .attr('r',       (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
