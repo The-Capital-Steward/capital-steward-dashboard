@@ -215,7 +215,7 @@ function fmtEV(v: unknown): string {
   return `$${n.toFixed(0)}`
 }
 function nodeRadius(ev: number, lo = 1e8, hi = 2e12): number {
-  const MIN_R = 1.8, MAX_R = 7.6
+  const MIN_R = 1.1, MAX_R = 4.7
   const t = Math.max(0, Math.min(1, (Math.log(Math.max(ev, lo)) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))))
   return MIN_R + t * (MAX_R - MIN_R)
 }
