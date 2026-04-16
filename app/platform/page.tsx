@@ -1167,7 +1167,7 @@ export default function PlatformPage() {
         .node-h   { animation: pulse-h   1364ms  ease-in-out infinite; }
         .node-mod { animation: pulse-mod 2207ms  ease-in-out infinite; }
         .node-lo  { animation: pulse-lo  3571ms ease-in-out infinite; }
-        .node-vl  { animation: pulse-vl  57781ms ease-in-out infinite; }
+        .node-vl  { animation: pulse-vl  5778ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
