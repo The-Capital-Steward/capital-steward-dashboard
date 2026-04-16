@@ -1065,6 +1065,26 @@ export default function PlatformPage() {
           .attr('data-evband', (d: Node) => String(d.evBand))
           .attr('transform',   (d: Node) => `translate(${scatterX(d.axis2Pct)},${scatterY(d.axis1Pct)})`)
 
+        // Axis labels
+        d3.select(conEl).append('text')
+          .attr('x', SW / 2)
+          .attr('y', SH - 4)
+          .attr('text-anchor', 'middle')
+          .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
+          .attr('font-size', 11)
+          .attr('letter-spacing', '0.14em')
+          .attr('fill', '#90A297')
+          .text('ANCHOR DEGRADATION →')
+
+        d3.select(conEl).append('text')
+          .attr('transform', `translate(13, ${SH / 2}) rotate(-90)`)
+          .attr('text-anchor', 'middle')
+          .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
+          .attr('font-size', 11)
+          .attr('letter-spacing', '0.14em')
+          .attr('fill', '#90A297')
+          .text('ANCHOR DETACHMENT →')
+
         cnGroups.append('circle')
           .attr('r',       (d: Node) => nodeRadius(d.ev ?? evLo, evLo, evHi))
           .attr('fill',    (d: Node) => bucketColor(d.bucket))
