@@ -1022,8 +1022,32 @@ export default function PlatformPage() {
         const d3 = (window as any).d3
         if (!d3) { console.error('[TCS] D3 not available'); return }
 
-        // Generate synthetic nodes — used by Sections 3 & 4 (OAL rungs, EV bands)
-        const nodes: Node[] = generateNodes(5200)
+        // Fetch real OSMR snapshot — 3,771 live companies from oal_scores.csv
+        const snapRes = await fetch(`${DATA_BASE}/data/osmr_snapshot.json`).catch(() => null)
+        if (!snapRes?.ok) { console.error('[TCS] osmr_snapshot.json unavailable'); return }
+        const snapData: any[] = await snapRes.json().catch(() => [])
+
+        const nodes: Node[] = snapData
+          .filter(d => d.axis1 != null && d.axis2 != null)
+          .map(d => ({
+            id:       d.id ?? d.symbol,
+            symbol:   d.symbol,
+            composite: typeof d.composite === 'number' && d.composite <= 1
+                         ? d.composite * 100
+                         : (d.composite ?? 0),
+            pctRank:  d.pctRank ?? 0,
+            bucket:   d.bucket as Node['bucket'],
+            axis1:    d.axis1,
+            axis2:    d.axis2,
+            axis1Pct: d.axis1,
+            axis2Pct: d.axis2,
+            ev:       d.ev ?? 0,
+            oal:      (d.oal ?? 'FCF') as Node['oal'],
+            evBand:   d.evBand ?? 0,
+            x:        0,
+            y:        0,
+          }))
+
         nodesRef.current = nodes
         setDerivedNodes([...nodes])
 
@@ -1065,23 +1089,53 @@ export default function PlatformPage() {
           .attr('data-evband', (d: Node) => String(d.evBand))
           .attr('transform',   (d: Node) => `translate(${scatterX(d.axis2Pct)},${scatterY(d.axis1Pct)})`)
 
+        const svg = d3.select(conEl)
+        const TICKS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+        // X axis ticks + labels (Anchor Degradation)
+        TICKS.forEach(v => {
+          const x = scatterX(v)
+          svg.append('line')
+            .attr('x1', x).attr('x2', x)
+            .attr('y1', SH - PAD).attr('y2', SH - PAD + 4)
+            .attr('stroke', '#90A297').attr('stroke-width', 0.5)
+          svg.append('text')
+            .attr('x', x).attr('y', SH - PAD + 14)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
+            .attr('font-size', 11).attr('fill', '#90A297')
+            .text(v)
+        })
+
+        // Y axis ticks + labels (Anchor Detachment)
+        TICKS.forEach(v => {
+          const y = scatterY(v)
+          svg.append('line')
+            .attr('x1', PAD - 4).attr('x2', PAD)
+            .attr('y1', y).attr('y2', y)
+            .attr('stroke', '#90A297').attr('stroke-width', 0.5)
+          svg.append('text')
+            .attr('x', PAD - 7).attr('y', y + 4)
+            .attr('text-anchor', 'end')
+            .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
+            .attr('font-size', 11).attr('fill', '#90A297')
+            .text(v)
+        })
+
         // Axis labels
-        d3.select(conEl).append('text')
-          .attr('x', SW / 2)
-          .attr('y', SH - 4)
+        svg.append('text')
+          .attr('x', SW / 2).attr('y', SH - 4)
           .attr('text-anchor', 'middle')
           .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
-          .attr('font-size', 11)
-          .attr('letter-spacing', '0.14em')
+          .attr('font-size', 11).attr('letter-spacing', '0.14em')
           .attr('fill', '#90A297')
           .text('ANCHOR DEGRADATION →')
 
-        d3.select(conEl).append('text')
-          .attr('transform', `translate(13, ${SH / 2}) rotate(-90)`)
+        svg.append('text')
+          .attr('transform', `translate(13,${SH / 2}) rotate(-90)`)
           .attr('text-anchor', 'middle')
           .attr('font-family', "'IBM Plex Mono','Courier New',monospace")
-          .attr('font-size', 11)
-          .attr('letter-spacing', '0.14em')
+          .attr('font-size', 11).attr('letter-spacing', '0.14em')
           .attr('fill', '#90A297')
           .text('ANCHOR DETACHMENT →')
 
