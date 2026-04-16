@@ -1069,7 +1069,7 @@ export default function PlatformPage() {
 
         // Constellation SVG — viewBox matches precompute canvas (W=542, H=440)
         d3.select(conEl)
-          .attr('viewBox', '0 0 542 440')
+          .attr('viewBox', '0 0 690 440')
           .attr('preserveAspectRatio', 'xMidYMid meet')
 
         // Compute 3rd/97th percentile EV from actual node distribution
