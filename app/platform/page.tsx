@@ -1125,16 +1125,16 @@ export default function PlatformPage() {
   return (
     <div style={s({ minHeight: '100vh', background: E.bg, color: E.text, fontFamily: E.sans })} ref={containerRef}>
       <style>{`
-        @keyframes pulse-vh  { 0%,100% { opacity: .85 } 50% { opacity: .47 } }
-        @keyframes pulse-h   { 0%,100% { opacity: .92 } 50% { opacity: .47 } }
-        @keyframes pulse-mod { 0%,100% { opacity: .96 } 50% { opacity: .47 } }
-        @keyframes pulse-lo  { 0%,100% { opacity: .97 } 50% { opacity: .47 } }
-        @keyframes pulse-vl  { 0%,100% { opacity: .99 } 50% { opacity: .47 } }
-        .node-vh  { animation: pulse-vh  1000ms  ease-in-out infinite; }
-        .node-h   { animation: pulse-h   2000ms ease-in-out infinite; }
-        .node-mod { animation: pulse-mod 3000ms ease-in-out infinite; }
-        .node-lo  { animation: pulse-lo  4000ms ease-in-out infinite; }
-        .node-vl  { animation: pulse-vl  7000ms ease-in-out infinite; }
+        @keyframes pulse-vh  { 0%,100% { opacity: 1.00 } 50% { opacity: .24 } }
+        @keyframes pulse-h   { 0%,100% { opacity: .99 } 50% { opacity: .53 } }
+        @keyframes pulse-mod { 0%,100% { opacity: .98 } 50% { opacity: .71 } }
+        @keyframes pulse-lo  { 0%,100% { opacity: .96 } 50% { opacity: .82 } }
+        @keyframes pulse-vl  { 0%,100% { opacity: .93 } 50% { opacity: .89 } }
+        .node-vh  { animation: pulse-vh  843ms  ease-in-out infinite; }
+        .node-h   { animation: pulse-h   1364ms ease-in-out infinite; }
+        .node-mod { animation: pulse-mod 2618ms ease-in-out infinite; }
+        .node-lo  { animation: pulse-lo  3578ms ease-in-out infinite; }
+        .node-vl  { animation: pulse-vl  5778ms ease-in-out infinite; }
         .sn-wrap { cursor: crosshair; }
         .filter-btn { transition: border-color 0.15s, color 0.15s, background 0.15s; }
 
@@ -1152,16 +1152,16 @@ export default function PlatformPage() {
            but with tighter opacity ranges. The constellation declares urgency;
            the curves confirm it quietly.
            VH: 0.92→0.78 (843ms)  ·  VL: 0.85→0.80 (5778ms) */
-        @keyframes gf-pulse-vh  { 0%,100% { opacity: .90 } 50% { opacity: .79 } }
-        @keyframes gf-pulse-h   { 0%,100% { opacity: .94 } 50% { opacity: .83 } }
-        @keyframes gf-pulse-mod { 0%,100% { opacity: .97 } 50% { opacity: .86 } }
-        @keyframes gf-pulse-lo  { 0%,100% { opacity: .99 } 50% { opacity: .88 } }
-        @keyframes gf-pulse-vl  { 0%,100% { opacity: 1.00 } 50% { opacity: .89 } }
-        /* g. prefix targets only <g> line groups — polygon fills excluded */
+        @keyframes gf-pulse-vh  { 0%,100% { opacity: .99 } 50% { opacity: .47 } }
+        @keyframes gf-pulse-h   { 0%,100% { opacity: .92 } 50% { opacity: .47 } }
+        @keyframes gf-pulse-mod { 0%,100% { opacity: .85 } 50% { opacity: .76 } }
+        @keyframes gf-pulse-lo  { 0%,100% { opacity: .92 } 50% { opacity: .82 } }
+        @keyframes gf-pulse-vl  { 0%,100% { opacity: .99 } 50% { opacity: .82 } }
+        /* g. prefix targets only <g> line groups — polygon fills excluded */ 
         g.gf-curve[data-bucket="VH"] { animation: gf-pulse-vh  843ms  ease-in-out infinite; }
         g.gf-curve[data-bucket="H"]  { animation: gf-pulse-h   1364ms ease-in-out infinite; }
         g.gf-curve[data-bucket="M"]  { animation: gf-pulse-mod 2207ms ease-in-out infinite; }
-        g.gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  3571ms ease-in-out infinite; }
+        g.gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  3578ms ease-in-out infinite; }
         g.gf-curve[data-bucket="VL"] { animation: gf-pulse-vl  5778ms ease-in-out infinite; }
         /* Hover sync — pause animation, apply opacity override, active curve holds steady */
         .gf-curve { transition: opacity 80ms ease; }
