@@ -20,10 +20,10 @@ const W = 843, H = 521
 // Golden ratio decay — each step ≈ 0.618× previous. VH/VL ratio = 6.9×.
 const BUCKET_ATTRACTION = {
   'Very High': 0.76,
-  'High':      0.47,
-  'Moderate':  0.29,
-  'Low':       0.18,
-  'Very Low':  0.11,
+  'High':      0.76,
+  'Moderate':  0.47,
+  'Low':       0.29,
+  'Very Low':  0.29,
 }
 
 // ─── nodeRadius — must match page.tsx exactly ─────────────────────────────────

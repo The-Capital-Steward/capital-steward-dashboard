@@ -1190,11 +1190,12 @@ export default function PlatformPage() {
         @keyframes gf-pulse-mod { 0%,100% { opacity: .97 } 50% { opacity: .86 } }
         @keyframes gf-pulse-lo  { 0%,100% { opacity: .99 } 50% { opacity: .88 } }
         @keyframes gf-pulse-vl  { 0%,100% { opacity: 1.00 } 50% { opacity: .89 } }
-        .gf-curve[data-bucket="VH"] { animation: gf-pulse-vh  843ms  ease-in-out infinite; }
-        .gf-curve[data-bucket="H"]  { animation: gf-pulse-h   1364ms ease-in-out infinite; }
-        .gf-curve[data-bucket="M"]  { animation: gf-pulse-mod 2207ms ease-in-out infinite; }
-        .gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  3571ms ease-in-out infinite; }
-        .gf-curve[data-bucket="VL"] { animation: gf-pulse-vl  5778ms ease-in-out infinite; }
+        /* g. prefix targets only <g> line groups — polygon fills excluded */
+        g.gf-curve[data-bucket="VH"] { animation: gf-pulse-vh  843ms  ease-in-out infinite; }
+        g.gf-curve[data-bucket="H"]  { animation: gf-pulse-h   1364ms ease-in-out infinite; }
+        g.gf-curve[data-bucket="M"]  { animation: gf-pulse-mod 2207ms ease-in-out infinite; }
+        g.gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  3571ms ease-in-out infinite; }
+        g.gf-curve[data-bucket="VL"] { animation: gf-pulse-vl  5778ms ease-in-out infinite; }
         /* Hover sync — pause animation, apply opacity override, active curve holds steady */
         .gf-curve { transition: opacity 80ms ease; }
         .gf-has-hover .gf-curve { opacity: 0.10 !important; animation-play-state: paused !important; }
