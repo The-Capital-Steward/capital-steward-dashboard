@@ -1158,11 +1158,11 @@ export default function PlatformPage() {
   return (
     <div style={s({ minHeight: '100vh', background: E.bg, color: E.text, fontFamily: E.sans })} ref={containerRef}>
       <style>{`
-        @keyframes pulse-vh  { 0%,100% { opacity: .93 } 50% { opacity: .29 } }
-        @keyframes pulse-h   { 0%,100% { opacity: .96 } 50% { opacity: .29 } }
-        @keyframes pulse-mod { 0%,100% { opacity: .97 } 50% { opacity: .47 } }
-        @keyframes pulse-lo  { 0%,100% { opacity: .98 } 50% { opacity: .76 } }
-        @keyframes pulse-vl  { 0%,100% { opacity: .99 } 50% { opacity: .76 } }
+        @keyframes pulse-vh  { 0%,100% { opacity: .90 } 50% { opacity: .43 } }
+        @keyframes pulse-h   { 0%,100% { opacity: .94 } 50% { opacity: .65 } }
+        @keyframes pulse-mod { 0%,100% { opacity: .97 } 50% { opacity: .79 } }
+        @keyframes pulse-lo  { 0%,100% { opacity: .99 } 50% { opacity: .88 } }
+        @keyframes pulse-vl  { 0%,100% { opacity: 1.00 } 50% { opacity: .93 } }
         .node-vh  { animation: pulse-vh  843ms  ease-in-out infinite; }
         .node-h   { animation: pulse-h   1364ms  ease-in-out infinite; }
         .node-mod { animation: pulse-mod 2207ms  ease-in-out infinite; }
