@@ -3,8 +3,21 @@
 // app/platform/page.tsx
 //
 // Migration: 2026-04-27 — Visual Doctrine v1.3 + Typography Doctrine v1.0 + April 26 Section 1.
+// Free Tier Architecture Pass v1.0 — 2026-04-27:
+//   1. Filter relocation: Anchor Levels → Section 3, EV Bands → Section 4. Top chrome
+//      reduces to brand · live · breadcrumb · upgrade. Eliminates horizontal scroll artifact.
+//   2. Pulse mechanics restored: animation shorthand split to longhand so inline animation-delay
+//      from D3 layers cleanly. All animation declarations consolidated into one style block.
+//   3. Section 3 rebuilt as horizontal strata — each anchor rung is a row, not a card.
+//      Restrained endpoint emphasis: Revenue 2px notch in H hue, FCF 2px notch in VL hue.
+//
+// ARCHITECTURE PRINCIPLE: local control, global organismic response.
+//   Filters are housed in their native semantic sections (Anchor Levels in Section 3,
+//   EV Bands in Section 4) but the user's adjustment propagates globally — Section 1 field
+//   dims by data-oal/data-evband, Return Field curves respond, all reactivity preserved.
+//   The user is adjusting one explanatory lens; the whole organism responds.
+//
 // Pricing fix: $159 → $249 in AuthModal and PaidWall.
-// Filter relocation deferred — see TODO LOCKED comment near filter strip.
 //
 // Section 1: five hardcoded neighborhood centers, static layout, no force simulation,
 // EV-driven 47% Lucas phase aperture, bucket-local descending. Field-pulsation timings:
@@ -623,7 +636,14 @@ const RUNG_DEFS = [
     weight: 51.8, ret: 10.2, hasRet: true },
 ]
 
-function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedOal: OALKey }) {
+function Section3AnchorLevels({
+  nodes, selectedOal, onSelectOal, filterRowRef,
+}: {
+  nodes: Node[]
+  selectedOal: OALKey[]
+  onSelectOal: (key: OALKey) => void
+  filterRowRef: (el: HTMLDivElement | null) => void
+}) {
   const rungs = RUNG_DEFS.map(r => {
     const rungNodes = nodes.filter(n => n.oal === r.key)
     const total = rungNodes.length || 1
@@ -631,53 +651,129 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
     return { ...r, total: rungNodes.length, dist }
   })
 
+  // Restrained endpoint notches — Revenue at H/VH transitional, FCF at VL.
+  // Quietly directional, not theatrical. EBIT and NI receive no notch.
+  const notchHue = (key: OALKey): string | null => {
+    if (key === 'Revenue') return E.H   // H hue — transitional fragility, not full VH bleed
+    if (key === 'FCF')     return E.VL  // VL hue — anchor stability
+    return null
+  }
+
+  const filterActive = !selectedOal.includes('all')
+  const singleSelected: OALKey = selectedOal.length === 1 ? selectedOal[0] : 'all'
+
   return (
     <section>
       <SectionHeader lucas={4} label="Anchor Levels" sub="Seven years of operational history. One dominant anchor." />
+
+      {/* Orientation copy — S2/16 sans body */}
       <div style={s({ padding: `${SP._18}px ${SP._29}px ${SP._11}px`, background: E.bg0, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, maxWidth: 780 })}>
         The operational anchor a company has built predicts the shape of its returns.{' '}
         <span style={s({ color: E.VH, fontWeight: 700 })}>Revenue-anchored: −17.3% median.</span>{' '}
         <span style={s({ color: E.VL, fontWeight: 700 })}>FCF-anchored: +10.2% median.</span>{' '}
         <span style={s({ color: E.text3 })}>Same universe. Same period. Different structures.</span>
       </div>
-      <div style={s({ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: E.bg0, padding: `${SP._11}px ${SP._29}px ${SP._29}px` })}>
-        {rungs.map((rung, i) => {
-          const isSelected = selectedOal === rung.key
-          const isActive   = selectedOal === 'all' || isSelected
-          return (
-            <div key={rung.key} style={s({
-              padding: `${SP._18}px ${SP._18}px ${SP._11}px`,
-              borderRight: i < 3 ? `1px solid ${alpha(E.limbus, 0.22)}` : 'none',
-              background: isSelected ? E.bg2 : 'transparent',
-              opacity: !isActive ? 0.40 : 1,
-              transition: 'opacity 0.22s, background 0.22s',
-            })}>
-              <small style={s({ display: 'block', fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.13em', textTransform: 'uppercase' as const, color: E.limbus, marginBottom: SP._7 })}>{rung.depth}</small>
-              <h3 style={s({ margin: `0 0 ${SP._7}px`, fontFamily: E.sans, fontSize: T.s4, lineHeight: 1.45, letterSpacing: '-0.01em', color: E.text1, fontWeight: 400 })}>{rung.label}</h3>
 
-              {/* Risk fingerprint — bucket distribution */}
-              <div style={s({ height: 22, display: 'flex', gap: 1, margin: `${SP._11}px 0` })}>
-                {BUCKET_ORDER.map(b => {
-                  const pct = rung.total > 0 ? (rung.dist[b] / rung.total) * 100 : 20
-                  return <div key={b} style={s({ height: '100%', flex: pct, background: bucketColor(b), opacity: isSelected ? 0.96 : 0.55, minWidth: pct > 1 ? '2px' : '0', transition: 'opacity 0.22s' })} />
-                })}
+      {/* Local filter row — Architecture Pass v1.0. Filter housed in native section,
+          but reactivity remains global (Section 1 dims by data-oal, Return Field responds). */}
+      <div ref={filterRowRef}
+        style={s({ background: E.bg0, padding: `${SP._4}px ${SP._29}px ${SP._18}px`, display: 'flex', alignItems: 'center', gap: SP._7, flexWrap: 'wrap' as const })}>
+        <span style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.text3, marginRight: SP._4, flexShrink: 0 })}>Filter by anchor</span>
+        {OAL_RUNGS.map(({ key, label, sub }) => {
+          const active = selectedOal.includes(key)
+          const isAllSelected = selectedOal.includes('all') && key === 'all'
+          return (
+            <button key={key} onClick={() => onSelectOal(key)} style={s({
+              fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, fontWeight: active ? 700 : 400,
+              letterSpacing: '0.10em',
+              padding: `${SP._7}px ${SP._11}px`,
+              background: isAllSelected ? E.bg1 : (active ? E.bg2 : 'transparent'),
+              color: active ? E.text1 : E.text3,
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, flexShrink: 0,
+            })}>
+              <span>{label}</span>
+              {sub && <span style={s({ fontSize: T.m1, color: active ? E.text2 : E.limbus, fontWeight: 400 })}>{sub}</span>}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Horizontal strata — each rung is a row, not a card.
+          Grid: anchor label | description | risk fingerprint | metric.
+          Containment via fixed widths, no overflow leak. */}
+      <div style={s({ background: E.bg0, padding: `0 ${SP._29}px ${SP._29}px` })}>
+        {rungs.map((rung, i) => {
+          const isSelected = singleSelected === rung.key
+          const isActive   = !filterActive || isSelected
+          const notch      = notchHue(rung.key)
+          const isLast     = i === rungs.length - 1
+          return (
+            <div key={rung.key}
+              data-rung={rung.key}
+              style={s({
+                position: 'relative',
+                display: 'grid',
+                gridTemplateColumns: '180px 1fr 280px 160px',
+                gap: SP._29,
+                alignItems: 'start',
+                padding: `${SP._18}px ${SP._18}px ${SP._18}px ${SP._29}px`,
+                borderBottom: !isLast ? `1px solid ${alpha(E.limbus, 0.18)}` : 'none', // Membrane hairline <25% — anatomical layer separator, not chrome border
+                opacity: !isActive ? 0.40 : 1,
+                transition: 'opacity 0.22s',
+              })}>
+              {/* Restrained endpoint notch — vascular marker, 2px left edge */}
+              {notch && <div style={s({ position: 'absolute', left: 0, top: SP._18, bottom: SP._18, width: 2, background: notch })} />}
+
+              {/* Anchor label column */}
+              <div>
+                <small style={s({ display: 'block', fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.13em', textTransform: 'uppercase' as const, color: E.limbus, marginBottom: SP._4 })}>{rung.depth}</small>
+                <h3 style={s({ margin: 0, fontFamily: E.sans, fontSize: T.s4, lineHeight: 1.2, letterSpacing: '-0.01em', color: E.text1, fontWeight: 400 })}>{rung.label}</h3>
               </div>
 
-              <p style={s({ fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, margin: 0, marginBottom: SP._11 })}>{rung.desc}</p>
+              {/* Description column */}
+              <div>
+                <p style={s({ fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, margin: 0 })}>{rung.desc}</p>
+              </div>
 
-              {rung.hasRet ? (
-                <div style={s({ display: 'flex', alignItems: 'baseline', gap: SP._7 })}>
-                  <span style={s({ fontFamily: E.sans, fontSize: T.s3, lineHeight: 1.0, fontWeight: 700, color: rung.ret! > 0 ? E.VL : E.VH, letterSpacing: '-0.01em' })}>
-                    {rung.ret! > 0 ? '+' : ''}{rung.ret}%
-                  </span>
-                  <span style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.10em', color: E.text3 })}>median 12m · 285K obs</span>
+              {/* Risk fingerprint column — bounded, contained, cannot bleed */}
+              <div style={s({ overflow: 'hidden' })}>
+                <small style={s({ display: 'block', fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.13em', textTransform: 'uppercase' as const, color: E.limbus, marginBottom: SP._7 })}>Risk fingerprint</small>
+                <div style={s({ height: 22, display: 'flex', gap: 1, width: '100%' })}>
+                  {BUCKET_ORDER.map(b => {
+                    const pct = rung.total > 0 ? (rung.dist[b] / rung.total) * 100 : 20
+                    return <div key={b} style={s({ height: '100%', flex: pct, background: bucketColor(b), opacity: isSelected ? 0.96 : 0.55, minWidth: pct > 1 ? '2px' : '0', transition: 'opacity 0.22s' })} />
+                  })}
                 </div>
-              ) : (
-                <div style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, color: E.text3 })}>
-                  Range: <span style={s({ color: E.VL })}>+10.2%</span> → <span style={s({ color: E.VH })}>−17.3%</span>
+                <div style={s({ display: 'flex', justifyContent: 'space-between', marginTop: SP._4 })}>
+                  {BUCKET_ORDER.map(b => {
+                    const short = b === 'Very Low' ? 'VL' : b === 'Low' ? 'L' : b === 'Moderate' ? 'M' : b === 'High' ? 'H' : 'VH'
+                    return <span key={b} style={s({ fontFamily: E.mono, fontSize: T.m1, color: E.limbus, letterSpacing: '0.06em' })}>{short}</span>
+                  })}
                 </div>
-              )}
-              <div style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, color: E.text3, marginTop: SP._4 })}>{rung.weight}% of composite weight</div>
+              </div>
+
+              {/* Metric column — right-aligned */}
+              <div style={s({ textAlign: 'right' as const })}>
+                {rung.hasRet ? (
+                  <>
+                    <small style={s({ display: 'block', fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.13em', textTransform: 'uppercase' as const, color: E.limbus, marginBottom: SP._4 })}>Median 12m</small>
+                    <div style={s({ fontFamily: E.sans, fontSize: T.s3, lineHeight: 1.0, fontWeight: 700, color: rung.ret! > 0 ? E.VL : E.VH, letterSpacing: '-0.01em', marginBottom: SP._4 })}>
+                      {rung.ret! > 0 ? '+' : ''}{rung.ret}%
+                    </div>
+                    <div style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, color: E.text3 })}>285K obs</div>
+                  </>
+                ) : (
+                  <>
+                    <small style={s({ display: 'block', fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.13em', textTransform: 'uppercase' as const, color: E.limbus, marginBottom: SP._4 })}>Range</small>
+                    <div style={s({ fontFamily: E.mono, fontSize: T.m2, lineHeight: 1.45, color: E.text3 })}>
+                      <span style={s({ color: E.VL })}>+10.2%</span> → <span style={s({ color: E.VH })}>−17.3%</span>
+                    </div>
+                  </>
+                )}
+                <div style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, color: E.text3, marginTop: SP._7 })}>{rung.weight}% weight</div>
+              </div>
             </div>
           )
         })}
@@ -688,7 +784,14 @@ function Section3AnchorLevels({ nodes, selectedOal }: { nodes: Node[]; selectedO
 
 // ─── Section 4: EV Quantile Bands ─────────────────────────────────────────────
 
-function Section4EVBands({ selectedBand }: { selectedBand: Band }) {
+function Section4EVBands({
+  selectedBand, selectedBandList, onSelectBand, filterRowRef,
+}: {
+  selectedBand: Band
+  selectedBandList: Band[]
+  onSelectBand: (band: Band) => void
+  filterRowRef: (el: HTMLDivElement | null) => void
+}) {
   const BAND_DATA = [
     { band: 1, label: 'Band I',   sub: '<$300M',      vlMedian:  9.3, vhMedian: -23.3, spread: 32.5 },
     { band: 2, label: 'Band II',  sub: '$300M–$1B',   vlMedian:  8.0, vhMedian: -11.6, spread: 19.6 },
@@ -712,11 +815,40 @@ function Section4EVBands({ selectedBand }: { selectedBand: Band }) {
   return (
     <section>
       <SectionHeader lucas={7} label="EV Quantile Bands" sub="Seven equal-population quantiles by enterprise value · 293,463 observations" />
+
+      {/* Orientation copy — S2/16 sans body */}
       <div style={s({ padding: `${SP._18}px ${SP._29}px ${SP._11}px`, background: E.bg0, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, maxWidth: 780 })}>
         Structural fragility is not a small-cap phenomenon — and structural safety is not a large-cap privilege.{' '}
         <span style={s({ color: E.text3 })}>The VL vs VH return spread is positive in all seven bands without exception.</span>
       </div>
-      <div style={s({ padding: `${SP._11}px ${SP._29}px ${SP._18}px`, background: E.bg0 })}>
+
+      {/* Local filter row — Architecture Pass v1.0. Filter housed in native section,
+          but reactivity remains global (Section 1 dims by data-evband, Return Field responds). */}
+      <div ref={filterRowRef}
+        style={s({ background: E.bg0, padding: `${SP._4}px ${SP._29}px ${SP._18}px`, display: 'flex', alignItems: 'center', gap: SP._7, flexWrap: 'wrap' as const })}>
+        <span style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.text3, marginRight: SP._4, flexShrink: 0 })}>Filter by EV band</span>
+        {EV_BANDS.map(({ band, label, sub }) => {
+          const active = selectedBandList.includes(band)
+          const isAllSelected = selectedBandList.includes('all') && band === 'all'
+          return (
+            <button key={String(band)} onClick={() => onSelectBand(band)} style={s({
+              fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, fontWeight: active ? 700 : 400,
+              letterSpacing: '0.10em',
+              padding: `${SP._7}px ${SP._11}px`,
+              background: isAllSelected ? E.bg1 : (active ? E.bg2 : 'transparent'),
+              color: active ? E.text1 : E.text3,
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, flexShrink: 0,
+            })}>
+              <span>{label}</span>
+              {sub && <span style={s({ fontSize: T.m1, color: active ? E.text2 : E.limbus, fontWeight: 400 })}>{sub}</span>}
+            </button>
+          )
+        })}
+      </div>
+
+      <div style={s({ padding: `0 ${SP._29}px ${SP._29}px`, background: E.bg0 })}>
         <svg viewBox={`0 0 ${W} ${H}`} style={s({ width: '100%', height: 'auto', display: 'block', maxHeight: 240 })}>
           {yTicks.map(v => {
             const y = cy(v)
@@ -1084,6 +1216,12 @@ export default function PlatformPage() {
         /* Type clamp at root — typography degrades slower than layout */
         html { font-size: clamp(13px, 0.94rem, 16px); }
 
+        /* ─── ANIMATION DECLARATIONS — CONSOLIDATED, LONGHAND ─────────────────
+           All animation rules use longhand (animation-name, animation-duration,
+           animation-timing-function, animation-iteration-count) so that inline
+           animation-delay set by D3 layers cleanly without resetting the shorthand.
+           ─────────────────────────────────────────────────────────────────────── */
+
         /* Field neighborhood pulsation — April 26 brief: 1000/2000/3000/4000/7000ms.
            Per-node animation-delay applied inline applies the 47% Lucas phase aperture. */
         @keyframes field-vh  { 0%,100% { opacity: .92 } 50% { opacity: .58 } }
@@ -1091,12 +1229,38 @@ export default function PlatformPage() {
         @keyframes field-mod { 0%,100% { opacity: .58 } 50% { opacity: .46 } }
         @keyframes field-lo  { 0%,100% { opacity: .50 } 50% { opacity: .42 } }
         @keyframes field-vl  { 0%,100% { opacity: .42 } 50% { opacity: .36 } }
-        .field-vh  { animation: field-vh  1000ms ease-in-out infinite; }
-        .field-h   { animation: field-h   2000ms ease-in-out infinite; }
-        .field-mod { animation: field-mod 3000ms ease-in-out infinite; }
-        .field-lo  { animation: field-lo  4000ms ease-in-out infinite; }
-        .field-vl  { animation: field-vl  7000ms ease-in-out infinite; }
+
         .fn-wrap { cursor: crosshair; }
+        .field-vh  {
+          animation-name: field-vh;
+          animation-duration: 1000ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .field-h   {
+          animation-name: field-h;
+          animation-duration: 2000ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .field-mod {
+          animation-name: field-mod;
+          animation-duration: 3000ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .field-lo  {
+          animation-name: field-lo;
+          animation-duration: 4000ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .field-vl  {
+          animation-name: field-vl;
+          animation-duration: 7000ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
 
         /* Field hover */
         .has-hover .fn-wrap { opacity: 0.06 !important; animation: none !important; }
@@ -1107,21 +1271,91 @@ export default function PlatformPage() {
         .filter-active.has-hover .fn-wrap.filter-match { opacity: 0.20 !important; animation: unset !important; }
         .filter-active.has-hover .fn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
 
-        /* Return Field — curve breathing at BPM cardiac cadence (60000/BPM = ms).
-           Tighter opacity ranges so curves confirm rather than compete with field nodes. */
+        /* Return Field — curve breathing at BPM cardiac cadence (60000/BPM = ms). */
         @keyframes gf-pulse-vh  { 0%,100% { opacity: .96 } 50% { opacity: .80 } }
         @keyframes gf-pulse-h   { 0%,100% { opacity: .90 } 50% { opacity: .70 } }
         @keyframes gf-pulse-mod { 0%,100% { opacity: .92 } 50% { opacity: .76 } }
         @keyframes gf-pulse-lo  { 0%,100% { opacity: .94 } 50% { opacity: .80 } }
         @keyframes gf-pulse-vl  { 0%,100% { opacity: .92 } 50% { opacity: .82 } }
-        g.gf-curve[data-bucket="VH"] { animation: gf-pulse-vh  302ms  ease-in-out infinite; }
-        g.gf-curve[data-bucket="H"]  { animation: gf-pulse-h   488ms  ease-in-out infinite; }
-        g.gf-curve[data-bucket="M"]  { animation: gf-pulse-mod 789ms  ease-in-out infinite; }
-        g.gf-curve[data-bucket="L"]  { animation: gf-pulse-lo  971ms  ease-in-out infinite; }
-        g.gf-curve[data-bucket="VL"] { animation: gf-pulse-vl  1277ms ease-in-out infinite; }
+        g.gf-curve[data-bucket="VH"] {
+          animation-name: gf-pulse-vh;
+          animation-duration: 302ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        g.gf-curve[data-bucket="H"]  {
+          animation-name: gf-pulse-h;
+          animation-duration: 488ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        g.gf-curve[data-bucket="M"]  {
+          animation-name: gf-pulse-mod;
+          animation-duration: 789ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        g.gf-curve[data-bucket="L"]  {
+          animation-name: gf-pulse-lo;
+          animation-duration: 971ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        g.gf-curve[data-bucket="VL"] {
+          animation-name: gf-pulse-vl;
+          animation-duration: 1277ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
         .gf-curve { transition: opacity 80ms ease; }
         .gf-has-hover .gf-curve { opacity: 0.10 !important; animation-play-state: paused !important; }
         .gf-has-hover .gf-curve.gf-active { opacity: 1 !important; animation-play-state: paused !important; }
+
+        /* Risk strip card EKG strokes — BPM cardiac cadence per bucket.
+           VH uses steps(2,end) for the arrhythmic flicker; others ease-in-out. */
+        @keyframes ekg-vh  { 0%,100% { opacity: 1 } 10% { opacity: .24 } 14% { opacity: 1 } 45% { opacity: .4 } 51% { opacity: 1 } 72% { opacity: .22 } 79% { opacity: .95 } }
+        @keyframes ekg-h   { 0%,100% { opacity: .9 } 50% { opacity: .45 } }
+        @keyframes ekg-mod { 0%,100% { opacity: .92 } 50% { opacity: .62 } }
+        @keyframes ekg-lo  { 0%,100% { opacity: .90 } 50% { opacity: .66 } }
+        @keyframes ekg-vl  { 0%,100% { opacity: .88 } 50% { opacity: .70 } }
+        @keyframes bpm-vh  { 0%,100% { filter: brightness(1) } 20% { filter: brightness(.68) } 24% { filter: brightness(1.25) } 52% { filter: brightness(.72) } 56% { filter: brightness(1.15) } }
+
+        .ekg-vh  {
+          animation-name: ekg-vh;
+          animation-duration: 302ms;
+          animation-timing-function: steps(2, end);
+          animation-iteration-count: infinite;
+        }
+        .ekg-h   {
+          animation-name: ekg-h;
+          animation-duration: 488ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .ekg-mod {
+          animation-name: ekg-mod;
+          animation-duration: 789ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .ekg-lo  {
+          animation-name: ekg-lo;
+          animation-duration: 971ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .ekg-vl  {
+          animation-name: ekg-vl;
+          animation-duration: 1277ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .bpm-vh  {
+          animation-name: bpm-vh;
+          animation-duration: 302ms;
+          animation-timing-function: steps(2, end);
+          animation-iteration-count: infinite;
+        }
 
         /* Reduced motion contract — severity preserved through luminance, hue, hierarchy.
            animation-delay also neutralized so phase-shifted nodes resolve to static opacity. */
@@ -1168,55 +1402,13 @@ export default function PlatformPage() {
       </div>
 
       {/*
-        TODO LOCKED: Filter relocation deferred to separate sprint.
-        Per Decisions Log 2026-04-16: Anchor Levels filter relocates to Section 3,
-        EV Bands filter relocates to Section 4. This pass = doctrine migration only.
-        Mixing structural relocation with visual doctrine migration risks muddying review.
+        FILTER RELOCATION (Free Tier Architecture Pass v1.0, 2026-04-27):
+        Anchor Levels filter now lives in Section 3, EV Bands filter now lives in Section 4.
+        Top chrome reduces to: brand · live · breadcrumb · upgrade. No filter strip here.
+        ARCHITECTURE PRINCIPLE: local control, global organismic response —
+        filters housed in native semantic sections, reactivity propagates globally
+        (Section 1 field dims by data-oal/data-evband, Return Field curves respond).
       */}
-      <div ref={(el: HTMLDivElement | null) => { oalRungRef.current = el; evBandRef.current = el }}
-        style={s({ background: E.bg0, padding: `${SP._7}px ${SP._29}px ${SP._18}px`, display: 'flex', alignItems: 'center', gap: SP._7, overflow: 'auto', position: 'sticky', top: 110, zIndex: 38, whiteSpace: 'nowrap' as const })}>
-        <span style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.text3, marginRight: SP._4, flexShrink: 0 })}>Anchor Levels</span>
-        {OAL_RUNGS.map(({ key, label, sub }) => {
-          const active = selectedOal.includes(key)
-          const isAllSelected = selectedOal.includes('all') && key === 'all'
-          return (
-            <button key={key} onClick={() => selectOal(key)} style={s({
-              fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, fontWeight: active ? 700 : 400,
-              letterSpacing: '0.10em',
-              padding: `${SP._7}px ${SP._11}px`,
-              background: isAllSelected ? E.bg1 : (active ? E.bg2 : 'transparent'),
-              color: active ? E.text1 : E.text3,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, flexShrink: 0,
-            })}>
-              <span>{label}</span>
-              {sub && <span style={s({ fontSize: T.m1, color: active ? E.text2 : E.limbus, fontWeight: 400 })}>{sub}</span>}
-            </button>
-          )
-        })}
-        <div style={s({ width: 1, height: 24, background: alpha(E.limbus, 0.22), flexShrink: 0, margin: `0 ${SP._7}px` })} />
-        <span style={s({ fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: E.text3, marginRight: SP._4, flexShrink: 0 })}>EV Bands</span>
-        {EV_BANDS.map(({ band, label, sub }) => {
-          const active = selectedBand.includes(band)
-          const isAllSelected = selectedBand.includes('all') && band === 'all'
-          return (
-            <button key={String(band)} onClick={() => selectBand(band)} style={s({
-              fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, fontWeight: active ? 700 : 400,
-              letterSpacing: '0.10em',
-              padding: `${SP._7}px ${SP._11}px`,
-              background: isAllSelected ? E.bg1 : (active ? E.bg2 : 'transparent'),
-              color: active ? E.text1 : E.text3,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, flexShrink: 0,
-            })}>
-              <span>{label}</span>
-              {sub && <span style={s({ fontSize: T.m1, color: active ? E.text2 : E.limbus, fontWeight: 400 })}>{sub}</span>}
-            </button>
-          )
-        })}
-      </div>
 
       {/* Section 1 orientation — S2/16 sans body, max-width 780px */}
       <div style={s({ padding: `0 ${SP._29}px ${SP._29}px`, background: E.bg0, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, maxWidth: 780 })}>
@@ -1329,7 +1521,6 @@ export default function PlatformPage() {
                     stroke="currentColor"
                     strokeWidth={isVH ? 3 : 2.1}
                     strokeLinecap="round"
-                    style={{ animationDuration: `${period}ms` }}
                   />
                 </svg>
               </div>
@@ -1344,8 +1535,22 @@ export default function PlatformPage() {
       <div style={s({ height: 1, background: alpha(E.limbus, 0.30) })} />
 
       <Section2Regimes summary={regimeSummary} />
-      {derivedNodes.length > 0 && <Section3AnchorLevels nodes={derivedNodes} selectedOal={selectedOal.length === 1 ? selectedOal[0] : 'all'} />}
-      {derivedNodes.length > 0 && <Section4EVBands selectedBand={selectedBand.length === 1 ? selectedBand[0] : 'all'} />}
+      {derivedNodes.length > 0 && (
+        <Section3AnchorLevels
+          nodes={derivedNodes}
+          selectedOal={selectedOal}
+          onSelectOal={selectOal}
+          filterRowRef={(el) => { oalRungRef.current = el }}
+        />
+      )}
+      {derivedNodes.length > 0 && (
+        <Section4EVBands
+          selectedBand={selectedBand.length === 1 ? selectedBand[0] : 'all'}
+          selectedBandList={selectedBand}
+          onSelectBand={selectBand}
+          filterRowRef={(el) => { evBandRef.current = el }}
+        />
+      )}
       {!isPaid && <PaidWall />}
       {isPaid && (
         <section>
@@ -1353,22 +1558,6 @@ export default function PlatformPage() {
           <div style={s({ padding: `${SP._29}px ${SP._29}px`, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2 })}>Sector-level structural risk analysis — in development.</div>
         </section>
       )}
-
-      {/* BPM keyframes injected per-bucket via inline style so EKG strokes use cardiac cadence */}
-      <style>{`
-        @keyframes ekg-vh   { 0%,100% { opacity: 1 } 10% { opacity: .24 } 14% { opacity: 1 } 45% { opacity: .4 } 51% { opacity: 1 } 72% { opacity: .22 } 79% { opacity: .95 } }
-        @keyframes ekg-h    { 0%,100% { opacity: .9 } 50% { opacity: .45 } }
-        @keyframes ekg-mod  { 0%,100% { opacity: .92 } 50% { opacity: .62 } }
-        @keyframes ekg-lo   { 0%,100% { opacity: .90 } 50% { opacity: .66 } }
-        @keyframes ekg-vl   { 0%,100% { opacity: .88 } 50% { opacity: .70 } }
-        @keyframes bpm-vh   { 0%,100% { filter: brightness(1) } 20% { filter: brightness(.68) } 24% { filter: brightness(1.25) } 52% { filter: brightness(.72) } 56% { filter: brightness(1.15) } }
-        .ekg-vh  { animation-name: ekg-vh;  animation-timing-function: steps(2,end); animation-iteration-count: infinite; }
-        .ekg-h   { animation-name: ekg-h;   animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-        .ekg-mod { animation-name: ekg-mod; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-        .ekg-lo  { animation-name: ekg-lo;  animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-        .ekg-vl  { animation-name: ekg-vl;  animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-        .bpm-vh  { animation: bpm-vh 302ms steps(2,end) infinite; }
-      `}</style>
 
       {/* Tooltip */}
       {tooltip && (() => {
