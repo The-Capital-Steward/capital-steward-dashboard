@@ -517,17 +517,24 @@ function ReturnFieldPanel({
           )
         })}
 
-        {/* Curve lines */}
+        {/* Curve lines — animation class on the <path> directly, not the <g>.
+            Same SVG opacity-on-group browser inconsistency as field nodes. */}
         {[...curves].reverse().map(b => {
           const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xPx(x)},${yPx(b.ys[i])}`).join(' ')
-          const baseOpacity = b.id === 'VH' ? 0.96 : b.id === 'VL' ? 0.85 : 0.78
           const baseWidth   = b.id === 'VH' ? 3.1  : b.id === 'VL' ? 2.3  : 1.8
           return (
             <g key={`curve-${b.id}`} className="gf-curve" data-bucket={b.id}>
               {(b.id === 'VH' || b.id === 'VL') && (
                 <path d={d} fill="none" stroke={b.col} strokeWidth={b.id === 'VH' ? 9 : 5} opacity={b.id === 'VH' ? 0.12 : 0.10} strokeLinecap="round" />
               )}
-              <path d={d} fill="none" stroke={b.col} strokeWidth={baseWidth} opacity={baseOpacity} strokeLinecap="round" />
+              <path
+                className={`gf-curve-line gf-curve-${b.id}`}
+                d={d}
+                fill="none"
+                stroke={b.col}
+                strokeWidth={baseWidth}
+                strokeLinecap="round"
+              />
             </g>
           )
         })}
@@ -1133,21 +1140,24 @@ export default function PlatformPage() {
           placed.push(...placedInBucket)
         })
 
-        // Render nodes — group per node, circle inside, animation-delay applied inline
+        // Render nodes — group per node, circle inside.
+        // Animation class and animation-delay are applied to the <circle>, NOT the <g>.
+        // Reason: SVG opacity animation on <g> elements is browser-inconsistent
+        // (Safari particularly ignores it). Animating <circle> opacity is reliable.
         const fnGroups = d3.select(fieldEl).selectAll('.fn-wrap')
           .data(placed, (d: any) => d.id)
           .join('g')
-          .attr('class', (d: any) => `fn-wrap field-${bucketCSSClass(d.bucket)}`)
+          .attr('class', 'fn-wrap')
           .attr('data-id',     (d: any) => d.id)
           .attr('data-oal',    (d: any) => d.oal)
           .attr('data-evband', (d: any) => String(d.evBand))
           .attr('transform',   (d: any) => `translate(${d.cx},${d.cy})`)
-          .style('animation-delay', (d: any) => `${d.phaseDelay}ms`)
 
         fnGroups.append('circle')
-          .attr('r',       (d: any) => nodeRadius(d.ev ?? evLo, evLo, evHi))
-          .attr('fill',    (d: any) => bucketColor(d.bucket))
-          .attr('opacity', (d: any) => BUCKET_OPACITY[d.bucket] ?? 0.58)
+          .attr('class',  (d: any) => `field-node field-${bucketCSSClass(d.bucket)}`)
+          .attr('r',      (d: any) => nodeRadius(d.ev ?? evLo, evLo, evHi))
+          .attr('fill',   (d: any) => bucketColor(d.bucket))
+          .style('animation-delay', (d: any) => `${d.phaseDelay}ms`)
 
         // Hover removed (Architecture Pass v1.0, 2026-04-27).
         // At ~700×440px panel resolution with 5,200 nodes packed into 5 neighborhoods,
@@ -1194,80 +1204,84 @@ export default function PlatformPage() {
            ─────────────────────────────────────────────────────────────────────── */
 
         /* Field neighborhood pulsation — April 26 brief: 1000/2000/3000/4000/7000ms.
-           Per-node animation-delay applied inline applies the 47% Lucas phase aperture. */
+           Per-node animation-delay applied inline applies the 47% Lucas phase aperture.
+           CRITICAL: Animation targets <circle class="field-node field-{x}"> directly,
+           not the parent <g>. SVG opacity animation on <g> is browser-inconsistent. */
         @keyframes field-vh  { 0%,100% { opacity: .92 } 50% { opacity: .58 } }
         @keyframes field-h   { 0%,100% { opacity: .75 } 50% { opacity: .50 } }
         @keyframes field-mod { 0%,100% { opacity: .58 } 50% { opacity: .46 } }
         @keyframes field-lo  { 0%,100% { opacity: .50 } 50% { opacity: .42 } }
         @keyframes field-vl  { 0%,100% { opacity: .42 } 50% { opacity: .36 } }
 
-        .fn-wrap { /* no cursor — observation at neighborhood level, not cellular */ }
-        .field-vh  {
+        circle.field-node { /* base — animation applied via bucket class below */ }
+        circle.field-vh  {
           animation-name: field-vh;
           animation-duration: 1000ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .field-h   {
+        circle.field-h   {
           animation-name: field-h;
           animation-duration: 2000ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .field-mod {
+        circle.field-mod {
           animation-name: field-mod;
           animation-duration: 3000ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .field-lo  {
+        circle.field-lo  {
           animation-name: field-lo;
           animation-duration: 4000ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .field-vl  {
+        circle.field-vl  {
           animation-name: field-vl;
           animation-duration: 7000ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
 
-        /* Field filter — only interaction model now (hover removed Architecture Pass v1.0) */
-        .filter-active .fn-wrap { opacity: 0.05 !important; animation: none !important; }
-        .filter-active .fn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
+        /* Field filter — only interaction model now (hover removed Architecture Pass v1.0).
+           Filter dimming applies to the <g> wrapper; matched nodes inherit normal animation. */
+        .filter-active .fn-wrap { opacity: 0.10 !important; }
+        .filter-active .fn-wrap.filter-match { opacity: 1 !important; }
 
-        /* Return Field — curve breathing at BPM cardiac cadence (60000/BPM = ms). */
+        /* Return Field curves — BPM cardiac cadence on the <path>, not the <g>.
+           Same browser-inconsistency reason as field nodes. */
         @keyframes gf-pulse-vh  { 0%,100% { opacity: .96 } 50% { opacity: .80 } }
         @keyframes gf-pulse-h   { 0%,100% { opacity: .90 } 50% { opacity: .70 } }
         @keyframes gf-pulse-mod { 0%,100% { opacity: .92 } 50% { opacity: .76 } }
         @keyframes gf-pulse-lo  { 0%,100% { opacity: .94 } 50% { opacity: .80 } }
         @keyframes gf-pulse-vl  { 0%,100% { opacity: .92 } 50% { opacity: .82 } }
-        g.gf-curve[data-bucket="VH"] {
+        path.gf-curve-VH {
           animation-name: gf-pulse-vh;
           animation-duration: 302ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        g.gf-curve[data-bucket="H"]  {
+        path.gf-curve-H {
           animation-name: gf-pulse-h;
           animation-duration: 488ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        g.gf-curve[data-bucket="M"]  {
+        path.gf-curve-M {
           animation-name: gf-pulse-mod;
           animation-duration: 789ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        g.gf-curve[data-bucket="L"]  {
+        path.gf-curve-L {
           animation-name: gf-pulse-lo;
           animation-duration: 971ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        g.gf-curve[data-bucket="VL"] {
+        path.gf-curve-VL {
           animation-name: gf-pulse-vl;
           animation-duration: 1277ms;
           animation-timing-function: ease-in-out;
@@ -1326,11 +1340,11 @@ export default function PlatformPage() {
             animation-delay: 0ms !important;
             transition-duration: 0.001ms !important;
           }
-          .field-vl  { opacity: .42 !important }
-          .field-lo  { opacity: .50 !important }
-          .field-mod { opacity: .58 !important }
-          .field-h   { opacity: .75 !important }
-          .field-vh  { opacity: .92 !important }
+          circle.field-vl  { opacity: .42 !important }
+          circle.field-lo  { opacity: .50 !important }
+          circle.field-mod { opacity: .58 !important }
+          circle.field-h   { opacity: .75 !important }
+          circle.field-vh  { opacity: .92 !important }
         }
       `}</style>
 
