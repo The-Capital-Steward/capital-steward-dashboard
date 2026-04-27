@@ -955,14 +955,12 @@ export default function PlatformPage() {
   const [selectedBand,  setSelectedBand]  = useState<Band[]>(['all'])
   const [selectedOal,   setSelectedOal]   = useState<OALKey[]>(['all'])
   const [activeLevel,   setActiveLevel]   = useState(1)
-  const [tooltip,       setTooltip]       = useState<{ x: number; y: number; node: Node } | null>(null)
   const [regimeSummary, setRegimeSummary] = useState<RegimeSummary | null>(null)
   const [derivedNodes,  setDerivedNodes]  = useState<Node[]>([])
   const [vizReady,      setVizReady]      = useState(false)
 
   const selectedBandRef  = useRef<Band[]>(['all'])
   const selectedOalRef   = useRef<OALKey[]>(['all'])
-  const hoveredIdRef     = useRef<string | null>(null)
   const nodesRef         = useRef<Node[]>([])
   const d3ReadyRef       = useRef(false)
   const fieldSvgRef      = useRef<SVGSVGElement | null>(null)
@@ -973,16 +971,11 @@ export default function PlatformPage() {
   const regimeFetchRef   = useRef<Promise<RegimeSummary | null> | null>(null)
 
   function refreshNodes() {
-    const hId  = hoveredIdRef.current
     const oal  = selectedOalRef.current
     const band = selectedBandRef.current
     const filterActive = !oal.includes('all') || !band.includes('all')
     const svg = fieldSvgRef.current
     if (!svg) return
-
-    svg.querySelectorAll('.is-hovered').forEach(el => el.classList.remove('is-hovered'))
-    if (hId) { svg.classList.add('has-hover'); svg.querySelectorAll(`[data-id="${hId}"]`).forEach(el => el.classList.add('is-hovered')) }
-    else { svg.classList.remove('has-hover') }
 
     if (filterActive) {
       svg.classList.add('filter-active')
@@ -1156,34 +1149,12 @@ export default function PlatformPage() {
           .attr('fill',    (d: any) => bucketColor(d.bucket))
           .attr('opacity', (d: any) => BUCKET_OPACITY[d.bucket] ?? 0.58)
 
-        fnGroups
-          .on('mouseenter', function(event: MouseEvent, d: any) {
-            hoveredIdRef.current = d.id
-            refreshNodes()
-            setTooltip({ x: event.clientX + 16, y: event.clientY - 14, node: d })
-
-            const bid   = bucketToId(d.bucket)
-            const gfEl  = gfSvgRef.current
-            if (gfEl) {
-              gfEl.classList.add('gf-has-hover')
-              gfEl.querySelectorAll('.gf-active').forEach(el => el.classList.remove('gf-active'))
-              gfEl.querySelectorAll(`.gf-curve[data-bucket="${bid}"]`).forEach(el => el.classList.add('gf-active'))
-            }
-          })
-          .on('mousemove', function(event: MouseEvent) {
-            setTooltip(prev => prev ? { ...prev, x: event.clientX + 16, y: event.clientY - 14 } : null)
-          })
-          .on('mouseleave', function() {
-            hoveredIdRef.current = null
-            refreshNodes()
-            setTooltip(null)
-
-            const gfEl = gfSvgRef.current
-            if (gfEl) {
-              gfEl.classList.remove('gf-has-hover')
-              gfEl.querySelectorAll('.gf-active').forEach(el => el.classList.remove('gf-active'))
-            }
-          })
+        // Hover removed (Architecture Pass v1.0, 2026-04-27).
+        // At ~700×440px panel resolution with 5,200 nodes packed into 5 neighborhoods,
+        // individual node hover targets are sub-pixel. The platform reasons at the level
+        // of structural condition, not individual ticker — the neighborhood is the unit
+        // of analysis at this descent level. Direct node interaction will return at
+        // paid-tier Sectors/Archetypes/Companies sections where resolution permits it.
 
       } finally {
         setVizReady(true)
@@ -1230,7 +1201,7 @@ export default function PlatformPage() {
         @keyframes field-lo  { 0%,100% { opacity: .50 } 50% { opacity: .42 } }
         @keyframes field-vl  { 0%,100% { opacity: .42 } 50% { opacity: .36 } }
 
-        .fn-wrap { cursor: crosshair; }
+        .fn-wrap { /* no cursor — observation at neighborhood level, not cellular */ }
         .field-vh  {
           animation-name: field-vh;
           animation-duration: 1000ms;
@@ -1262,14 +1233,9 @@ export default function PlatformPage() {
           animation-iteration-count: infinite;
         }
 
-        /* Field hover */
-        .has-hover .fn-wrap { opacity: 0.06 !important; animation: none !important; }
-        .has-hover .fn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
-        /* Field filter */
+        /* Field filter — only interaction model now (hover removed Architecture Pass v1.0) */
         .filter-active .fn-wrap { opacity: 0.05 !important; animation: none !important; }
         .filter-active .fn-wrap.filter-match { opacity: unset !important; animation: unset !important; }
-        .filter-active.has-hover .fn-wrap.filter-match { opacity: 0.20 !important; animation: unset !important; }
-        .filter-active.has-hover .fn-wrap.is-hovered { opacity: 1 !important; animation: none !important; }
 
         /* Return Field — curve breathing at BPM cardiac cadence (60000/BPM = ms). */
         @keyframes gf-pulse-vh  { 0%,100% { opacity: .96 } 50% { opacity: .80 } }
@@ -1308,52 +1274,46 @@ export default function PlatformPage() {
           animation-iteration-count: infinite;
         }
         .gf-curve { transition: opacity 80ms ease; }
-        .gf-has-hover .gf-curve { opacity: 0.10 !important; animation-play-state: paused !important; }
-        .gf-has-hover .gf-curve.gf-active { opacity: 1 !important; animation-play-state: paused !important; }
 
-        /* Risk strip card EKG strokes — BPM cardiac cadence per bucket.
-           VH uses steps(2,end) for the arrhythmic flicker; others ease-in-out. */
-        @keyframes ekg-vh  { 0%,100% { opacity: 1 } 10% { opacity: .24 } 14% { opacity: 1 } 45% { opacity: .4 } 51% { opacity: 1 } 72% { opacity: .22 } 79% { opacity: .95 } }
-        @keyframes ekg-h   { 0%,100% { opacity: .9 } 50% { opacity: .45 } }
-        @keyframes ekg-mod { 0%,100% { opacity: .92 } 50% { opacity: .62 } }
-        @keyframes ekg-lo  { 0%,100% { opacity: .90 } 50% { opacity: .66 } }
-        @keyframes ekg-vl  { 0%,100% { opacity: .88 } 50% { opacity: .70 } }
-        @keyframes bpm-vh  { 0%,100% { filter: brightness(1) } 20% { filter: brightness(.68) } 24% { filter: brightness(1.25) } 52% { filter: brightness(.72) } 56% { filter: brightness(1.15) } }
+        /* Bucket signal lines — 3px top notch on each risk strip card, animated as the
+           singular physiological pulse carrier. BPM cardiac cadence (60000/BPM = ms).
+           VH uses steps(2,end) for arrhythmic flicker; others ease-in-out.
+           Architecture Pass v1.0 (2026-04-27): replaces prior BPM numeral + EKG stroke system.
+           The pulse is felt, not narrated. */
+        @keyframes bucket-signal-vh { 0%,100% { opacity: 1 } 10% { opacity: .30 } 14% { opacity: 1 } 45% { opacity: .42 } 51% { opacity: 1 } 72% { opacity: .28 } 79% { opacity: .96 } }
+        @keyframes bucket-signal-h  { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+        @keyframes bucket-signal-m  { 0%,100% { opacity: 1 } 50% { opacity: .70 } }
+        @keyframes bucket-signal-l  { 0%,100% { opacity: 1 } 50% { opacity: .78 } }
+        @keyframes bucket-signal-vl { 0%,100% { opacity: 1 } 50% { opacity: .85 } }
 
-        .ekg-vh  {
-          animation-name: ekg-vh;
+        .bucket-signal-vh {
+          animation-name: bucket-signal-vh;
           animation-duration: 302ms;
           animation-timing-function: steps(2, end);
           animation-iteration-count: infinite;
         }
-        .ekg-h   {
-          animation-name: ekg-h;
+        .bucket-signal-h  {
+          animation-name: bucket-signal-h;
           animation-duration: 488ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .ekg-mod {
-          animation-name: ekg-mod;
+        .bucket-signal-mod {
+          animation-name: bucket-signal-m;
           animation-duration: 789ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .ekg-lo  {
-          animation-name: ekg-lo;
+        .bucket-signal-lo  {
+          animation-name: bucket-signal-l;
           animation-duration: 971ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        .ekg-vl  {
-          animation-name: ekg-vl;
+        .bucket-signal-vl  {
+          animation-name: bucket-signal-vl;
           animation-duration: 1277ms;
           animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-        .bpm-vh  {
-          animation-name: bpm-vh;
-          animation-duration: 302ms;
-          animation-timing-function: steps(2, end);
           animation-iteration-count: infinite;
         }
 
@@ -1432,7 +1392,7 @@ export default function PlatformPage() {
       {/* Section 1: Dual panels — Structural Field (neighborhoods) + Return Field */}
       <div style={s({ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', height: 440, background: E.bg0 })}>
         <div style={s({ borderRight: `1px solid ${alpha(E.limbus, 0.30)}`, background: E.bg0, overflow: 'hidden' })}>
-          <svg ref={fieldSvgRef} style={s({ display: 'block', width: '100%', height: '100%', cursor: 'crosshair' })} />
+          <svg ref={fieldSvgRef} style={s({ display: 'block', width: '100%', height: '100%' })} />
         </div>
         <div style={s({ background: E.bg0, overflow: 'hidden' })}>
           <ReturnFieldPanel
@@ -1455,16 +1415,17 @@ export default function PlatformPage() {
         )}
       </div>
 
-      {/* Risk strip — Section 1 legend. BPM cardiac cadence on cards.
-          Doctrine compliance: 2px top notch + ~6% bucket tint, no border, VH halo only,
-          BPM at D1/49 with VH lifted to D2/61 as part of locked stress grammar. */}
+      {/* Risk strip — Section 1 legend.
+          Architecture Pass v1.0 (2026-04-27): BPM numerals and EKG strokes removed.
+          Pulse is felt, not narrated — the 3px top signal line is the singular pulse carrier.
+          Each card carries: bucket name + severe loss rate (top row),
+          structural state at S3/20 sans (focal),
+          framework explanation at S1/13 sans (calm).
+          Card height retained at 198px — quiet diagnostic shelf, not compressed tile. */}
       <div style={s({ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: SP._11, padding: `${SP._18}px ${SP._29}px ${SP._29}px`, background: E.bg0 })}>
         {BUCKET_ORDER.map((b) => {
           const isVH = b === 'Very High'
           const col = bucketColor(b)
-          const bpmSize = isVH ? T.d2 : T.d1
-          const period = BPM_PERIOD[b]
-          const bpm = BPM_VALUE[b]
           const cls = bucketCSSClass(b)
           const desc: Record<string, string> = {
             'Very Low':  'Grounded',
@@ -1492,39 +1453,31 @@ export default function PlatformPage() {
               overflow: 'hidden',
               boxShadow: isVH ? `0 0 34px ${alpha(col, 0.20)}` : 'none',
             })}>
-              <div style={s({ position: 'absolute', left: 0, top: 0, height: 2, width: '100%', background: col })} />
-              <div style={s({ display: 'flex', justifyContent: 'space-between', gap: SP._7, fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.10em', textTransform: 'uppercase' as const })}>
+              {/* 3px animated physiological signal line — singular pulse carrier */}
+              <div className={`bucket-signal-${cls}`} style={s({ position: 'absolute', left: 0, top: 0, height: 3, width: '100%', background: col })} />
+
+              {/* Top row: bucket label + severe loss rate */}
+              <div style={s({ display: 'flex', justifyContent: 'space-between', gap: SP._7, fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.45, letterSpacing: '0.10em', textTransform: 'uppercase' as const, marginTop: SP._11 })}>
                 <span style={s({ color: col })}>{b}</span>
-                <span style={s({ color: E.text3, textAlign: 'right' as const })}>{loss[b]}</span>
+                <span style={s({ color: E.text3, textAlign: 'right' as const })}>{loss[b]} severe loss</span>
               </div>
-              <div className={isVH ? `bpm-${cls}` : undefined} style={s({
-                fontFamily: E.serif,
-                fontSize: bpmSize,
-                lineHeight: 1.0,
-                marginTop: SP._18,
-                letterSpacing: '-0.005em',
+
+              {/* Structural state — S3/20 sans, new emotional focal line.
+                  Generous vertical space above and below since BPM/EKG are gone. */}
+              <div style={s({
+                fontFamily: E.sans,
+                fontSize: T.s3,
+                lineHeight: 1.2,
+                fontWeight: 700,
+                letterSpacing: '-0.01em',
                 color: col,
+                marginTop: SP._47,
+                marginBottom: SP._11,
               })}>
-                {bpm}
-                <span style={s({ fontFamily: E.mono, fontSize: T.m2, lineHeight: 1.3, letterSpacing: '0.10em', marginLeft: SP._7 })}>BPM</span>
+                {desc[b]}
               </div>
-              <div style={s({ height: 36, margin: `${SP._7}px 0 ${SP._11}px`, color: col })}>
-                <svg viewBox="0 0 240 48" preserveAspectRatio="none" style={s({ width: '100%', height: '100%' })}>
-                  <path
-                    className={`ekg-${cls}`}
-                    d={isVH
-                      ? "M0 27 L14 18 L26 39 L38 8 L49 32 L63 24 L74 44 L88 15 L102 30 L117 18 L130 41 L146 7 L159 34 L176 22 L191 43 L207 12 L224 31 L240 25"
-                      : b === 'High'
-                        ? "M0 26 C18 12, 31 41, 45 25 S78 39, 93 22 S125 44, 140 24 S174 38, 190 20 S217 32, 240 24"
-                        : "M0 25 C24 11, 48 39, 72 25 S120 11, 144 25 S192 39, 240 25"}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={isVH ? 3 : 2.1}
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-              <div style={s({ fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text1, marginBottom: SP._3 })}>{desc[b]}</div>
+
+              {/* Framework explanation — S1/13 sans, calm */}
               <div style={s({ fontFamily: E.sans, fontSize: T.s1, lineHeight: 1.55, color: E.text2 })}>{sub[b]}</div>
             </div>
           )
@@ -1558,50 +1511,6 @@ export default function PlatformPage() {
           <div style={s({ padding: `${SP._29}px ${SP._29}px`, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2 })}>Sector-level structural risk analysis — in development.</div>
         </section>
       )}
-
-      {/* Tooltip */}
-      {tooltip && (() => {
-        const n = tooltip.node
-        const oalFull: Record<string, string> = { FCF: 'Free Cash Flow', NI: 'Net Income', EBIT: 'Operating Income', Revenue: 'Revenue' }
-        const bucketCol = bucketColor(n.bucket)
-        return (
-          <div style={s({ position: 'fixed', left: tooltip.x, top: tooltip.y, background: E.bg1, borderTop: `2px solid ${isPaid ? E.text1 : bucketCol}`, padding: `${SP._11}px ${SP._18}px`, fontFamily: E.mono, fontSize: T.m1, lineHeight: 1.5, color: E.text1, whiteSpace: 'nowrap' as const, zIndex: 50, pointerEvents: 'none', minWidth: 210 })}>
-            <div style={s({ marginBottom: SP._7 })}>
-              {isPaid ? (
-                <>
-                  <div style={s({ fontSize: T.m2, fontWeight: 700, color: E.text1, letterSpacing: '0.02em', lineHeight: 1.2 })}>COMPANY</div>
-                  <div style={s({ fontSize: T.m1, color: E.text3, marginTop: 2 })}>{n.symbol}</div>
-                </>
-              ) : (
-                <>
-                  <div style={s({ fontSize: T.m2, fontWeight: 700, color: E.text1, filter: 'blur(5px)', userSelect: 'none' as const, lineHeight: 1.2 })}>COMPANY NAME</div>
-                  <div style={s({ fontSize: T.m1, color: E.text3, marginTop: 2, filter: 'blur(4px)', userSelect: 'none' as const })}>TICKER</div>
-                </>
-              )}
-            </div>
-            <div style={s({ marginBottom: SP._7 })}>
-              <span style={s({ fontFamily: E.serif, fontSize: T.s4, fontWeight: 700, color: bucketCol, letterSpacing: '-0.01em', lineHeight: 1 })}>{n.pctRank}</span>
-              <span style={s({ fontSize: T.m1, color: E.text3, marginLeft: SP._4 })}>Composite Risk Score</span>
-            </div>
-            <div style={s({ marginBottom: SP._4 })}>
-              <span style={s({ color: bucketCol, fontWeight: 700 })}>{n.bucket}</span>
-              <span style={s({ color: E.text3 })}> · EV Band {n.evBand}</span>
-            </div>
-            <div style={s({ color: E.text2, marginBottom: SP._7 })}>{oalFull[n.oal] ?? n.oal} anchor</div>
-            <div style={s({ display: 'flex', gap: SP._11 })}>
-              <div>
-                <div style={s({ fontSize: T.m1, color: E.text3, letterSpacing: '0.10em', marginBottom: 1 })}>DETACHMENT</div>
-                <div style={s({ fontSize: T.m2, color: E.text2 })}>{safeFixed(n.axis1, 0)}</div>
-              </div>
-              <div>
-                <div style={s({ fontSize: T.m1, color: E.text3, letterSpacing: '0.10em', marginBottom: 1 })}>DEGRADATION</div>
-                <div style={s({ fontSize: T.m2, color: E.text2 })}>{safeFixed(n.axis2, 0)}</div>
-              </div>
-            </div>
-            {!isPaid && <div style={s({ marginTop: SP._7, fontSize: T.m1, color: E.text3 })}>Full profile · paid tier</div>}
-          </div>
-        )
-      })()}
 
       {/* Footer — decorative orientation, limbus permitted */}
       <div style={s({ padding: `${SP._29}px ${SP._29}px`, textAlign: 'center' as const, background: E.bg0 })}>
