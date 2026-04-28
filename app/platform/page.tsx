@@ -136,12 +136,18 @@ const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as con
 // April 26 brief: hardcoded neighborhood centers (% of SVG canvas).
 // VL bottom-left → VH top-right. Static layout, computed once per render.
 // Field-pulsation periods per April 26 brief.
+//
+// 2026-04-27 Architecture Pass v1.0 calibration: centers tightened inward to preserve
+// the diagonal doctrine under the deployed panel aspect ratio (~700×440px). Original
+// April 26 percentages (15/75, 32/55, 50/40, 68/28, 82/18) pressed the endpoints too
+// close to the boundary at this aspect — VL piled against the lower-left edge.
+// Radius factors unchanged: bucket density semantics preserved, composition corrected.
 const NEIGHBORHOODS = [
-  { id: 'VL', cx: 15, cy: 75, radiusFactor: 9.0, period: 7000 },
-  { id: 'L',  cx: 32, cy: 55, radiusFactor: 8.5, period: 4000 },
+  { id: 'VL', cx: 18, cy: 72, radiusFactor: 9.0, period: 7000 },
+  { id: 'L',  cx: 33, cy: 56, radiusFactor: 8.5, period: 4000 },
   { id: 'M',  cx: 50, cy: 40, radiusFactor: 8.0, period: 3000 },
-  { id: 'H',  cx: 68, cy: 28, radiusFactor: 6.5, period: 2000 },
-  { id: 'VH', cx: 82, cy: 18, radiusFactor: 5.8, period: 1000 },
+  { id: 'H',  cx: 67, cy: 26, radiusFactor: 6.5, period: 2000 },
+  { id: 'VH', cx: 79, cy: 18, radiusFactor: 5.8, period: 1000 },
 ] as const
 
 // April 26 brief: static bucket opacities (replaces prior breathing-animation swings)
@@ -1106,23 +1112,41 @@ export default function PlatformPage() {
 
         const lcg = makeLCG(31337)
 
+        // Box-Muller transform — produces a standard normal sample (mean=0, σ=1).
+        // Each call consumes 2 LCG draws.
+        function gaussian(): number {
+          const u1 = Math.max(lcg(), 1e-9)
+          const u2 = lcg()
+          return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
+        }
+
         // For each neighborhood, distribute nodes around its center via Box-Muller,
         // sort by EV descending (heavier leads), apply 47% Lucas phase aperture.
+        // Independent samples per axis. Radius clamped at 2.5σ to prevent outlier
+        // pile-up against the canvas boundary (the bug seen in 2026-04-27 render).
+        // Isotropic scaling — neighborhoods stay roughly circular regardless of panel aspect.
         const placed: Array<Node & { phaseDelay: number; cx: number; cy: number }> = []
+        const ISO_SCALE = Math.min(SW, SH) / 100  // pixels per neighborhood-radius unit
+        const SIGMA_CLAMP = 2.5                   // clamp normal samples at ±2.5σ
 
         NEIGHBORHOODS.forEach((nb) => {
           const bucketKey = nb.id === 'VL' ? 'Very Low' : nb.id === 'L' ? 'Low' : nb.id === 'M' ? 'Moderate' : nb.id === 'H' ? 'High' : 'Very High'
           const list = byBucket[bucketKey] ?? []
 
-          // Place each node around (cx, cy) with Gaussian-ish distribution
+          // Each node placed via two independent Box-Muller samples, clamped to ±2.5σ.
+          // Scale is isotropic — multiplied by min(SW,SH)/100, NOT separately by SW and SH.
           const placedInBucket = list.map(n => {
-            const u1 = lcg() || 0.001
-            const u2 = lcg()
-            const radiusX = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * nb.radiusFactor * (SW / 100) * 0.5
-            const radiusY = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * nb.radiusFactor * (SH / 100) * 0.5
-            const rawX = (nb.cx / 100) * SW + radiusX
-            const rawY = (nb.cy / 100) * SH + radiusY
-            // Clamp to canvas with 50px hard padding (April 26 brief)
+            let gx = gaussian()
+            let gy = gaussian()
+            // Truncate at ±2.5σ — preserves Gaussian core, eliminates tail outliers
+            // that would otherwise clamp to the canvas edge and create visible pile-up
+            gx = Math.max(-SIGMA_CLAMP, Math.min(SIGMA_CLAMP, gx))
+            gy = Math.max(-SIGMA_CLAMP, Math.min(SIGMA_CLAMP, gy))
+            // sigmaPx is the standard deviation in pixels for this neighborhood
+            const sigmaPx = nb.radiusFactor * ISO_SCALE * 0.45
+            const rawX = (nb.cx / 100) * SW + gx * sigmaPx
+            const rawY = (nb.cy / 100) * SH + gy * sigmaPx
+            // Hard padding clamp — should rarely fire after sigma-clamp, safety net
             const x = Math.max(PAD, Math.min(SW - PAD, rawX))
             const y = Math.max(PAD, Math.min(SH - PAD, rawY))
             return { ...n, cx: x, cy: y, phaseDelay: 0 }
@@ -1206,12 +1230,14 @@ export default function PlatformPage() {
         /* Field neighborhood pulsation — April 26 brief: 1000/2000/3000/4000/7000ms.
            Per-node animation-delay applied inline applies the 47% Lucas phase aperture.
            CRITICAL: Animation targets <circle class="field-node field-{x}"> directly,
-           not the parent <g>. SVG opacity animation on <g> is browser-inconsistent. */
-        @keyframes field-vh  { 0%,100% { opacity: .92 } 50% { opacity: .58 } }
-        @keyframes field-h   { 0%,100% { opacity: .75 } 50% { opacity: .50 } }
-        @keyframes field-mod { 0%,100% { opacity: .58 } 50% { opacity: .46 } }
-        @keyframes field-lo  { 0%,100% { opacity: .50 } 50% { opacity: .42 } }
-        @keyframes field-vl  { 0%,100% { opacity: .42 } 50% { opacity: .36 } }
+           and uses fill-opacity (not opacity) — fill-opacity is an SVG presentation
+           attribute that animates reliably across all browsers without conflicting
+           with the parent <g> opacity or the XML opacity attribute. */
+        @keyframes field-vh  { 0%,100% { fill-opacity: .92 } 50% { fill-opacity: .58 } }
+        @keyframes field-h   { 0%,100% { fill-opacity: .75 } 50% { fill-opacity: .50 } }
+        @keyframes field-mod { 0%,100% { fill-opacity: .58 } 50% { fill-opacity: .46 } }
+        @keyframes field-lo  { 0%,100% { fill-opacity: .50 } 50% { fill-opacity: .42 } }
+        @keyframes field-vl  { 0%,100% { fill-opacity: .42 } 50% { fill-opacity: .36 } }
 
         circle.field-node { /* base — animation applied via bucket class below */ }
         circle.field-vh  {
@@ -1251,12 +1277,13 @@ export default function PlatformPage() {
         .filter-active .fn-wrap.filter-match { opacity: 1 !important; }
 
         /* Return Field curves — BPM cardiac cadence on the <path>, not the <g>.
-           Same browser-inconsistency reason as field nodes. */
-        @keyframes gf-pulse-vh  { 0%,100% { opacity: .96 } 50% { opacity: .80 } }
-        @keyframes gf-pulse-h   { 0%,100% { opacity: .90 } 50% { opacity: .70 } }
-        @keyframes gf-pulse-mod { 0%,100% { opacity: .92 } 50% { opacity: .76 } }
-        @keyframes gf-pulse-lo  { 0%,100% { opacity: .94 } 50% { opacity: .80 } }
-        @keyframes gf-pulse-vl  { 0%,100% { opacity: .92 } 50% { opacity: .82 } }
+           Uses stroke-opacity (SVG presentation attribute) for reliable cross-browser
+           animation. Same principle as fill-opacity on field circles. */
+        @keyframes gf-pulse-vh  { 0%,100% { stroke-opacity: .96 } 50% { stroke-opacity: .80 } }
+        @keyframes gf-pulse-h   { 0%,100% { stroke-opacity: .90 } 50% { stroke-opacity: .70 } }
+        @keyframes gf-pulse-mod { 0%,100% { stroke-opacity: .92 } 50% { stroke-opacity: .76 } }
+        @keyframes gf-pulse-lo  { 0%,100% { stroke-opacity: .94 } 50% { stroke-opacity: .80 } }
+        @keyframes gf-pulse-vl  { 0%,100% { stroke-opacity: .92 } 50% { stroke-opacity: .82 } }
         path.gf-curve-VH {
           animation-name: gf-pulse-vh;
           animation-duration: 302ms;
@@ -1332,7 +1359,7 @@ export default function PlatformPage() {
         }
 
         /* Reduced motion contract — severity preserved through luminance, hue, hierarchy.
-           animation-delay also neutralized so phase-shifted nodes resolve to static opacity. */
+           animation-delay also neutralized so phase-shifted nodes resolve to static state. */
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
             animation-duration: 0.001ms !important;
@@ -1340,11 +1367,11 @@ export default function PlatformPage() {
             animation-delay: 0ms !important;
             transition-duration: 0.001ms !important;
           }
-          circle.field-vl  { opacity: .42 !important }
-          circle.field-lo  { opacity: .50 !important }
-          circle.field-mod { opacity: .58 !important }
-          circle.field-h   { opacity: .75 !important }
-          circle.field-vh  { opacity: .92 !important }
+          circle.field-vl  { fill-opacity: .42 !important }
+          circle.field-lo  { fill-opacity: .50 !important }
+          circle.field-mod { fill-opacity: .58 !important }
+          circle.field-h   { fill-opacity: .75 !important }
+          circle.field-vh  { fill-opacity: .92 !important }
         }
       `}</style>
 
