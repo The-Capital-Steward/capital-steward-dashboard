@@ -152,36 +152,29 @@ const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as con
 // the diagonal doctrine under the deployed panel aspect ratio (~700×440px). Original
 // April 26 percentages (15/75, 32/55, 50/40, 68/28, 82/18) pressed the endpoints too
 // close to the boundary at this aspect — VL piled against the lower-left edge.
-// NEIGHBORHOODS — proportional spacing along diagonal (LOCKED 2026-04-28).
-// Centers reflect cumulative distance in median-return space, not equidistant
-// stops along the canvas. The Return Field's median returns are not evenly
-// spaced — VL +11.4%, L +7.5%, M +4.5%, H -2.0%, VH -9.6% — so the structural
-// field's habitat centers should not be evenly spaced either. The two panels
-// were lying about each other under equidistant centers.
+// NEIGHBORHOODS — auto-fit endpoints + Alpha proportional spacing (LOCKED 2026-04-28).
+// Endpoint positions chosen to maximize habitat area within deployed panel
+// (700×440). The data is the priority; the diagonal is decorative.
 //
-// Cumulative t along VL→VH chord, normalized to total return-space span:
-//   VL → L  : 3.9pp / 21.0pp = 0.186
-//   L  → M  : 3.0pp / 21.0pp = 0.329 cumulative
-//   M  → H  : 6.5pp / 21.0pp = 0.638 cumulative
-//   H  → VH : 7.6pp / 21.0pp = 1.000 cumulative
+// Optimal endpoints (grid-searched against deployed panel + bucket shares):
+//   VL = (17, 55) — pulled inward from prior corner-anchored position
+//   VH = (80, 40) — pulled inward from prior corner-anchored position
+// Both endpoints maximize the smallest per-habitat edge-clearance, which
+// determines auto-fit BASE. The diagonal flattens as a consequence — VH
+// no longer sits in the upper-right corner. This is intentional.
 //
-// VL fixed at (18, 72), VH fixed at (79, 18). Δx = 61, Δy = -54.
-// Each intermediate bucket sits at (18 + 61·t, 72 - 54·t) in % units.
+// Cumulative t in median-return space (Alpha): VL=0, L=0.186, M=0.329,
+// H=0.638, VH=1.000. Each intermediate sits at:
+//   cx = 17 + (80-17)*t = 17 + 63*t
+//   cy = 55 + (40-55)*t = 55 - 15*t
 //
-// Doctrinal consequence: VL/L/M cluster tightly in the lower-left quadrant
-// because their median returns cluster tightly. Habitats overlap at the core,
-// not just at the periphery. This is Alpha — pure proportional spacing,
-// distribution as honest claim. Same governing principle as Resolution C.
-// Supersedes the 2026-04-27 aspect-calibration entry.
-//
-// Radius factors and animation periods unchanged: bucket density semantics
-// preserved, only the geometric placement of the centers changed.
+// Radius factors and animation periods unchanged.
 const NEIGHBORHOODS = [
-  { id: 'VL', cx: 18, cy: 72, radiusFactor: 9.0, period: 7000 },
-  { id: 'L',  cx: 29, cy: 62, radiusFactor: 8.5, period: 4000 },
-  { id: 'M',  cx: 38, cy: 54, radiusFactor: 8.0, period: 3000 },
-  { id: 'H',  cx: 57, cy: 38, radiusFactor: 6.5, period: 2000 },
-  { id: 'VH', cx: 79, cy: 18, radiusFactor: 5.8, period: 1000 },
+  { id: 'VL', cx: 17, cy: 55, radiusFactor: 9.0, period: 7000 },
+  { id: 'L',  cx: 29, cy: 52, radiusFactor: 8.5, period: 4000 },
+  { id: 'M',  cx: 38, cy: 50, radiusFactor: 8.0, period: 3000 },
+  { id: 'H',  cx: 57, cy: 45, radiusFactor: 6.5, period: 2000 },
+  { id: 'VH', cx: 80, cy: 40, radiusFactor: 5.8, period: 1000 },
 ] as const
 
 // ─── Section 1 v2.0 persistence-radius habitat encoding ──────────────────────
@@ -197,15 +190,25 @@ const NEIGHBORHOODS = [
 //   - Habitat sizing: sqrt(bucket_share_current) — radius scalar, gentler option
 //   - Aspect-calibrated centers from 2026-04-27 LOCKED entry, expressed as decimals here.
 
-// Habitat centers — proportional spacing along diagonal (LOCKED 2026-04-28).
-// Decimal form mirrors NEIGHBORHOODS percentage values exactly. The two
-// constants must stay in lockstep — drift produces silent placement bugs.
+// Habitat centers — auto-fit endpoints + Alpha proportional spacing (LOCKED 2026-04-28).
+// Decimal form mirrors NEIGHBORHOODS percentage values exactly.
 const HABITAT_CENTERS: Record<string, { cx: number; cy: number }> = {
-  'Very Low':  { cx: 0.18, cy: 0.72 },
-  'Low':       { cx: 0.29, cy: 0.62 },
-  'Moderate':  { cx: 0.38, cy: 0.54 },
-  'High':      { cx: 0.57, cy: 0.38 },
-  'Very High': { cx: 0.79, cy: 0.18 },
+  'Very Low':  { cx: 0.17, cy: 0.55 },
+  'Low':       { cx: 0.29, cy: 0.52 },
+  'Moderate':  { cx: 0.38, cy: 0.50 },
+  'High':      { cx: 0.57, cy: 0.45 },
+  'Very High': { cx: 0.80, cy: 0.40 },
+}
+
+// Bucket-share lookup matching the Build-delivered persistence_snapshot.json
+// (2026-03 live universe). Used by habitatRadius BASE auto-derivation when
+// persistence data is unavailable. Numbers match bucket_share_current.
+const HABITAT_SHARE: Record<string, number> = {
+  'Very Low':  0.072,
+  'Low':       0.290,
+  'Moderate':  0.351,
+  'High':      0.155,
+  'Very High': 0.132,
 }
 
 // Decorative habitat labels — limbus opacity, M1 doctrine, pointer-events disabled.
@@ -229,21 +232,41 @@ function tickerHash(symbol: string): number {
   return (h >>> 0) / 0xffffffff
 }
 
-// Habitat radius scalar — sqrt(bucket_share_current).
-// Gentler than area-scaling: Moderate (35.1%) won't dominate visually,
-// Very Low (7.2%) won't shrink dramatically.
+// Habitat radius — auto-fit BASE derived from panel dimensions and habitat
+// centers (LOCKED 2026-04-28). No hardcoded magnitude tunable.
 //
-// BASE = panelW * 0.14 calibrates "equal share" (20%) habitat to ~98px radius
-// at deployed 700px panel width. Empirical tuning: BASE = 0.18 (initial value)
-// produced visible edge-clamping pile-up because Moderate (35.1% share, sqrt
-// scalar 1.32) generated a habitat radius of ~167px from center (0.50, 0.40),
-// which pushed the habitat's outer edge above the 440px panel ceiling. Reduced
-// to 0.14 in render review on 2026-04-28; doctrinal claim (sqrt-share scaling,
-// aspect-calibrated centers, persistence-as-radius) preserved — only the
-// magnitude tunable changed.
-function habitatRadius(share: number, panelW: number): number {
-  const BASE = panelW * 0.14
-  return BASE * Math.sqrt(share / 0.20)
+// Algorithm: for each habitat, compute its edge-clearance budget (distance
+// from center to nearest panel edge minus padding). The maximum BASE that
+// keeps every habitat inside the panel is the minimum of (edge_clear / sqrt(share/0.20))
+// across all habitats. The smallest-clearance habitat is the binding constraint.
+//
+// Returns radius in pixels for the given share at the auto-derived BASE.
+// All five habitats fit inside the panel by construction.
+function habitatRadiusAutoFit(
+  bucket: string,
+  panelW: number,
+  panelH: number,
+  centers: Record<string, { cx: number; cy: number }>,
+  shares: Record<string, number>,
+  pad: number = 8,
+): number {
+  // Auto-derive BASE: smallest implied BASE across all habitats
+  let base = Infinity
+  for (const b of Object.keys(centers)) {
+    const c = centers[b]
+    const cxp = c.cx * panelW
+    const cyp = c.cy * panelH
+    const edgeClear = Math.min(cxp, panelW - cxp, cyp, panelH - cyp) - pad
+    const sqrtShare = Math.sqrt((shares[b] ?? 0.20) / 0.20)
+    if (sqrtShare > 0) {
+      const implied = edgeClear / sqrtShare
+      if (implied < base) base = implied
+    }
+  }
+  if (!isFinite(base) || base <= 0) base = panelW * 0.10  // ultra-conservative fallback
+
+  const sqrtShareThis = Math.sqrt((shares[bucket] ?? 0.20) / 0.20)
+  return base * sqrtShareThis
 }
 
 // April 26 brief: static bucket opacities (replaces prior breathing-animation swings)
@@ -1244,23 +1267,29 @@ export default function PlatformPage() {
         // EV sort + 47% Lucas phase aperture preserved unchanged from earlier locks.
         const placed: Array<Node & { phaseDelay: number; cx: number; cy: number }> = []
 
+        // Build live bucket-share map from persistence data (one share per bucket).
+        // If persistence is unavailable, fall back to HABITAT_SHARE constants
+        // (2026-03 snapshot). The auto-fit BASE is derived once from this map.
+        const liveShares: Record<string, number> = { ...HABITAT_SHARE }
+        for (const [bucketName] of Object.entries(HABITAT_CENTERS)) {
+          const list = byBucket[bucketName] ?? []
+          for (const n of list) {
+            const p = persMap.get(n.symbol)
+            if (p?.bucket_share_current != null) {
+              liveShares[bucketName] = p.bucket_share_current
+              break
+            }
+          }
+        }
+
         NEIGHBORHOODS.forEach((nb) => {
           const bucketKey = nb.id === 'VL' ? 'Very Low' : nb.id === 'L' ? 'Low' : nb.id === 'M' ? 'Moderate' : nb.id === 'H' ? 'High' : 'Very High'
           const list = byBucket[bucketKey] ?? []
           const center = HABITAT_CENTERS[bucketKey]
 
-          // Per-bucket habitat radius. All companies in a bucket share the same
-          // bucket_share_current, so we read it from the first persistence record
-          // we find for this bucket. If none available, fall back to 0.20 (equal-share).
-          let bucketShare = 0.20
-          for (const n of list) {
-            const p = persMap.get(n.symbol)
-            if (p?.bucket_share_current != null) {
-              bucketShare = p.bucket_share_current
-              break
-            }
-          }
-          const hR = habitatRadius(bucketShare, SW)
+          // Auto-fit habitat radius — BASE derived from panel dimensions and
+          // habitat centers in the helper, no hardcoded magnitude tunable.
+          const hR = habitatRadiusAutoFit(bucketKey, SW, SH, HABITAT_CENTERS, liveShares)
 
           const placedInBucket = list.map(n => {
             const pers = persMap.get(n.symbol)
