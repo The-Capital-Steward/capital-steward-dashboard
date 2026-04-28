@@ -207,10 +207,17 @@ function tickerHash(symbol: string): number {
 // Habitat radius scalar — sqrt(bucket_share_current).
 // Gentler than area-scaling: Moderate (35.1%) won't dominate visually,
 // Very Low (7.2%) won't shrink dramatically.
-// BASE = panelW * 0.18 calibrates "equal share" (20%) habitat to ~125px radius
-// at deployed 700px panel width — empirical, tuned with deployed centers.
+//
+// BASE = panelW * 0.14 calibrates "equal share" (20%) habitat to ~98px radius
+// at deployed 700px panel width. Empirical tuning: BASE = 0.18 (initial value)
+// produced visible edge-clamping pile-up because Moderate (35.1% share, sqrt
+// scalar 1.32) generated a habitat radius of ~167px from center (0.50, 0.40),
+// which pushed the habitat's outer edge above the 440px panel ceiling. Reduced
+// to 0.14 in render review on 2026-04-28; doctrinal claim (sqrt-share scaling,
+// aspect-calibrated centers, persistence-as-radius) preserved — only the
+// magnitude tunable changed.
 function habitatRadius(share: number, panelW: number): number {
-  const BASE = panelW * 0.18
+  const BASE = panelW * 0.14
   return BASE * Math.sqrt(share / 0.20)
 }
 
