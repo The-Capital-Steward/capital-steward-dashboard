@@ -152,12 +152,35 @@ const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as con
 // the diagonal doctrine under the deployed panel aspect ratio (~700×440px). Original
 // April 26 percentages (15/75, 32/55, 50/40, 68/28, 82/18) pressed the endpoints too
 // close to the boundary at this aspect — VL piled against the lower-left edge.
-// Radius factors unchanged: bucket density semantics preserved, composition corrected.
+// NEIGHBORHOODS — proportional spacing along diagonal (LOCKED 2026-04-28).
+// Centers reflect cumulative distance in median-return space, not equidistant
+// stops along the canvas. The Return Field's median returns are not evenly
+// spaced — VL +11.4%, L +7.5%, M +4.5%, H -2.0%, VH -9.6% — so the structural
+// field's habitat centers should not be evenly spaced either. The two panels
+// were lying about each other under equidistant centers.
+//
+// Cumulative t along VL→VH chord, normalized to total return-space span:
+//   VL → L  : 3.9pp / 21.0pp = 0.186
+//   L  → M  : 3.0pp / 21.0pp = 0.329 cumulative
+//   M  → H  : 6.5pp / 21.0pp = 0.638 cumulative
+//   H  → VH : 7.6pp / 21.0pp = 1.000 cumulative
+//
+// VL fixed at (18, 72), VH fixed at (79, 18). Δx = 61, Δy = -54.
+// Each intermediate bucket sits at (18 + 61·t, 72 - 54·t) in % units.
+//
+// Doctrinal consequence: VL/L/M cluster tightly in the lower-left quadrant
+// because their median returns cluster tightly. Habitats overlap at the core,
+// not just at the periphery. This is Alpha — pure proportional spacing,
+// distribution as honest claim. Same governing principle as Resolution C.
+// Supersedes the 2026-04-27 aspect-calibration entry.
+//
+// Radius factors and animation periods unchanged: bucket density semantics
+// preserved, only the geometric placement of the centers changed.
 const NEIGHBORHOODS = [
   { id: 'VL', cx: 18, cy: 72, radiusFactor: 9.0, period: 7000 },
-  { id: 'L',  cx: 33, cy: 56, radiusFactor: 8.5, period: 4000 },
-  { id: 'M',  cx: 50, cy: 40, radiusFactor: 8.0, period: 3000 },
-  { id: 'H',  cx: 67, cy: 26, radiusFactor: 6.5, period: 2000 },
+  { id: 'L',  cx: 29, cy: 62, radiusFactor: 8.5, period: 4000 },
+  { id: 'M',  cx: 38, cy: 54, radiusFactor: 8.0, period: 3000 },
+  { id: 'H',  cx: 57, cy: 38, radiusFactor: 6.5, period: 2000 },
   { id: 'VH', cx: 79, cy: 18, radiusFactor: 5.8, period: 1000 },
 ] as const
 
@@ -174,12 +197,14 @@ const NEIGHBORHOODS = [
 //   - Habitat sizing: sqrt(bucket_share_current) — radius scalar, gentler option
 //   - Aspect-calibrated centers from 2026-04-27 LOCKED entry, expressed as decimals here.
 
-// Habitat centers (decimal fractions of canvas, mirrors NEIGHBORHOODS percentage values)
+// Habitat centers — proportional spacing along diagonal (LOCKED 2026-04-28).
+// Decimal form mirrors NEIGHBORHOODS percentage values exactly. The two
+// constants must stay in lockstep — drift produces silent placement bugs.
 const HABITAT_CENTERS: Record<string, { cx: number; cy: number }> = {
   'Very Low':  { cx: 0.18, cy: 0.72 },
-  'Low':       { cx: 0.33, cy: 0.56 },
-  'Moderate':  { cx: 0.50, cy: 0.40 },
-  'High':      { cx: 0.67, cy: 0.26 },
+  'Low':       { cx: 0.29, cy: 0.62 },
+  'Moderate':  { cx: 0.38, cy: 0.54 },
+  'High':      { cx: 0.57, cy: 0.38 },
   'Very High': { cx: 0.79, cy: 0.18 },
 }
 
