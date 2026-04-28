@@ -184,11 +184,17 @@ const NEIGHBORHOODS = [
 // structural conditions, not to produce visually balanced compositions.
 //
 // Locked encoding decisions:
-//   - Option Three: persistence_months / 24 as direct radial coordinate
+//   - Radial coordinate: persistence_pct (within-bucket percentile rank).
+//     Supersedes Option Three's months/24 mapping after render review surfaced
+//     that absolute month count is not bucket-comparable — a 7-month VH tenure
+//     means something different from a 7-month Moderate tenure given their
+//     differing median tenures (17 vs 7). Within-bucket percentile rank
+//     directly encodes within-cohort settledness, which is what the radius
+//     should say. Side benefit: the integer-radius ring artifact dissolves.
 //   - Radial direction: settled = center (1 = center, 0 = periphery)
 //   - Angular position: seeded-stable ticker hash (no analytical meaning, visual continuity)
 //   - Habitat sizing: sqrt(bucket_share_current) — radius scalar, gentler option
-//   - Aspect-calibrated centers from 2026-04-27 LOCKED entry, expressed as decimals here.
+//   - Endpoints: AF-3 auto-fit (data over diagonal philosophy)
 
 // Habitat centers — auto-fit endpoints + Alpha proportional spacing (LOCKED 2026-04-28).
 // Decimal form mirrors NEIGHBORHOODS percentage values exactly.
@@ -1294,10 +1300,23 @@ export default function PlatformPage() {
           const placedInBucket = list.map(n => {
             const pers = persMap.get(n.symbol)
 
-            // persistence_months / 24 → [0, 1].
-            // Inverted radial: settled (high persistence) → center, recent → edge.
+            // Radial coordinate: within-bucket percentile rank of persistence.
+            // LOCKED 2026-04-28 (supersedes Option Three months/24 encoding).
+            //
+            // Doctrine: "settled" means settled relative to this bucket's cohort,
+            // not relative to an absolute 24-month scale. A 7-month tenure means
+            // something different in VH (median 17mo) than in Moderate (median 7mo).
+            // persistence_pct directly encodes within-cohort settledness; the eye
+            // reads radial position as "where this company sits in its bucket's
+            // distribution," which is what the encoding should say.
+            //
+            // Side effect: the visible ring artifact at integer-month radii
+            // dissolves because percentile rank is essentially continuous (one
+            // distinct value per ticker), no two companies share a radius.
+            //
+            // Inverted radial: settled (high pct) → center, recent (low pct) → edge.
             // No persistence data → 0.5 (mid-habitat) per fallback policy.
-            const persistenceT   = pers ? Math.min(pers.persistence_months / 24, 1) : 0.5
+            const persistenceT   = pers ? pers.persistence_pct : 0.5
             const radialFraction = 1 - persistenceT
             const radius         = radialFraction * hR
 
@@ -1593,7 +1612,7 @@ export default function PlatformPage() {
       <div style={s({ padding: `0 ${SP._29}px ${SP._29}px`, background: E.bg0, fontFamily: E.sans, fontSize: T.s2, lineHeight: 1.62, color: E.text2, maxWidth: 780 })}>
         <b style={s({ color: E.VH, fontWeight: 700 })}>9.4% of companies. 38.6% of catastrophic losses.</b><br />
         Left: every U.S. equity organized into structural neighborhoods. Right: the return each neighborhood has produced.{' '}
-        <span style={s({ color: E.text3 })}>Neighbors share a condition, not a sector — and the cost shows up in returns. Distance from center = months in that condition.</span>
+        <span style={s({ color: E.text3 })}>Neighbors share a condition, not a sector — and the cost shows up in returns. Distance from center = how settled within this condition.</span>
       </div>
 
       {/* Panel headers — bg1 soft strip, no bottom border */}
