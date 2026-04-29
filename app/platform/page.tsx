@@ -169,12 +169,18 @@ const BUCKET_ORDER = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'] as con
 //   cy = 55 + (40-55)*t = 55 - 15*t
 //
 // Radius factors and animation periods unchanged.
+// Radius factors and animation periods updated 2026-04-28: cadence unified
+// to cardiac BPM (302/488/789/971/1277ms VH→VL). The earlier directional
+// values (1000/2000/3000/4000/7000ms) ran the field slower than the Return
+// Field curves and risk strip card top notches, which were already on the
+// cardiac BPM cadence per Visual Doctrine v1.3. Field now matches both.
+// 47% Lucas phase aperture math automatically rescales to the new periods.
 const NEIGHBORHOODS = [
-  { id: 'VL', cx: 17, cy: 55, radiusFactor: 9.0, period: 7000 },
-  { id: 'L',  cx: 29, cy: 52, radiusFactor: 8.5, period: 4000 },
-  { id: 'M',  cx: 38, cy: 50, radiusFactor: 8.0, period: 3000 },
-  { id: 'H',  cx: 57, cy: 45, radiusFactor: 6.5, period: 2000 },
-  { id: 'VH', cx: 80, cy: 40, radiusFactor: 5.8, period: 1000 },
+  { id: 'VL', cx: 17, cy: 55, radiusFactor: 9.0, period: 1277 },
+  { id: 'L',  cx: 29, cy: 52, radiusFactor: 8.5, period: 971  },
+  { id: 'M',  cx: 38, cy: 50, radiusFactor: 8.0, period: 789  },
+  { id: 'H',  cx: 57, cy: 45, radiusFactor: 6.5, period: 488  },
+  { id: 'VH', cx: 80, cy: 40, radiusFactor: 5.8, period: 302  },
 ] as const
 
 // ─── Section 1 v2.0 persistence-radius habitat encoding ──────────────────────
@@ -1439,31 +1445,31 @@ export default function PlatformPage() {
         circle.field-node { /* base — animation applied via bucket class below */ }
         circle.field-vh  {
           animation-name: field-vh;
-          animation-duration: 1000ms;
+          animation-duration: 302ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
         circle.field-h   {
           animation-name: field-h;
-          animation-duration: 2000ms;
+          animation-duration: 488ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
         circle.field-mod {
           animation-name: field-mod;
-          animation-duration: 3000ms;
+          animation-duration: 789ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
         circle.field-lo  {
           animation-name: field-lo;
-          animation-duration: 4000ms;
+          animation-duration: 971ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
         circle.field-vl  {
           animation-name: field-vl;
-          animation-duration: 7000ms;
+          animation-duration: 1277ms;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
