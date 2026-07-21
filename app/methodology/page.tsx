@@ -710,13 +710,13 @@ export default function MethodologyPage() {
           <div className={styles.validationStatus}>
             <div>
               <p className={styles.miniEyebrow}>Evidence status</p>
-              <h3>Production-parity historical validation is being regenerated.</h3>
+              <h3>Historical research is published for the current v2 architecture.</h3>
             </div>
             <p>
-              Legacy return and Fama–French results are not presented as evidence
-              for the current cascade × disagreement system. The Evidence page
-              will publish the canonical v2 results only after point-in-time
-              validation, calibration separation and claims review are complete.
+              The Evidence page presents payoff, drawdown, topology and robustness
+              results generated with the current cascade × disagreement × distance
+              system. Legacy return and Fama–French findings from earlier
+              architectures are not used as evidence for v2.
             </p>
           </div>
 
@@ -746,11 +746,11 @@ export default function MethodologyPage() {
       <section className={styles.close}>
         <div>
           <p className={styles.eyebrow}>From specification to application</p>
-          <h2>Inspect the live classifications—or examine the evidence boundary.</h2>
+          <h2>Inspect the live classifications—or examine the historical evidence.</h2>
           <p>
             The platform shows how the methodology classifies individual
-            companies today. The Evidence page documents what has and has not yet
-            been established historically.
+            companies today. The Evidence page presents the historical payoff,
+            drawdown, topology and robustness results supporting the framework.
           </p>
           <div className={styles.closeActions}>
             <Link href="/platform" className={styles.primaryButton}>
