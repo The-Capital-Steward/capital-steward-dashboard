@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "2.0.0",
+  "methodologyVersion": "2.0.0-rc1",
+  "generatedAt": "2026-07-21T17:52:33.870416+00:00",
+  "asOfDate": "2026-07-21",
+  "launchUniverse": "U.S.-domiciled, U.S.-exchange-listed common stocks of operating companies",
+  "trailingQuarters": 28,
+  "cascadeLadder": [
+    {
+      "key": "free_cash_flow",
+      "label": "Free Cash Flow"
+    },
+    {
+      "key": "ebit",
+      "label": "EBIT"
+    },
+    {
+      "key": "gross_profit",
+      "label": "Gross Profit"
+    },
+    {
+      "key": "revenue",
+      "label": "Revenue"
+    }
+  ],
+  "allAnchors": [
+    {
+      "key": "revenue",
+      "label": "Revenue"
+    },
+    {
+      "key": "gross_profit",
+      "label": "Gross Profit"
+    },
+    {
+      "key": "ebitda",
+      "label": "EBITDA"
+    },
+    {
+      "key": "ebit",
+      "label": "EBIT"
+    },
+    {
+      "key": "net_income",
+      "label": "Net Income"
+    },
+    {
+      "key": "operating_cash_flow",
+      "label": "Operating Cash Flow"
+    },
+    {
+      "key": "free_cash_flow",
+      "label": "Free Cash Flow"
+    }
+  ],
+  "cascadeBuckets": [
+    "Very Low",
+    "Low",
+    "Moderate",
+    "High",
+    "Very High"
+  ],
+  "disagreementBuckets": [
+    "Tightly Agreeing",
+    "Mildly Agreeing",
+    "Moderate",
+    "Mildly Disagreeing",
+    "Strongly Disagreeing"
+  ],
+  "disagreementThresholds": [
+    0.07207296120786229,
+    0.10902311731495859,
+    0.14718927513420293,
+    0.2140106872068123
+  ],
+  "penalties": {
+    "free_cash_flow": 0.0,
+    "ebit": 0.2823404388115714,
+    "gross_profit": 1.3388211161020036,
+    "revenue": 2.339978914911827
+  },
+  "peakCell": {
+    "cascadePosition": 3,
+    "disagreementPosition": 1
+  },
+  "tiers": [
+    {
+      "label": "Tier 1 \u2014 Structurally Attractive",
+      "distanceRange": [
+        0,
+        1
+      ],
+      "count": 255
+    },
+    {
+      "label": "Tier 2 \u2014 Mid-Range",
+      "distanceRange": [
+        2,
+        4
+      ],
+      "count": 1129
+    },
+    {
+      "label": "Tier 3 \u2014 Structurally Fragile",
+      "distanceRange": [
+        5,
+        6
+      ],
+      "count": 389
+    }
+  ],
+  "specialCohorts": [
+    {
+      "label": "Invalid EV",
+      "count": 0
+    },
+    {
+      "label": "Negative-EV",
+      "count": 9
+    },
+    {
+      "label": "Incomplete History",
+      "count": 396
+    },
+    {
+      "label": "Cascade Truly-Non-Viable",
+      "count": 34
+    },
+    {
+      "label": "Cascade Eligible No-Disagreement",
+      "count": 270
+    }
+  ],
+  "counts": {
+    "total": 5429,
+    "eligible": 2482,
+    "mainland": 1773,
+    "island": 709,
+    "excluded": 2947
+  },
+  "limitations": [
+    "OSMR is a structural-risk classification system, not a stand-alone investment recommendation.",
+    "The live launch universe excludes non-U.S. domicile, non-USD reporting, and securities below the locked liquidity and market-cap floors.",
+    "Backtested results are hypothetical and must be read with the published methodology and limitations."
+  ]
+}
